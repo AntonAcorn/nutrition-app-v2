@@ -110,8 +110,8 @@ jobs:
             exit 1
           fi
 
-          docker compose -f infra/docker/docker-compose.prod.yml config >/dev/null
-          docker compose -f infra/docker/docker-compose.prod.yml up -d --build
+          docker compose --env-file "$DEPLOY_PATH/.env" -f infra/docker/docker-compose.prod.yml config >/dev/null
+          docker compose --env-file "$DEPLOY_PATH/.env" -f infra/docker/docker-compose.prod.yml up -d --build
           docker image prune -f >/dev/null 2>&1 || true
 
           printf '%s\n' "$GITHUB_SHA" > .deploy-revision

@@ -1,5 +1,7 @@
 PROJECT_NAME=nutrition-app-v2
 COMPOSE_DIR=infra/docker
+PROD_COMPOSE_FILE=$(COMPOSE_DIR)/docker-compose.prod.yml
+PROD_ENV_FILE?=.env
 
 up:
 	cd $(COMPOSE_DIR) && docker compose up --build
@@ -7,11 +9,14 @@ up:
 down:
 	cd $(COMPOSE_DIR) && docker compose down
 
+prod-config:
+	docker compose --env-file $(PROD_ENV_FILE) -f $(PROD_COMPOSE_FILE) config
+
 prod-up:
-	cd $(COMPOSE_DIR) && docker compose -f docker-compose.prod.yml up --build -d
+	docker compose --env-file $(PROD_ENV_FILE) -f $(PROD_COMPOSE_FILE) up --build -d
 
 prod-down:
-	cd $(COMPOSE_DIR) && docker compose -f docker-compose.prod.yml down
+	docker compose --env-file $(PROD_ENV_FILE) -f $(PROD_COMPOSE_FILE) down
 
 logs:
 	cd $(COMPOSE_DIR) && docker compose logs -f

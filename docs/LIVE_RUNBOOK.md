@@ -74,7 +74,7 @@ cd /opt/nutrition-app-v2
 cp .env.example .env   # если .env ещё не создан
 # затем вручную поправить значения
 
-docker compose -f infra/docker/docker-compose.prod.yml up -d --build
+docker compose --env-file /opt/nutrition-app-v2/.env -f infra/docker/docker-compose.prod.yml up -d --build
 ```
 
 После первого успешного bootstrap дальше лучше использовать GitHub Actions, а не ручной `scp`/`git pull`.
@@ -84,7 +84,7 @@ docker compose -f infra/docker/docker-compose.prod.yml up -d --build
 ### 1. Статус контейнеров
 
 ```bash
-docker compose -f infra/docker/docker-compose.prod.yml ps
+docker compose --env-file /opt/nutrition-app-v2/.env -f infra/docker/docker-compose.prod.yml ps
 ```
 
 Ожидаемо должны быть подняты:
@@ -96,7 +96,7 @@ docker compose -f infra/docker/docker-compose.prod.yml ps
 ### 2. Проверка compose-конфига
 
 ```bash
-docker compose -f infra/docker/docker-compose.prod.yml config
+docker compose --env-file /opt/nutrition-app-v2/.env -f infra/docker/docker-compose.prod.yml config
 ```
 
 Это полезно прогонять ещё до первого запуска.
@@ -104,7 +104,7 @@ docker compose -f infra/docker/docker-compose.prod.yml config
 ### 3. Логи
 
 ```bash
-docker compose -f infra/docker/docker-compose.prod.yml logs --tail=100
+docker compose --env-file /opt/nutrition-app-v2/.env -f infra/docker/docker-compose.prod.yml logs --tail=100
 ```
 
 ### 4. Backend health
@@ -151,19 +151,19 @@ curl https://$APP_DOMAIN/api/health
 ### Проверить backend
 
 ```bash
-docker compose -f infra/docker/docker-compose.prod.yml logs backend --tail=100
+docker compose --env-file /opt/nutrition-app-v2/.env -f infra/docker/docker-compose.prod.yml logs backend --tail=100
 ```
 
 ### Проверить frontend
 
 ```bash
-docker compose -f infra/docker/docker-compose.prod.yml logs frontend --tail=100
+docker compose --env-file /opt/nutrition-app-v2/.env -f infra/docker/docker-compose.prod.yml logs frontend --tail=100
 ```
 
 ### Проверить caddy
 
 ```bash
-docker compose -f infra/docker/docker-compose.prod.yml logs caddy --tail=100
+docker compose --env-file /opt/nutrition-app-v2/.env -f infra/docker/docker-compose.prod.yml logs caddy --tail=100
 ```
 
 ### Проверить, что `APP_DOMAIN` и `CADDY_SITE_ADDRESS` согласованы
@@ -175,6 +175,8 @@ docker compose -f infra/docker/docker-compose.prod.yml logs caddy --tail=100
 - `CADDY_SITE_ADDRESS=nutrition.example.com`
 
 Отсутствующие или пустые переменные теперь не ломают парсинг Caddyfile/compose: Caddy получит fallback `localhost`. Но это только safe fallback для валидации, а не корректная live-конфигурация.
+
+Важно: `env_file:` внутри `docker-compose.prod.yml` задаёт environment контейнеров, но не является источником значений для `${APP_DOMAIN}` / `${CADDY_SITE_ADDRESS}` в самом compose-файле. Поэтому production-команды должны явно идти через `--env-file /opt/nutrition-app-v2/.env`.
 
 ## Базовый recovery
 
@@ -194,13 +196,13 @@ docker compose -f infra/docker/docker-compose.prod.yml logs caddy --tail=100
 Пересобрать и перезапустить:
 
 ```bash
-docker compose -f infra/docker/docker-compose.prod.yml up -d --build
+docker compose --env-file /opt/nutrition-app-v2/.env -f infra/docker/docker-compose.prod.yml up -d --build
 ```
 
 Остановить стек:
 
 ```bash
-docker compose -f infra/docker/docker-compose.prod.yml down
+docker compose --env-file /opt/nutrition-app-v2/.env -f infra/docker/docker-compose.prod.yml down
 ```
 
 ## Граница этой итерации

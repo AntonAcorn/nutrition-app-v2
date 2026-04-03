@@ -60,3 +60,16 @@ Flow:
 - `APP_DOMAIN` остаётся значением host/IP для smoke checks и документации
 - `CADDY_SITE_ADDRESS` управляет тем, как именно Caddy открывает сайт
 - префикс `http://` нужен только для временного bootstrap по IP/host без TLS
+
+## Важный нюанс production compose
+
+Для `docker compose` interpolation вида `${APP_DOMAIN}` и `${CADDY_SITE_ADDRESS}` недостаточно только `env_file:` внутри сервиса: `env_file` попадает в environment контейнера, но не управляет тем, чем compose подставляет значения в сам YAML.
+
+Поэтому production-запуск должен явно указывать env-файл верхнего уровня:
+
+```bash
+docker compose --env-file .env -f infra/docker/docker-compose.prod.yml config
+docker compose --env-file .env -f infra/docker/docker-compose.prod.yml up -d --build
+```
+
+На сервере source of truth остаётся `/opt/nutrition-app-v2/.env`; GitHub Actions deploy использует именно его через `--env-file`.
