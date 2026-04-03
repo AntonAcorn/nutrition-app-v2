@@ -20,7 +20,7 @@ cd nutrition-app-v2
 - merge в `main` допускается только когда:
   - CI зелёный
   - `frontend` production build проходит
-  - `docker compose -f infra/docker/docker-compose.prod.yml config` валиден
+  - `docker compose --env-file .env -f infra/docker/docker-compose.prod.yml config` валиден
 
 ## 3. GitHub Actions baseline
 
@@ -41,13 +41,14 @@ cd nutrition-app-v2
 1. проверяет наличие обязательных GitHub secrets
 2. поднимает SSH agent и known_hosts
 3. синхронизирует репозиторий на сервер в `/opt/nutrition-app-v2`
-4. запускает `docker compose -f infra/docker/docker-compose.prod.yml up -d --build`
+4. запускает `docker compose --env-file /opt/nutrition-app-v2/.env -f infra/docker/docker-compose.prod.yml up -d --build`
 5. делает smoke check через `http://127.0.0.1/api/health` с `Host: $APP_DOMAIN`
 
 Важно:
 - workflow не хранит production secrets в репозитории
 - серверный `.env` остаётся только на сервере и не перезаписывается из GitHub Actions
 - `storage/` и `.env` исключены из sync, чтобы не затереть runtime state
+- production compose вызывается с явным `--env-file`, потому что `env_file:` в сервисах не участвует в compose interpolation `${...}`
 
 ## 4. GitHub Actions secrets for SSH deploy
 
@@ -87,8 +88,8 @@ Deploy command, который выполняет workflow:
 
 ```bash
 cd /opt/nutrition-app-v2
-docker compose -f infra/docker/docker-compose.prod.yml config
-docker compose -f infra/docker/docker-compose.prod.yml up -d --build
+docker compose --env-file /opt/nutrition-app-v2/.env -f infra/docker/docker-compose.prod.yml config
+docker compose --env-file /opt/nutrition-app-v2/.env -f infra/docker/docker-compose.prod.yml up -d --build
 ```
 
 ## 6. Recommended hardening
