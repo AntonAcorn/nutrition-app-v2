@@ -1,15 +1,17 @@
-version: '3.9'
-
 services:
   postgres:
     image: postgres:16
     restart: unless-stopped
     env_file:
       - ../../.env
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-nutrition_app}
+      POSTGRES_USER: ${POSTGRES_USER:-nutrition}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-change-me}
     volumes:
       - ../../storage/postgres:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-nutrition} -d ${POSTGRES_DB:-nutrition_app}"]
       interval: 10s
       timeout: 5s
       retries: 10
@@ -22,9 +24,9 @@ services:
       - ../../.env
     environment:
       PORT: 8080
-      DB_URL: jdbc:postgresql://postgres:5432/${POSTGRES_DB}
-      DB_USER: ${POSTGRES_USER}
-      DB_PASSWORD: ${POSTGRES_PASSWORD}
+      DB_URL: jdbc:postgresql://postgres:5432/${POSTGRES_DB:-nutrition_app}
+      DB_USER: ${POSTGRES_USER:-nutrition}
+      DB_PASSWORD: ${POSTGRES_PASSWORD:-change-me}
     depends_on:
       postgres:
         condition: service_healthy
