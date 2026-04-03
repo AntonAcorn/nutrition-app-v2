@@ -1,0 +1,147 @@
+name: Deploy to production over SSH
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+concurrency:
+  group: production-deploy
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+env:
+  DEPLOY_PATH: /opt/nutrition-app-v2
+  SSH_PORT: ${{ secrets.SSH_PORT != '' && secrets.SSH_PORT || '22' }}
+
+jobs:
+  deploy:
+    name: Sync project and deploy on server
+    runs-on: ubuntu-latest
+    environment:
+      name: production
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Validate required SSH secrets
+        env:
+          SSH_HOST: ${{ secrets.SSH_HOST }}
+          SSH_USER: ${{ secrets.SSH_USER }}
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+        run: |
+          set -euo pipefail
+          test -n "$SSH_HOST" || { echo "Missing required secret: SSH_HOST"; exit 1; }
+          test -n "$SSH_USER" || { echo "Missing required secret: SSH_USER"; exit 1; }
+          test -n "$SSH_PRIVATE_KEY" || { echo "Missing required secret: SSH_PRIVATE_KEY"; exit 1; }
+
+      - name: Start SSH agent
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+
+      - name: Prepare SSH known_hosts
+        env:
+          SSH_HOST: ${{ secrets.SSH_HOST }}
+          SSH_PORT: ${{ env.SSH_PORT }}
+          SSH_KNOWN_HOSTS: ${{ secrets.SSH_KNOWN_HOSTS }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.ssh
+          chmod 700 ~/.ssh
+
+          if [ -n "$SSH_KNOWN_HOSTS" ]; then
+            printf '%s\n' "$SSH_KNOWN_HOSTS" > ~/.ssh/known_hosts
+          else
+            ssh-keyscan -p "$SSH_PORT" -H "$SSH_HOST" >> ~/.ssh/known_hosts
+          fi
+
+          chmod 600 ~/.ssh/known_hosts
+
+      - name: Ensure deploy path exists on server
+        env:
+          SSH_HOST: ${{ secrets.SSH_HOST }}
+          SSH_USER: ${{ secrets.SSH_USER }}
+          SSH_PORT: ${{ env.SSH_PORT }}
+          DEPLOY_PATH: ${{ env.DEPLOY_PATH }}
+        run: |
+          set -euo pipefail
+          ssh -p "$SSH_PORT" "$SSH_USER@$SSH_HOST" "mkdir -p '$DEPLOY_PATH'"
+
+      - name: Sync repository to server
+        env:
+          SSH_HOST: ${{ secrets.SSH_HOST }}
+          SSH_USER: ${{ secrets.SSH_USER }}
+          SSH_PORT: ${{ env.SSH_PORT }}
+          DEPLOY_PATH: ${{ env.DEPLOY_PATH }}
+        run: |
+          set -euo pipefail
+          rsync -az --delete \
+            --exclude '.git/' \
+            --exclude '.github/' \
+            --exclude '.gitignore' \
+            --exclude '.env' \
+            --exclude 'node_modules/' \
+            --exclude 'frontend/node_modules/' \
+            --exclude 'storage/' \
+            -e "ssh -p $SSH_PORT" \
+            ./ "$SSH_USER@$SSH_HOST:$DEPLOY_PATH/"
+
+      - name: Deploy application on server
+        env:
+          SSH_HOST: ${{ secrets.SSH_HOST }}
+          SSH_USER: ${{ secrets.SSH_USER }}
+          SSH_PORT: ${{ env.SSH_PORT }}
+          DEPLOY_PATH: ${{ env.DEPLOY_PATH }}
+          GITHUB_SHA: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+          ssh -p "$SSH_PORT" "$SSH_USER@$SSH_HOST" \
+            "DEPLOY_PATH='$DEPLOY_PATH' GITHUB_SHA='$GITHUB_SHA' bash -s" <<'EOF'
+          set -euo pipefail
+          cd "$DEPLOY_PATH"
+
+          if [ ! -f .env ]; then
+            echo "Missing required server file: $DEPLOY_PATH/.env" >&2
+            exit 1
+          fi
+
+          docker compose -f infra/docker/docker-compose.prod.yml config >/dev/null
+          docker compose -f infra/docker/docker-compose.prod.yml up -d --build
+          docker image prune -f >/dev/null 2>&1 || true
+
+          printf '%s\n' "$GITHUB_SHA" > .deploy-revision
+          EOF
+
+      - name: Smoke check /api/health via local Caddy
+        env:
+          SSH_HOST: ${{ secrets.SSH_HOST }}
+          SSH_USER: ${{ secrets.SSH_USER }}
+          SSH_PORT: ${{ env.SSH_PORT }}
+          DEPLOY_PATH: ${{ env.DEPLOY_PATH }}
+        run: |
+          set -euo pipefail
+          ssh -p "$SSH_PORT" "$SSH_USER@$SSH_HOST" \
+            "DEPLOY_PATH='$DEPLOY_PATH' bash -s" <<'EOF'
+          set -euo pipefail
+          cd "$DEPLOY_PATH"
+          set -a
+          . ./.env
+          set +a
+
+          if [ -z "${APP_DOMAIN:-}" ]; then
+            echo "APP_DOMAIN is not set in $DEPLOY_PATH/.env; cannot run host-based smoke check" >&2
+            exit 1
+          fi
+
+          curl --fail --silent --show-error \
+            --retry 10 \
+            --retry-delay 3 \
+            --retry-connrefused \
+            -H "Host: $APP_DOMAIN" \
+            http://127.0.0.1/api/health >/dev/null
+          EOF

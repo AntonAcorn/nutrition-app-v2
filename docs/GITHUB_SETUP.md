@@ -24,15 +24,30 @@ cd nutrition-app-v2
 
 ## 3. GitHub Actions baseline
 
-Сейчас в проекте есть:
-- `ci.yml` — backend build + frontend build
-- `deploy-example.yml` — placeholder
-- `deploy-ssh-example.yml` — пример SSH deploy
+Сейчас production baseline такой:
+- `ci.yml` — backend build + frontend build, остаётся обязательным для PR
+- `deploy-ssh.yml` — реальный production deploy workflow по SSH
 
-Для безопасного первого production rollout достаточно:
-- оставить `ci.yml` обязательным
-- использовать SSH deploy workflow как шаблон
-- не включать auto-deploy на каждый push, пока не будет подтверждён серверный target
+Логика запуска deploy:
+- автоматически на `push` в `main`
+- вручную через `workflow_dispatch` для повторного rollout / hotfix-перезапуска без нового коммита
+
+Почему именно так:
+- PR остаётся основным gate: изменения сначала проходят review и CI
+- deploy не идёт на feature-ветки и не ломает модель `PR -> merge -> deploy`
+- ручной trigger полезен для повторного прогона после серверной правки, flaky deploy или rollback/forward без изменения workflow
+
+Что делает `deploy-ssh.yml`:
+1. проверяет наличие обязательных GitHub secrets
+2. поднимает SSH agent и known_hosts
+3. синхронизирует репозиторий на сервер в `/opt/nutrition-app-v2`
+4. запускает `docker compose -f infra/docker/docker-compose.prod.yml up -d --build`
+5. делает smoke check через `http://127.0.0.1/api/health` с `Host: $APP_DOMAIN`
+
+Важно:
+- workflow не хранит production secrets в репозитории
+- серверный `.env` остаётся только на сервере и не перезаписывается из GitHub Actions
+- `storage/` и `.env` исключены из sync, чтобы не затереть runtime state
 
 ## 4. GitHub Actions secrets for SSH deploy
 
@@ -41,10 +56,12 @@ cd nutrition-app-v2
 - `SSH_USER`
 - `SSH_PRIVATE_KEY`
 
-Опционально позже:
-- `SSH_PORT`
-- `APP_DOMAIN`
-- другие runtime secrets, если решим передавать env не только через серверный `.env`
+Поддерживаемые опциональные secrets:
+- `SSH_PORT` — если SSH не на `22`
+- `SSH_KNOWN_HOSTS` — предпочтительный pinned host key; если не задан, workflow делает `ssh-keyscan` во время запуска
+
+Не нужно класть в GitHub secrets production `.env`, если сервер уже хранит runtime-конфиг локально.
+`APP_DOMAIN` должен жить в `/opt/nutrition-app-v2/.env` на сервере, потому что он нужен и Caddy, и post-deploy smoke check.
 
 ## 5. Server-side expectations
 
@@ -54,18 +71,26 @@ Project path:
 Environment file:
 - `/opt/nutrition-app-v2/.env`
 
-Deploy command:
+Минимум должно быть готово заранее:
+- у SSH user есть доступ к `/opt/nutrition-app-v2`
+- у SSH user есть право запускать `docker compose` без интерактивного sudo
+- на сервере установлен Docker + Compose plugin
+- в `/opt/nutrition-app-v2/.env` есть рабочий `APP_DOMAIN`
+
+Deploy command, который выполняет workflow:
 
 ```bash
-cd /opt/nutrition-app-v2/infra/docker
-docker compose -f docker-compose.prod.yml up --build -d
+cd /opt/nutrition-app-v2
+docker compose -f infra/docker/docker-compose.prod.yml config
+docker compose -f infra/docker/docker-compose.prod.yml up -d --build
 ```
 
-## 6. Recommended hardening before regular deploys
+## 6. Recommended hardening
 
 - использовать отдельный deploy-only SSH key
-- ограничить SSH user по доступам
+- ограничить SSH user по доступам и командам настолько, насколько позволяет ваш setup
+- хранить pinned host key в `SSH_KNOWN_HOSTS`, а не полагаться только на `ssh-keyscan`
 - не хранить production secrets в repo
 - держать production `.env` только на сервере
-- добавить smoke-check после деплоя (`/api/health` + открытие frontend)
-- позже перевести example workflow в production-safe deploy pipeline
+- по возможности защитить GitHub environment `production` reviewers / branch rules
+- при необходимости добавить отдельный rollback workflow, но не смешивать его с обычным deploy
