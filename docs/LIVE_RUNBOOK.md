@@ -42,6 +42,7 @@ APP_DOMAIN=example.com
 ```
 
 Если используется временный домен/поддомен — подставить его в `APP_DOMAIN`.
+Если live DNS ещё не готов, допустим временный IP/host для bootstrap; главное, чтобы `APP_DOMAIN` не оставался пустым.
 
 ## Первый деплой
 
@@ -146,7 +147,8 @@ docker compose -f infra/docker/docker-compose.prod.yml logs caddy --tail=100
 
 ### Проверить, что домен реально совпадает с `APP_DOMAIN`
 
-Если в `Caddyfile.production` указан `{$APP_DOMAIN}`, а DNS смотрит не туда или домен не совпадает, Caddy не сможет корректно обслуживать live URL.
+Если в `Caddyfile.production` указан `{$APP_DOMAIN:localhost}`, а DNS смотрит не туда или домен не совпадает, Caddy не сможет корректно обслуживать live URL.
+Отсутствующий или пустой `APP_DOMAIN` больше не ломает парсинг Caddyfile/compose: контейнер получит fallback `localhost`. Но deploy всё равно будет в некорректном состоянии: Caddy матчится на `localhost`, а smoke/external checks будут бесполезны, пока не задан реальный host.
 
 ## Базовый recovery
 
