@@ -4,7 +4,15 @@
 
 ## Цель
 
-Поднять минимальный production frontend на сервере и открыть его по live URL.
+Поднять минимальный production frontend на сервере и открыть его по live URL, не трогая старый `nutrition-dashboard`.
+
+## Что входит в первую итерацию
+
+- production build frontend
+- frontend раздаётся как статический сайт из контейнера
+- Caddy проксирует `/api/*` на backend и остальное на frontend
+- backend отвечает как минимум на `/api/health`
+- стек поднимается отдельно от старого проекта
 
 ## Предпосылки
 
@@ -35,7 +43,7 @@ APP_DOMAIN=example.com
 
 Если используется временный домен/поддомен — подставить его в `APP_DOMAIN`.
 
-## Деплой
+## Первый деплой
 
 ```bash
 cd /opt/nutrition-app-v2
@@ -47,19 +55,33 @@ docker compose -f infra/docker/docker-compose.prod.yml up -d --build
 
 ## Проверка после деплоя
 
-### Статус контейнеров
+### 1. Статус контейнеров
 
 ```bash
 docker compose -f infra/docker/docker-compose.prod.yml ps
 ```
 
-### Логи
+Ожидаемо должны быть подняты:
+- `postgres`
+- `backend`
+- `frontend`
+- `caddy`
+
+### 2. Проверка compose-конфига
+
+```bash
+docker compose -f infra/docker/docker-compose.prod.yml config
+```
+
+Это полезно прогонять ещё до первого запуска.
+
+### 3. Логи
 
 ```bash
 docker compose -f infra/docker/docker-compose.prod.yml logs --tail=100
 ```
 
-### Backend health
+### 4. Backend health
 
 Если домен уже смотрит на сервер:
 
@@ -67,26 +89,25 @@ docker compose -f infra/docker/docker-compose.prod.yml logs --tail=100
 curl https://$APP_DOMAIN/api/health
 ```
 
-Если TLS/домен ещё не готовы, можно проверять локально на сервере через Caddy/backend route по фактической схеме.
+Ожидаемый ответ:
 
-### Frontend smoke check
+```json
+{"status":"ok","service":"nutrition-backend"}
+```
+
+### 5. Frontend smoke check
 
 Открыть в браузере:
 
 - `https://$APP_DOMAIN`
 
 Ожидаемый результат:
-- открывается стартовая страница `Nutrition App v2`
+- открывается стартовый экран `Nutrition App v2`
+- виден базовый day view shell
 - нет 502/404 на первом экране
 - `/api/health` отвечает успешно
 
 ## Если что-то сломалось
-
-### Проверить compose-конфиг
-
-```bash
-docker compose -f infra/docker/docker-compose.prod.yml config
-```
 
 ### Проверить backend
 
@@ -106,6 +127,10 @@ docker compose -f infra/docker/docker-compose.prod.yml logs frontend --tail=100
 docker compose -f infra/docker/docker-compose.prod.yml logs caddy --tail=100
 ```
 
+### Проверить, что домен реально совпадает с `APP_DOMAIN`
+
+Если в `Caddyfile.production` указан `{$APP_DOMAIN}`, а DNS смотрит не туда или домен не совпадает, Caddy не сможет корректно обслуживать live URL.
+
 ## Базовый recovery
 
 Пересобрать и перезапустить:
@@ -120,6 +145,8 @@ docker compose -f infra/docker/docker-compose.prod.yml up -d --build
 docker compose -f infra/docker/docker-compose.prod.yml down
 ```
 
-## Замечание
+## Граница этой итерации
 
-В первой итерации цель — живой минимальный frontend. Полноценная backend-логика, auth и analyzer pipeline идут следующими шагами.
+В первой итерации цель — живой минимальный frontend с рабочим reverse proxy и health endpoint.
+
+Полноценные backend-экраны, auth, загрузка фото и analyzer pipeline — следующие шаги.
