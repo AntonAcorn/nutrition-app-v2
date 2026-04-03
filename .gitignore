@@ -1,0 +1,36 @@
+# OS / editors
+.DS_Store
+.idea/
+.vscode/
+*.swp
+
+# env
+.env
+.env.*
+!.env.example
+
+# frontend
+frontend/node_modules/
+frontend/dist/
+
+# backend
+backend/target/
+backend/.mvn/
+
+# analyzer
+analyzer/.venv/
+analyzer/__pycache__/
+analyzer/.pytest_cache/
+
+# runtime data
+storage/uploads/*
+!storage/uploads/.gitkeep
+storage/postgres/*
+!storage/postgres/.gitkeep
+storage/caddy_data/*
+!storage/caddy_data/.gitkeep
+storage/caddy_config/*
+!storage/caddy_config/.gitkeep
+
+# logs
+*.log

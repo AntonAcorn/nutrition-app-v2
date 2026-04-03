@@ -1,0 +1,26 @@
+:root {
+  font-family: Inter, system-ui, sans-serif;
+  color: #e8eef7;
+  background: #0f172a;
+}
+
+body {
+  margin: 0;
+}
+
+.page {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 40px 20px;
+}
+
+.card {
+  background: #111827;
+  border: 1px solid #263043;
+  border-radius: 16px;
+  padding: 20px;
+}
+
+h1, h2 {
+  margin-top: 0;
+}

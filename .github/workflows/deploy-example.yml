@@ -1,0 +1,13 @@
+name: Deploy Example
+
+on:
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Placeholder
+        run: |
+          echo "Add SSH-based deploy or registry-based deploy here"
+          echo "Recommended next step: add GH secrets and a production compose file"

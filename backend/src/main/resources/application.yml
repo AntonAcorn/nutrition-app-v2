@@ -1,0 +1,25 @@
+spring:
+  application:
+    name: nutrition-backend
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/nutrition_app}
+    username: ${DB_USER:nutrition}
+    password: ${DB_PASSWORD:nutrition}
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        format_sql: true
+    open-in-view: false
+  flyway:
+    enabled: true
+
+server:
+  port: ${PORT:8080}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
