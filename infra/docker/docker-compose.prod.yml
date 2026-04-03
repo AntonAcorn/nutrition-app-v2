@@ -44,6 +44,8 @@ services:
     depends_on:
       - frontend
       - backend
+    environment:
+      APP_DOMAIN: ${APP_DOMAIN:-localhost}
     ports:
       - "80:80"
       - "443:443"
