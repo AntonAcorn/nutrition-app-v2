@@ -32,17 +32,31 @@
 Создать файл:
 - `/opt/nutrition-app-v2/.env`
 
-Минимальный стартовый пример:
+Минимальный стартовый пример для нормального домена/TLS:
 
 ```env
 POSTGRES_DB=nutrition_app
 POSTGRES_USER=nutrition
 POSTGRES_PASSWORD=change-me-now
 APP_DOMAIN=example.com
+CADDY_SITE_ADDRESS=example.com
 ```
 
-Если используется временный домен/поддомен — подставить его в `APP_DOMAIN`.
-Если live DNS ещё не готов, допустим временный IP/host для bootstrap; главное, чтобы `APP_DOMAIN` не оставался пустым.
+Bootstrap-вариант без домена, когда приложение нужно открыть с другой машины по IP через plain HTTP:
+
+```env
+POSTGRES_DB=nutrition_app
+POSTGRES_USER=nutrition
+POSTGRES_PASSWORD=change-me-now
+APP_DOMAIN=65.109.3.45
+CADDY_SITE_ADDRESS=http://65.109.3.45
+```
+
+Правило такое:
+- `APP_DOMAIN` — host/IP для smoke checks и явного значения хоста
+- `CADDY_SITE_ADDRESS` — реальный Caddy site label
+- если нужен временный bootstrap без TLS, `CADDY_SITE_ADDRESS` должен начинаться с `http://`
+- если уже есть нормальный домен и нужен стандартный production path с TLS, использовать обычный host без схемы
 
 ## Первый деплой
 
@@ -101,7 +115,13 @@ GitHub Actions workflow после deploy уже делает smoke check лок
 curl -H "Host: $APP_DOMAIN" http://127.0.0.1/api/health
 ```
 
-Для внешней ручной проверки, если домен уже смотрит на сервер:
+Для внешней ручной проверки, если используется bootstrap по IP/HTTP:
+
+```bash
+curl http://$APP_DOMAIN/api/health
+```
+
+Если уже используется нормальный домен с TLS:
 
 ```bash
 curl https://$APP_DOMAIN/api/health
@@ -117,7 +137,8 @@ curl https://$APP_DOMAIN/api/health
 
 Открыть в браузере:
 
-- `https://$APP_DOMAIN`
+- bootstrap по IP/HTTP: `http://$APP_DOMAIN`
+- нормальный домен/TLS: `https://$APP_DOMAIN`
 
 Ожидаемый результат:
 - открывается стартовый экран `Nutrition App v2`
@@ -145,10 +166,15 @@ docker compose -f infra/docker/docker-compose.prod.yml logs frontend --tail=100
 docker compose -f infra/docker/docker-compose.prod.yml logs caddy --tail=100
 ```
 
-### Проверить, что домен реально совпадает с `APP_DOMAIN`
+### Проверить, что `APP_DOMAIN` и `CADDY_SITE_ADDRESS` согласованы
 
-Если в `Caddyfile.production` указан `{$APP_DOMAIN:localhost}`, а DNS смотрит не туда или домен не совпадает, Caddy не сможет корректно обслуживать live URL.
-Отсутствующий или пустой `APP_DOMAIN` больше не ломает парсинг Caddyfile/compose: контейнер получит fallback `localhost`. Но deploy всё равно будет в некорректном состоянии: Caddy матчится на `localhost`, а smoke/external checks будут бесполезны, пока не задан реальный host.
+Если для bootstrap по IP нужен plain HTTP, а `CADDY_SITE_ADDRESS` оставлен как просто `65.109.3.45` без `http://`, Caddy воспримет это как HTTPS-адрес и начнёт auto-HTTPS/redirect поведение.
+
+Если уже есть реальный домен и нужен штатный production path, наоборот нужно использовать обычный host без схемы:
+- `APP_DOMAIN=nutrition.example.com`
+- `CADDY_SITE_ADDRESS=nutrition.example.com`
+
+Отсутствующие или пустые переменные теперь не ломают парсинг Caddyfile/compose: Caddy получит fallback `localhost`. Но это только safe fallback для валидации, а не корректная live-конфигурация.
 
 ## Базовый recovery
 

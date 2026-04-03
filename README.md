@@ -45,3 +45,18 @@ Flow:
 - frontend раздаётся как статический сайт из контейнера
 - Caddy проксирует `/api/*` на backend и остальное на frontend
 - деплой идёт через `infra/docker/docker-compose.prod.yml`
+
+## Bootstrap по IP vs нормальный домен
+
+Для live bootstrap без домена используем plain HTTP:
+- `APP_DOMAIN=65.109.3.45`
+- `CADDY_SITE_ADDRESS=http://65.109.3.45`
+
+Для нормального production-домена оставляем обычный host, чтобы Caddy вёл себя как TLS entrypoint:
+- `APP_DOMAIN=nutrition.example.com`
+- `CADDY_SITE_ADDRESS=nutrition.example.com`
+
+Идея простая:
+- `APP_DOMAIN` остаётся значением host/IP для smoke checks и документации
+- `CADDY_SITE_ADDRESS` управляет тем, как именно Caddy открывает сайт
+- префикс `http://` нужен только для временного bootstrap по IP/host без TLS
