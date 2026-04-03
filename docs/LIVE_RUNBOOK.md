@@ -45,6 +45,15 @@ APP_DOMAIN=example.com
 
 ## Первый деплой
 
+### Вариант A — рекомендуемый: через GitHub Actions после merge в `main`
+
+1. На сервере заранее подготовить `/opt/nutrition-app-v2/.env`
+2. В GitHub repository secrets добавить `SSH_HOST`, `SSH_USER`, `SSH_PRIVATE_KEY`
+3. При необходимости добавить `SSH_PORT` и `SSH_KNOWN_HOSTS`
+4. Смёржить PR в `main` — workflow `Deploy to production over SSH` сам синхронизирует код и выполнит deploy
+
+### Вариант B — ручной bootstrap прямо на сервере
+
 ```bash
 cd /opt/nutrition-app-v2
 cp .env.example .env   # если .env ещё не создан
@@ -52,6 +61,8 @@ cp .env.example .env   # если .env ещё не создан
 
 docker compose -f infra/docker/docker-compose.prod.yml up -d --build
 ```
+
+После первого успешного bootstrap дальше лучше использовать GitHub Actions, а не ручной `scp`/`git pull`.
 
 ## Проверка после деплоя
 
@@ -83,7 +94,13 @@ docker compose -f infra/docker/docker-compose.prod.yml logs --tail=100
 
 ### 4. Backend health
 
-Если домен уже смотрит на сервер:
+GitHub Actions workflow после deploy уже делает smoke check локально на сервере через Caddy:
+
+```bash
+curl -H "Host: $APP_DOMAIN" http://127.0.0.1/api/health
+```
+
+Для внешней ручной проверки, если домен уже смотрит на сервер:
 
 ```bash
 curl https://$APP_DOMAIN/api/health
@@ -132,6 +149,19 @@ docker compose -f infra/docker/docker-compose.prod.yml logs caddy --tail=100
 Если в `Caddyfile.production` указан `{$APP_DOMAIN}`, а DNS смотрит не туда или домен не совпадает, Caddy не сможет корректно обслуживать live URL.
 
 ## Базовый recovery
+
+### Повторить deploy через GitHub Actions
+
+Предпочтительный путь:
+- открыть workflow `Deploy to production over SSH`
+- запустить `Run workflow` вручную (`workflow_dispatch`)
+
+Это удобно, если:
+- merge уже был, но deploy нужно повторить
+- на сервере исправили окружение и нужен повторный rollout
+- нужно быстро переподнять тот же revision без нового коммита
+
+### Ручной recovery на сервере
 
 Пересобрать и перезапустить:
 
