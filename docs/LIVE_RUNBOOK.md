@@ -109,7 +109,9 @@ docker compose --env-file /opt/nutrition-app-v2/.env -f infra/docker/docker-comp
 
 ### 4. Backend health
 
-GitHub Actions workflow после deploy уже делает smoke check локально на сервере через Caddy:
+Backend теперь считается ready только после успешного Spring Boot startup + Flyway migrations: Docker healthcheck бьёт в `http://127.0.0.1:8080/actuator/health/readiness` внутри контейнера.
+
+GitHub Actions workflow после deploy сначала дожидается этого readiness-состояния и только потом делает smoke check локально на сервере через Caddy:
 
 ```bash
 curl -H "Host: $APP_DOMAIN" http://127.0.0.1/api/health
@@ -152,6 +154,14 @@ curl https://$APP_DOMAIN/api/health
 
 ```bash
 docker compose --env-file /opt/nutrition-app-v2/.env -f infra/docker/docker-compose.prod.yml logs backend --tail=100
+docker compose --env-file /opt/nutrition-app-v2/.env -f infra/docker/docker-compose.prod.yml ps
+```
+
+Если нужно явно посмотреть readiness внутри контейнера:
+
+```bash
+docker compose --env-file /opt/nutrition-app-v2/.env -f infra/docker/docker-compose.prod.yml exec backend \
+  curl --silent --show-error http://127.0.0.1:8080/actuator/health/readiness
 ```
 
 ### Проверить frontend

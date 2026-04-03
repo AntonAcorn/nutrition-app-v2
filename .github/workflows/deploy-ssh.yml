@@ -117,6 +117,36 @@ jobs:
           printf '%s\n' "$GITHUB_SHA" > .deploy-revision
           EOF
 
+      - name: Wait for backend readiness on server
+        env:
+          SSH_HOST: ${{ secrets.SSH_HOST }}
+          SSH_USER: ${{ secrets.SSH_USER }}
+          SSH_PORT: ${{ env.SSH_PORT }}
+          DEPLOY_PATH: ${{ env.DEPLOY_PATH }}
+        run: |
+          set -euo pipefail
+          ssh -p "$SSH_PORT" "$SSH_USER@$SSH_HOST" \
+            "DEPLOY_PATH='$DEPLOY_PATH' bash -s" <<'EOF'
+          set -euo pipefail
+          cd "$DEPLOY_PATH"
+
+          timeout 180 sh -c '
+            while :; do
+              container_id=$(docker compose --env-file "$DEPLOY_PATH/.env" -f infra/docker/docker-compose.prod.yml ps -q backend)
+              if [ -n "$container_id" ]; then
+                status=$(docker inspect --format "{{if .State.Health}}{{.State.Health.Status}}{{else}}starting{{end}}" "$container_id")
+                if [ "$status" = "healthy" ]; then
+                  exit 0
+                fi
+                echo "backend health: $status"
+              else
+                echo "backend container not created yet"
+              fi
+              sleep 3
+            done
+          '
+          EOF
+
       - name: Smoke check /api/health via local Caddy
         env:
           SSH_HOST: ${{ secrets.SSH_HOST }}
@@ -139,9 +169,9 @@ jobs:
           fi
 
           curl --fail --silent --show-error \
-            --retry 10 \
+            --retry 20 \
             --retry-delay 3 \
-            --retry-connrefused \
+            --retry-all-errors \
             -H "Host: $APP_DOMAIN" \
             http://127.0.0.1/api/health >/dev/null
           EOF

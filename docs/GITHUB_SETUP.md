@@ -42,13 +42,15 @@ cd nutrition-app-v2
 2. поднимает SSH agent и known_hosts
 3. синхронизирует репозиторий на сервер в `/opt/nutrition-app-v2`
 4. запускает `docker compose --env-file /opt/nutrition-app-v2/.env -f infra/docker/docker-compose.prod.yml up -d --build`
-5. делает smoke check через `http://127.0.0.1/api/health` с `Host: $APP_DOMAIN`
+5. ждёт backend readiness (`/actuator/health/readiness` внутри контейнера)
+6. делает smoke check через `http://127.0.0.1/api/health` с `Host: $APP_DOMAIN`
 
 Важно:
 - workflow не хранит production secrets в репозитории
 - серверный `.env` остаётся только на сервере и не перезаписывается из GitHub Actions
 - `storage/` и `.env` исключены из sync, чтобы не затереть runtime state
 - production compose вызывается с явным `--env-file`, потому что `env_file:` в сервисах не участвует в compose interpolation `${...}`
+- backend теперь имеет Docker healthcheck на `/actuator/health/readiness`, поэтому smoke check стартует только после реальной готовности Spring Boot/Flyway, а не сразу после запуска контейнера
 
 ## 4. GitHub Actions secrets for SSH deploy
 
