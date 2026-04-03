@@ -61,8 +61,12 @@ cd nutrition-app-v2
 - `SSH_KNOWN_HOSTS` — предпочтительный pinned host key; если не задан, workflow делает `ssh-keyscan` во время запуска
 
 Не нужно класть в GitHub secrets production `.env`, если сервер уже хранит runtime-конфиг локально.
-`APP_DOMAIN` должен жить в `/opt/nutrition-app-v2/.env` на сервере, потому что он нужен и Caddy, и post-deploy smoke check.
-Если переменная отсутствует или пуста, compose теперь подставит `localhost`, а production Caddyfile имеет такой же fallback для прямой валидации. Это нужно только для того, чтобы Caddy не падал на этапе парсинга; корректным production значением это не считается.
+`APP_DOMAIN` должен жить в `/opt/nutrition-app-v2/.env` на сервере, потому что он нужен для post-deploy smoke check.
+`CADDY_SITE_ADDRESS` тоже должен жить там же, потому что именно он задаёт Caddy site label:
+- для bootstrap по IP/HTTP: `CADDY_SITE_ADDRESS=http://65.109.3.45`
+- для нормального домена/TLS: `CADDY_SITE_ADDRESS=nutrition.example.com`
+
+Если переменные отсутствуют или пусты, compose теперь подставит `localhost`, а production Caddyfile имеет такой же fallback для прямой валидации. Это нужно только для того, чтобы Caddy не падал на этапе парсинга; корректным live значением это не считается.
 
 ## 5. Server-side expectations
 
@@ -76,7 +80,8 @@ Environment file:
 - у SSH user есть доступ к `/opt/nutrition-app-v2`
 - у SSH user есть право запускать `docker compose` без интерактивного sudo
 - на сервере установлен Docker + Compose plugin
-- в `/opt/nutrition-app-v2/.env` есть рабочий `APP_DOMAIN` (домен или временный IP/host для bootstrap)
+- в `/opt/nutrition-app-v2/.env` есть рабочие `APP_DOMAIN` и `CADDY_SITE_ADDRESS`
+- для IP bootstrap `CADDY_SITE_ADDRESS` должен быть со схемой `http://...`, иначе Caddy снова включит auto-HTTPS-поведение
 
 Deploy command, который выполняет workflow:
 
