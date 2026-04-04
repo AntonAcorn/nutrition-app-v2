@@ -15,6 +15,11 @@ spring:
   flyway:
     enabled: true
 
+nutrition:
+  import:
+    enabled: ${NUTRITION_IMPORT_ENABLED:false}
+    csv-path: ${NUTRITION_IMPORT_CSV_PATH:}
+
 server:
   port: ${PORT:8080}
 

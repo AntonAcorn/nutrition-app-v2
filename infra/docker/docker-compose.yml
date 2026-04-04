@@ -25,6 +25,8 @@ services:
       DB_URL: jdbc:postgresql://postgres:5432/${POSTGRES_DB:-nutrition_app}
       DB_USER: ${POSTGRES_USER:-nutrition}
       DB_PASSWORD: ${POSTGRES_PASSWORD:-nutrition}
+      NUTRITION_IMPORT_ENABLED: ${NUTRITION_IMPORT_ENABLED:-false}
+      NUTRITION_IMPORT_CSV_PATH: ${NUTRITION_IMPORT_CSV_PATH:-}
     depends_on:
       postgres:
         condition: service_healthy
