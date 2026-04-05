@@ -5,6 +5,7 @@ import com.aiduparc.nutrition.domain.User;
 import com.aiduparc.nutrition.dto.DashboardResponse;
 import com.aiduparc.nutrition.repo.DailyMetricRepository;
 import java.math.BigDecimal;
+import java.time.Clock;
 import java.time.LocalDate;
 import java.util.Comparator;
 import java.util.List;
@@ -15,10 +16,16 @@ import org.springframework.stereotype.Service;
 public class DashboardService {
     private final DailyMetricRepository dailyMetricRepository;
     private final UserService userService;
+    private final Clock clock;
 
     public DashboardService(DailyMetricRepository dailyMetricRepository, UserService userService) {
+        this(dailyMetricRepository, userService, Clock.systemUTC());
+    }
+
+    DashboardService(DailyMetricRepository dailyMetricRepository, UserService userService, Clock clock) {
         this.dailyMetricRepository = dailyMetricRepository;
         this.userService = userService;
+        this.clock = clock;
     }
 
     public DashboardResponse getDashboard(Integer days) {
@@ -28,14 +35,28 @@ public class DashboardService {
                 .stream()
                 .sorted(Comparator.comparing(DailyMetric::getMetricDate))
                 .toList();
-        LocalDate latestDate = recent.isEmpty() ? LocalDate.now() : recent.get(recent.size() - 1).getMetricDate();
-        LocalDate from = latestDate.minusDays(effectiveDays - 1L);
-        List<DailyMetric> filtered = dailyMetricRepository.findByUserAndMetricDateBetweenOrderByMetricDateAsc(user, from, latestDate);
 
-        DailyMetric todayMetric = filtered.isEmpty() ? null : filtered.get(filtered.size() - 1);
-        DashboardResponse.SummaryCard today = summaryCard(todayMetric, latestDate);
+        LocalDate todayDate = LocalDate.now(clock);
+        LocalDate latestDate = recent.isEmpty() ? todayDate : recent.get(recent.size() - 1).getMetricDate();
+        LocalDate rangeEnd = latestDate.isAfter(todayDate) ? latestDate : todayDate;
+        LocalDate from = rangeEnd.minusDays(effectiveDays - 1L);
+        List<DailyMetric> filtered = dailyMetricRepository.findByUserAndMetricDateBetweenOrderByMetricDateAsc(user, from, rangeEnd);
+
+        DailyMetric todayMetric = filtered.stream()
+                .filter(metric -> todayDate.equals(metric.getMetricDate()))
+                .findFirst()
+                .orElse(null);
+        BigDecimal defaultTarget = Optional.ofNullable(todayMetric)
+                .map(DailyMetric::getCaloriesTargetKcal)
+                .or(() -> recent.stream()
+                        .map(DailyMetric::getCaloriesTargetKcal)
+                        .filter(value -> value != null)
+                        .reduce((first, second) -> second))
+                .orElse(BigDecimal.ZERO);
+
+        DashboardResponse.SummaryCard today = summaryCard(todayMetric, todayDate, defaultTarget);
         DashboardResponse.SummaryCard totals = new DashboardResponse.SummaryCard(
-                latestDate.toString(),
+                rangeEnd.toString(),
                 sum(filtered.stream().map(DailyMetric::getCaloriesConsumedKcal).toList()),
                 sum(filtered.stream().map(DailyMetric::getCaloriesTargetKcal).toList()),
                 sum(filtered.stream().map(metric -> remaining(metric).max(BigDecimal.ZERO)).toList()),
@@ -46,7 +67,7 @@ public class DashboardService {
 
         return new DashboardResponse(
                 today,
-                new DashboardResponse.TimeRange(from.toString(), latestDate.toString(), effectiveDays),
+                new DashboardResponse.TimeRange(from.toString(), rangeEnd.toString(), effectiveDays),
                 totals,
                 filtered.stream().map(metric -> new DashboardResponse.MetricPoint(metric.getMetricDate().toString(), metric.getWeightKg())).toList(),
                 filtered.stream().map(metric -> new DashboardResponse.MetricPoint(metric.getMetricDate().toString(), metric.getCaloriesConsumedKcal())).toList(),
@@ -55,14 +76,22 @@ public class DashboardService {
         );
     }
 
-    private DashboardResponse.SummaryCard summaryCard(DailyMetric metric, LocalDate date) {
+    private DashboardResponse.SummaryCard summaryCard(DailyMetric metric, LocalDate date, BigDecimal defaultTarget) {
         if (metric == null) {
-            return new DashboardResponse.SummaryCard(date.toString(), BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO, null, BigDecimal.ZERO, BigDecimal.ZERO);
+            return new DashboardResponse.SummaryCard(
+                    date.toString(),
+                    BigDecimal.ZERO,
+                    valueOrZero(defaultTarget),
+                    valueOrZero(defaultTarget),
+                    null,
+                    BigDecimal.ZERO,
+                    BigDecimal.ZERO
+            );
         }
         return new DashboardResponse.SummaryCard(
                 metric.getMetricDate().toString(),
                 metric.getCaloriesConsumedKcal(),
-                valueOrZero(metric.getCaloriesTargetKcal()),
+                Optional.ofNullable(metric.getCaloriesTargetKcal()).orElse(valueOrZero(defaultTarget)),
                 remaining(metric),
                 metric.getWeightKg(),
                 valueOrZero(metric.getProteinG()),
