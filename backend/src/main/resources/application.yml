@@ -15,10 +15,21 @@ spring:
   flyway:
     enabled: true
 
+nutrition:
+  import:
+    enabled: ${NUTRITION_IMPORT_ENABLED:true}
+    csv-path: ${NUTRITION_IMPORT_CSV_PATH:data/imports/nutrition-history.csv}
+    default-user-ref: ${NUTRITION_DEFAULT_USER_REF:primary-user}
+    default-user-name: ${NUTRITION_DEFAULT_USER_NAME:Anton}
+
 server:
   port: ${PORT:8080}
 
 management:
+  endpoint:
+    health:
+      probes:
+        enabled: true
   endpoints:
     web:
       exposure:
