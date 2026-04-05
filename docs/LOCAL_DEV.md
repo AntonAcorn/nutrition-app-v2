@@ -3,7 +3,7 @@
 ## Requirements
 - Docker + Docker Compose
 - Node 22+
-- Java 21+
+- Java 17+
 - Maven 3.9+ (если запускать backend вне Docker)
 
 ## Option A: run everything with Docker Compose

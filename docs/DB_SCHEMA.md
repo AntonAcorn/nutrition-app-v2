@@ -61,6 +61,25 @@
 - estimated_fiber_g (numeric, nullable)
 - created_at
 
+## daily_metrics
+- id (uuid, pk)
+- user_id (uuid, fk -> users)
+- metric_date (date, unique per user)
+- weight_kg (numeric, nullable)
+- calories_consumed_kcal (numeric, source of truth for daily calories)
+- calories_target_kcal (numeric, nullable)
+- protein_g (numeric, nullable)
+- fiber_g (numeric, nullable)
+- data_source (text: manual | imported_csv | future sync/import sources)
+- source_payload (jsonb, raw imported row for traceability)
+- created_at
+- updated_at
+
+### Source of truth vs derived fields
+- **Source of truth:** `weight_kg`, `calories_consumed_kcal`, `calories_target_kcal`, `protein_g`, `fiber_g`, `metric_date`
+- **Derived at read time / materialization later:** deviation from target, weekly averages, weekly calorie totals, monthly calorie totals
+- CSV columns like `Отклонение`, `Средний вес недели`, `Итог недели по калориям`, `Итог месяца по калориям` are preserved only inside `source_payload`, not as primary normalized columns.
+
 ## optional: audit_log
 - id (uuid, pk)
 - entity_type (text)

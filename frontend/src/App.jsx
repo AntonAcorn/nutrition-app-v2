@@ -1,321 +1,365 @@
-const daySummary = {
-  dateLabel: 'Сегодня, 3 апреля',
-  calories: 1640,
-  protein: 108,
-  fiber: 24,
-  goal: 2100,
-  water: '1.8 / 2.5 л',
-  mood: 'Стабильная энергия',
-  score: 82,
+import { useEffect, useMemo, useState } from 'react'
+
+const RANGE_OPTIONS = [
+  { value: 14, label: '14 дней' },
+  { value: 30, label: '30 дней' },
+  { value: 90, label: '90 дней' },
+]
+
+const METRIC_CONFIG = [
+  {
+    key: 'weight',
+    title: 'Вес',
+    accent: '#60a5fa',
+    suffix: 'кг',
+    description: 'Ежедневная динамика веса.',
+  },
+  {
+    key: 'calories',
+    title: 'Калории',
+    accent: '#f59e0b',
+    suffix: 'ккал',
+    description: 'Сколько съедено за день.',
+  },
+  {
+    key: 'protein',
+    title: 'Белок',
+    accent: '#34d399',
+    suffix: 'г',
+    description: 'Суммарный белок за день.',
+  },
+  {
+    key: 'fiber',
+    title: 'Клетчатка',
+    accent: '#f472b6',
+    suffix: 'г',
+    description: 'Суммарная клетчатка за день.',
+  },
+]
+
+const emptyDashboard = {
+  today: { date: '—', consumed: 0, target: 0, remaining: 0, weight: null, protein: 0, fiber: 0 },
+  totals: { date: '—', consumed: 0, target: 0, remaining: 0, weight: null, protein: 0, fiber: 0 },
+  range: { from: '', to: '', days: 30 },
+  weight: [],
+  calories: [],
+  protein: [],
+  fiber: [],
 }
 
-const macroProgress = [
-  {
-    label: 'Белок',
-    value: 108,
-    target: 135,
-    unit: 'г',
-    tone: 'emerald',
-  },
-  {
-    label: 'Углеводы',
-    value: 156,
-    target: 220,
-    unit: 'г',
-    tone: 'amber',
-  },
-  {
-    label: 'Жиры',
-    value: 58,
-    target: 72,
-    unit: 'г',
-    tone: 'violet',
-  },
-]
+function formatNumber(value, digits = 0) {
+  if (value === null || value === undefined || value === '') return '—'
+  return new Intl.NumberFormat('ru-RU', {
+    minimumFractionDigits: digits,
+    maximumFractionDigits: digits,
+  }).format(Number(value))
+}
 
-const mealGroups = [
-  {
-    title: 'Завтрак',
-    timeRange: '08:10 · подтверждено',
-    calories: 420,
-    protein: 28,
-    accent: 'sunrise',
-    items: [
-      'Овсянка с греческим йогуртом и ягодами',
-      'Кофе без сахара',
-    ],
-  },
-  {
-    title: 'Обед',
-    timeRange: '13:05 · подтверждено',
-    calories: 610,
-    protein: 42,
-    accent: 'day',
-    items: [
-      'Куриная грудка, киноа, овощи гриль',
-      'Салат с оливковым маслом',
-    ],
-  },
-  {
-    title: 'Ужин',
-    timeRange: 'Запланирован на вечер',
-    calories: 0,
-    protein: 0,
-    accent: 'night',
-    items: [],
-    hint: 'Оставь место для ужина или добавь фото, когда еда будет перед тобой.',
-  },
-]
+function formatShortDate(value) {
+  if (!value) return '—'
+  return new Intl.DateTimeFormat('ru-RU', { day: '2-digit', month: 'short' }).format(new Date(value))
+}
 
-const quickActions = [
-  'Сфотографировать тарелку',
-  'Подтвердить draft от analyzer',
-  'Добавить воду или перекус',
-]
-
-const insightCards = [
-  {
-    label: 'Фокус дня',
-    title: 'Нормальный баланс без перегруза интерфейса',
-    text: 'Сводка сверху, детали дня ниже, а capture-flow держим рядом — это даёт ощущение реального продукта, а не лендинга.',
-  },
-  {
-    label: 'Следующий шаг',
-    title: 'Фото и analyzer — первый-class flow',
-    text: 'Визуально выделили зону upload / analysis, чтобы будущая AI-функция уже имела естественное место в оболочке.',
-  },
-]
-
-const upcomingModules = [
-  'История дней и недельные тренды',
-  'Draft review после фото-анализа',
-  'Подтверждение meal entries из backend',
-  'Карточка нутриентов / микроэлементов',
-]
-
-function StatChip({ label, value }) {
+function MetricCard({ label, value, suffix, accent = false, helper }) {
   return (
-    <div className="stat-chip">
-      <span className="stat-chip__label">{label}</span>
-      <strong>{value}</strong>
+    <article className={`metric ${accent ? 'metric--accent' : ''}`}>
+      <span className="metric__label">{label}</span>
+      <strong className="metric__value">
+        {value}
+        {suffix ? <span className="metric__suffix"> {suffix}</span> : null}
+      </strong>
+      {helper ? <span className="metric__helper">{helper}</span> : null}
+    </article>
+  )
+}
+
+function StatPill({ label, value, suffix }) {
+  return (
+    <div className="stat-pill">
+      <span>{label}</span>
+      <strong>
+        {value}
+        {suffix ? <small>{suffix}</small> : null}
+      </strong>
     </div>
   )
 }
 
-function MetricCard({ label, value, suffix, accent = false, detail }) {
-  return (
-    <article className={`metric-card ${accent ? 'metric-card--accent' : ''}`}>
-      <span className="metric-card__label">{label}</span>
-      <strong className="metric-card__value">
-        {value}
-        {suffix ? <span className="metric-card__suffix"> {suffix}</span> : null}
-      </strong>
-      {detail ? <p className="metric-card__detail">{detail}</p> : null}
-    </article>
-  )
-}
-
-function MacroBar({ label, value, target, unit, tone }) {
-  const progress = Math.min(100, Math.round((value / target) * 100))
+function ChartCard({ title, description, points, color, suffix }) {
+  const cleanPoints = points.filter((point) => point.value !== null && point.value !== undefined)
+  const chart = useMemo(() => createChartGeometry(cleanPoints), [cleanPoints])
 
   return (
-    <article className="macro-bar">
-      <div className="macro-bar__header">
+    <section className="panel chart-card">
+      <div className="chart-card__header">
         <div>
-          <span className={`macro-bar__tone macro-bar__tone--${tone}`} />
-          <strong>{label}</strong>
-        </div>
-        <span>
-          {value}/{target} {unit}
-        </span>
-      </div>
-      <div className="macro-bar__track">
-        <div
-          className={`macro-bar__fill macro-bar__fill--${tone}`}
-          style={{ width: `${progress}%` }}
-        />
-      </div>
-      <p className="macro-bar__caption">{progress}% дневной цели</p>
-    </article>
-  )
-}
-
-function MealCard({ title, timeRange, calories, protein, items, hint, accent }) {
-  const hasItems = items.length > 0
-
-  return (
-    <article className={`meal-card meal-card--${accent}`}>
-      <div className="meal-card__header">
-        <div>
-          <p className="meal-card__eyebrow">{timeRange}</p>
           <h3>{title}</h3>
+          <p className="muted">{description}</p>
         </div>
-        <div className="meal-card__totals">
-          <StatChip label="ккал" value={calories || '—'} />
-          <StatChip label="белок" value={protein ? `${protein} г` : '—'} />
+        <div className="chart-card__meta">
+          <span>{cleanPoints.length} точек</span>
+          <strong>
+            {cleanPoints.length ? `${formatNumber(cleanPoints.at(-1).value, suffix === 'кг' ? 2 : 0)} ${suffix}` : 'нет данных'}
+          </strong>
         </div>
       </div>
 
-      {hasItems ? (
-        <ul className="meal-card__list">
-          {items.map((item) => (
-            <li key={item}>{item}</li>
-          ))}
-        </ul>
+      {cleanPoints.length ? (
+        <>
+          <svg viewBox="0 0 640 240" className="chart-svg" role="img" aria-label={`${title} chart`}>
+            {chart.gridLines.map((line) => (
+              <line
+                key={line.y}
+                x1="32"
+                x2="608"
+                y1={line.y}
+                y2={line.y}
+                className="chart-svg__grid"
+              />
+            ))}
+
+            <polyline
+              fill="none"
+              stroke={color}
+              strokeWidth="4"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              points={chart.linePoints}
+            />
+
+            {chart.coordinates.map((point) => (
+              <g key={point.label}>
+                <circle cx={point.x} cy={point.y} r="5" fill={color} />
+              </g>
+            ))}
+          </svg>
+
+          <div className="chart-axis-labels">
+            <span>{formatShortDate(cleanPoints[0]?.date)}</span>
+            <span>{formatShortDate(cleanPoints.at(-1)?.date)}</span>
+          </div>
+
+          <div className="chart-stats">
+            <StatPill label="Мин" value={formatNumber(chart.min, suffix === 'кг' ? 2 : 0)} suffix={suffix} />
+            <StatPill label="Среднее" value={formatNumber(chart.avg, suffix === 'кг' ? 2 : 0)} suffix={suffix} />
+            <StatPill label="Макс" value={formatNumber(chart.max, suffix === 'кг' ? 2 : 0)} suffix={suffix} />
+          </div>
+        </>
       ) : (
-        <div className="meal-card__empty">
-          <p>Пока без записей.</p>
-          <p>{hint}</p>
+        <div className="empty-state">
+          <p>Нет данных для графика.</p>
+          <p className="muted">После импорта CSV здесь появится история.</p>
         </div>
       )}
-    </article>
+    </section>
   )
+}
+
+function createChartGeometry(points) {
+  if (!points.length) {
+    return { coordinates: [], linePoints: '', min: 0, max: 0, avg: 0, gridLines: [] }
+  }
+
+  const width = 576
+  const height = 176
+  const left = 32
+  const top = 24
+  const min = Math.min(...points.map((point) => Number(point.value)))
+  const max = Math.max(...points.map((point) => Number(point.value)))
+  const range = max - min || 1
+
+  const coordinates = points.map((point, index) => {
+    const x = left + (index * width) / Math.max(points.length - 1, 1)
+    const y = top + height - ((Number(point.value) - min) / range) * height
+    return { x, y, label: `${point.date}-${index}` }
+  })
+
+  return {
+    coordinates,
+    linePoints: coordinates.map((point) => `${point.x},${point.y}`).join(' '),
+    min,
+    max,
+    avg: points.reduce((sum, point) => sum + Number(point.value), 0) / points.length,
+    gridLines: [0, 0.25, 0.5, 0.75, 1].map((ratio) => ({ y: top + height * ratio })),
+  }
 }
 
 export default function App() {
-  const remainingCalories = daySummary.goal - daySummary.calories
+  const [days, setDays] = useState(30)
+  const [dashboard, setDashboard] = useState(emptyDashboard)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState('')
+
+  useEffect(() => {
+    let active = true
+
+    async function loadDashboard() {
+      try {
+        setLoading(true)
+        setError('')
+        const response = await fetch(`/api/dashboard?days=${days}`)
+        if (!response.ok) {
+          throw new Error(`dashboard request failed: ${response.status}`)
+        }
+        const payload = await response.json()
+        if (active) {
+          setDashboard(payload)
+        }
+      } catch (err) {
+        if (active) {
+          setDashboard(emptyDashboard)
+          setError('Не удалось загрузить dashboard. Проверь backend/API.')
+        }
+      } finally {
+        if (active) {
+          setLoading(false)
+        }
+      }
+    }
+
+    loadDashboard()
+    return () => {
+      active = false
+    }
+  }, [days])
+
+  const today = dashboard.today ?? emptyDashboard.today
+  const totals = dashboard.totals ?? emptyDashboard.totals
 
   return (
     <main className="app-shell">
-      <section className="topbar">
+      <section className="hero panel">
         <div>
           <p className="eyebrow">Nutrition App v2</p>
-          <h1>Дневной экран, который уже выглядит как продукт</h1>
+          <h1>Дневной summary и история метрик</h1>
+          <p className="lead">
+            Dashboard теперь читает данные из базы: today summary, исторические метрики и графики веса,
+            калорий, белка и клетчатки.
+          </p>
         </div>
-        <div className="topbar__badge">
-          <span className="status-dot" />
-          <span>Current day · meal logging · analyzer-ready shell</span>
+
+        <div className="hero__actions">
+          <div className="hero__status">
+            <span className={`status-dot ${loading ? 'status-dot--loading' : ''}`} />
+            <span>{loading ? 'Обновляем данные…' : `Диапазон: ${dashboard.range?.days ?? days} дней`}</span>
+          </div>
+
+          <label className="range-select">
+            <span>Период</span>
+            <select value={days} onChange={(event) => setDays(Number(event.target.value))}>
+              {RANGE_OPTIONS.map((option) => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
+          </label>
         </div>
       </section>
 
-      <section className="hero-card panel">
-        <div className="hero-card__main">
-          <div>
-            <p className="eyebrow eyebrow--soft">Сводка дня</p>
-            <h2>Спокойный wellness-dashboard вместо placeholder-каркаса</h2>
-            <p className="lead">
-              Интерфейс собран вокруг реальных паттернов nutrition apps: крупная daily summary, быстрый доступ к
-              логированию, визуально лёгкие meal cards и отдельная зона для будущего photo-analysis flow.
+      {error ? (
+        <section className="panel banner banner--error">
+          <strong>Данные пока недоступны.</strong>
+          <p>{error}</p>
+        </section>
+      ) : null}
+
+      <section className="summary-grid">
+        <MetricCard
+          label="Съедено сегодня"
+          value={formatNumber(today.consumed)}
+          suffix="ккал"
+          accent
+          helper={`Дата: ${formatShortDate(today.date)}`}
+        />
+        <MetricCard label="Дневная норма" value={formatNumber(today.target)} suffix="ккал" />
+        <MetricCard label="Осталось" value={formatNumber(today.remaining)} suffix="ккал" />
+        <MetricCard label="Вес" value={formatNumber(today.weight, 2)} suffix="кг" />
+      </section>
+
+      <section className="content-grid">
+        <div className="content-grid__main">
+          <section className="panel today-panel">
+            <div className="today-panel__header">
+              <div>
+                <h2>Сегодня</h2>
+                <p className="muted">Основной блок дневного экрана: consumed, target и remaining calories.</p>
+              </div>
+              <span className="date-badge">{formatShortDate(today.date)}</span>
+            </div>
+
+            <div className="today-panel__metrics">
+              <StatPill label="Белок" value={formatNumber(today.protein)} suffix="г" />
+              <StatPill label="Клетчатка" value={formatNumber(today.fiber)} suffix="г" />
+              <StatPill label="Средний вес периода" value={formatNumber(totals.weight, 2)} suffix="кг" />
+            </div>
+          </section>
+
+          <section className="charts-grid">
+            {METRIC_CONFIG.map((metric) => (
+              <ChartCard
+                key={metric.key}
+                title={metric.title}
+                description={metric.description}
+                points={dashboard[metric.key] ?? []}
+                color={metric.accent}
+                suffix={metric.suffix}
+              />
+            ))}
+          </section>
+        </div>
+
+        <aside className="content-grid__side">
+          <section className="panel info-panel">
+            <h2>Период</h2>
+            <div className="info-list">
+              <div>
+                <span>От</span>
+                <strong>{formatShortDate(dashboard.range?.from)}</strong>
+              </div>
+              <div>
+                <span>До</span>
+                <strong>{formatShortDate(dashboard.range?.to)}</strong>
+              </div>
+              <div>
+                <span>Дней в выборке</span>
+                <strong>{dashboard.range?.days ?? 0}</strong>
+              </div>
+            </div>
+          </section>
+
+          <section className="panel info-panel">
+            <h2>Итоги периода</h2>
+            <div className="info-list">
+              <div>
+                <span>Калории съедено</span>
+                <strong>{formatNumber(totals.consumed)} ккал</strong>
+              </div>
+              <div>
+                <span>Калории target</span>
+                <strong>{formatNumber(totals.target)} ккал</strong>
+              </div>
+              <div>
+                <span>Remaining суммарно</span>
+                <strong>{formatNumber(totals.remaining)} ккал</strong>
+              </div>
+              <div>
+                <span>Белок</span>
+                <strong>{formatNumber(totals.protein)} г</strong>
+              </div>
+              <div>
+                <span>Клетчатка</span>
+                <strong>{formatNumber(totals.fiber)} г</strong>
+              </div>
+            </div>
+          </section>
+
+          <section className="panel info-panel">
+            <h2>Источник истины</h2>
+            <p className="muted">
+              Исторические daily metrics лежат в PostgreSQL. Derived-поля вроде отклонения и агрегатов по
+              неделе/месяцу не хранятся как первичная истина — они рассчитываются из дневных данных.
             </p>
-          </div>
-
-          <div className="hero-card__highlights">
-            <StatChip label="Nutrition score" value={`${daySummary.score}/100`} />
-            <StatChip label="Вода" value={daySummary.water} />
-            <StatChip label="Самочувствие" value={daySummary.mood} />
-          </div>
-        </div>
-
-        <div className="hero-card__side">
-          <div className="hero-orb" aria-hidden="true">
-            <div className="hero-orb__inner">
-              <span>Осталось</span>
-              <strong>{remainingCalories}</strong>
-              <small>ккал до цели</small>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <section className="metrics-grid">
-        <MetricCard label={daySummary.dateLabel} value={daySummary.calories} suffix="ккал" accent detail="Из подтверждённых meal entries" />
-        <MetricCard label="Белок" value={daySummary.protein} suffix="г" detail="Сильнее всего закрыт после обеда" />
-        <MetricCard label="Клетчатка" value={daySummary.fiber} suffix="г" detail="Нужно ещё немного овощей вечером" />
-        <MetricCard label="До цели" value={remainingCalories} suffix="ккал" detail="Можно закрыть ужином без перегруза" />
-      </section>
-
-      <section className="dashboard-grid">
-        <div className="dashboard-grid__main">
-          <section className="panel section-panel">
-            <div className="section-head">
-              <div>
-                <p className="eyebrow eyebrow--soft">Текущий день</p>
-                <h2>Meals laid out as a timeline</h2>
-              </div>
-              <p className="muted">Паттерн ближе к Yazio / Lifesum: день читается сверху вниз и не прячется за tabs.</p>
-            </div>
-
-            <div className="meal-stack">
-              {mealGroups.map((group) => (
-                <MealCard key={group.title} {...group} />
-              ))}
-            </div>
-          </section>
-
-          <section className="panel section-panel">
-            <div className="section-head">
-              <div>
-                <p className="eyebrow eyebrow--soft">Питательные цели</p>
-                <h2>Macro progress без тяжёлых charts</h2>
-              </div>
-              <p className="muted">Достаточно на стартовом этапе: быстро видно, где дефицит, но код остаётся простым.</p>
-            </div>
-
-            <div className="macro-grid">
-              {macroProgress.map((item) => (
-                <MacroBar key={item.label} {...item} />
-              ))}
-            </div>
-          </section>
-        </div>
-
-        <aside className="dashboard-grid__side">
-          <section className="panel section-panel capture-panel">
-            <div>
-              <p className="eyebrow eyebrow--soft">Capture flow</p>
-              <h2>Фото и анализ должны быть под рукой</h2>
-              <p className="muted">
-                Вместо generic marketing hero здесь сразу показан рабочий сценарий: снять фото, получить draft,
-                подтвердить meal entry.
-              </p>
-            </div>
-
-            <div className="capture-preview" aria-hidden="true">
-              <div className="capture-preview__plate" />
-              <div className="capture-preview__card capture-preview__card--primary">
-                <span>Photo uploaded</span>
-                <strong>Analyzer draft · 86% confident</strong>
-              </div>
-              <div className="capture-preview__card capture-preview__card--secondary">
-                <span>Next</span>
-                <strong>Confirm portions & save meal</strong>
-              </div>
-            </div>
-
-            <ul className="action-list">
-              {quickActions.map((action) => (
-                <li key={action}>{action}</li>
-              ))}
-            </ul>
-          </section>
-
-          <section className="panel section-panel insights-panel">
-            <div className="section-head section-head--stacked">
-              <div>
-                <p className="eyebrow eyebrow--soft">Почему так</p>
-                <h2>Research-informed direction</h2>
-              </div>
-            </div>
-
-            <div className="insight-stack">
-              {insightCards.map((card) => (
-                <article key={card.title} className="insight-card">
-                  <span>{card.label}</span>
-                  <strong>{card.title}</strong>
-                  <p>{card.text}</p>
-                </article>
-              ))}
-            </div>
-          </section>
-
-          <section className="panel section-panel roadmap-panel">
-            <p className="eyebrow eyebrow--soft">Path forward</p>
-            <h2>Модули, которые сюда естественно добавятся</h2>
-            <ul className="roadmap-list">
-              {upcomingModules.map((item) => (
-                <li key={item}>{item}</li>
-              ))}
-            </ul>
           </section>
         </aside>
       </section>

@@ -46,6 +46,14 @@ Flow:
 - Caddy проксирует `/api/*` на backend и остальное на frontend
 - деплой идёт через `infra/docker/docker-compose.prod.yml`
 
+## Nutrition history / stats
+
+- PostgreSQL остаётся основным source of truth
+- historical CSV импортируется в `daily_metrics` как one-time startup import
+- importer понимает русские заголовки и числа с запятой
+- derived-поля из CSV (отклонение, недельные/месячные итоги) не хранятся как первичная истина
+- frontend dashboard читает `GET /api/dashboard?days=30` и показывает today summary + charts
+
 ## Bootstrap по IP vs нормальный домен
 
 Для live bootstrap без домена используем plain HTTP:
