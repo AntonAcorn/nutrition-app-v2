@@ -61,6 +61,26 @@
 - estimated_fiber_g (numeric, nullable)
 - created_at
 
+## daily_nutrition_entries
+- id (uuid, pk)
+- user_id (uuid, fk -> users)
+- entry_date (date)
+- weight_kg (numeric, nullable)
+- calories_consumed_kcal (numeric)
+- calorie_target_kcal (numeric, nullable)
+- protein_g (numeric, nullable)
+- fiber_g (numeric, nullable)
+- notes (text, nullable)
+- created_at
+- updated_at
+- unique (user_id, entry_date)
+
+### Source of truth vs derived values
+- Source of truth: `entry_date`, `weight_kg`, `calories_consumed_kcal`, `calorie_target_kcal`, `protein_g`, `fiber_g`, `notes`
+- Derived on the fly: `calorie_balance_kcal = calorie_target_kcal - calories_consumed_kcal`, weekly/monthly aggregates, rolling streaks, macro completion %
+
+Only persist the raw day inputs. Everything that can drift (aggregates, balances, streak counters) should be computed in SQL or the API layer so it always reflects the latest edits/import corrections.
+
 ## optional: audit_log
 - id (uuid, pk)
 - entity_type (text)
