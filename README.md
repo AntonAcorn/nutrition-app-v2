@@ -73,3 +73,36 @@ docker compose --env-file .env -f infra/docker/docker-compose.prod.yml up -d --b
 ```
 
 На сервере source of truth остаётся `/opt/nutrition-app-v2/.env`; GitHub Actions deploy использует именно его через `--env-file`.
+
+## One-time CSV import в daily_nutrition_entries
+
+В backend добавлен одноразовый импорт historical nutrition CSV в `daily_nutrition_entries`.
+
+Поддерживается:
+- русские и английские заголовки (`Дата`, `Калории`, `Норма`, `Вес`, `Белок`, `Клетчатка`, `Заметки` и EN aliases)
+- десятичные значения с запятой (`74,15`) и разделителями тысяч (`1 234,56`)
+- upsert по `(user_id, entry_date)`
+- сохраняются только source-of-truth поля (без derived агрегатов)
+
+Пример dry-run:
+
+```bash
+cd backend
+mvn spring-boot:run -Dspring-boot.run.arguments="--spring.main.web-application-type=none --nutrition.import.csv.enabled=true --nutrition.import.csv.dry-run=true --nutrition.import.csv.path=/absolute/path/nutrition.csv --nutrition.import.csv.user-id=<USER_UUID>"
+```
+
+Реальный импорт (запись в DB):
+
+```bash
+cd backend
+mvn spring-boot:run -Dspring-boot.run.arguments="--spring.main.web-application-type=none --nutrition.import.csv.enabled=true --nutrition.import.csv.path=/absolute/path/nutrition.csv --nutrition.import.csv.user-id=<USER_UUID>"
+```
+
+Проверка результата (пример):
+
+```sql
+select entry_date, calories_consumed_kcal, weight_kg, protein_g, fiber_g
+from daily_nutrition_entries
+where user_id = '<USER_UUID>'::uuid
+order by entry_date;
+```
