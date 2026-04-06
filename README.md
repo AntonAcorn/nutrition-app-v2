@@ -106,3 +106,83 @@ from daily_nutrition_entries
 where user_id = '<USER_UUID>'::uuid
 order by entry_date;
 ```
+
+## Photo analysis backend skeleton (v1)
+
+В backend добавлен PR-sized skeleton для анализа фото еды.
+
+### Endpoint
+
+- `POST /api/photo-analysis`
+
+### Example request
+
+```json
+{
+  "imageUrl": "https://cdn.example.com/meals/lunch.jpg",
+  "userNote": "Chicken, rice, maybe cucumbers",
+  "locale": "en"
+}
+```
+
+### Example response
+
+```json
+{
+  "items": [
+    {
+      "name": "Chicken breast",
+      "estimatedPortion": "150 g",
+      "calories": 248,
+      "protein": 46,
+      "carbs": 0,
+      "fat": 5,
+      "fiber": 0,
+      "confidence": 0.81
+    }
+  ],
+  "totals": {
+    "calories": 248,
+    "protein": 46,
+    "carbs": 0,
+    "fat": 5,
+    "fiber": 0
+  },
+  "confidence": 0.81,
+  "notes": [
+    "Stub response from provider 'openai-stub'.",
+    "Replace StubOpenAiPhotoAnalysisProvider with a real OpenAI API client once OPENAI_API_KEY is available.",
+    "User confirmation remains required before creating a meal entry."
+  ],
+  "needsUserConfirmation": true
+}
+```
+
+### Current behavior
+
+- текущая реализация использует `StubOpenAiPhotoAnalysisProvider`
+- live вызов OpenAI пока не обязателен и не используется
+- ответ уже имеет app-oriented форму для draft/confirmation flow
+
+### Future OpenAI wiring
+
+Переменные окружения уже заведены:
+
+- `PHOTO_ANALYSIS_ENABLED`
+- `PHOTO_ANALYSIS_PROVIDER`
+- `OPENAI_API_KEY`
+- `OPENAI_MODEL`
+- `OPENAI_BASE_URL`
+
+Чтобы подключить реальный OpenAI later:
+1. оставить endpoint и service boundary как есть
+2. заменить `StubOpenAiPhotoAnalysisProvider` на HTTP/OpenAI client implementation
+3. читать ключ из `OPENAI_API_KEY`, модель из `OPENAI_MODEL`, base URL из `OPENAI_BASE_URL`
+4. при необходимости переключать provider через `PHOTO_ANALYSIS_PROVIDER`
+
+### Backend test run
+
+```bash
+cd backend
+mvn test
+```
