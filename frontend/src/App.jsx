@@ -1,325 +1,298 @@
-import { TodaySummaryBlock } from './features/today-summary/TodaySummaryBlock'
-import { getTodaySummaryMock } from './features/today-summary/mockTodaySummary'
+import { useEffect, useMemo, useState } from 'react'
 
-const daySummary = {
-  water: '1.8 / 2.5 л',
-  mood: 'Стабильная энергия',
-  score: 82,
+const numericFields = ['grams', 'calories', 'protein', 'fat', 'carbs', 'fiber']
+
+function toNumber(value) {
+  const num = Number(value)
+  return Number.isFinite(num) ? num : 0
 }
 
-const macroProgress = [
-  {
-    label: 'Белок',
-    value: 108,
-    target: 135,
-    unit: 'г',
-    tone: 'emerald',
-  },
-  {
-    label: 'Углеводы',
-    value: 156,
-    target: 220,
-    unit: 'г',
-    tone: 'amber',
-  },
-  {
-    label: 'Жиры',
-    value: 58,
-    target: 72,
-    unit: 'г',
-    tone: 'violet',
-  },
-]
+function normalizeDraft(payload) {
+  const source = payload?.draft ?? payload ?? {}
+  const items = Array.isArray(source.items)
+    ? source.items.map((item, index) => ({
+        id: item.id ?? `item-${index}`,
+        name: item.name ?? '',
+        grams: toNumber(item.grams),
+        calories: toNumber(item.calories),
+        protein: toNumber(item.protein),
+        fat: toNumber(item.fat),
+        carbs: toNumber(item.carbs),
+        fiber: toNumber(item.fiber),
+      }))
+    : []
 
-const mealGroups = [
-  {
-    title: 'Завтрак',
-    timeRange: '08:10 · подтверждено',
-    calories: 420,
-    protein: 28,
-    accent: 'sunrise',
-    items: [
-      'Овсянка с греческим йогуртом и ягодами',
-      'Кофе без сахара',
-    ],
-  },
-  {
-    title: 'Обед',
-    timeRange: '13:05 · подтверждено',
-    calories: 610,
-    protein: 42,
-    accent: 'day',
-    items: [
-      'Куриная грудка, киноа, овощи гриль',
-      'Салат с оливковым маслом',
-    ],
-  },
-  {
-    title: 'Ужин',
-    timeRange: 'Запланирован на вечер',
-    calories: 0,
-    protein: 0,
-    accent: 'night',
-    items: [],
-    hint: 'Оставь место для ужина или добавь фото, когда еда будет перед тобой.',
-  },
-]
+  const notes = Array.isArray(source.notes)
+    ? source.notes
+    : typeof source.notes === 'string'
+      ? source.notes.split('\n').filter(Boolean)
+      : []
 
-const quickActions = [
-  'Сфотографировать тарелку',
-  'Подтвердить draft от analyzer',
-  'Добавить воду или перекус',
-]
+  const totalsFromBackend = source.totals ?? {}
 
-const insightCards = [
-  {
-    label: 'Фокус дня',
-    title: 'Нормальный баланс без перегруза интерфейса',
-    text: 'Сводка сверху, детали дня ниже, а capture-flow держим рядом — это даёт ощущение реального продукта, а не лендинга.',
-  },
-  {
-    label: 'Следующий шаг',
-    title: 'Фото и analyzer — первый-class flow',
-    text: 'Визуально выделили зону upload / analysis, чтобы будущая AI-функция уже имела естественное место в оболочке.',
-  },
-]
+  const calculatedTotals = items.reduce(
+    (acc, item) => {
+      acc.calories += toNumber(item.calories)
+      acc.protein += toNumber(item.protein)
+      acc.fat += toNumber(item.fat)
+      acc.carbs += toNumber(item.carbs)
+      acc.fiber += toNumber(item.fiber)
+      return acc
+    },
+    { calories: 0, protein: 0, fat: 0, carbs: 0, fiber: 0 },
+  )
 
-const upcomingModules = [
-  'История дней и недельные тренды',
-  'Draft review после фото-анализа',
-  'Подтверждение meal entries из backend',
-  'Карточка нутриентов / микроэлементов',
-]
+  return {
+    id: source.id ?? payload?.id ?? 'latest',
+    items,
+    totals: {
+      calories: toNumber(totalsFromBackend.calories || calculatedTotals.calories),
+      protein: toNumber(totalsFromBackend.protein || calculatedTotals.protein),
+      fat: toNumber(totalsFromBackend.fat || calculatedTotals.fat),
+      carbs: toNumber(totalsFromBackend.carbs || calculatedTotals.carbs),
+      fiber: toNumber(totalsFromBackend.fiber || calculatedTotals.fiber),
+    },
+    notes,
+    confidence: toNumber(source.confidence),
+    needsUserConfirmation: source.needsUserConfirmation !== false,
+  }
+}
 
-function StatChip({ label, value }) {
+function DraftItemEditor({ item, onChange }) {
   return (
-    <div className="stat-chip">
-      <span className="stat-chip__label">{label}</span>
-      <strong>{value}</strong>
+    <article className="draft-item">
+      <label>
+        Название
+        <input value={item.name} onChange={(e) => onChange(item.id, 'name', e.target.value)} />
+      </label>
+
+      <div className="draft-item__grid">
+        {numericFields.map((field) => (
+          <label key={field}>
+            {field}
+            <input
+              type="number"
+              step="0.1"
+              value={item[field]}
+              onChange={(e) => onChange(item.id, field, e.target.value)}
+            />
+          </label>
+        ))}
+      </div>
+    </article>
+  )
+}
+
+function TotalsRow({ totals }) {
+  return (
+    <div className="totals-row">
+      <span>ккал: {totals.calories.toFixed(0)}</span>
+      <span>б: {totals.protein.toFixed(1)} г</span>
+      <span>ж: {totals.fat.toFixed(1)} г</span>
+      <span>у: {totals.carbs.toFixed(1)} г</span>
+      <span>клетч.: {totals.fiber.toFixed(1)} г</span>
     </div>
   )
 }
 
-function MetricCard({ label, value, suffix, accent = false, detail }) {
-  return (
-    <article className={`metric-card ${accent ? 'metric-card--accent' : ''}`}>
-      <span className="metric-card__label">{label}</span>
-      <strong className="metric-card__value">
-        {value}
-        {suffix ? <span className="metric-card__suffix"> {suffix}</span> : null}
-      </strong>
-      {detail ? <p className="metric-card__detail">{detail}</p> : null}
-    </article>
-  )
-}
-
-function MacroBar({ label, value, target, unit, tone }) {
-  const progress = Math.min(100, Math.round((value / target) * 100))
-
-  return (
-    <article className="macro-bar">
-      <div className="macro-bar__header">
-        <div>
-          <span className={`macro-bar__tone macro-bar__tone--${tone}`} />
-          <strong>{label}</strong>
-        </div>
-        <span>
-          {value}/{target} {unit}
-        </span>
-      </div>
-      <div className="macro-bar__track">
-        <div
-          className={`macro-bar__fill macro-bar__fill--${tone}`}
-          style={{ width: `${progress}%` }}
-        />
-      </div>
-      <p className="macro-bar__caption">{progress}% дневной цели</p>
-    </article>
-  )
-}
-
-function MealCard({ title, timeRange, calories, protein, items, hint, accent }) {
-  const hasItems = items.length > 0
-
-  return (
-    <article className={`meal-card meal-card--${accent}`}>
-      <div className="meal-card__header">
-        <div>
-          <p className="meal-card__eyebrow">{timeRange}</p>
-          <h3>{title}</h3>
-        </div>
-        <div className="meal-card__totals">
-          <StatChip label="ккал" value={calories || '—'} />
-          <StatChip label="белок" value={protein ? `${protein} г` : '—'} />
-        </div>
-      </div>
-
-      {hasItems ? (
-        <ul className="meal-card__list">
-          {items.map((item) => (
-            <li key={item}>{item}</li>
-          ))}
-        </ul>
-      ) : (
-        <div className="meal-card__empty">
-          <p>Пока без записей.</p>
-          <p>{hint}</p>
-        </div>
-      )}
-    </article>
-  )
-}
-
 export default function App() {
-  const todaySummary = getTodaySummaryMock()
-  const remainingCalories = todaySummary.remainingCalories
+  const [draft, setDraft] = useState(null)
+  const [loading, setLoading] = useState(true)
+  const [saving, setSaving] = useState(false)
+  const [error, setError] = useState('')
+  const [finalEntry, setFinalEntry] = useState(null)
+
+  const draftId = useMemo(() => {
+    const params = new URLSearchParams(window.location.search)
+    return params.get('draftId') || 'latest'
+  }, [])
+
+  useEffect(() => {
+    const controller = new AbortController()
+
+    async function loadDraft() {
+      setLoading(true)
+      setError('')
+
+      try {
+        const response = await fetch(`/api/photo-analysis/drafts/${draftId}`, {
+          signal: controller.signal,
+        })
+
+        if (!response.ok) {
+          throw new Error(`Не удалось загрузить draft (${response.status})`)
+        }
+
+        const payload = await response.json()
+        setDraft(normalizeDraft(payload))
+      } catch (err) {
+        if (err.name !== 'AbortError') {
+          setError(err.message || 'Ошибка загрузки draft')
+        }
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    loadDraft()
+    return () => controller.abort()
+  }, [draftId])
+
+  const recalculatedTotals = useMemo(() => {
+    if (!draft) {
+      return { calories: 0, protein: 0, fat: 0, carbs: 0, fiber: 0 }
+    }
+
+    return draft.items.reduce(
+      (acc, item) => {
+        acc.calories += toNumber(item.calories)
+        acc.protein += toNumber(item.protein)
+        acc.fat += toNumber(item.fat)
+        acc.carbs += toNumber(item.carbs)
+        acc.fiber += toNumber(item.fiber)
+        return acc
+      },
+      { calories: 0, protein: 0, fat: 0, carbs: 0, fiber: 0 },
+    )
+  }, [draft])
+
+  function updateItem(itemId, field, value) {
+    setDraft((current) => {
+      if (!current) {
+        return current
+      }
+
+      const updatedItems = current.items.map((item) => {
+        if (item.id !== itemId) {
+          return item
+        }
+
+        if (field === 'name') {
+          return { ...item, [field]: value }
+        }
+
+        return { ...item, [field]: toNumber(value) }
+      })
+
+      return {
+        ...current,
+        items: updatedItems,
+      }
+    })
+  }
+
+  function updateNotes(value) {
+    setDraft((current) => {
+      if (!current) {
+        return current
+      }
+
+      return {
+        ...current,
+        notes: value
+          .split('\n')
+          .map((line) => line.trim())
+          .filter(Boolean),
+      }
+    })
+  }
+
+  async function saveDraft() {
+    if (!draft) {
+      return
+    }
+
+    setSaving(true)
+    setError('')
+
+    const payload = {
+      ...draft,
+      totals: recalculatedTotals,
+      needsUserConfirmation: false,
+    }
+
+    try {
+      const response = await fetch(`/api/photo-analysis/drafts/${draft.id}/confirm`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(payload),
+      })
+
+      if (!response.ok) {
+        throw new Error(`Не удалось сохранить draft (${response.status})`)
+      }
+
+      const result = await response.json()
+      setFinalEntry(result?.mealEntry ?? result)
+      setDraft((current) => (current ? { ...current, needsUserConfirmation: false } : current))
+    } catch (err) {
+      setError(err.message || 'Ошибка сохранения')
+    } finally {
+      setSaving(false)
+    }
+  }
 
   return (
     <main className="app-shell">
       <section className="topbar">
         <div>
           <p className="eyebrow">Nutrition App v2</p>
-          <h1>Дневной экран, который уже выглядит как продукт</h1>
-        </div>
-        <div className="topbar__badge">
-          <span className="status-dot" />
-          <span>Current day · meal logging · analyzer-ready shell</span>
+          <h1>Draft review и подтверждение анализа фото</h1>
         </div>
       </section>
 
-      <TodaySummaryBlock summary={todaySummary} />
+      <section className="panel section-panel draft-review-panel">
+        {loading ? <p>Загружаем draft...</p> : null}
+        {!loading && error ? <p className="error-text">{error}</p> : null}
 
-      <section className="hero-card panel">
-        <div className="hero-card__main">
-          <div>
-            <p className="eyebrow eyebrow--soft">Сводка дня</p>
-            <h2>Спокойный wellness-dashboard вместо placeholder-каркаса</h2>
-            <p className="lead">
-              Интерфейс собран вокруг реальных паттернов nutrition apps: крупная daily summary, быстрый доступ к
-              логированию, визуально лёгкие meal cards и отдельная зона для будущего photo-analysis flow.
-            </p>
-          </div>
-
-          <div className="hero-card__highlights">
-            <StatChip label="Nutrition score" value={`${daySummary.score}/100`} />
-            <StatChip label="Вода" value={daySummary.water} />
-            <StatChip label="Самочувствие" value={daySummary.mood} />
-          </div>
-        </div>
-
-        <div className="hero-card__side">
-          <div className="hero-orb" aria-hidden="true">
-            <div className="hero-orb__inner">
-              <span>Осталось</span>
-              <strong>{remainingCalories}</strong>
-              <small>ккал до цели</small>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <section className="metrics-grid">
-        <MetricCard label={todaySummary.dateLabel} value={todaySummary.consumedCalories} suffix="ккал" accent detail="Из подтверждённых meal entries" />
-        <MetricCard label="Белок" value={todaySummary.proteinGrams} suffix="г" detail="Сильнее всего закрыт после обеда" />
-        <MetricCard label="Клетчатка" value={todaySummary.fiberGrams} suffix="г" detail="Нужно ещё немного овощей вечером" />
-        <MetricCard label="До цели" value={remainingCalories} suffix="ккал" detail="Можно закрыть ужином без перегруза" />
-      </section>
-
-      <section className="dashboard-grid">
-        <div className="dashboard-grid__main">
-          <section className="panel section-panel">
-            <div className="section-head">
+        {!loading && !error && draft ? (
+          <>
+            <div className="draft-header">
               <div>
-                <p className="eyebrow eyebrow--soft">Текущий день</p>
-                <h2>Meals laid out as a timeline</h2>
+                <p className="eyebrow eyebrow--soft">Draft #{draft.id}</p>
+                <h2>Проверь, поправь и сохрани</h2>
               </div>
-              <p className="muted">Паттерн ближе к Yazio / Lifesum: день читается сверху вниз и не прячется за tabs.</p>
-            </div>
-
-            <div className="meal-stack">
-              {mealGroups.map((group) => (
-                <MealCard key={group.title} {...group} />
-              ))}
-            </div>
-          </section>
-
-          <section className="panel section-panel">
-            <div className="section-head">
-              <div>
-                <p className="eyebrow eyebrow--soft">Питательные цели</p>
-                <h2>Macro progress без тяжёлых charts</h2>
-              </div>
-              <p className="muted">Достаточно на стартовом этапе: быстро видно, где дефицит, но код остаётся простым.</p>
-            </div>
-
-            <div className="macro-grid">
-              {macroProgress.map((item) => (
-                <MacroBar key={item.label} {...item} />
-              ))}
-            </div>
-          </section>
-        </div>
-
-        <aside className="dashboard-grid__side">
-          <section className="panel section-panel capture-panel">
-            <div>
-              <p className="eyebrow eyebrow--soft">Capture flow</p>
-              <h2>Фото и анализ должны быть под рукой</h2>
-              <p className="muted">
-                Вместо generic marketing hero здесь сразу показан рабочий сценарий: снять фото, получить draft,
-                подтвердить meal entry.
-              </p>
-            </div>
-
-            <div className="capture-preview" aria-hidden="true">
-              <div className="capture-preview__plate" />
-              <div className="capture-preview__card capture-preview__card--primary">
-                <span>Photo uploaded</span>
-                <strong>Analyzer draft · 86% confident</strong>
-              </div>
-              <div className="capture-preview__card capture-preview__card--secondary">
-                <span>Next</span>
-                <strong>Confirm portions & save meal</strong>
+              <div className="topbar__badge">
+                <span className={`status-dot ${draft.needsUserConfirmation ? '' : 'status-dot--done'}`} />
+                <span>{draft.needsUserConfirmation ? 'Ожидает подтверждения' : 'Подтверждён'}</span>
               </div>
             </div>
 
-            <ul className="action-list">
-              {quickActions.map((action) => (
-                <li key={action}>{action}</li>
-              ))}
-            </ul>
-          </section>
+            <p className="muted">Confidence: {draft.confidence || 0}%</p>
 
-          <section className="panel section-panel insights-panel">
-            <div className="section-head section-head--stacked">
-              <div>
-                <p className="eyebrow eyebrow--soft">Почему так</p>
-                <h2>Research-informed direction</h2>
-              </div>
-            </div>
-
-            <div className="insight-stack">
-              {insightCards.map((card) => (
-                <article key={card.title} className="insight-card">
-                  <span>{card.label}</span>
-                  <strong>{card.title}</strong>
-                  <p>{card.text}</p>
-                </article>
+            <div className="draft-items">
+              {draft.items.map((item) => (
+                <DraftItemEditor key={item.id} item={item} onChange={updateItem} />
               ))}
             </div>
-          </section>
 
-          <section className="panel section-panel roadmap-panel">
-            <p className="eyebrow eyebrow--soft">Path forward</p>
-            <h2>Модули, которые сюда естественно добавятся</h2>
-            <ul className="roadmap-list">
-              {upcomingModules.map((item) => (
-                <li key={item}>{item}</li>
-              ))}
-            </ul>
-          </section>
-        </aside>
+            <div className="notes-block">
+              <label>
+                Notes
+                <textarea value={draft.notes.join('\n')} onChange={(e) => updateNotes(e.target.value)} rows={4} />
+              </label>
+            </div>
+
+            <TotalsRow totals={recalculatedTotals} />
+
+            <div className="draft-actions">
+              <button type="button" onClick={saveDraft} disabled={saving}>
+                {saving ? 'Сохраняем...' : 'Save и подтвердить'}
+              </button>
+            </div>
+          </>
+        ) : null}
       </section>
+
+      {finalEntry ? (
+        <section className="panel section-panel final-entry-panel">
+          <p className="eyebrow eyebrow--soft">Сохранённый meal entry</p>
+          <h2>UI показывает финальные данные из backend</h2>
+          <pre>{JSON.stringify(finalEntry, null, 2)}</pre>
+        </section>
+      ) : null}
     </main>
   )
 }
