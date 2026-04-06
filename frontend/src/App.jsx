@@ -1,9 +1,7 @@
+import { TodaySummaryBlock } from './features/today-summary/TodaySummaryBlock'
+import { getTodaySummaryMock } from './features/today-summary/mockTodaySummary'
+
 const daySummary = {
-  dateLabel: 'Сегодня, 3 апреля',
-  calories: 1640,
-  protein: 108,
-  fiber: 24,
-  goal: 2100,
   water: '1.8 / 2.5 л',
   mood: 'Стабильная энергия',
   score: 82,
@@ -173,7 +171,8 @@ function MealCard({ title, timeRange, calories, protein, items, hint, accent }) 
 }
 
 export default function App() {
-  const remainingCalories = daySummary.goal - daySummary.calories
+  const todaySummary = getTodaySummaryMock()
+  const remainingCalories = todaySummary.remainingCalories
 
   return (
     <main className="app-shell">
@@ -187,6 +186,8 @@ export default function App() {
           <span>Current day · meal logging · analyzer-ready shell</span>
         </div>
       </section>
+
+      <TodaySummaryBlock summary={todaySummary} />
 
       <section className="hero-card panel">
         <div className="hero-card__main">
@@ -218,9 +219,9 @@ export default function App() {
       </section>
 
       <section className="metrics-grid">
-        <MetricCard label={daySummary.dateLabel} value={daySummary.calories} suffix="ккал" accent detail="Из подтверждённых meal entries" />
-        <MetricCard label="Белок" value={daySummary.protein} suffix="г" detail="Сильнее всего закрыт после обеда" />
-        <MetricCard label="Клетчатка" value={daySummary.fiber} suffix="г" detail="Нужно ещё немного овощей вечером" />
+        <MetricCard label={todaySummary.dateLabel} value={todaySummary.consumedCalories} suffix="ккал" accent detail="Из подтверждённых meal entries" />
+        <MetricCard label="Белок" value={todaySummary.proteinGrams} suffix="г" detail="Сильнее всего закрыт после обеда" />
+        <MetricCard label="Клетчатка" value={todaySummary.fiberGrams} suffix="г" detail="Нужно ещё немного овощей вечером" />
         <MetricCard label="До цели" value={remainingCalories} suffix="ккал" detail="Можно закрыть ужином без перегруза" />
       </section>
 
