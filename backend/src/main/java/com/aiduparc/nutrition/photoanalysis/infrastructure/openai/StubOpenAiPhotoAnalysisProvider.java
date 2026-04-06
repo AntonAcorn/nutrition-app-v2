@@ -6,9 +6,11 @@ import com.aiduparc.nutrition.photoanalysis.application.dto.PhotoAnalysisTotals;
 import com.aiduparc.nutrition.photoanalysis.config.PhotoAnalysisProperties;
 import java.math.BigDecimal;
 import java.util.List;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 
 @Component
+@ConditionalOnProperty(prefix = "nutrition.photo-analysis", name = "provider", havingValue = "openai-stub", matchIfMissing = true)
 public class StubOpenAiPhotoAnalysisProvider implements OpenAiPhotoAnalysisProvider {
 
     private final PhotoAnalysisProperties properties;

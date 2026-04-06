@@ -160,9 +160,11 @@ order by entry_date;
 
 ### Current behavior
 
-- текущая реализация использует `StubOpenAiPhotoAnalysisProvider`
-- live вызов OpenAI пока не обязателен и не используется
-- ответ уже имеет app-oriented форму для draft/confirmation flow
+- провайдер выбирается через `PHOTO_ANALYSIS_PROVIDER`:
+  - `openai-stub` — локальный deterministic stub
+  - `openai` — реальный вызов OpenAI API (`/v1/chat/completions`) с image input
+- при `PHOTO_ANALYSIS_PROVIDER=openai` обязателен `OPENAI_API_KEY`
+- endpoint контракт остаётся прежним (`POST /api/photo-analysis`, поля `items/totals/confidence/notes/needsUserConfirmation`)
 
 ### Future OpenAI wiring
 
@@ -173,12 +175,13 @@ order by entry_date;
 - `OPENAI_API_KEY`
 - `OPENAI_MODEL`
 - `OPENAI_BASE_URL`
+- `OPENAI_TIMEOUT_MS`
 
-Чтобы подключить реальный OpenAI later:
-1. оставить endpoint и service boundary как есть
-2. заменить `StubOpenAiPhotoAnalysisProvider` на HTTP/OpenAI client implementation
-3. читать ключ из `OPENAI_API_KEY`, модель из `OPENAI_MODEL`, base URL из `OPENAI_BASE_URL`
-4. при необходимости переключать provider через `PHOTO_ANALYSIS_PROVIDER`
+Для live-интеграции OpenAI:
+1. установить `PHOTO_ANALYSIS_PROVIDER=openai`
+2. задать `OPENAI_API_KEY` (не коммитить в git)
+3. опционально настроить `OPENAI_MODEL` (по умолчанию `gpt-4.1-mini`) и `OPENAI_TIMEOUT_MS` (по умолчанию `25000`)
+4. отправлять тот же request (`imageUrl`, `userNote`, `locale`) — backend сам промапит модельный ответ в app DTO
 
 ### Backend test run
 

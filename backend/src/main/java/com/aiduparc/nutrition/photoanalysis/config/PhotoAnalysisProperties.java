@@ -14,7 +14,8 @@ public record PhotoAnalysisProperties(
     public record OpenAi(
             String apiKey,
             @NotBlank String model,
-            String baseUrl
+            String baseUrl,
+            int timeoutMs
     ) {
     }
 }
