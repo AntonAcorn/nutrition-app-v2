@@ -19,7 +19,7 @@ class DefaultPhotoAnalysisServiceTest {
         var properties = new PhotoAnalysisProperties(
                 true,
                 "openai-stub",
-                new PhotoAnalysisProperties.OpenAi("", "gpt-4.1-mini", "https://api.openai.com/v1")
+                new PhotoAnalysisProperties.OpenAi("", "gpt-4.1-mini", "https://api.openai.com/v1", 25000)
         );
 
         CapturingProvider provider = new CapturingProvider();

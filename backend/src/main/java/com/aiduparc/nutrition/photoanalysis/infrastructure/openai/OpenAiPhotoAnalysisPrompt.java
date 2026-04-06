@@ -20,7 +20,8 @@ public record OpenAiPhotoAnalysisPrompt(
                 List.of(
                         "Identify likely foods from the image.",
                         "Estimate portion sizes.",
-                        "Return nutrition totals and per-item confidence.",
+                        "Return JSON only, matching the schema with items, totals, confidence, notes, needsUserConfirmation.",
+                        "Each item must contain name, estimatedPortion, calories, protein, carbs, fat, fiber, confidence.",
                         "Mark whether user confirmation is still required."
                 )
         );

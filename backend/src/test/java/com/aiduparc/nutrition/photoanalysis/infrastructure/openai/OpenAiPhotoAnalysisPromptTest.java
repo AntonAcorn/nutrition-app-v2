@@ -14,7 +14,7 @@ class OpenAiPhotoAnalysisPromptTest {
         var properties = new PhotoAnalysisProperties(
                 true,
                 "openai-stub",
-                new PhotoAnalysisProperties.OpenAi("test-key", "gpt-4o-mini", "https://api.openai.com/v1")
+                new PhotoAnalysisProperties.OpenAi("test-key", "gpt-4o-mini", "https://api.openai.com/v1", 25000)
         );
 
         var prompt = OpenAiPhotoAnalysisPrompt.from(request, properties);
