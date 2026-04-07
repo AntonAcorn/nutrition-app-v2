@@ -11,5 +11,7 @@ public interface PhotoAnalysisDraftService {
     PhotoAnalysisDraftResponse get(UUID draftId);
 
     PhotoAnalysisDraftResponse confirm(UUID draftId, ConfirmPhotoAnalysisDraftRequest request);
+
+    PhotoAnalysisDraftResponse getLatest();
 }
 

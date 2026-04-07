@@ -46,5 +46,11 @@ public class PhotoAnalysisDraftController {
                 : request;
         return draftService.confirm(draftId, safeRequest);
     }
+
+    @GetMapping("/latest")
+    @ResponseStatus(HttpStatus.OK)
+    public PhotoAnalysisDraftResponse getLatest() {
+        return draftService.getLatest();
+    }
 }
 

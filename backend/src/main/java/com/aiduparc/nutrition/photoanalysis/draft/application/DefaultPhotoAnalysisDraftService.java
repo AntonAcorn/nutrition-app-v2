@@ -94,6 +94,15 @@ public class DefaultPhotoAnalysisDraftService implements PhotoAnalysisDraftServi
         return toResponse(updated);
     }
 
+    @Override
+    public PhotoAnalysisDraftResponse getLatest() {
+        PhotoAnalysisDraftEntity entity = repository
+                .findTopByStatusOrderByCreatedAtDesc(PhotoAnalysisDraftStatus.DRAFT)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "No drafts found"));
+
+        return toResponse(entity);
+    }
+
     private PhotoAnalysisDraftEntity getExistingDraft(UUID draftId) {
         return repository.findById(draftId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Draft not found"));
