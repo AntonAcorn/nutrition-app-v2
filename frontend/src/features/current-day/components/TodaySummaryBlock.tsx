@@ -24,12 +24,12 @@ interface TodaySummaryBlockProps {
 
 export function TodaySummaryBlock({ summary }: TodaySummaryBlockProps) {
   return (
-    <section className="current-day-grid" aria-label="Today nutrition summary">
-      <SummaryItem label="Consumed" value={summary.consumedCalories} unit="kcal" />
-      <SummaryItem label="Remaining" value={summary.remainingCalories} unit="kcal" />
-      <SummaryItem label="Protein" value={summary.proteinGrams} unit="g" />
-      <SummaryItem label="Fat" value={summary.fatGrams} unit="g" />
-      <SummaryItem label="Fiber" value={summary.fiberGrams} unit="g" />
+    <section className="current-day-grid" aria-label="Сводка питания за день">
+      <SummaryItem label="Съедено" value={summary.consumedCalories} unit="ккал" />
+      <SummaryItem label="Осталось" value={summary.remainingCalories} unit="ккал" />
+      <SummaryItem label="Белки" value={summary.proteinGrams} unit="г" />
+      <SummaryItem label="Жиры" value={summary.fatGrams} unit="г" />
+      <SummaryItem label="Клетчатка" value={summary.fiberGrams} unit="г" />
     </section>
   )
 }

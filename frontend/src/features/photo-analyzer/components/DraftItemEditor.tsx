@@ -6,6 +6,14 @@ interface DraftItemEditorProps {
   onChange: (itemId: string, field: keyof DraftItem, value: string) => void
 }
 
+const fieldLabels: Record<string, string> = {
+  calories: 'Калории',
+  protein: 'Белки',
+  fat: 'Жиры',
+  carbs: 'Углеводы',
+  fiber: 'Клетчатка',
+}
+
 export function DraftItemEditor({ item, onChange }: DraftItemEditorProps) {
   return (
     <article className="draft-item-card">
@@ -15,7 +23,7 @@ export function DraftItemEditor({ item, onChange }: DraftItemEditorProps) {
       </label>
 
       <label>
-        Portion estimate
+        Оценка порции
         <input
           value={item.estimatedPortion}
           onChange={(event) => onChange(item.id, 'estimatedPortion', event.target.value)}
@@ -25,7 +33,7 @@ export function DraftItemEditor({ item, onChange }: DraftItemEditorProps) {
       <div className="draft-item-card__grid">
         {numericFields.map((field) => (
           <label key={field}>
-            {field}
+            {fieldLabels[field] ?? field}
             <input
               type="number"
               step="0.1"
