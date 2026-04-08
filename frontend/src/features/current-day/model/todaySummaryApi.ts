@@ -11,6 +11,7 @@ interface TodaySummaryApiResponse {
 }
 
 const DEFAULT_USER_ID = '00000000-0000-0000-0000-000000000001'
+const HARD_CODED_DAILY_TARGET_CALORIES = 2000
 
 function currentEntryDate(): string {
   return new Date().toISOString().slice(0, 10)
@@ -38,8 +39,8 @@ export async function fetchTodaySummary(): Promise<TodaySummary> {
   return {
     dateLabel: formatDateLabel(payload.entryDate),
     consumedCalories: payload.consumedCalories,
-    dailyTargetCalories: payload.dailyTargetCalories,
-    remainingCalories: payload.remainingCalories,
+    dailyTargetCalories: HARD_CODED_DAILY_TARGET_CALORIES,
+    remainingCalories: Math.max(0, HARD_CODED_DAILY_TARGET_CALORIES - payload.consumedCalories),
     proteinGrams: payload.proteinGrams,
     fatGrams: payload.fatGrams,
     fiberGrams: payload.fiberGrams,
