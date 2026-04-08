@@ -127,6 +127,35 @@ body {
   gap: 18px;
 }
 
+.statistics-toolbar {
+  display: grid;
+  gap: 10px;
+  justify-items: end;
+}
+
+.range-selector {
+  display: inline-flex;
+  gap: 8px;
+  padding: 6px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.72);
+  border: 1px solid rgba(148, 163, 184, 0.24);
+}
+
+.range-selector__button {
+  border: 0;
+  background: transparent;
+  color: #475569;
+  border-radius: 999px;
+  padding: 8px 14px;
+  cursor: pointer;
+}
+
+.range-selector__button--active {
+  background: #0f172a;
+  color: #f8fafc;
+}
+
 .statistics-panel {
   padding: 22px;
 }
@@ -215,11 +244,15 @@ body {
 .line-chart__labels {
   grid-column: 2;
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(36px, 1fr));
+  grid-template-columns: repeat(var(--label-count, 7), minmax(0, 1fr));
   gap: 8px;
   color: #64748b;
   font-size: 0.78rem;
   text-align: center;
+}
+
+.line-chart__label--ghost {
+  visibility: hidden;
 }
 
 .chart-bars__balance--over,
@@ -551,6 +584,11 @@ body {
     padding: 18px;
   }
 
+  .statistics-toolbar {
+    width: 100%;
+    justify-items: start;
+  }
+
   .screen-header,
   .upload-panel {
     grid-template-columns: 1fr;
@@ -597,6 +635,11 @@ body {
     grid-column: 1;
     grid-template-columns: repeat(4, minmax(0, 1fr));
     row-gap: 6px;
+  }
+
+  .range-selector {
+    width: 100%;
+    justify-content: space-between;
   }
 
   .analyzer-panel,
