@@ -46,9 +46,17 @@ export interface NutritionStatisticsPoint {
   fiberGrams: number
 }
 
+export interface NutritionBalanceSummary {
+  consumedCalories: number
+  targetCalories: number
+  calorieBalance: number
+}
+
 export interface NutritionStatisticsResponse {
   userId: string
   fromDate: string
   toDate: string
+  weeklySummary: NutritionBalanceSummary
+  monthlySummary: NutritionBalanceSummary
   points: NutritionStatisticsPoint[]
 }

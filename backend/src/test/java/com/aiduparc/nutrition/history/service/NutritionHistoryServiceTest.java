@@ -89,6 +89,8 @@ class NutritionHistoryServiceTest {
         assertThat(response.points()).hasSize(2);
         assertThat(response.points().get(0).calorieBalance()).isEqualByComparingTo("-200.00");
         assertThat(response.points().get(1).calorieBalance()).isEqualByComparingTo("150.00");
+        assertThat(response.weeklySummary().calorieBalance()).isEqualByComparingTo("-50.00");
+        assertThat(response.monthlySummary().calorieBalance()).isEqualByComparingTo("-50.00");
     }
 
     @Test
