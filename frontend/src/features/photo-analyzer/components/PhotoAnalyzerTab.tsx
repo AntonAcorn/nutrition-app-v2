@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { ChangeEvent, useMemo, useState } from 'react'
 import { toNumber } from '../../../shared/lib/number'
 import type { DraftItem, PhotoAnalysisDraft } from '../../../shared/types/nutrition'
 import { DraftItemEditor } from './DraftItemEditor'
@@ -9,49 +9,17 @@ interface PhotoAnalyzerTabProps {
   onConfirmed?: () => void
 }
 
+const DEFAULT_USER_ID = '00000000-0000-0000-0000-000000000001'
+
 export function PhotoAnalyzerTab({ onConfirmed }: PhotoAnalyzerTabProps) {
   const [draft, setDraft] = useState<PhotoAnalysisDraft | null>(null)
-  const [loading, setLoading] = useState(true)
+  const [uploading, setUploading] = useState(false)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
   const [finalEntry, setFinalEntry] = useState<unknown>(null)
-
-  const draftId = useMemo(() => {
-    const params = new URLSearchParams(window.location.search)
-    return params.get('draftId') || 'latest'
-  }, [])
-
-  useEffect(() => {
-    const controller = new AbortController()
-
-    async function loadDraft() {
-      setLoading(true)
-      setError('')
-
-      try {
-        const url = draftId === 'latest' ? '/api/photo-analysis/drafts/latest' : `/api/photo-analysis/drafts/${draftId}`
-        const response = await fetch(url, {
-          signal: controller.signal,
-        })
-
-        if (!response.ok) {
-          throw new Error(`Не удалось загрузить draft (${response.status})`)
-        }
-
-        const payload = await response.json()
-        setDraft(normalizeDraft(payload))
-      } catch (err) {
-        if (!(err instanceof DOMException && err.name === 'AbortError')) {
-          setError(err instanceof Error ? err.message : 'Ошибка загрузки draft')
-        }
-      } finally {
-        setLoading(false)
-      }
-    }
-
-    loadDraft()
-    return () => controller.abort()
-  }, [draftId])
+  const [selectedFileName, setSelectedFileName] = useState('')
+  const [previewUrl, setPreviewUrl] = useState('')
+  const [userNote, setUserNote] = useState('')
 
   const recalculatedTotals = useMemo(() => (draft ? calculateTotals(draft.items) : calculateTotals([])), [draft])
 
@@ -92,6 +60,44 @@ export function PhotoAnalyzerTab({ onConfirmed }: PhotoAnalyzerTabProps) {
           .filter(Boolean),
       }
     })
+  }
+
+  async function handleFileSelected(event: ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0]
+    if (!file) {
+      return
+    }
+
+    setUploading(true)
+    setError('')
+    setSelectedFileName(file.name)
+    setPreviewUrl(URL.createObjectURL(file))
+    setFinalEntry(null)
+
+    try {
+      const formData = new FormData()
+      formData.append('file', file)
+      formData.append('userId', DEFAULT_USER_ID)
+      formData.append('userNote', userNote)
+      formData.append('locale', 'ru')
+
+      const response = await fetch('/api/photo-analysis/upload', {
+        method: 'POST',
+        body: formData,
+      })
+
+      if (!response.ok) {
+        throw new Error(`Не удалось загрузить и проанализировать фото (${response.status})`)
+      }
+
+      const payload = await response.json()
+      setDraft(normalizeDraft(payload.draft))
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Ошибка загрузки фото')
+    } finally {
+      setUploading(false)
+      event.target.value = ''
+    }
   }
 
   async function saveDraft() {
@@ -139,14 +145,49 @@ export function PhotoAnalyzerTab({ onConfirmed }: PhotoAnalyzerTabProps) {
           <p className="screen-header__eyebrow">Photo analyzer</p>
           <h2>Анализ фото и подтверждение</h2>
         </div>
-        <p className="screen-header__meta">Тут будет новый upload flow, а пока я привёл в порядок экран review draft.</p>
+        <p className="screen-header__meta">Загрузи фото, получи draft от модели и сразу подтверди результат.</p>
       </header>
 
       <section className="panel analyzer-panel">
-        {loading ? <p>Загружаем draft...</p> : null}
-        {!loading && error ? <p className="error-text">{error}</p> : null}
+        <div className="upload-panel">
+          <div>
+            <p className="screen-header__eyebrow">Upload</p>
+            <h3>Загрузить новое фото</h3>
+            <p className="subtle-text">Поддерживаются image uploads до 10 MB.</p>
+          </div>
 
-        {!loading && !error && draft ? (
+          <div className="upload-panel__controls">
+            <label className="upload-panel__note">
+              Note for model
+              <textarea
+                value={userNote}
+                onChange={(event) => setUserNote(event.target.value)}
+                rows={3}
+                placeholder="Например: курица, рис, салат"
+              />
+            </label>
+
+            <label className="upload-button">
+              <input type="file" accept="image/*" onChange={handleFileSelected} hidden />
+              <span>{uploading ? 'Анализируем...' : 'Выбрать фото'}</span>
+            </label>
+
+            {selectedFileName ? <p className="subtle-text">Выбрано: {selectedFileName}</p> : null}
+          </div>
+        </div>
+
+        {previewUrl ? (
+          <div className="image-preview">
+            <img src={previewUrl} alt="Preview of uploaded meal" />
+          </div>
+        ) : null}
+
+        <div>
+        </div>
+
+        {error ? <p className="error-text">{error}</p> : null}
+
+        {draft ? (
           <>
             <div className="analyzer-panel__header">
               <div>
@@ -177,7 +218,7 @@ export function PhotoAnalyzerTab({ onConfirmed }: PhotoAnalyzerTabProps) {
             <TotalsRow totals={recalculatedTotals} />
 
             <div className="primary-actions">
-              <button type="button" onClick={saveDraft} disabled={saving}>
+              <button type="button" onClick={saveDraft} disabled={saving || uploading}>
                 {saving ? 'Сохраняем...' : 'Save и подтвердить'}
               </button>
             </div>
