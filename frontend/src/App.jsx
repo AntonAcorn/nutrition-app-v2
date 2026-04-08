@@ -1,6 +1,12 @@
 import { useEffect, useMemo, useState } from 'react'
+import { TodaySummaryBlock } from './features/today-summary/TodaySummaryBlock'
+import { getTodaySummaryMock } from './features/today-summary/mockTodaySummary'
 
 const numericFields = ['grams', 'calories', 'protein', 'fat', 'carbs', 'fiber']
+const tabs = {
+  currentDay: 'current-day',
+  photoAnalyzer: 'photo-analyzer',
+}
 
 function toNumber(value) {
   const num = Number(value)
@@ -8,7 +14,7 @@ function toNumber(value) {
 }
 
 function normalizeDraft(payload) {
-  const source = payload?.draft ?? payload ?? {}
+  const source = payload?.analysis ?? payload?.draft ?? payload ?? {}
   const items = Array.isArray(source.items)
     ? source.items.map((item, index) => ({
         id: item.id ?? `item-${index}`,
@@ -43,7 +49,7 @@ function normalizeDraft(payload) {
   )
 
   return {
-    id: source.id ?? payload?.id ?? 'latest',
+    id: payload?.id ?? source.id ?? 'latest',
     items,
     totals: {
       calories: toNumber(totalsFromBackend.calories || calculatedTotals.calories),
@@ -95,7 +101,27 @@ function TotalsRow({ totals }) {
   )
 }
 
-export default function App() {
+function CurrentDayTab() {
+  const summary = getTodaySummaryMock()
+
+  return (
+    <section className="tab-content">
+      <section className="panel section-panel">
+        <div className="section-head section-head--stacked">
+          <div>
+            <p className="eyebrow eyebrow--soft">Current day</p>
+            <h2>Текущая сводка за день</h2>
+          </div>
+          <p className="muted">Пока тут mock-данные. На следующем шаге подключу реальный backend summary.</p>
+        </div>
+
+        <TodaySummaryBlock summary={summary} />
+      </section>
+    </section>
+  )
+}
+
+function PhotoAnalyzerTab() {
   const [draft, setDraft] = useState(null)
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
@@ -115,7 +141,8 @@ export default function App() {
       setError('')
 
       try {
-        const response = await fetch(`/api/photo-analysis/drafts/${draftId}`, {
+        const url = draftId === 'latest' ? '/api/photo-analysis/drafts/latest' : `/api/photo-analysis/drafts/${draftId}`
+        const response = await fetch(url, {
           signal: controller.signal,
         })
 
@@ -235,14 +262,7 @@ export default function App() {
   }
 
   return (
-    <main className="app-shell">
-      <section className="topbar">
-        <div>
-          <p className="eyebrow">Nutrition App v2</p>
-          <h1>Draft review и подтверждение анализа фото</h1>
-        </div>
-      </section>
-
+    <section className="tab-content">
       <section className="panel section-panel draft-review-panel">
         {loading ? <p>Загружаем draft...</p> : null}
         {!loading && error ? <p className="error-text">{error}</p> : null}
@@ -251,8 +271,8 @@ export default function App() {
           <>
             <div className="draft-header">
               <div>
-                <p className="eyebrow eyebrow--soft">Draft #{draft.id}</p>
-                <h2>Проверь, поправь и сохрани</h2>
+                <p className="eyebrow eyebrow--soft">Photo analyzer</p>
+                <h2>Проверь, поправь и сохрани анализ фото</h2>
               </div>
               <div className="topbar__badge">
                 <span className={`status-dot ${draft.needsUserConfirmation ? '' : 'status-dot--done'}`} />
@@ -289,10 +309,53 @@ export default function App() {
       {finalEntry ? (
         <section className="panel section-panel final-entry-panel">
           <p className="eyebrow eyebrow--soft">Сохранённый meal entry</p>
-          <h2>UI показывает финальные данные из backend</h2>
+          <h2>Ответ backend после подтверждения</h2>
           <pre>{JSON.stringify(finalEntry, null, 2)}</pre>
         </section>
       ) : null}
+    </section>
+  )
+}
+
+export default function App() {
+  const [activeTab, setActiveTab] = useState(tabs.currentDay)
+
+  return (
+    <main className="app-shell">
+      <section className="topbar">
+        <div>
+          <p className="eyebrow">Nutrition App v2</p>
+          <h1>Дневная сводка и анализ фото еды</h1>
+        </div>
+      </section>
+
+      <section className="tabs-shell panel">
+        <div className="tabs-header" role="tablist" aria-label="Nutrition app sections">
+          <button
+            type="button"
+            role="tab"
+            className={`tab-button ${activeTab === tabs.currentDay ? 'tab-button--active' : ''}`}
+            aria-selected={activeTab === tabs.currentDay}
+            onClick={() => setActiveTab(tabs.currentDay)}
+          >
+            Current day
+          </button>
+          <button
+            type="button"
+            role="tab"
+            className={`tab-button ${activeTab === tabs.photoAnalyzer ? 'tab-button--active' : ''}`}
+            aria-selected={activeTab === tabs.photoAnalyzer}
+            onClick={() => setActiveTab(tabs.photoAnalyzer)}
+          >
+            Photo analyzer
+          </button>
+        </div>
+
+        <div className="tabs-body">
+          {activeTab === tabs.currentDay ? <CurrentDayTab /> : null}
+          {activeTab === tabs.photoAnalyzer ? <PhotoAnalyzerTab /> : null}
+        </div>
+      </section>
     </main>
   )
 }
