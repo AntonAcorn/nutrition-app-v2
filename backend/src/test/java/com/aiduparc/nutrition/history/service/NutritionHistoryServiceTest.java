@@ -5,8 +5,8 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.aiduparc.nutrition.history.api.NutritionStatisticsResponse;
 import com.aiduparc.nutrition.history.api.TodaySummaryResponse;
-
 import com.aiduparc.nutrition.history.model.DailyNutritionEntryEntity;
 import com.aiduparc.nutrition.history.repository.DailyNutritionEntryRepository;
 import java.math.BigDecimal;
@@ -53,6 +53,42 @@ class NutritionHistoryServiceTest {
         assertThat(summary.proteinGrams()).isEqualByComparingTo("108.00");
         assertThat(summary.fatGrams()).isEqualByComparingTo("52.00");
         assertThat(summary.fiberGrams()).isEqualByComparingTo("24.00");
+    }
+
+    @Test
+    void getStatisticsReturnsDerivedBalanceForRange() {
+        UUID userId = UUID.randomUUID();
+        LocalDate fromDate = LocalDate.of(2026, 4, 1);
+        LocalDate toDate = LocalDate.of(2026, 4, 2);
+
+        DailyNutritionEntryEntity first = new DailyNutritionEntryEntity();
+        first.setId(UUID.randomUUID());
+        first.setUserId(userId);
+        first.setEntryDate(fromDate);
+        first.setCaloriesConsumedKcal(new BigDecimal("1800.00"));
+        first.setCalorieTargetKcal(new BigDecimal("2000.00"));
+        first.setProteinGrams(new BigDecimal("110.00"));
+        first.setFatGrams(new BigDecimal("60.00"));
+        first.setFiberGrams(new BigDecimal("20.00"));
+
+        DailyNutritionEntryEntity second = new DailyNutritionEntryEntity();
+        second.setId(UUID.randomUUID());
+        second.setUserId(userId);
+        second.setEntryDate(toDate);
+        second.setCaloriesConsumedKcal(new BigDecimal("2150.00"));
+        second.setCalorieTargetKcal(new BigDecimal("2000.00"));
+        second.setProteinGrams(new BigDecimal("125.00"));
+        second.setFatGrams(new BigDecimal("72.00"));
+        second.setFiberGrams(new BigDecimal("24.00"));
+
+        when(repository.findByUserIdAndEntryDateBetweenOrderByEntryDateAsc(userId, fromDate, toDate))
+            .thenReturn(java.util.List.of(first, second));
+
+        NutritionStatisticsResponse response = service.getStatistics(userId, fromDate, toDate);
+
+        assertThat(response.points()).hasSize(2);
+        assertThat(response.points().get(0).calorieBalance()).isEqualByComparingTo("-200.00");
+        assertThat(response.points().get(1).calorieBalance()).isEqualByComparingTo("150.00");
     }
 
     @Test
