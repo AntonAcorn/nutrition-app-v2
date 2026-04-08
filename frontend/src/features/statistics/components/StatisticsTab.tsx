@@ -2,6 +2,10 @@ import { useEffect, useMemo, useState } from 'react'
 import { fetchNutritionStatistics } from '../model/statisticsApi'
 import type { NutritionBalanceSummary, NutritionStatisticsPoint, NutritionStatisticsResponse } from '../../../shared/types/nutrition'
 
+const RANGE_OPTIONS = [7, 14, 30] as const
+
+type RangeDays = (typeof RANGE_OPTIONS)[number]
+
 function formatSigned(value: number): string {
   if (value > 0) return `+${value}`
   return `${value}`
@@ -43,6 +47,23 @@ function SummaryCard({ title, summary }: { title: string; summary: NutritionBala
   )
 }
 
+function RangeSelector({ value, onChange }: { value: RangeDays; onChange: (value: RangeDays) => void }) {
+  return (
+    <div className="range-selector" role="tablist" aria-label="Диапазон статистики">
+      {RANGE_OPTIONS.map((days) => (
+        <button
+          key={days}
+          type="button"
+          className={`range-selector__button ${value === days ? 'range-selector__button--active' : ''}`}
+          onClick={() => onChange(days)}
+        >
+          {days} дней
+        </button>
+      ))}
+    </div>
+  )
+}
+
 function LineChart({
   title,
   unit,
@@ -67,6 +88,7 @@ function LineChart({
   const valuePath = buildLinePath(values, width, height, min, max)
   const targetPath = targets.length > 0 ? buildLinePath(targets, width, height, min, max) : ''
   const guideValues = [min, (min + max) / 2, max]
+  const labelStep = points.length > 14 ? 4 : points.length > 7 ? 2 : 1
 
   return (
     <section className="panel statistics-panel">
@@ -95,9 +117,11 @@ function LineChart({
             {targetPath ? <path d={targetPath} className="line-chart__path line-chart__path--target" /> : null}
           </svg>
         </div>
-        <div className="line-chart__labels">
-          {points.map((point) => (
-            <span key={`${title}-${point.entryDate}`}>{formatShortDate(point.entryDate)}</span>
+        <div className="line-chart__labels" style={{ ['--label-count' as string]: String(points.length) }}>
+          {points.map((point, index) => (
+            <span key={`${title}-${point.entryDate}`} className={index % labelStep === 0 || index === points.length - 1 ? '' : 'line-chart__label--ghost'}>
+              {index % labelStep === 0 || index === points.length - 1 ? formatShortDate(point.entryDate) : ''}
+            </span>
           ))}
         </div>
       </div>
@@ -142,6 +166,7 @@ function StatisticsTable({ points }: { points: NutritionStatisticsPoint[] }) {
 }
 
 export function StatisticsTab() {
+  const [rangeDays, setRangeDays] = useState<RangeDays>(14)
   const [data, setData] = useState<NutritionStatisticsResponse | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
@@ -154,7 +179,7 @@ export function StatisticsTab() {
       setError('')
 
       try {
-        const nextData = await fetchNutritionStatistics()
+        const nextData = await fetchNutritionStatistics(rangeDays)
         if (!cancelled) {
           setData(nextData)
         }
@@ -173,7 +198,7 @@ export function StatisticsTab() {
     return () => {
       cancelled = true
     }
-  }, [])
+  }, [rangeDays])
 
   const points = useMemo(() => data?.points ?? [], [data])
 
@@ -184,7 +209,10 @@ export function StatisticsTab() {
           <p className="screen-header__eyebrow">Статистика</p>
           <h2>История питания</h2>
         </div>
-        <p className="screen-header__meta">Последние 14 дней, с дневными, недельными и месячными отклонениями.</p>
+        <div className="statistics-toolbar">
+          <p className="screen-header__meta">Дневные, недельные и месячные отклонения.</p>
+          <RangeSelector value={rangeDays} onChange={setRangeDays} />
+        </div>
       </header>
 
       {loading ? <section className="panel detail-panel"><p>Загружаем статистику...</p></section> : null}
