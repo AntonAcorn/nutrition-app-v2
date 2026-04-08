@@ -159,6 +159,21 @@ body {
   border: 1px solid rgba(226, 232, 240, 0.95);
 }
 
+.summary-card--accent {
+  background: linear-gradient(180deg, #fff7ed 0%, #ffedd5 100%);
+  border-color: rgba(251, 146, 60, 0.45);
+  box-shadow: 0 14px 34px rgba(249, 115, 22, 0.14);
+}
+
+.summary-card--accent .summary-card__label {
+  color: #9a3412;
+}
+
+.summary-card--accent .summary-card__value,
+.summary-card--accent .summary-card__unit {
+  color: #7c2d12;
+}
+
 .summary-card__label {
   display: block;
   color: #64748b;
