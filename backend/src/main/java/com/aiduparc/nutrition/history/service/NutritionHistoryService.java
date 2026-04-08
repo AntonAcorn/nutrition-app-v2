@@ -1,5 +1,6 @@
 package com.aiduparc.nutrition.history.service;
 
+import com.aiduparc.nutrition.history.api.TodaySummaryResponse;
 import com.aiduparc.nutrition.history.model.DailyNutritionEntryEntity;
 import com.aiduparc.nutrition.history.model.DailyNutritionEntrySnapshot;
 import com.aiduparc.nutrition.history.repository.DailyNutritionEntryRepository;
@@ -34,6 +35,40 @@ public class NutritionHistoryService {
             .toList();
     }
 
+    public TodaySummaryResponse getTodaySummary(UUID userId, LocalDate entryDate) {
+        DailyNutritionEntrySnapshot snapshot = getOrCreateEmptySnapshot(userId, entryDate);
+
+        BigDecimal consumedCalories = defaultBigDecimal(snapshot.caloriesConsumedKcal());
+        BigDecimal dailyTargetCalories = defaultBigDecimal(snapshot.calorieTargetKcal());
+        BigDecimal remainingCalories = dailyTargetCalories.subtract(consumedCalories).max(BigDecimal.ZERO);
+
+        return new TodaySummaryResponse(
+            userId,
+            entryDate,
+            consumedCalories,
+            dailyTargetCalories,
+            remainingCalories,
+            defaultBigDecimal(snapshot.proteinGrams()),
+            defaultBigDecimal(snapshot.fiberGrams())
+        );
+    }
+
+    @Transactional
+    public DailyNutritionEntrySnapshot addToDailyTotals(AddToDailyTotalsCommand command) {
+        DailyNutritionEntrySnapshot current = getOrCreateEmptySnapshot(command.userId(), command.entryDate());
+
+        return upsert(new UpsertDailyNutritionEntryCommand(
+            command.userId(),
+            command.entryDate(),
+            defaultBigDecimal(current.caloriesConsumedKcal()).add(defaultBigDecimal(command.caloriesConsumedKcal())),
+            current.calorieTargetKcal(),
+            current.weightKg(),
+            defaultBigDecimal(current.proteinGrams()).add(defaultBigDecimal(command.proteinGrams())),
+            defaultBigDecimal(current.fiberGrams()).add(defaultBigDecimal(command.fiberGrams())),
+            mergeNotes(current.notes(), command.notes())
+        ));
+    }
+
     @Transactional
     public DailyNutritionEntrySnapshot upsert(UpsertDailyNutritionEntryCommand command) {
         DailyNutritionEntryEntity entity = repository
@@ -63,5 +98,46 @@ public class NutritionHistoryService {
         BigDecimal fiberGrams,
         String notes
     ) {
+    }
+
+    public record AddToDailyTotalsCommand(
+        @NotNull UUID userId,
+        @NotNull LocalDate entryDate,
+        @NotNull BigDecimal caloriesConsumedKcal,
+        BigDecimal proteinGrams,
+        BigDecimal fiberGrams,
+        String notes
+    ) {
+    }
+
+    private DailyNutritionEntrySnapshot getOrCreateEmptySnapshot(UUID userId, LocalDate entryDate) {
+        return findByUserAndDate(userId, entryDate)
+            .orElseGet(() -> new DailyNutritionEntrySnapshot(
+                null,
+                userId,
+                entryDate,
+                null,
+                BigDecimal.ZERO,
+                BigDecimal.ZERO,
+                BigDecimal.ZERO,
+                BigDecimal.ZERO,
+                null,
+                null,
+                null
+            ));
+    }
+
+    private static BigDecimal defaultBigDecimal(BigDecimal value) {
+        return value != null ? value : BigDecimal.ZERO;
+    }
+
+    private static String mergeNotes(String currentNotes, String incomingNotes) {
+        if (incomingNotes == null || incomingNotes.isBlank()) {
+            return currentNotes;
+        }
+        if (currentNotes == null || currentNotes.isBlank()) {
+            return incomingNotes;
+        }
+        return currentNotes + "\n" + incomingNotes;
     }
 }

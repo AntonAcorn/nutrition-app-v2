@@ -72,12 +72,10 @@ public class DefaultPhotoAnalysisDraftService implements PhotoAnalysisDraftServi
         BigDecimal protein = firstNonNull(request.proteinG(), entity.getEstimatedProteinG());
         BigDecimal fiber = firstNonNull(request.fiberG(), entity.getEstimatedFiberG());
 
-        var savedEntry = nutritionHistoryService.upsert(new NutritionHistoryService.UpsertDailyNutritionEntryCommand(
+        var savedEntry = nutritionHistoryService.addToDailyTotals(new NutritionHistoryService.AddToDailyTotalsCommand(
                 entity.getUserId(),
                 entity.getEntryDate(),
                 calories,
-                null,
-                null,
                 protein,
                 fiber,
                 request.notes()

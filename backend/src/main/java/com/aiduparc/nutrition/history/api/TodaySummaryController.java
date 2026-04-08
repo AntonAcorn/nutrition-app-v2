@@ -1,0 +1,33 @@
+package com.aiduparc.nutrition.history.api;
+
+import com.aiduparc.nutrition.history.service.NutritionHistoryService;
+import java.time.LocalDate;
+import java.util.UUID;
+import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.bind.annotation.RestController;
+
+@RestController
+@RequestMapping("/api/history/today-summary")
+public class TodaySummaryController {
+
+    private final NutritionHistoryService nutritionHistoryService;
+
+    public TodaySummaryController(NutritionHistoryService nutritionHistoryService) {
+        this.nutritionHistoryService = nutritionHistoryService;
+    }
+
+    @GetMapping
+    @ResponseStatus(HttpStatus.OK)
+    public TodaySummaryResponse getTodaySummary(
+            @RequestParam UUID userId,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate entryDate
+    ) {
+        LocalDate safeDate = entryDate != null ? entryDate : LocalDate.now();
+        return nutritionHistoryService.getTodaySummary(userId, safeDate);
+    }
+}

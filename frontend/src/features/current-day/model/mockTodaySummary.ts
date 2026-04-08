@@ -1,12 +1,14 @@
+import type { TodaySummary } from '../../../shared/types/nutrition'
+
 const todaySummaryMock = {
-  dateLabel: 'Сегодня, 3 апреля',
+  dateLabel: 'Сегодня',
   consumedCalories: 1640,
   dailyTargetCalories: 2100,
   proteinGrams: 108,
   fiberGrams: 24,
 }
 
-function normalizeSummary(summary) {
+function normalizeSummary(summary: Omit<TodaySummary, 'remainingCalories'>): TodaySummary {
   const remainingCalories = Math.max(0, summary.dailyTargetCalories - summary.consumedCalories)
 
   return {
@@ -15,12 +17,6 @@ function normalizeSummary(summary) {
   }
 }
 
-/**
- * Temporary source for Today Summary data.
- *
- * Replace this function body with backend/API call later,
- * keeping the returned data shape stable for the UI component.
- */
-export function getTodaySummaryMock() {
+export function getTodaySummaryMock(): TodaySummary {
   return normalizeSummary(todaySummaryMock)
 }

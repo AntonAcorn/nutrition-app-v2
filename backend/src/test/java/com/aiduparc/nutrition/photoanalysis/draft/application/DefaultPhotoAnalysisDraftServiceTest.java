@@ -65,10 +65,11 @@ class DefaultPhotoAnalysisDraftServiceTest {
         assertThat(response.status()).isEqualTo(PhotoAnalysisDraftStatus.DRAFT);
         assertThat(response.analysis().totals().calories()).isEqualByComparingTo("560");
         verify(nutritionHistoryService, never()).upsert(any());
+        verify(nutritionHistoryService, never()).addToDailyTotals(any());
     }
 
     @Test
-    void confirmWritesFinalNutritionEntryAndMarksDraftConfirmed() {
+    void confirmAddsNutritionToCurrentDayAndMarksDraftConfirmed() {
         UUID draftId = UUID.randomUUID();
         UUID userId = UUID.randomUUID();
         LocalDate date = LocalDate.of(2026, 4, 6);
@@ -99,7 +100,7 @@ class DefaultPhotoAnalysisDraftServiceTest {
                 null,
                 null
         );
-        when(nutritionHistoryService.upsert(any())).thenReturn(snapshot);
+        when(nutritionHistoryService.addToDailyTotals(any())).thenReturn(snapshot);
 
         var response = service.confirm(draftId, new ConfirmPhotoAnalysisDraftRequest(
                 new BigDecimal("570"),
@@ -111,7 +112,7 @@ class DefaultPhotoAnalysisDraftServiceTest {
         assertThat(response.status()).isEqualTo(PhotoAnalysisDraftStatus.CONFIRMED);
         assertThat(response.confirmedDailyEntryId()).isEqualTo(snapshot.id());
         assertThat(response.estimatedCaloriesKcal()).isEqualByComparingTo("570");
-        verify(nutritionHistoryService).upsert(any());
+        verify(nutritionHistoryService).addToDailyTotals(any());
     }
 
     @Test
