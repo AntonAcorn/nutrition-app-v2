@@ -203,7 +203,7 @@ export function StatisticsTab() {
   }, [rangeDays])
 
   const points = useMemo(() => data?.points ?? [], [data])
-  const selectedTitle = `${rangeDays} дней`
+  const selectedTitle = rangeDays === 30 ? 'месяц' : `${rangeDays} дней`
 
   return (
     <section className="screen-section">
@@ -223,9 +223,10 @@ export function StatisticsTab() {
       {!loading && !error && data ? (
         <>
           <section className="current-day-grid">
-            <SummaryCard title={`Отклонение за ${selectedTitle}`} summary={data.selectedPeriodSummary} />
-            {rangeDays >= 7 ? <SummaryCard title="Отклонение за неделю" summary={data.weeklySummary} /> : null}
-            {rangeDays >= 30 ? <SummaryCard title="Отклонение за месяц" summary={data.monthlySummary} /> : null}
+            <SummaryCard
+              title={`Отклонение за ${selectedTitle}`}
+              summary={rangeDays === 30 ? data.monthlySummary : data.selectedPeriodSummary}
+            />
           </section>
           <LineChart title="Калории" unit="ккал" points={points} valueKey="consumedCalories" targetKey="calorieTarget" colorClass="line-chart__path--calories" />
           <div className="statistics-grid">

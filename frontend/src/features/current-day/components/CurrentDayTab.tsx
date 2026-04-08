@@ -48,6 +48,7 @@ export function CurrentDayTab({ refreshToken = 0, successMessage = '' }: Current
         <div>
           <p className="screen-header__eyebrow">Текущий день</p>
           <h2>Сегодняшняя сводка</h2>
+          {summary ? <p className="screen-header__meta">Дата: {summary.dateLabel}</p> : null}
         </div>
         <p className="screen-header__meta">Данные загружаются из backend и обновляются после сохранения анализа.</p>
       </header>
@@ -56,22 +57,7 @@ export function CurrentDayTab({ refreshToken = 0, successMessage = '' }: Current
       {loading ? <section className="panel detail-panel"><p>Загружаем сводку...</p></section> : null}
       {!loading && error ? <section className="panel detail-panel"><p className="error-text">{error}</p></section> : null}
 
-      {!loading && !error && summary ? (
-        <>
-          <TodaySummaryBlock summary={summary} />
-
-          <section className="panel detail-panel">
-            <div className="detail-panel__row">
-              <span>Дневная цель</span>
-              <strong>{summary.dailyTargetCalories} ккал</strong>
-            </div>
-            <div className="detail-panel__row">
-              <span>Дата</span>
-              <strong>{summary.dateLabel}</strong>
-            </div>
-          </section>
-        </>
-      ) : null}
+      {!loading && !error && summary ? <TodaySummaryBlock summary={summary} /> : null}
     </section>
   )
 }
