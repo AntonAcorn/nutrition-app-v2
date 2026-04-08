@@ -8,6 +8,8 @@ public record NutritionStatisticsResponse(
     UUID userId,
     LocalDate fromDate,
     LocalDate toDate,
+    NutritionBalanceSummaryResponse weeklySummary,
+    NutritionBalanceSummaryResponse monthlySummary,
     List<NutritionStatisticsPointResponse> points
 ) {
 }

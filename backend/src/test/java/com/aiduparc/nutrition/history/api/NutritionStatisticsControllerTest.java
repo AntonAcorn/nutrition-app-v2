@@ -34,6 +34,16 @@ class NutritionStatisticsControllerTest {
                 userId,
                 LocalDate.of(2026, 3, 26),
                 LocalDate.of(2026, 4, 8),
+                new NutritionBalanceSummaryResponse(
+                    new BigDecimal("12840.00"),
+                    new BigDecimal("14000.00"),
+                    new BigDecimal("-1160.00")
+                ),
+                new NutritionBalanceSummaryResponse(
+                    new BigDecimal("25680.00"),
+                    new BigDecimal("28000.00"),
+                    new BigDecimal("-2320.00")
+                ),
                 List.of(new NutritionStatisticsPointResponse(
                     LocalDate.of(2026, 4, 8),
                     new BigDecimal("1840.00"),

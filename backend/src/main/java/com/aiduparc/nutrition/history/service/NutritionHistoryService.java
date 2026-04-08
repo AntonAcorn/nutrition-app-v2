@@ -1,5 +1,6 @@
 package com.aiduparc.nutrition.history.service;
 
+import com.aiduparc.nutrition.history.api.NutritionBalanceSummaryResponse;
 import com.aiduparc.nutrition.history.api.NutritionStatisticsPointResponse;
 import com.aiduparc.nutrition.history.api.NutritionStatisticsResponse;
 import com.aiduparc.nutrition.history.api.TodaySummaryResponse;
@@ -74,7 +75,9 @@ public class NutritionHistoryService {
     }
 
     public NutritionStatisticsResponse getStatistics(UUID userId, LocalDate fromInclusive, LocalDate toInclusive) {
-        List<NutritionStatisticsPointResponse> points = findByUserAndRange(userId, fromInclusive, toInclusive)
+        List<DailyNutritionEntrySnapshot> snapshots = findByUserAndRange(userId, fromInclusive, toInclusive);
+
+        List<NutritionStatisticsPointResponse> points = snapshots
             .stream()
             .map(snapshot -> new NutritionStatisticsPointResponse(
                 snapshot.entryDate(),
@@ -87,7 +90,17 @@ public class NutritionHistoryService {
             ))
             .toList();
 
-        return new NutritionStatisticsResponse(userId, fromInclusive, toInclusive, points);
+        LocalDate weeklyFrom = toInclusive.minusDays(6);
+        LocalDate monthlyFrom = toInclusive.minusDays(29);
+
+        NutritionBalanceSummaryResponse weeklySummary = summarizeBalance(
+            snapshots.stream().filter(snapshot -> !snapshot.entryDate().isBefore(weeklyFrom)).toList()
+        );
+        NutritionBalanceSummaryResponse monthlySummary = summarizeBalance(
+            snapshots.stream().filter(snapshot -> !snapshot.entryDate().isBefore(monthlyFrom)).toList()
+        );
+
+        return new NutritionStatisticsResponse(userId, fromInclusive, toInclusive, weeklySummary, monthlySummary, points);
     }
 
     @Transactional
@@ -183,6 +196,17 @@ public class NutritionHistoryService {
 
     private static BigDecimal defaultBigDecimal(BigDecimal value) {
         return value != null ? value : BigDecimal.ZERO;
+    }
+
+    private static NutritionBalanceSummaryResponse summarizeBalance(List<DailyNutritionEntrySnapshot> snapshots) {
+        BigDecimal consumed = snapshots.stream()
+            .map(snapshot -> defaultBigDecimal(snapshot.caloriesConsumedKcal()))
+            .reduce(BigDecimal.ZERO, BigDecimal::add);
+        BigDecimal target = snapshots.stream()
+            .map(snapshot -> defaultBigDecimal(snapshot.calorieTargetKcal()))
+            .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+        return new NutritionBalanceSummaryResponse(consumed, target, consumed.subtract(target));
     }
 
     private static String mergeNotes(String currentNotes, String incomingNotes) {

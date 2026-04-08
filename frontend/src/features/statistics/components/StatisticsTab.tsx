@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { fetchNutritionStatistics } from '../model/statisticsApi'
-import type { NutritionStatisticsPoint, NutritionStatisticsResponse } from '../../../shared/types/nutrition'
+import type { NutritionBalanceSummary, NutritionStatisticsPoint, NutritionStatisticsResponse } from '../../../shared/types/nutrition'
 
 function formatSigned(value: number): string {
   if (value > 0) return `+${value}`
@@ -8,17 +8,15 @@ function formatSigned(value: number): string {
 }
 
 function formatShortDate(value: string): string {
-  const [year, month, day] = value.split('-')
+  const [, month, day] = value.split('-')
   return `${day}.${month}`
 }
 
-function buildLinePath(values: number[], width: number, height: number) {
+function buildLinePath(values: number[], width: number, height: number, min: number, max: number) {
   if (values.length === 0) {
     return ''
   }
 
-  const max = Math.max(...values)
-  const min = Math.min(...values)
   const range = Math.max(1, max - min)
 
   return values
@@ -28,6 +26,21 @@ function buildLinePath(values: number[], width: number, height: number) {
       return `${index === 0 ? 'M' : 'L'} ${x.toFixed(1)} ${y.toFixed(1)}`
     })
     .join(' ')
+}
+
+function SummaryCard({ title, summary }: { title: string; summary: NutritionBalanceSummary }) {
+  return (
+    <section className="summary-card summary-card--stats">
+      <span className="summary-card__label">{title}</span>
+      <strong className={`summary-card__value ${summary.calorieBalance > 0 ? 'text-over' : 'text-under'}`}>
+        {formatSigned(summary.calorieBalance)}
+        <span className="summary-card__unit"> ккал</span>
+      </strong>
+      <p className="subtle-text">
+        Съедено {summary.consumedCalories} из {summary.targetCalories}
+      </p>
+    </section>
+  )
 }
 
 function LineChart({
@@ -49,8 +62,11 @@ function LineChart({
   const targets = targetKey ? points.map((point) => point[targetKey]) : []
   const width = 760
   const height = 220
-  const valuePath = buildLinePath(values, width, height)
-  const targetPath = targets.length > 0 ? buildLinePath(targets, width, height) : ''
+  const max = Math.max(1, ...values, ...targets)
+  const min = Math.min(0, ...values, ...targets)
+  const valuePath = buildLinePath(values, width, height, min, max)
+  const targetPath = targets.length > 0 ? buildLinePath(targets, width, height, min, max) : ''
+  const guideValues = [min, (min + max) / 2, max]
 
   return (
     <section className="panel statistics-panel">
@@ -62,11 +78,23 @@ function LineChart({
         <p className="subtle-text">{unit}</p>
       </div>
 
-      <div className="line-chart">
-        <svg viewBox={`0 0 ${width} ${height}`} className="line-chart__svg" role="img" aria-label={title}>
-          <path d={valuePath} className={`line-chart__path ${colorClass}`} />
-          {targetPath ? <path d={targetPath} className="line-chart__path line-chart__path--target" /> : null}
-        </svg>
+      <div className="line-chart line-chart--framed">
+        <div className="line-chart__guides">
+          {guideValues.slice().reverse().map((guide) => (
+            <span key={`${title}-${guide}`}>{Math.round(guide)}</span>
+          ))}
+        </div>
+        <div className="line-chart__canvas">
+          <div className="line-chart__grid">
+            {guideValues.map((guide) => (
+              <span key={`${title}-grid-${guide}`} />
+            ))}
+          </div>
+          <svg viewBox={`0 0 ${width} ${height}`} className="line-chart__svg" role="img" aria-label={title}>
+            <path d={valuePath} className={`line-chart__path ${colorClass}`} />
+            {targetPath ? <path d={targetPath} className="line-chart__path line-chart__path--target" /> : null}
+          </svg>
+        </div>
         <div className="line-chart__labels">
           {points.map((point) => (
             <span key={`${title}-${point.entryDate}`}>{formatShortDate(point.entryDate)}</span>
@@ -88,7 +116,7 @@ function StatisticsTable({ points }: { points: NutritionStatisticsPoint[] }) {
       </div>
 
       <div className="statistics-table">
-        <div className="statistics-table__head">
+        <div className="statistics-table__head statistics-table__row">
           <span>Дата</span>
           <span>Ккал</span>
           <span>Цель</span>
@@ -156,13 +184,17 @@ export function StatisticsTab() {
           <p className="screen-header__eyebrow">Статистика</p>
           <h2>История питания</h2>
         </div>
-        <p className="screen-header__meta">Последние 14 дней, с кривыми по калориям и макросам.</p>
+        <p className="screen-header__meta">Последние 14 дней, с дневными, недельными и месячными отклонениями.</p>
       </header>
 
       {loading ? <section className="panel detail-panel"><p>Загружаем статистику...</p></section> : null}
       {!loading && error ? <section className="panel detail-panel"><p className="error-text">{error}</p></section> : null}
       {!loading && !error && data ? (
         <>
+          <section className="current-day-grid">
+            <SummaryCard title="Отклонение за неделю" summary={data.weeklySummary} />
+            <SummaryCard title="Отклонение за месяц" summary={data.monthlySummary} />
+          </section>
           <LineChart title="Калории" unit="ккал" points={points} valueKey="consumedCalories" targetKey="calorieTarget" colorClass="line-chart__path--calories" />
           <div className="statistics-grid">
             <LineChart title="Белок" unit="г" points={points} valueKey="proteinGrams" colorClass="line-chart__path--protein" />
