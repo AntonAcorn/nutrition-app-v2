@@ -38,6 +38,7 @@ class TodaySummaryControllerTest {
                         new BigDecimal("2100.00"),
                         new BigDecimal("460.00"),
                         new BigDecimal("108.00"),
+                        new BigDecimal("52.00"),
                         new BigDecimal("24.00")
                 )
         );
@@ -49,6 +50,7 @@ class TodaySummaryControllerTest {
                 .andExpect(jsonPath("$.consumedCalories").value(1640.00))
                 .andExpect(jsonPath("$.remainingCalories").value(460.00))
                 .andExpect(jsonPath("$.proteinGrams").value(108.00))
+                .andExpect(jsonPath("$.fatGrams").value(52.00))
                 .andExpect(jsonPath("$.fiberGrams").value(24.00));
 
         verify(nutritionHistoryService).getTodaySummary(userId, entryDate);

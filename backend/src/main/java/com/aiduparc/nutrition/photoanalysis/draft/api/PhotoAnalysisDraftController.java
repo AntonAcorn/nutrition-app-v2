@@ -42,7 +42,7 @@ public class PhotoAnalysisDraftController {
     public PhotoAnalysisDraftResponse confirm(@PathVariable UUID draftId,
                                               @RequestBody(required = false) ConfirmPhotoAnalysisDraftRequest request) {
         ConfirmPhotoAnalysisDraftRequest safeRequest = request == null
-                ? new ConfirmPhotoAnalysisDraftRequest(null, null, null, null)
+                ? new ConfirmPhotoAnalysisDraftRequest(null, null, null, null, null)
                 : request;
         return draftService.confirm(draftId, safeRequest);
     }

@@ -14,6 +14,14 @@ export function DraftItemEditor({ item, onChange }: DraftItemEditorProps) {
         <input value={item.name} onChange={(event) => onChange(item.id, 'name', event.target.value)} />
       </label>
 
+      <label>
+        Portion estimate
+        <input
+          value={item.estimatedPortion}
+          onChange={(event) => onChange(item.id, 'estimatedPortion', event.target.value)}
+        />
+      </label>
+
       <div className="draft-item-card__grid">
         {numericFields.map((field) => (
           <label key={field}>

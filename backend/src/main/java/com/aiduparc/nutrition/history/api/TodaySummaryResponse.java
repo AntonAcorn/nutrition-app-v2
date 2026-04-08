@@ -11,6 +11,7 @@ public record TodaySummaryResponse(
         BigDecimal dailyTargetCalories,
         BigDecimal remainingCalories,
         BigDecimal proteinGrams,
+        BigDecimal fatGrams,
         BigDecimal fiberGrams
 ) {
 }

@@ -36,7 +36,7 @@ export function PhotoAnalyzerTab({ onConfirmed }: PhotoAnalyzerTabProps) {
             return item
           }
 
-          if (field === 'name') {
+          if (field === 'name' || field === 'estimatedPortion') {
             return { ...item, [field]: value }
           }
 
@@ -111,6 +111,7 @@ export function PhotoAnalyzerTab({ onConfirmed }: PhotoAnalyzerTabProps) {
     const payload = {
       ...draft,
       totals: recalculatedTotals,
+      fatG: recalculatedTotals.fat,
       needsUserConfirmation: false,
     }
 
@@ -181,9 +182,6 @@ export function PhotoAnalyzerTab({ onConfirmed }: PhotoAnalyzerTabProps) {
             <img src={previewUrl} alt="Preview of uploaded meal" />
           </div>
         ) : null}
-
-        <div>
-        </div>
 
         {error ? <p className="error-text">{error}</p> : null}
 

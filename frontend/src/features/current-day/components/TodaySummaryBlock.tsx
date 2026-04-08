@@ -28,6 +28,7 @@ export function TodaySummaryBlock({ summary }: TodaySummaryBlockProps) {
       <SummaryItem label="Consumed" value={summary.consumedCalories} unit="kcal" />
       <SummaryItem label="Remaining" value={summary.remainingCalories} unit="kcal" />
       <SummaryItem label="Protein" value={summary.proteinGrams} unit="g" />
+      <SummaryItem label="Fat" value={summary.fatGrams} unit="g" />
       <SummaryItem label="Fiber" value={summary.fiberGrams} unit="g" />
     </section>
   )

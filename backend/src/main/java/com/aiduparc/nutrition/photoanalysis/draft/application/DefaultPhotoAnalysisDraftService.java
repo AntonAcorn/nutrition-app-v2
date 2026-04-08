@@ -70,6 +70,8 @@ public class DefaultPhotoAnalysisDraftService implements PhotoAnalysisDraftServi
 
         BigDecimal calories = firstNonNull(request.caloriesKcal(), entity.getEstimatedCaloriesKcal());
         BigDecimal protein = firstNonNull(request.proteinG(), entity.getEstimatedProteinG());
+        var analysis = fromJson(entity.getAnalysisJson());
+        BigDecimal fat = firstNonNull(request.fatG(), analysis.totals().fat());
         BigDecimal fiber = firstNonNull(request.fiberG(), entity.getEstimatedFiberG());
 
         var savedEntry = nutritionHistoryService.addToDailyTotals(new NutritionHistoryService.AddToDailyTotalsCommand(
@@ -77,6 +79,7 @@ public class DefaultPhotoAnalysisDraftService implements PhotoAnalysisDraftServi
                 entity.getEntryDate(),
                 calories,
                 protein,
+                fat,
                 fiber,
                 request.notes()
         ));

@@ -4,13 +4,14 @@ export interface TodaySummary {
   dailyTargetCalories: number
   remainingCalories: number
   proteinGrams: number
+  fatGrams: number
   fiberGrams: number
 }
 
 export interface DraftItem {
   id: string
   name: string
-  grams: number
+  estimatedPortion: string
   calories: number
   protein: number
   fat: number
