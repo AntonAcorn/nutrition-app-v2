@@ -10,12 +10,16 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @Transactional(readOnly = true)
 public class NutritionHistoryService {
+
+    private static final Logger log = LoggerFactory.getLogger(NutritionHistoryService.class);
 
     private final DailyNutritionEntryRepository repository;
 
@@ -42,7 +46,7 @@ public class NutritionHistoryService {
         BigDecimal dailyTargetCalories = defaultBigDecimal(snapshot.calorieTargetKcal());
         BigDecimal remainingCalories = dailyTargetCalories.subtract(consumedCalories).max(BigDecimal.ZERO);
 
-        return new TodaySummaryResponse(
+        TodaySummaryResponse response = new TodaySummaryResponse(
             userId,
             entryDate,
             consumedCalories,
@@ -52,13 +56,26 @@ public class NutritionHistoryService {
             defaultBigDecimal(snapshot.fatGrams()),
             defaultBigDecimal(snapshot.fiberGrams())
         );
+
+        log.info(
+            "today-summary resolved userId={} entryDate={} calories={} target={} protein={} fat={} fiber={}",
+            userId,
+            entryDate,
+            response.consumedCalories(),
+            response.dailyTargetCalories(),
+            response.proteinGrams(),
+            response.fatGrams(),
+            response.fiberGrams()
+        );
+
+        return response;
     }
 
     @Transactional
     public DailyNutritionEntrySnapshot addToDailyTotals(AddToDailyTotalsCommand command) {
         DailyNutritionEntrySnapshot current = getOrCreateEmptySnapshot(command.userId(), command.entryDate());
 
-        return upsert(new UpsertDailyNutritionEntryCommand(
+        DailyNutritionEntrySnapshot result = upsert(new UpsertDailyNutritionEntryCommand(
             command.userId(),
             command.entryDate(),
             defaultBigDecimal(current.caloriesConsumedKcal()).add(defaultBigDecimal(command.caloriesConsumedKcal())),
@@ -69,6 +86,18 @@ public class NutritionHistoryService {
             defaultBigDecimal(current.fiberGrams()).add(defaultBigDecimal(command.fiberGrams())),
             mergeNotes(current.notes(), command.notes())
         ));
+
+        log.info(
+            "daily-totals updated userId={} entryDate={} calories={} protein={} fat={} fiber={}",
+            result.userId(),
+            result.entryDate(),
+            result.caloriesConsumedKcal(),
+            result.proteinGrams(),
+            result.fatGrams(),
+            result.fiberGrams()
+        );
+
+        return result;
     }
 
     @Transactional

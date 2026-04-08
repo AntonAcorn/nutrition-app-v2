@@ -11,12 +11,16 @@ interface PhotoAnalyzerTabProps {
 
 const DEFAULT_USER_ID = '00000000-0000-0000-0000-000000000001'
 
+function currentEntryDate(): string {
+  return new Date().toISOString().slice(0, 10)
+}
+
 export function PhotoAnalyzerTab({ onConfirmed }: PhotoAnalyzerTabProps) {
   const [draft, setDraft] = useState<PhotoAnalysisDraft | null>(null)
   const [uploading, setUploading] = useState(false)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
-  const [finalEntry, setFinalEntry] = useState<unknown>(null)
+  const [successMessage, setSuccessMessage] = useState('')
   const [selectedFileName, setSelectedFileName] = useState('')
   const [previewUrl, setPreviewUrl] = useState('')
   const [userNote, setUserNote] = useState('')
@@ -70,14 +74,15 @@ export function PhotoAnalyzerTab({ onConfirmed }: PhotoAnalyzerTabProps) {
 
     setUploading(true)
     setError('')
+    setSuccessMessage('')
     setSelectedFileName(file.name)
     setPreviewUrl(URL.createObjectURL(file))
-    setFinalEntry(null)
 
     try {
       const formData = new FormData()
       formData.append('file', file)
       formData.append('userId', DEFAULT_USER_ID)
+      formData.append('entryDate', currentEntryDate())
       formData.append('userNote', userNote)
       formData.append('locale', 'ru')
 
@@ -107,6 +112,7 @@ export function PhotoAnalyzerTab({ onConfirmed }: PhotoAnalyzerTabProps) {
 
     setSaving(true)
     setError('')
+    setSuccessMessage('')
 
     const payload = {
       ...draft,
@@ -125,12 +131,12 @@ export function PhotoAnalyzerTab({ onConfirmed }: PhotoAnalyzerTabProps) {
       })
 
       if (!response.ok) {
-        throw new Error(`Не удалось сохранить draft (${response.status})`)
+        throw new Error(`Не удалось сохранить черновик (${response.status})`)
       }
 
-      const result = await response.json()
-      setFinalEntry(result)
+      await response.json()
       setDraft((current) => (current ? { ...current, needsUserConfirmation: false } : current))
+      setSuccessMessage('Сохранено. Сводка за день обновлена.')
       onConfirmed?.()
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Ошибка сохранения')
@@ -143,23 +149,23 @@ export function PhotoAnalyzerTab({ onConfirmed }: PhotoAnalyzerTabProps) {
     <section className="screen-section">
       <header className="screen-header">
         <div>
-          <p className="screen-header__eyebrow">Photo analyzer</p>
+          <p className="screen-header__eyebrow">Анализатор фото</p>
           <h2>Анализ фото и подтверждение</h2>
         </div>
-        <p className="screen-header__meta">Загрузи фото, получи draft от модели и сразу подтверди результат.</p>
+        <p className="screen-header__meta">Загрузи фото, получи черновик от модели и сразу подтверди результат.</p>
       </header>
 
       <section className="panel analyzer-panel">
         <div className="upload-panel">
           <div>
-            <p className="screen-header__eyebrow">Upload</p>
+            <p className="screen-header__eyebrow">Загрузка</p>
             <h3>Загрузить новое фото</h3>
-            <p className="subtle-text">Поддерживаются image uploads до 10 MB.</p>
+            <p className="subtle-text">Поддерживаются изображения до 10 MB.</p>
           </div>
 
           <div className="upload-panel__controls">
             <label className="upload-panel__note">
-              Note for model
+              Комментарий для модели
               <textarea
                 value={userNote}
                 onChange={(event) => setUserNote(event.target.value)}
@@ -179,17 +185,18 @@ export function PhotoAnalyzerTab({ onConfirmed }: PhotoAnalyzerTabProps) {
 
         {previewUrl ? (
           <div className="image-preview">
-            <img src={previewUrl} alt="Preview of uploaded meal" />
+            <img src={previewUrl} alt="Предпросмотр загруженной еды" />
           </div>
         ) : null}
 
         {error ? <p className="error-text">{error}</p> : null}
+        {successMessage ? <p className="success-text">{successMessage}</p> : null}
 
         {draft ? (
           <>
             <div className="analyzer-panel__header">
               <div>
-                <p className="screen-header__eyebrow">Draft</p>
+                <p className="screen-header__eyebrow">Черновик</p>
                 <h3>Проверь, поправь и сохрани</h3>
               </div>
               <div className="status-badge">
@@ -198,7 +205,7 @@ export function PhotoAnalyzerTab({ onConfirmed }: PhotoAnalyzerTabProps) {
               </div>
             </div>
 
-            <p className="subtle-text">Confidence: {draft.confidence || 0}%</p>
+            <p className="subtle-text">Уверенность модели: {draft.confidence || 0}%</p>
 
             <div className="draft-items-list">
               {draft.items.map((item) => (
@@ -208,7 +215,7 @@ export function PhotoAnalyzerTab({ onConfirmed }: PhotoAnalyzerTabProps) {
 
             <div className="notes-block">
               <label>
-                Notes
+                Заметки
                 <textarea value={draft.notes.join('\n')} onChange={(event) => updateNotes(event.target.value)} rows={4} />
               </label>
             </div>
@@ -217,20 +224,12 @@ export function PhotoAnalyzerTab({ onConfirmed }: PhotoAnalyzerTabProps) {
 
             <div className="primary-actions">
               <button type="button" onClick={saveDraft} disabled={saving || uploading}>
-                {saving ? 'Сохраняем...' : 'Save и подтвердить'}
+                {saving ? 'Сохраняем...' : 'Подтвердить и сохранить'}
               </button>
             </div>
           </>
         ) : null}
       </section>
-
-      {finalEntry ? (
-        <section className="panel final-entry-panel">
-          <p className="screen-header__eyebrow">Backend response</p>
-          <h3>Черновик подтверждён</h3>
-          <pre>{JSON.stringify(finalEntry, null, 2)}</pre>
-        </section>
-      ) : null}
     </section>
   )
 }

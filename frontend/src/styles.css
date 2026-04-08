@@ -359,6 +359,11 @@ body {
   color: #b91c1c;
 }
 
+.success-text {
+  color: #166534;
+  margin-bottom: 14px;
+}
+
 .final-entry-panel pre {
   margin-top: 14px;
   padding: 14px;

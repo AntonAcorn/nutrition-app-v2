@@ -14,6 +14,8 @@ import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.UUID;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,6 +24,8 @@ import org.springframework.web.server.ResponseStatusException;
 @Service
 @Transactional(readOnly = true)
 public class DefaultPhotoAnalysisDraftService implements PhotoAnalysisDraftService {
+
+    private static final Logger log = LoggerFactory.getLogger(DefaultPhotoAnalysisDraftService.class);
 
     private final PhotoAnalysisDraftRepository repository;
     private final NutritionHistoryService nutritionHistoryService;
@@ -50,6 +54,7 @@ public class DefaultPhotoAnalysisDraftService implements PhotoAnalysisDraftServi
         entity.setEstimatedFiberG(request.analysis().totals().fiber());
 
         PhotoAnalysisDraftEntity saved = repository.save(entity);
+        log.info("photo-analysis draft created draftId={} userId={} entryDate={}", saved.getId(), saved.getUserId(), saved.getEntryDate());
         return toResponse(saved);
     }
 
@@ -92,6 +97,17 @@ public class DefaultPhotoAnalysisDraftService implements PhotoAnalysisDraftServi
         entity.setEstimatedFiberG(fiber);
 
         PhotoAnalysisDraftEntity updated = repository.save(entity);
+        log.info(
+                "photo-analysis draft confirmed draftId={} userId={} entryDate={} confirmedDailyEntryId={} calories={} protein={} fat={} fiber={}",
+                updated.getId(),
+                updated.getUserId(),
+                updated.getEntryDate(),
+                updated.getConfirmedDailyEntryId(),
+                calories,
+                protein,
+                fat,
+                fiber
+        );
         return toResponse(updated);
     }
 
