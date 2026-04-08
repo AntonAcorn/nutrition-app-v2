@@ -13,7 +13,7 @@ interface DraftPayload {
   }
 }
 
-export const numericFields: Array<keyof DraftItem> = ['grams', 'calories', 'protein', 'fat', 'carbs', 'fiber']
+export const numericFields: Array<keyof DraftItem> = ['calories', 'protein', 'fat', 'carbs', 'fiber']
 
 export function normalizeDraft(payload: DraftPayload): PhotoAnalysisDraft {
   const source = payload?.analysis ?? {}
@@ -21,7 +21,10 @@ export function normalizeDraft(payload: DraftPayload): PhotoAnalysisDraft {
     ? source.items.map((item, index) => ({
         id: item.id ?? `item-${index}`,
         name: item.name ?? '',
-        grams: toNumber(item.grams),
+        estimatedPortion:
+          typeof item.estimatedPortion === 'string' && item.estimatedPortion.trim().length > 0
+            ? item.estimatedPortion.trim()
+            : 'unknown',
         calories: toNumber(item.calories),
         protein: toNumber(item.protein),
         fat: toNumber(item.fat),

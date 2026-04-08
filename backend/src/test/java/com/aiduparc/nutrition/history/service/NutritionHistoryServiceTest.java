@@ -40,6 +40,7 @@ class NutritionHistoryServiceTest {
         entity.setCaloriesConsumedKcal(new BigDecimal("1640.00"));
         entity.setCalorieTargetKcal(new BigDecimal("2100.00"));
         entity.setProteinGrams(new BigDecimal("108.00"));
+        entity.setFatGrams(new BigDecimal("52.00"));
         entity.setFiberGrams(new BigDecimal("24.00"));
 
         when(repository.findByUserIdAndEntryDate(userId, entryDate)).thenReturn(Optional.of(entity));
@@ -50,6 +51,7 @@ class NutritionHistoryServiceTest {
         assertThat(summary.dailyTargetCalories()).isEqualByComparingTo("2100.00");
         assertThat(summary.remainingCalories()).isEqualByComparingTo("460.00");
         assertThat(summary.proteinGrams()).isEqualByComparingTo("108.00");
+        assertThat(summary.fatGrams()).isEqualByComparingTo("52.00");
         assertThat(summary.fiberGrams()).isEqualByComparingTo("24.00");
     }
 
@@ -64,6 +66,7 @@ class NutritionHistoryServiceTest {
         existing.setCaloriesConsumedKcal(new BigDecimal("1200.00"));
         existing.setCalorieTargetKcal(new BigDecimal("2100.00"));
         existing.setProteinGrams(new BigDecimal("80.00"));
+        existing.setFatGrams(new BigDecimal("35.00"));
         existing.setFiberGrams(new BigDecimal("18.00"));
         existing.setNotes("breakfast");
 
@@ -75,12 +78,14 @@ class NutritionHistoryServiceTest {
             entryDate,
             new BigDecimal("560.00"),
             new BigDecimal("30.00"),
+            new BigDecimal("17.00"),
             new BigDecimal("8.00"),
             "lunch"
         ));
 
         assertThat(saved.caloriesConsumedKcal()).isEqualByComparingTo("1760.00");
         assertThat(saved.proteinGrams()).isEqualByComparingTo("110.00");
+        assertThat(saved.fatGrams()).isEqualByComparingTo("52.00");
         assertThat(saved.fiberGrams()).isEqualByComparingTo("26.00");
         assertThat(saved.notes()).isEqualTo("breakfast\nlunch");
     }
@@ -104,6 +109,7 @@ class NutritionHistoryServiceTest {
             new BigDecimal("2500.00"),
             new BigDecimal("82.10"),
             new BigDecimal("165.00"),
+            null,
             new BigDecimal("27.00"),
             "imported from sheet"
         );
@@ -141,6 +147,7 @@ class NutritionHistoryServiceTest {
             null,
             null,
             new BigDecimal("140.00"),
+            null,
             new BigDecimal("24.00"),
             "corrected"
         );

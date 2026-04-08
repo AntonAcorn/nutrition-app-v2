@@ -42,6 +42,9 @@ public class DailyNutritionEntryEntity {
     @Column(name = "protein_g", precision = 10, scale = 2)
     private BigDecimal proteinGrams;
 
+    @Column(name = "fat_g", precision = 10, scale = 2)
+    private BigDecimal fatGrams;
+
     @Column(name = "fiber_g", precision = 10, scale = 2)
     private BigDecimal fiberGrams;
 
@@ -108,6 +111,14 @@ public class DailyNutritionEntryEntity {
 
     public void setProteinGrams(BigDecimal proteinGrams) {
         this.proteinGrams = proteinGrams;
+    }
+
+    public BigDecimal getFatGrams() {
+        return fatGrams;
+    }
+
+    public void setFatGrams(BigDecimal fatGrams) {
+        this.fatGrams = fatGrams;
     }
 
     public BigDecimal getFiberGrams() {

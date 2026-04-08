@@ -49,6 +49,7 @@ public class NutritionHistoryService {
             dailyTargetCalories,
             remainingCalories,
             defaultBigDecimal(snapshot.proteinGrams()),
+            defaultBigDecimal(snapshot.fatGrams()),
             defaultBigDecimal(snapshot.fiberGrams())
         );
     }
@@ -64,6 +65,7 @@ public class NutritionHistoryService {
             current.calorieTargetKcal(),
             current.weightKg(),
             defaultBigDecimal(current.proteinGrams()).add(defaultBigDecimal(command.proteinGrams())),
+            defaultBigDecimal(current.fatGrams()).add(defaultBigDecimal(command.fatGrams())),
             defaultBigDecimal(current.fiberGrams()).add(defaultBigDecimal(command.fiberGrams())),
             mergeNotes(current.notes(), command.notes())
         ));
@@ -81,6 +83,7 @@ public class NutritionHistoryService {
         entity.setCaloriesConsumedKcal(command.caloriesConsumedKcal());
         entity.setCalorieTargetKcal(command.calorieTargetKcal());
         entity.setProteinGrams(command.proteinGrams());
+        entity.setFatGrams(command.fatGrams());
         entity.setFiberGrams(command.fiberGrams());
         entity.setNotes(command.notes());
 
@@ -95,6 +98,7 @@ public class NutritionHistoryService {
         BigDecimal calorieTargetKcal,
         BigDecimal weightKg,
         BigDecimal proteinGrams,
+        BigDecimal fatGrams,
         BigDecimal fiberGrams,
         String notes
     ) {
@@ -105,6 +109,7 @@ public class NutritionHistoryService {
         @NotNull LocalDate entryDate,
         @NotNull BigDecimal caloriesConsumedKcal,
         BigDecimal proteinGrams,
+        BigDecimal fatGrams,
         BigDecimal fiberGrams,
         String notes
     ) {
@@ -117,6 +122,7 @@ public class NutritionHistoryService {
                 userId,
                 entryDate,
                 null,
+                BigDecimal.ZERO,
                 BigDecimal.ZERO,
                 BigDecimal.ZERO,
                 BigDecimal.ZERO,

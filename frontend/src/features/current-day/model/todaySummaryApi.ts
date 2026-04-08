@@ -6,6 +6,7 @@ interface TodaySummaryApiResponse {
   dailyTargetCalories: number
   remainingCalories: number
   proteinGrams: number
+  fatGrams: number
   fiberGrams: number
 }
 
@@ -34,6 +35,7 @@ export async function fetchTodaySummary(): Promise<TodaySummary> {
     dailyTargetCalories: payload.dailyTargetCalories,
     remainingCalories: payload.remainingCalories,
     proteinGrams: payload.proteinGrams,
+    fatGrams: payload.fatGrams,
     fiberGrams: payload.fiberGrams,
   }
 }

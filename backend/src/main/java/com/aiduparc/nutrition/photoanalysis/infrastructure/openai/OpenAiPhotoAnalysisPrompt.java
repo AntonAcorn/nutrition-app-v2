@@ -19,7 +19,11 @@ public record OpenAiPhotoAnalysisPrompt(
                 properties.openai().model(),
                 List.of(
                         "Identify likely foods from the image.",
-                        "Estimate portion sizes.",
+                        "Estimate realistic portion sizes and write them explicitly in estimatedPortion, for example '180 g', '1 bowl', '2 pieces'.",
+                        "Estimate calories, protein, carbs, fat, and fiber for the visible portion, not for a tiny tasting portion.",
+                        "If the portion size is uncertain, prefer a realistic everyday serving instead of an unrealistically small estimate.",
+                        "Do not default to very low calories when the image suggests oil, sauce, frying, cheese, nuts, or dense carbs.",
+                        "Include hidden fats when they are visually likely, such as cooking oil, dressing, mayo, butter, cheese, or creamy sauce.",
                         "Return JSON only, matching the schema with items, totals, confidence, notes, needsUserConfirmation.",
                         "Each item must contain name, estimatedPortion, calories, protein, carbs, fat, fiber, confidence.",
                         "Mark whether user confirmation is still required."

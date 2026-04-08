@@ -95,6 +95,7 @@ class DefaultPhotoAnalysisDraftServiceTest {
                 new BigDecimal("570"),
                 null,
                 new BigDecimal("31"),
+                new BigDecimal("22"),
                 new BigDecimal("7"),
                 "confirmed",
                 null,
@@ -105,6 +106,7 @@ class DefaultPhotoAnalysisDraftServiceTest {
         var response = service.confirm(draftId, new ConfirmPhotoAnalysisDraftRequest(
                 new BigDecimal("570"),
                 new BigDecimal("31"),
+                new BigDecimal("22"),
                 new BigDecimal("7"),
                 "confirmed"
         ));
@@ -125,7 +127,7 @@ class DefaultPhotoAnalysisDraftServiceTest {
 
         when(repository.findById(draftId)).thenReturn(Optional.of(entity));
 
-        assertThatThrownBy(() -> service.confirm(draftId, new ConfirmPhotoAnalysisDraftRequest(null, null, null, null)))
+        assertThatThrownBy(() -> service.confirm(draftId, new ConfirmPhotoAnalysisDraftRequest(null, null, null, null, null)))
                 .isInstanceOf(ResponseStatusException.class)
                 .hasMessageContaining("409 CONFLICT");
     }
