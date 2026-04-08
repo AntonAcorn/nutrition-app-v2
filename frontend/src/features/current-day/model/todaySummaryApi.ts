@@ -1,4 +1,4 @@
-import { APP_USER_ID } from '../../../shared/config/appUser'
+import { LIVE_APP_USER_ID } from '../../../shared/config/appUser'
 import { formatLocalDateInputValue } from '../../../shared/lib/date'
 import type { TodaySummary } from '../../../shared/types/nutrition'
 
@@ -28,7 +28,7 @@ function formatDateLabel(entryDate: string): string {
 
 export async function fetchTodaySummary(): Promise<TodaySummary> {
   const response = await fetch(
-    `/api/history/today-summary?userId=${APP_USER_ID}&entryDate=${currentEntryDate()}`,
+    `/api/history/today-summary?userId=${LIVE_APP_USER_ID}&entryDate=${currentEntryDate()}`,
   )
 
   if (!response.ok) {
