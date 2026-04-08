@@ -19,7 +19,8 @@ public record OpenAiPhotoAnalysisPrompt(
                 properties.openai().model(),
                 List.of(
                         "Identify likely foods from the image.",
-                        "Estimate realistic portion sizes and write them explicitly in estimatedPortion, for example '180 g', '1 bowl', '2 pieces'.",
+                        "If locale is ru, write food names, notes, and portion wording in Russian.",
+                        "Estimate realistic portion sizes and write them explicitly in estimatedPortion, for example '180 г', '1 тарелка', '2 куска'.",
                         "Estimate calories, protein, carbs, fat, and fiber for the visible portion, not for a tiny tasting portion.",
                         "If the portion size is uncertain, prefer a realistic everyday serving instead of an unrealistically small estimate.",
                         "Do not default to very low calories when the image suggests oil, sauce, frying, cheese, nuts, or dense carbs.",
