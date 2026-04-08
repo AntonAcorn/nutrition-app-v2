@@ -1,4 +1,5 @@
 import { ChangeEvent, useMemo, useState } from 'react'
+import { formatLocalDateInputValue } from '../../../shared/lib/date'
 import { toNumber } from '../../../shared/lib/number'
 import type { DraftItem, PhotoAnalysisDraft } from '../../../shared/types/nutrition'
 import { DraftItemEditor } from './DraftItemEditor'
@@ -12,7 +13,7 @@ interface PhotoAnalyzerTabProps {
 const DEFAULT_USER_ID = '00000000-0000-0000-0000-000000000001'
 
 function currentEntryDate(): string {
-  return new Date().toISOString().slice(0, 10)
+  return formatLocalDateInputValue(new Date())
 }
 
 export function PhotoAnalyzerTab({ onConfirmed }: PhotoAnalyzerTabProps) {
