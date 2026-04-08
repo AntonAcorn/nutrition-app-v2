@@ -7,6 +7,7 @@ import java.util.UUID;
 public record TodaySummaryResponse(
         UUID userId,
         LocalDate entryDate,
+        BigDecimal weightKg,
         BigDecimal consumedCalories,
         BigDecimal dailyTargetCalories,
         BigDecimal remainingCalories,

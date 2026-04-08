@@ -34,6 +34,7 @@ class TodaySummaryControllerTest {
                 new TodaySummaryResponse(
                         userId,
                         entryDate,
+                        new BigDecimal("82.40"),
                         new BigDecimal("1640.00"),
                         new BigDecimal("2100.00"),
                         new BigDecimal("460.00"),
@@ -47,6 +48,7 @@ class TodaySummaryControllerTest {
                         .param("userId", userId.toString())
                         .param("entryDate", "2026-04-08"))
                 .andExpect(status().isOk())
+                .andExpect(jsonPath("$.weightKg").value(82.40))
                 .andExpect(jsonPath("$.consumedCalories").value(1640.00))
                 .andExpect(jsonPath("$.remainingCalories").value(460.00))
                 .andExpect(jsonPath("$.proteinGrams").value(108.00))

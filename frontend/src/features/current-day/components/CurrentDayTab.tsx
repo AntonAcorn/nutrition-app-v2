@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { TodaySummaryBlock } from './TodaySummaryBlock'
 import { fetchTodaySummary } from '../model/todaySummaryApi'
+import { updateTodayWeight } from '../model/weightApi'
 import type { TodaySummary } from '../../../shared/types/nutrition'
 
 interface CurrentDayTabProps {
@@ -11,6 +12,8 @@ interface CurrentDayTabProps {
 export function CurrentDayTab({ refreshToken = 0, successMessage = '' }: CurrentDayTabProps) {
   const [summary, setSummary] = useState<TodaySummary | null>(null)
   const [loading, setLoading] = useState(true)
+  const [savingWeight, setSavingWeight] = useState(false)
+  const [weightInput, setWeightInput] = useState('')
   const [error, setError] = useState('')
 
   useEffect(() => {
@@ -24,6 +27,7 @@ export function CurrentDayTab({ refreshToken = 0, successMessage = '' }: Current
         const nextSummary = await fetchTodaySummary()
         if (!cancelled) {
           setSummary(nextSummary)
+          setWeightInput(nextSummary.weightKg != null ? String(nextSummary.weightKg) : '')
         }
       } catch (err) {
         if (!cancelled) {
@@ -42,6 +46,29 @@ export function CurrentDayTab({ refreshToken = 0, successMessage = '' }: Current
     }
   }, [refreshToken])
 
+  async function handleWeightSave() {
+    const parsedWeight = Number(weightInput.replace(',', '.'))
+
+    if (!Number.isFinite(parsedWeight) || parsedWeight <= 0) {
+      setError('Введи корректный вес в килограммах')
+      return
+    }
+
+    setSavingWeight(true)
+    setError('')
+
+    try {
+      await updateTodayWeight(parsedWeight)
+      const nextSummary = await fetchTodaySummary()
+      setSummary(nextSummary)
+      setWeightInput(nextSummary.weightKg != null ? String(nextSummary.weightKg) : '')
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Не удалось сохранить вес')
+    } finally {
+      setSavingWeight(false)
+    }
+  }
+
   return (
     <section className="screen-section">
       <header className="screen-header">
@@ -54,6 +81,34 @@ export function CurrentDayTab({ refreshToken = 0, successMessage = '' }: Current
       </header>
 
       {successMessage ? <section className="panel detail-panel"><p className="success-text">{successMessage}</p></section> : null}
+      {!loading && summary ? (
+        <section className="panel detail-panel weight-panel">
+          <div className="weight-panel__content">
+            <div>
+              <p className="screen-header__eyebrow">Вес</p>
+              <h3>Вес на сегодня</h3>
+              <p className="subtle-text">Сохраняется в БД и попадает в статистику.</p>
+            </div>
+            <div className="weight-panel__form">
+              <label>
+                Вес, кг
+                <input
+                  type="number"
+                  inputMode="decimal"
+                  step="0.1"
+                  min="0"
+                  value={weightInput}
+                  onChange={(event) => setWeightInput(event.target.value)}
+                  placeholder="Например, 82.4"
+                />
+              </label>
+              <button type="button" onClick={handleWeightSave} disabled={savingWeight}>
+                {savingWeight ? 'Сохраняем...' : 'Сохранить вес'}
+              </button>
+            </div>
+          </div>
+        </section>
+      ) : null}
       {loading ? <section className="panel detail-panel"><p>Загружаем сводку...</p></section> : null}
       {!loading && error ? <section className="panel detail-panel"><p className="error-text">{error}</p></section> : null}
 

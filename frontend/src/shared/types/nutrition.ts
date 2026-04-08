@@ -1,5 +1,6 @@
 export interface TodaySummary {
   dateLabel: string
+  weightKg: number | null
   consumedCalories: number
   dailyTargetCalories: number
   remainingCalories: number
@@ -38,6 +39,7 @@ export interface PhotoAnalysisDraft {
 
 export interface NutritionStatisticsPoint {
   entryDate: string
+  weightKg: number | null
   consumedCalories: number
   calorieTarget: number
   calorieBalance: number
@@ -59,5 +61,7 @@ export interface NutritionStatisticsResponse {
   selectedPeriodSummary: NutritionBalanceSummary
   weeklySummary: NutritionBalanceSummary
   monthlySummary: NutritionBalanceSummary
+  weeklyAverageWeightKg: number | null
+  monthlyAverageWeightKg: number | null
   points: NutritionStatisticsPoint[]
 }

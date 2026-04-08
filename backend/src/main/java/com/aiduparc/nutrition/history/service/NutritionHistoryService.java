@@ -9,6 +9,7 @@ import com.aiduparc.nutrition.history.model.DailyNutritionEntrySnapshot;
 import com.aiduparc.nutrition.history.repository.DailyNutritionEntryRepository;
 import jakarta.validation.constraints.NotNull;
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.time.YearMonth;
 import java.util.List;
@@ -53,6 +54,7 @@ public class NutritionHistoryService {
         TodaySummaryResponse response = new TodaySummaryResponse(
             userId,
             entryDate,
+            snapshot.weightKg(),
             consumedCalories,
             dailyTargetCalories,
             remainingCalories,
@@ -81,6 +83,7 @@ public class NutritionHistoryService {
         List<NutritionStatisticsPointResponse> points = selectedSnapshots.stream()
             .map(snapshot -> new NutritionStatisticsPointResponse(
                 snapshot.entryDate(),
+                roundToSingleDecimal(snapshot.weightKg()),
                 defaultBigDecimal(snapshot.caloriesConsumedKcal()),
                 defaultBigDecimal(snapshot.calorieTargetKcal()),
                 defaultBigDecimal(snapshot.caloriesConsumedKcal()).subtract(defaultBigDecimal(snapshot.calorieTargetKcal())),
@@ -107,8 +110,27 @@ public class NutritionHistoryService {
             selectedPeriodSummary,
             weeklySummary,
             monthlySummary,
+            averageWeight(weeklySnapshots),
+            averageWeight(monthlySnapshots),
             points
         );
+    }
+
+    @Transactional
+    public DailyNutritionEntrySnapshot updateWeight(UUID userId, LocalDate entryDate, BigDecimal weightKg) {
+        DailyNutritionEntrySnapshot current = getOrCreateEmptySnapshot(userId, entryDate);
+
+        return upsert(new UpsertDailyNutritionEntryCommand(
+            userId,
+            entryDate,
+            defaultBigDecimal(current.caloriesConsumedKcal()),
+            current.calorieTargetKcal(),
+            weightKg,
+            current.proteinGrams(),
+            current.fatGrams(),
+            current.fiberGrams(),
+            current.notes()
+        ));
     }
 
     @Transactional
@@ -228,6 +250,24 @@ public class NutritionHistoryService {
         }
 
         return new NutritionBalanceSummaryResponse(consumed, target, consumed.subtract(target));
+    }
+
+    private static BigDecimal averageWeight(List<DailyNutritionEntrySnapshot> snapshots) {
+        List<BigDecimal> weights = snapshots.stream()
+            .map(DailyNutritionEntrySnapshot::weightKg)
+            .filter(value -> value != null)
+            .toList();
+
+        if (weights.isEmpty()) {
+            return null;
+        }
+
+        BigDecimal total = weights.stream().reduce(BigDecimal.ZERO, BigDecimal::add);
+        return total.divide(BigDecimal.valueOf(weights.size()), 1, RoundingMode.HALF_UP);
+    }
+
+    private static BigDecimal roundToSingleDecimal(BigDecimal value) {
+        return value == null ? null : value.setScale(1, RoundingMode.HALF_UP);
     }
 
     private static String mergeNotes(String currentNotes, String incomingNotes) {

@@ -49,8 +49,11 @@ class NutritionStatisticsControllerTest {
                     new BigDecimal("16000.00"),
                     new BigDecimal("156.00")
                 ),
+                new BigDecimal("82.4"),
+                new BigDecimal("81.9"),
                 List.of(new NutritionStatisticsPointResponse(
                     LocalDate.of(2026, 4, 8),
+                    new BigDecimal("82.4"),
                     new BigDecimal("1840.00"),
                     new BigDecimal("2000.00"),
                     new BigDecimal("-160.00"),
@@ -65,7 +68,10 @@ class NutritionStatisticsControllerTest {
                 .param("fromDate", "2026-03-26")
                 .param("toDate", "2026-04-08"))
             .andExpect(status().isOk())
+            .andExpect(jsonPath("$.weeklyAverageWeightKg").value(82.4))
+            .andExpect(jsonPath("$.monthlyAverageWeightKg").value(81.9))
             .andExpect(jsonPath("$.points[0].entryDate").value("2026-04-08"))
+            .andExpect(jsonPath("$.points[0].weightKg").value(82.4))
             .andExpect(jsonPath("$.points[0].calorieBalance").value(-160.00));
 
         verify(nutritionHistoryService).getStatistics(userId, LocalDate.of(2026, 3, 26), LocalDate.of(2026, 4, 8));

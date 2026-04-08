@@ -37,6 +37,7 @@ class NutritionHistoryServiceTest {
         entity.setId(UUID.randomUUID());
         entity.setUserId(userId);
         entity.setEntryDate(entryDate);
+        entity.setWeightKg(new BigDecimal("82.40"));
         entity.setCaloriesConsumedKcal(new BigDecimal("1640.00"));
         entity.setCalorieTargetKcal(new BigDecimal("2100.00"));
         entity.setProteinGrams(new BigDecimal("108.00"));
@@ -47,6 +48,7 @@ class NutritionHistoryServiceTest {
 
         TodaySummaryResponse summary = service.getTodaySummary(userId, entryDate);
 
+        assertThat(summary.weightKg()).isEqualByComparingTo("82.40");
         assertThat(summary.consumedCalories()).isEqualByComparingTo("1640.00");
         assertThat(summary.dailyTargetCalories()).isEqualByComparingTo("2100.00");
         assertThat(summary.remainingCalories()).isEqualByComparingTo("460.00");
@@ -65,6 +67,7 @@ class NutritionHistoryServiceTest {
         first.setId(UUID.randomUUID());
         first.setUserId(userId);
         first.setEntryDate(fromDate);
+        first.setWeightKg(new BigDecimal("82.34"));
         first.setCaloriesConsumedKcal(new BigDecimal("1800.00"));
         first.setCalorieTargetKcal(new BigDecimal("2000.00"));
         first.setProteinGrams(new BigDecimal("110.00"));
@@ -75,6 +78,7 @@ class NutritionHistoryServiceTest {
         second.setId(UUID.randomUUID());
         second.setUserId(userId);
         second.setEntryDate(toDate);
+        second.setWeightKg(new BigDecimal("81.86"));
         second.setCaloriesConsumedKcal(new BigDecimal("2150.00"));
         second.setCalorieTargetKcal(new BigDecimal("2000.00"));
         second.setProteinGrams(new BigDecimal("125.00"));
@@ -91,8 +95,12 @@ class NutritionHistoryServiceTest {
         NutritionStatisticsResponse response = service.getStatistics(userId, fromDate, toDate);
 
         assertThat(response.points()).hasSize(2);
+        assertThat(response.points().get(0).weightKg()).isEqualByComparingTo("82.3");
+        assertThat(response.points().get(1).weightKg()).isEqualByComparingTo("81.9");
         assertThat(response.points().get(0).calorieBalance()).isEqualByComparingTo("-200.00");
         assertThat(response.points().get(1).calorieBalance()).isEqualByComparingTo("150.00");
+        assertThat(response.weeklyAverageWeightKg()).isEqualByComparingTo("82.1");
+        assertThat(response.monthlyAverageWeightKg()).isEqualByComparingTo("82.1");
         assertThat(response.weeklySummary().calorieBalance()).isEqualByComparingTo("-10050.00");
         assertThat(response.monthlySummary().calorieBalance()).isEqualByComparingTo("-50.00");
     }
@@ -166,6 +174,32 @@ class NutritionHistoryServiceTest {
         assertThat(persisted.getEntryDate()).isEqualTo(entryDate);
         assertThat(persisted.getCaloriesConsumedKcal()).isEqualByComparingTo("2200.00");
         assertThat(saved.calorieBalanceKcal()).contains(new BigDecimal("300.00"));
+    }
+
+    @Test
+    void updateWeightPreservesExistingNutritionValues() {
+        UUID userId = UUID.randomUUID();
+        LocalDate entryDate = LocalDate.of(2026, 4, 5);
+        DailyNutritionEntryEntity existing = new DailyNutritionEntryEntity();
+        existing.setId(UUID.randomUUID());
+        existing.setUserId(userId);
+        existing.setEntryDate(entryDate);
+        existing.setCaloriesConsumedKcal(new BigDecimal("1800.00"));
+        existing.setCalorieTargetKcal(new BigDecimal("2000.00"));
+        existing.setProteinGrams(new BigDecimal("120.00"));
+        existing.setFatGrams(new BigDecimal("60.00"));
+        existing.setFiberGrams(new BigDecimal("20.00"));
+        existing.setNotes("old");
+
+        when(repository.findByUserIdAndEntryDate(userId, entryDate)).thenReturn(Optional.of(existing));
+        when(repository.save(any(DailyNutritionEntryEntity.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        var saved = service.updateWeight(userId, entryDate, new BigDecimal("81.74"));
+
+        assertThat(saved.weightKg()).isEqualByComparingTo("81.74");
+        assertThat(saved.caloriesConsumedKcal()).isEqualByComparingTo("1800.00");
+        assertThat(saved.proteinGrams()).isEqualByComparingTo("120.00");
+        assertThat(saved.notes()).isEqualTo("old");
     }
 
     @Test
