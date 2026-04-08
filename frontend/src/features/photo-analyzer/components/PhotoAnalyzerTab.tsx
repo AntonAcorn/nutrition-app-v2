@@ -1,5 +1,5 @@
 import { ChangeEvent, useMemo, useState } from 'react'
-import { APP_USER_ID } from '../../../shared/config/appUser'
+import { LIVE_APP_USER_ID } from '../../../shared/config/appUser'
 import { formatLocalDateInputValue } from '../../../shared/lib/date'
 import { toNumber } from '../../../shared/lib/number'
 import type { DraftItem, PhotoAnalysisDraft } from '../../../shared/types/nutrition'
@@ -81,7 +81,7 @@ export function PhotoAnalyzerTab({ onConfirmed }: PhotoAnalyzerTabProps) {
     try {
       const formData = new FormData()
       formData.append('file', file)
-      formData.append('userId', APP_USER_ID)
+      formData.append('userId', LIVE_APP_USER_ID)
       formData.append('entryDate', currentEntryDate())
       formData.append('userNote', userNote)
       formData.append('locale', 'ru')
