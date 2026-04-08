@@ -3,7 +3,7 @@ import type { TodaySummary } from '../../../shared/types/nutrition'
 const todaySummaryMock = {
   dateLabel: 'Сегодня',
   consumedCalories: 1640,
-  dailyTargetCalories: 2100,
+  dailyTargetCalories: 2000,
   proteinGrams: 108,
   fiberGrams: 24,
 }
