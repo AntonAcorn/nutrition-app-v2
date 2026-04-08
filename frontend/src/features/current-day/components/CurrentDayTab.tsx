@@ -5,9 +5,10 @@ import type { TodaySummary } from '../../../shared/types/nutrition'
 
 interface CurrentDayTabProps {
   refreshToken?: number
+  successMessage?: string
 }
 
-export function CurrentDayTab({ refreshToken = 0 }: CurrentDayTabProps) {
+export function CurrentDayTab({ refreshToken = 0, successMessage = '' }: CurrentDayTabProps) {
   const [summary, setSummary] = useState<TodaySummary | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
@@ -26,7 +27,7 @@ export function CurrentDayTab({ refreshToken = 0 }: CurrentDayTabProps) {
         }
       } catch (err) {
         if (!cancelled) {
-          setError(err instanceof Error ? err.message : 'Не удалось загрузить current day summary')
+          setError(err instanceof Error ? err.message : 'Не удалось загрузить сводку за день')
         }
       } finally {
         if (!cancelled) {
@@ -45,13 +46,14 @@ export function CurrentDayTab({ refreshToken = 0 }: CurrentDayTabProps) {
     <section className="screen-section">
       <header className="screen-header">
         <div>
-          <p className="screen-header__eyebrow">Current day</p>
+          <p className="screen-header__eyebrow">Текущий день</p>
           <h2>Сегодняшняя сводка</h2>
         </div>
-        <p className="screen-header__meta">Current day теперь загружается из backend.</p>
+        <p className="screen-header__meta">Данные загружаются из backend и обновляются после сохранения анализа.</p>
       </header>
 
-      {loading ? <section className="panel detail-panel"><p>Загружаем summary...</p></section> : null}
+      {successMessage ? <section className="panel detail-panel"><p className="success-text">{successMessage}</p></section> : null}
+      {loading ? <section className="panel detail-panel"><p>Загружаем сводку...</p></section> : null}
       {!loading && error ? <section className="panel detail-panel"><p className="error-text">{error}</p></section> : null}
 
       {!loading && !error && summary ? (
@@ -60,11 +62,11 @@ export function CurrentDayTab({ refreshToken = 0 }: CurrentDayTabProps) {
 
           <section className="panel detail-panel">
             <div className="detail-panel__row">
-              <span>Daily target</span>
-              <strong>{summary.dailyTargetCalories} kcal</strong>
+              <span>Дневная цель</span>
+              <strong>{summary.dailyTargetCalories} ккал</strong>
             </div>
             <div className="detail-panel__row">
-              <span>Date</span>
+              <span>Дата</span>
               <strong>{summary.dateLabel}</strong>
             </div>
           </section>

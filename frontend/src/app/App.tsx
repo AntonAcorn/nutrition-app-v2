@@ -12,10 +12,12 @@ type TabKey = (typeof tabs)[keyof typeof tabs]
 export default function App() {
   const [activeTab, setActiveTab] = useState<TabKey>(tabs.currentDay)
   const [summaryRefreshToken, setSummaryRefreshToken] = useState(0)
+  const [daySuccessMessage, setDaySuccessMessage] = useState('')
 
   function handleDraftConfirmed() {
-    setSummaryRefreshToken((current) => current + 1)
     setActiveTab(tabs.currentDay)
+    setSummaryRefreshToken((current) => current + 1)
+    setDaySuccessMessage('Анализ сохранён, сводка за день обновляется.')
   }
 
   return (
@@ -23,12 +25,12 @@ export default function App() {
       <header className="app-header">
         <div>
           <p className="app-header__eyebrow">Nutrition App v2</p>
-          <h1>Dashboard</h1>
+          <h1>Панель питания</h1>
         </div>
       </header>
 
       <section className="tabs-shell">
-        <div className="tabs-header" role="tablist" aria-label="Nutrition app sections">
+        <div className="tabs-header" role="tablist" aria-label="Разделы приложения">
           <button
             type="button"
             role="tab"
@@ -36,7 +38,7 @@ export default function App() {
             aria-selected={activeTab === tabs.currentDay}
             onClick={() => setActiveTab(tabs.currentDay)}
           >
-            Current day
+            Текущий день
           </button>
           <button
             type="button"
@@ -45,12 +47,12 @@ export default function App() {
             aria-selected={activeTab === tabs.photoAnalyzer}
             onClick={() => setActiveTab(tabs.photoAnalyzer)}
           >
-            Photo analyzer
+            Анализатор фото
           </button>
         </div>
 
         <div className="tabs-body">
-          {activeTab === tabs.currentDay ? <CurrentDayTab refreshToken={summaryRefreshToken} /> : null}
+          {activeTab === tabs.currentDay ? <CurrentDayTab refreshToken={summaryRefreshToken} successMessage={daySuccessMessage} /> : null}
           {activeTab === tabs.photoAnalyzer ? <PhotoAnalyzerTab onConfirmed={handleDraftConfirmed} /> : null}
         </div>
       </section>
