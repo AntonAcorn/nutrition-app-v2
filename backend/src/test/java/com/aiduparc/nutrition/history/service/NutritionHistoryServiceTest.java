@@ -5,6 +5,8 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.aiduparc.nutrition.history.api.TodaySummaryResponse;
+
 import com.aiduparc.nutrition.history.model.DailyNutritionEntryEntity;
 import com.aiduparc.nutrition.history.repository.DailyNutritionEntryRepository;
 import java.math.BigDecimal;
@@ -26,6 +28,62 @@ class NutritionHistoryServiceTest {
 
     @InjectMocks
     private NutritionHistoryService service;
+
+    @Test
+    void getTodaySummaryReturnsPersistedValues() {
+        UUID userId = UUID.randomUUID();
+        LocalDate entryDate = LocalDate.of(2026, 4, 8);
+        DailyNutritionEntryEntity entity = new DailyNutritionEntryEntity();
+        entity.setId(UUID.randomUUID());
+        entity.setUserId(userId);
+        entity.setEntryDate(entryDate);
+        entity.setCaloriesConsumedKcal(new BigDecimal("1640.00"));
+        entity.setCalorieTargetKcal(new BigDecimal("2100.00"));
+        entity.setProteinGrams(new BigDecimal("108.00"));
+        entity.setFiberGrams(new BigDecimal("24.00"));
+
+        when(repository.findByUserIdAndEntryDate(userId, entryDate)).thenReturn(Optional.of(entity));
+
+        TodaySummaryResponse summary = service.getTodaySummary(userId, entryDate);
+
+        assertThat(summary.consumedCalories()).isEqualByComparingTo("1640.00");
+        assertThat(summary.dailyTargetCalories()).isEqualByComparingTo("2100.00");
+        assertThat(summary.remainingCalories()).isEqualByComparingTo("460.00");
+        assertThat(summary.proteinGrams()).isEqualByComparingTo("108.00");
+        assertThat(summary.fiberGrams()).isEqualByComparingTo("24.00");
+    }
+
+    @Test
+    void addToDailyTotalsAccumulatesExistingDayValues() {
+        UUID userId = UUID.randomUUID();
+        LocalDate entryDate = LocalDate.of(2026, 4, 8);
+        DailyNutritionEntryEntity existing = new DailyNutritionEntryEntity();
+        existing.setId(UUID.randomUUID());
+        existing.setUserId(userId);
+        existing.setEntryDate(entryDate);
+        existing.setCaloriesConsumedKcal(new BigDecimal("1200.00"));
+        existing.setCalorieTargetKcal(new BigDecimal("2100.00"));
+        existing.setProteinGrams(new BigDecimal("80.00"));
+        existing.setFiberGrams(new BigDecimal("18.00"));
+        existing.setNotes("breakfast");
+
+        when(repository.findByUserIdAndEntryDate(userId, entryDate)).thenReturn(Optional.of(existing));
+        when(repository.save(any(DailyNutritionEntryEntity.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        var saved = service.addToDailyTotals(new NutritionHistoryService.AddToDailyTotalsCommand(
+            userId,
+            entryDate,
+            new BigDecimal("560.00"),
+            new BigDecimal("30.00"),
+            new BigDecimal("8.00"),
+            "lunch"
+        ));
+
+        assertThat(saved.caloriesConsumedKcal()).isEqualByComparingTo("1760.00");
+        assertThat(saved.proteinGrams()).isEqualByComparingTo("110.00");
+        assertThat(saved.fiberGrams()).isEqualByComparingTo("26.00");
+        assertThat(saved.notes()).isEqualTo("breakfast\nlunch");
+    }
 
     @Test
     void upsertCreatesNewEntryWhenDateIsMissing() {
