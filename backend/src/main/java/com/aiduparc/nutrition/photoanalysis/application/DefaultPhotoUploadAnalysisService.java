@@ -13,24 +13,25 @@ public class DefaultPhotoUploadAnalysisService implements PhotoUploadAnalysisSer
 
     private final PhotoAnalysisService photoAnalysisService;
     private final PhotoAnalysisDraftService draftService;
+    private final ImageNormalizationService imageNormalizationService;
 
     public DefaultPhotoUploadAnalysisService(
             PhotoAnalysisService photoAnalysisService,
-            PhotoAnalysisDraftService draftService
+            PhotoAnalysisDraftService draftService,
+            ImageNormalizationService imageNormalizationService
     ) {
         this.photoAnalysisService = photoAnalysisService;
         this.draftService = draftService;
+        this.imageNormalizationService = imageNormalizationService;
     }
 
     @Override
     public PhotoAnalysisDraftResponse analyzeAndCreateDraft(PhotoUploadAnalysisRequest request) {
-        String contentType = request.contentType() != null && !request.contentType().isBlank()
-                ? request.contentType()
-                : "image/jpeg";
+        var normalizedImage = imageNormalizationService.normalize(request.imageBytes(), request.contentType());
 
         String imageDataUrl = "data:%s;base64,%s".formatted(
-                contentType,
-                Base64.getEncoder().encodeToString(request.imageBytes())
+                normalizedImage.contentType(),
+                Base64.getEncoder().encodeToString(normalizedImage.bytes())
         );
 
         var analysis = photoAnalysisService.analyze(new PhotoAnalysisRequest(
