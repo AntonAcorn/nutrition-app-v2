@@ -33,6 +33,9 @@ class DefaultPhotoUploadAnalysisServiceTest {
     @Mock
     private PhotoAnalysisDraftService draftService;
 
+    @Mock
+    private ImageNormalizationService imageNormalizationService;
+
     @InjectMocks
     private DefaultPhotoUploadAnalysisService service;
 
@@ -78,6 +81,9 @@ class DefaultPhotoUploadAnalysisServiceTest {
                 OffsetDateTime.now()
         );
 
+        when(imageNormalizationService.normalize(any(), any())).thenReturn(
+                new ImageNormalizationService.NormalizedImage("normalized-image".getBytes(), "image/jpeg")
+        );
         when(photoAnalysisService.analyze(any())).thenReturn(analysis);
         when(draftService.create(any())).thenReturn(draftResponse);
 
@@ -98,6 +104,7 @@ class DefaultPhotoUploadAnalysisServiceTest {
         verify(photoAnalysisService).analyze(analysisCaptor.capture());
         assertThat(analysisCaptor.getValue().imageUrl()).startsWith("data:image/jpeg;base64,");
 
+        verify(imageNormalizationService).normalize(any(), any());
         verify(draftService).create(any());
     }
 }
