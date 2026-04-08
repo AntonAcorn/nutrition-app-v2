@@ -1,10 +1,7 @@
+import { formatLocalDateInputValue } from '../../../shared/lib/date'
 import type { NutritionStatisticsResponse } from '../../../shared/types/nutrition'
 
 const DEFAULT_USER_ID = '00000000-0000-0000-0000-000000000001'
-
-function formatIsoDate(date: Date): string {
-  return date.toISOString().slice(0, 10)
-}
 
 function getDefaultRange() {
   const toDate = new Date()
@@ -12,8 +9,8 @@ function getDefaultRange() {
   fromDate.setDate(toDate.getDate() - 13)
 
   return {
-    fromDate: formatIsoDate(fromDate),
-    toDate: formatIsoDate(toDate),
+    fromDate: formatLocalDateInputValue(fromDate),
+    toDate: formatLocalDateInputValue(toDate),
   }
 }
 
