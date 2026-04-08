@@ -138,65 +138,53 @@ body {
   margin-bottom: 18px;
 }
 
-.chart-bars {
+.line-chart {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(28px, 1fr));
-  gap: 10px;
-  align-items: end;
-  min-height: 220px;
+  gap: 12px;
 }
 
-.chart-bars__item {
+.line-chart__svg {
+  width: 100%;
+  height: auto;
+  overflow: visible;
+}
+
+.line-chart__path {
+  fill: none;
+  stroke-width: 4;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.line-chart__path--calories {
+  stroke: #f97316;
+}
+
+.line-chart__path--protein {
+  stroke: #2563eb;
+}
+
+.line-chart__path--fat {
+  stroke: #db2777;
+}
+
+.line-chart__path--fiber {
+  stroke: #16a34a;
+}
+
+.line-chart__path--target {
+  stroke: #0f172a;
+  stroke-dasharray: 10 8;
+  opacity: 0.55;
+}
+
+.line-chart__labels {
   display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(36px, 1fr));
   gap: 8px;
-  justify-items: center;
-}
-
-.chart-bars__track {
-  position: relative;
-  width: 100%;
-  min-height: 180px;
-  display: flex;
-  align-items: end;
-  justify-content: center;
-  padding: 8px 0;
-  border-radius: 16px;
-  background: linear-gradient(180deg, #f8fafc 0%, #eef2f7 100%);
-}
-
-.chart-bars__value {
-  width: 100%;
-  border-radius: 12px 12px 8px 8px;
-}
-
-.chart-bars__value--calories {
-  background: linear-gradient(180deg, #fb923c 0%, #f97316 100%);
-}
-
-.chart-bars__value--protein {
-  background: linear-gradient(180deg, #60a5fa 0%, #2563eb 100%);
-}
-
-.chart-bars__value--fat {
-  background: linear-gradient(180deg, #f472b6 0%, #db2777 100%);
-}
-
-.chart-bars__value--fiber {
-  background: linear-gradient(180deg, #4ade80 0%, #16a34a 100%);
-}
-
-.chart-bars__target {
-  position: absolute;
-  left: 4px;
-  right: 4px;
-  border-top: 2px dashed #0f172a;
-  opacity: 0.7;
-}
-
-.chart-bars__label,
-.chart-bars__balance {
-  font-size: 0.8rem;
-  color: #475569;
+  color: #64748b;
+  font-size: 0.78rem;
+  text-align: center;
 }
 
 .chart-bars__balance--over,
@@ -513,6 +501,10 @@ body {
   .statistics-table__head,
   .statistics-table__row {
     grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .line-chart__labels {
+    grid-template-columns: repeat(7, minmax(0, 1fr));
   }
 
   .summary-card {

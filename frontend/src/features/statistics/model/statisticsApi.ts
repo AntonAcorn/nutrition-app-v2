@@ -1,7 +1,6 @@
+import { APP_USER_ID } from '../../../shared/config/appUser'
 import { formatLocalDateInputValue } from '../../../shared/lib/date'
 import type { NutritionStatisticsResponse } from '../../../shared/types/nutrition'
-
-const DEFAULT_USER_ID = '00000000-0000-0000-0000-000000000001'
 
 function getDefaultRange() {
   const toDate = new Date()
@@ -17,7 +16,7 @@ function getDefaultRange() {
 export async function fetchNutritionStatistics(): Promise<NutritionStatisticsResponse> {
   const { fromDate, toDate } = getDefaultRange()
   const response = await fetch(
-    `/api/history/statistics?userId=${DEFAULT_USER_ID}&fromDate=${fromDate}&toDate=${toDate}`,
+    `/api/history/statistics?userId=${APP_USER_ID}&fromDate=${fromDate}&toDate=${toDate}`,
   )
 
   if (!response.ok) {
