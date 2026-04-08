@@ -1,3 +1,4 @@
+import { formatLocalDateInputValue } from '../../../shared/lib/date'
 import type { TodaySummary } from '../../../shared/types/nutrition'
 
 interface TodaySummaryApiResponse {
@@ -14,7 +15,7 @@ const DEFAULT_USER_ID = '00000000-0000-0000-0000-000000000001'
 const HARD_CODED_DAILY_TARGET_CALORIES = 2000
 
 function currentEntryDate(): string {
-  return new Date().toISOString().slice(0, 10)
+  return formatLocalDateInputValue(new Date())
 }
 
 function formatDateLabel(entryDate: string): string {
