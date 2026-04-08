@@ -115,10 +115,11 @@ export function PhotoAnalyzerTab({ onConfirmed }: PhotoAnalyzerTabProps) {
     setSuccessMessage('')
 
     const payload = {
-      ...draft,
-      totals: recalculatedTotals,
+      caloriesKcal: recalculatedTotals.calories,
+      proteinG: recalculatedTotals.protein,
       fatG: recalculatedTotals.fat,
-      needsUserConfirmation: false,
+      fiberG: recalculatedTotals.fiber,
+      notes: draft.notes.join('\n'),
     }
 
     try {
