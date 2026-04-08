@@ -1,5 +1,7 @@
 package com.aiduparc.nutrition.history.service;
 
+import com.aiduparc.nutrition.history.api.NutritionStatisticsPointResponse;
+import com.aiduparc.nutrition.history.api.NutritionStatisticsResponse;
 import com.aiduparc.nutrition.history.api.TodaySummaryResponse;
 import com.aiduparc.nutrition.history.model.DailyNutritionEntryEntity;
 import com.aiduparc.nutrition.history.model.DailyNutritionEntrySnapshot;
@@ -69,6 +71,23 @@ public class NutritionHistoryService {
         );
 
         return response;
+    }
+
+    public NutritionStatisticsResponse getStatistics(UUID userId, LocalDate fromInclusive, LocalDate toInclusive) {
+        List<NutritionStatisticsPointResponse> points = findByUserAndRange(userId, fromInclusive, toInclusive)
+            .stream()
+            .map(snapshot -> new NutritionStatisticsPointResponse(
+                snapshot.entryDate(),
+                defaultBigDecimal(snapshot.caloriesConsumedKcal()),
+                defaultBigDecimal(snapshot.calorieTargetKcal()),
+                defaultBigDecimal(snapshot.caloriesConsumedKcal()).subtract(defaultBigDecimal(snapshot.calorieTargetKcal())),
+                defaultBigDecimal(snapshot.proteinGrams()),
+                defaultBigDecimal(snapshot.fatGrams()),
+                defaultBigDecimal(snapshot.fiberGrams())
+            ))
+            .toList();
+
+        return new NutritionStatisticsResponse(userId, fromInclusive, toInclusive, points);
     }
 
     @Transactional

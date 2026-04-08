@@ -1,9 +1,11 @@
 import { useState } from 'react'
 import { CurrentDayTab } from '../features/current-day/components/CurrentDayTab'
 import { PhotoAnalyzerTab } from '../features/photo-analyzer/components/PhotoAnalyzerTab'
+import { StatisticsTab } from '../features/statistics/components/StatisticsTab'
 
 const tabs = {
   currentDay: 'current-day',
+  statistics: 'statistics',
   photoAnalyzer: 'photo-analyzer',
 } as const
 
@@ -43,6 +45,15 @@ export default function App() {
           <button
             type="button"
             role="tab"
+            className={`tab-button ${activeTab === tabs.statistics ? 'tab-button--active' : ''}`}
+            aria-selected={activeTab === tabs.statistics}
+            onClick={() => setActiveTab(tabs.statistics)}
+          >
+            Статистика
+          </button>
+          <button
+            type="button"
+            role="tab"
             className={`tab-button ${activeTab === tabs.photoAnalyzer ? 'tab-button--active' : ''}`}
             aria-selected={activeTab === tabs.photoAnalyzer}
             onClick={() => setActiveTab(tabs.photoAnalyzer)}
@@ -53,6 +64,7 @@ export default function App() {
 
         <div className="tabs-body">
           {activeTab === tabs.currentDay ? <CurrentDayTab refreshToken={summaryRefreshToken} successMessage={daySuccessMessage} /> : null}
+          {activeTab === tabs.statistics ? <StatisticsTab /> : null}
           {activeTab === tabs.photoAnalyzer ? <PhotoAnalyzerTab onConfirmed={handleDraftConfirmed} /> : null}
         </div>
       </section>

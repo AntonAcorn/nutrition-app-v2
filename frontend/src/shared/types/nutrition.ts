@@ -35,3 +35,20 @@ export interface PhotoAnalysisDraft {
   confidence: number
   needsUserConfirmation: boolean
 }
+
+export interface NutritionStatisticsPoint {
+  entryDate: string
+  consumedCalories: number
+  calorieTarget: number
+  calorieBalance: number
+  proteinGrams: number
+  fatGrams: number
+  fiberGrams: number
+}
+
+export interface NutritionStatisticsResponse {
+  userId: string
+  fromDate: string
+  toDate: string
+  points: NutritionStatisticsPoint[]
+}
