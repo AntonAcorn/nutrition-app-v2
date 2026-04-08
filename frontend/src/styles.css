@@ -235,6 +235,10 @@ body {
   stroke: #16a34a;
 }
 
+.line-chart__path--weight {
+  stroke: #7c3aed;
+}
+
 .line-chart__path--target {
   stroke: #0f172a;
   stroke-dasharray: 10 8;
@@ -274,7 +278,7 @@ body {
 .statistics-table__head,
 .statistics-table__row {
   display: grid;
-  grid-template-columns: minmax(120px, 1.1fr) repeat(6, minmax(84px, 1fr));
+  grid-template-columns: minmax(120px, 1.1fr) repeat(7, minmax(84px, 1fr));
   gap: 12px;
   align-items: center;
 }
@@ -384,6 +388,45 @@ body {
   border-top: 1px solid #e2e8f0;
 }
 
+.weight-panel__content {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 18px;
+}
+
+.weight-panel__form {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: end;
+  gap: 12px;
+}
+
+.weight-panel__form label {
+  display: grid;
+  gap: 6px;
+  color: #475569;
+  min-width: min(240px, 100%);
+}
+
+.weight-panel__form input {
+  border: 1px solid #cbd5e1;
+  background: #ffffff;
+  color: #0f172a;
+  border-radius: 12px;
+  padding: 10px 12px;
+}
+
+.weight-panel__form button {
+  border: 0;
+  border-radius: 14px;
+  padding: 12px 18px;
+  background: #0f172a;
+  color: #f8fafc;
+  font-weight: 700;
+  cursor: pointer;
+}
+
 .analyzer-panel,
 .final-entry-panel {
   padding: 22px;
@@ -398,17 +441,29 @@ body {
   border-bottom: 1px solid #e2e8f0;
 }
 
+.upload-panel > * {
+  min-width: 0;
+}
+
 .upload-panel__controls {
   display: grid;
   gap: 12px;
+  min-width: 0;
+}
+
+.upload-panel__note {
+  min-width: 0;
 }
 
 .upload-panel__note textarea {
+  width: 100%;
+  min-width: 0;
   border: 1px solid #cbd5e1;
   background: #ffffff;
   color: #0f172a;
   border-radius: 12px;
   padding: 10px 12px;
+  resize: vertical;
 }
 
 .upload-button {
@@ -595,6 +650,11 @@ body {
     flex-direction: column;
     align-items: flex-start;
   }
+
+  .weight-panel__content {
+    flex-direction: column;
+    align-items: flex-start;
+  }
 }
 
 @media (max-width: 720px) {
@@ -640,6 +700,25 @@ body {
   .range-selector {
     width: 100%;
     justify-content: space-between;
+  }
+
+  .upload-panel {
+    grid-template-columns: 1fr;
+  }
+
+  .upload-button,
+  .weight-panel__form button,
+  .weight-panel__form label {
+    width: 100%;
+  }
+
+  .analyzer-panel__header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .status-badge {
+    white-space: normal;
   }
 
   .analyzer-panel,

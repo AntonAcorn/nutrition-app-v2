@@ -5,6 +5,7 @@ import java.time.LocalDate;
 
 public record NutritionStatisticsPointResponse(
     LocalDate entryDate,
+    BigDecimal weightKg,
     BigDecimal consumedCalories,
     BigDecimal calorieTarget,
     BigDecimal calorieBalance,

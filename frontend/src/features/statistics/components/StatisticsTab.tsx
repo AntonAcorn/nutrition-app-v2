@@ -47,6 +47,18 @@ function SummaryCard({ title, summary }: { title: string; summary: NutritionBala
   )
 }
 
+function WeightAverageCard({ title, value }: { title: string; value: number | null }) {
+  return (
+    <section className="summary-card summary-card--stats">
+      <span className="summary-card__label">{title}</span>
+      <strong className="summary-card__value">
+        {value == null ? '—' : value.toFixed(1)}
+        <span className="summary-card__unit"> кг</span>
+      </strong>
+    </section>
+  )
+}
+
 function RangeSelector({ value, onChange }: { value: RangeDays; onChange: (value: RangeDays) => void }) {
   return (
     <div className="range-selector" role="tablist" aria-label="Диапазон статистики">
@@ -75,11 +87,11 @@ function LineChart({
   title: string
   unit: string
   points: NutritionStatisticsPoint[]
-  valueKey: 'consumedCalories' | 'proteinGrams' | 'fatGrams' | 'fiberGrams'
+  valueKey: 'weightKg' | 'consumedCalories' | 'proteinGrams' | 'fatGrams' | 'fiberGrams'
   targetKey?: 'calorieTarget'
   colorClass: string
 }) {
-  const values = points.map((point) => point[valueKey])
+  const values = points.map((point) => point[valueKey] ?? 0)
   const targets = targetKey ? points.map((point) => point[targetKey]) : []
   const width = 760
   const height = 220
@@ -144,6 +156,7 @@ function StatisticsTable({ points }: { points: NutritionStatisticsPoint[] }) {
       <div className="statistics-table">
         <div className="statistics-table__head statistics-table__row">
           <span>Дата</span>
+          <span>Вес</span>
           <span>Ккал</span>
           <span>Цель</span>
           <span>Баланс</span>
@@ -154,6 +167,7 @@ function StatisticsTable({ points }: { points: NutritionStatisticsPoint[] }) {
         {orderedPoints.map((point) => (
           <div className="statistics-table__row" key={point.entryDate}>
             <span>{point.entryDate}</span>
+            <span>{point.weightKg == null ? '—' : point.weightKg.toFixed(1)}</span>
             <strong>{point.consumedCalories}</strong>
             <span>{point.calorieTarget}</span>
             <strong className={point.calorieBalance > 0 ? 'text-over' : 'text-under'}>{formatSigned(point.calorieBalance)}</strong>
@@ -203,7 +217,7 @@ export function StatisticsTab() {
   }, [rangeDays])
 
   const points = useMemo(() => data?.points ?? [], [data])
-  const selectedTitle = `${rangeDays} дней`
+  const selectedTitle = rangeDays === 30 ? 'месяц' : `${rangeDays} дней`
 
   return (
     <section className="screen-section">
@@ -223,10 +237,14 @@ export function StatisticsTab() {
       {!loading && !error && data ? (
         <>
           <section className="current-day-grid">
-            <SummaryCard title={`Отклонение за ${selectedTitle}`} summary={data.selectedPeriodSummary} />
-            {rangeDays >= 7 ? <SummaryCard title="Отклонение за неделю" summary={data.weeklySummary} /> : null}
-            {rangeDays >= 30 ? <SummaryCard title="Отклонение за месяц" summary={data.monthlySummary} /> : null}
+            <SummaryCard
+              title={`Отклонение за ${selectedTitle}`}
+              summary={rangeDays === 30 ? data.monthlySummary : data.selectedPeriodSummary}
+            />
+            <WeightAverageCard title="Средний вес за неделю" value={data.weeklyAverageWeightKg} />
+            <WeightAverageCard title="Средний вес за месяц" value={data.monthlyAverageWeightKg} />
           </section>
+          <LineChart title="Вес" unit="кг" points={points} valueKey="weightKg" colorClass="line-chart__path--weight" />
           <LineChart title="Калории" unit="ккал" points={points} valueKey="consumedCalories" targetKey="calorieTarget" colorClass="line-chart__path--calories" />
           <div className="statistics-grid">
             <LineChart title="Белок" unit="г" points={points} valueKey="proteinGrams" colorClass="line-chart__path--protein" />

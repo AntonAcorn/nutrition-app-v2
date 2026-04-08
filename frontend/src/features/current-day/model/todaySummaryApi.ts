@@ -4,6 +4,7 @@ import type { TodaySummary } from '../../../shared/types/nutrition'
 
 interface TodaySummaryApiResponse {
   entryDate: string
+  weightKg: number | null
   consumedCalories: number
   dailyTargetCalories: number
   remainingCalories: number
@@ -39,6 +40,7 @@ export async function fetchTodaySummary(): Promise<TodaySummary> {
 
   return {
     dateLabel: formatDateLabel(payload.entryDate),
+    weightKg: payload.weightKg,
     consumedCalories: payload.consumedCalories,
     dailyTargetCalories: HARD_CODED_DAILY_TARGET_CALORIES,
     remainingCalories: Math.max(0, HARD_CODED_DAILY_TARGET_CALORIES - payload.consumedCalories),
