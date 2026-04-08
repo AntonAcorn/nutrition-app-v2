@@ -1,4 +1,5 @@
 import { ChangeEvent, useMemo, useState } from 'react'
+import { APP_USER_ID } from '../../../shared/config/appUser'
 import { formatLocalDateInputValue } from '../../../shared/lib/date'
 import { toNumber } from '../../../shared/lib/number'
 import type { DraftItem, PhotoAnalysisDraft } from '../../../shared/types/nutrition'
@@ -9,8 +10,6 @@ import { calculateTotals, normalizeDraft } from '../model/photoAnalysis'
 interface PhotoAnalyzerTabProps {
   onConfirmed?: () => void
 }
-
-const DEFAULT_USER_ID = '00000000-0000-0000-0000-000000000001'
 
 function currentEntryDate(): string {
   return formatLocalDateInputValue(new Date())
@@ -82,7 +81,7 @@ export function PhotoAnalyzerTab({ onConfirmed }: PhotoAnalyzerTabProps) {
     try {
       const formData = new FormData()
       formData.append('file', file)
-      formData.append('userId', DEFAULT_USER_ID)
+      formData.append('userId', APP_USER_ID)
       formData.append('entryDate', currentEntryDate())
       formData.append('userNote', userNote)
       formData.append('locale', 'ru')

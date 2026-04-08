@@ -7,15 +7,50 @@ function formatSigned(value: number): string {
   return `${value}`
 }
 
-function MacroChart({ title, unit, values, targets, balances, accentClass }: {
+function formatShortDate(value: string): string {
+  const [year, month, day] = value.split('-')
+  return `${day}.${month}`
+}
+
+function buildLinePath(values: number[], width: number, height: number) {
+  if (values.length === 0) {
+    return ''
+  }
+
+  const max = Math.max(...values)
+  const min = Math.min(...values)
+  const range = Math.max(1, max - min)
+
+  return values
+    .map((value, index) => {
+      const x = values.length === 1 ? width / 2 : (index / (values.length - 1)) * width
+      const y = height - ((value - min) / range) * height
+      return `${index === 0 ? 'M' : 'L'} ${x.toFixed(1)} ${y.toFixed(1)}`
+    })
+    .join(' ')
+}
+
+function LineChart({
+  title,
+  unit,
+  points,
+  valueKey,
+  targetKey,
+  colorClass,
+}: {
   title: string
   unit: string
-  values: number[]
-  targets?: number[]
-  balances?: number[]
-  accentClass: string
+  points: NutritionStatisticsPoint[]
+  valueKey: 'consumedCalories' | 'proteinGrams' | 'fatGrams' | 'fiberGrams'
+  targetKey?: 'calorieTarget'
+  colorClass: string
 }) {
-  const maxValue = Math.max(1, ...values, ...(targets ?? []), ...((balances ?? []).map((value) => Math.abs(value))))
+  const values = points.map((point) => point[valueKey])
+  const targets = targetKey ? points.map((point) => point[targetKey]) : []
+  const width = 760
+  const height = 220
+  const valuePath = buildLinePath(values, width, height)
+  const targetPath = targets.length > 0 ? buildLinePath(targets, width, height) : ''
 
   return (
     <section className="panel statistics-panel">
@@ -24,22 +59,20 @@ function MacroChart({ title, unit, values, targets, balances, accentClass }: {
           <p className="screen-header__eyebrow">Статистика</p>
           <h3>{title}</h3>
         </div>
+        <p className="subtle-text">{unit}</p>
       </div>
 
-      <div className="chart-bars" aria-label={title}>
-        {values.map((value, index) => (
-          <div className="chart-bars__item" key={`${title}-${index}`}>
-            <div className="chart-bars__track">
-              <div className={`chart-bars__value ${accentClass}`} style={{ height: `${(value / maxValue) * 100}%` }} />
-              {targets ? <div className="chart-bars__target" style={{ bottom: `${(targets[index] / maxValue) * 100}%` }} /> : null}
-            </div>
-            <span className="chart-bars__label">{value}</span>
-            {balances ? <span className={`chart-bars__balance ${balances[index] > 0 ? 'chart-bars__balance--over' : 'chart-bars__balance--under'}`}>{formatSigned(balances[index])}</span> : null}
-          </div>
-        ))}
+      <div className="line-chart">
+        <svg viewBox={`0 0 ${width} ${height}`} className="line-chart__svg" role="img" aria-label={title}>
+          <path d={valuePath} className={`line-chart__path ${colorClass}`} />
+          {targetPath ? <path d={targetPath} className="line-chart__path line-chart__path--target" /> : null}
+        </svg>
+        <div className="line-chart__labels">
+          {points.map((point) => (
+            <span key={`${title}-${point.entryDate}`}>{formatShortDate(point.entryDate)}</span>
+          ))}
+        </div>
       </div>
-
-      <p className="subtle-text">Единицы: {unit}</p>
     </section>
   )
 }
@@ -114,14 +147,7 @@ export function StatisticsTab() {
     }
   }, [])
 
-  const points = data?.points ?? []
-
-  const calories = useMemo(() => points.map((point) => point.consumedCalories), [points])
-  const targets = useMemo(() => points.map((point) => point.calorieTarget), [points])
-  const balances = useMemo(() => points.map((point) => point.calorieBalance), [points])
-  const protein = useMemo(() => points.map((point) => point.proteinGrams), [points])
-  const fat = useMemo(() => points.map((point) => point.fatGrams), [points])
-  const fiber = useMemo(() => points.map((point) => point.fiberGrams), [points])
+  const points = useMemo(() => data?.points ?? [], [data])
 
   return (
     <section className="screen-section">
@@ -130,18 +156,18 @@ export function StatisticsTab() {
           <p className="screen-header__eyebrow">Статистика</p>
           <h2>История питания</h2>
         </div>
-        <p className="screen-header__meta">Последние 14 дней, с отклонением по калориям относительно дневной цели.</p>
+        <p className="screen-header__meta">Последние 14 дней, с кривыми по калориям и макросам.</p>
       </header>
 
       {loading ? <section className="panel detail-panel"><p>Загружаем статистику...</p></section> : null}
       {!loading && error ? <section className="panel detail-panel"><p className="error-text">{error}</p></section> : null}
       {!loading && !error && data ? (
         <>
-          <MacroChart title="Калории" unit="ккал" values={calories} targets={targets} balances={balances} accentClass="chart-bars__value--calories" />
+          <LineChart title="Калории" unit="ккал" points={points} valueKey="consumedCalories" targetKey="calorieTarget" colorClass="line-chart__path--calories" />
           <div className="statistics-grid">
-            <MacroChart title="Белок" unit="г" values={protein} accentClass="chart-bars__value--protein" />
-            <MacroChart title="Жиры" unit="г" values={fat} accentClass="chart-bars__value--fat" />
-            <MacroChart title="Клетчатка" unit="г" values={fiber} accentClass="chart-bars__value--fiber" />
+            <LineChart title="Белок" unit="г" points={points} valueKey="proteinGrams" colorClass="line-chart__path--protein" />
+            <LineChart title="Жиры" unit="г" points={points} valueKey="fatGrams" colorClass="line-chart__path--fat" />
+            <LineChart title="Клетчатка" unit="г" points={points} valueKey="fiberGrams" colorClass="line-chart__path--fiber" />
           </div>
           <StatisticsTable points={points} />
         </>

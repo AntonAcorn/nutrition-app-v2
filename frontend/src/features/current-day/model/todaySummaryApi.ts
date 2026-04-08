@@ -1,3 +1,4 @@
+import { APP_USER_ID } from '../../../shared/config/appUser'
 import { formatLocalDateInputValue } from '../../../shared/lib/date'
 import type { TodaySummary } from '../../../shared/types/nutrition'
 
@@ -11,7 +12,6 @@ interface TodaySummaryApiResponse {
   fiberGrams: number
 }
 
-const DEFAULT_USER_ID = '00000000-0000-0000-0000-000000000001'
 const HARD_CODED_DAILY_TARGET_CALORIES = 2000
 
 function currentEntryDate(): string {
@@ -28,7 +28,7 @@ function formatDateLabel(entryDate: string): string {
 
 export async function fetchTodaySummary(): Promise<TodaySummary> {
   const response = await fetch(
-    `/api/history/today-summary?userId=${DEFAULT_USER_ID}&entryDate=${currentEntryDate()}`,
+    `/api/history/today-summary?userId=${APP_USER_ID}&entryDate=${currentEntryDate()}`,
   )
 
   if (!response.ok) {
