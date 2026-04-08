@@ -34,6 +34,13 @@ public class NutritionHistoryService {
             .toList();
     }
 
+    public Optional<CurrentDaySummarySnapshot> findCurrentDaySummary(UUID userId, LocalDate currentDate) {
+        return repository
+            .findFirstByUserIdAndEntryDateLessThanEqualOrderByEntryDateDesc(userId, currentDate)
+            .map(DailyNutritionEntrySnapshot::fromEntity)
+            .map(CurrentDaySummarySnapshot::fromEntry);
+    }
+
     @Transactional
     public DailyNutritionEntrySnapshot upsert(UpsertDailyNutritionEntryCommand command) {
         DailyNutritionEntryEntity entity = repository

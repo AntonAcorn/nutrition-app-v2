@@ -1,4 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
+import { TodaySummaryBlock } from './features/today-summary/TodaySummaryBlock'
+import { getTodaySummary } from './features/today-summary/getTodaySummary'
 
 const numericFields = ['grams', 'calories', 'protein', 'fat', 'carbs', 'fiber']
 
@@ -101,6 +103,9 @@ export default function App() {
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
   const [finalEntry, setFinalEntry] = useState(null)
+  const [todaySummary, setTodaySummary] = useState(null)
+  const [todaySummaryLoading, setTodaySummaryLoading] = useState(true)
+  const [todaySummaryError, setTodaySummaryError] = useState('')
 
   const draftId = useMemo(() => {
     const params = new URLSearchParams(window.location.search)
@@ -134,7 +139,24 @@ export default function App() {
       }
     }
 
+    async function loadTodaySummary() {
+      setTodaySummaryLoading(true)
+      setTodaySummaryError('')
+
+      try {
+        const summary = await getTodaySummary(controller.signal)
+        setTodaySummary(summary)
+      } catch (err) {
+        if (err.name !== 'AbortError') {
+          setTodaySummaryError(err.message || 'Ошибка загрузки сводки дня')
+        }
+      } finally {
+        setTodaySummaryLoading(false)
+      }
+    }
+
     loadDraft()
+    loadTodaySummary()
     return () => controller.abort()
   }, [draftId])
 
@@ -241,6 +263,12 @@ export default function App() {
           <p className="eyebrow">Nutrition App v2</p>
           <h1>Draft review и подтверждение анализа фото</h1>
         </div>
+      </section>
+
+      <section className="section-panel">
+        {todaySummaryLoading ? <p>Загружаем Current Day...</p> : null}
+        {!todaySummaryLoading && todaySummaryError ? <p className="error-text">{todaySummaryError}</p> : null}
+        {!todaySummaryLoading && !todaySummaryError && todaySummary ? <TodaySummaryBlock summary={todaySummary} /> : null}
       </section>
 
       <section className="panel section-panel draft-review-panel">

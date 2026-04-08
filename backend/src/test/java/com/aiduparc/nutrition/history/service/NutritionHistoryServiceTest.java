@@ -63,6 +63,31 @@ class NutritionHistoryServiceTest {
     }
 
     @Test
+    void findCurrentDaySummaryReturnsLatestEntryAtOrBeforeCurrentDate() {
+        UUID userId = UUID.randomUUID();
+        LocalDate entryDate = LocalDate.of(2026, 4, 7);
+
+        DailyNutritionEntryEntity existing = new DailyNutritionEntryEntity();
+        existing.setId(UUID.randomUUID());
+        existing.setUserId(userId);
+        existing.setEntryDate(entryDate);
+        existing.setCaloriesConsumedKcal(new BigDecimal("1490.00"));
+        existing.setCalorieTargetKcal(new BigDecimal("2000.00"));
+        existing.setProteinGrams(new BigDecimal("97.00"));
+        existing.setFiberGrams(new BigDecimal("13.00"));
+
+        when(repository.findFirstByUserIdAndEntryDateLessThanEqualOrderByEntryDateDesc(userId, LocalDate.of(2026, 4, 8)))
+            .thenReturn(Optional.of(existing));
+
+        var summary = service.findCurrentDaySummary(userId, LocalDate.of(2026, 4, 8));
+
+        assertThat(summary).isPresent();
+        assertThat(summary.get().entryDate()).isEqualTo(entryDate);
+        assertThat(summary.get().consumedCalories()).isEqualByComparingTo("1490.00");
+        assertThat(summary.get().remainingCalories()).isEqualByComparingTo("510.00");
+    }
+
+    @Test
     void upsertUpdatesExistingEntryForSameUserAndDate() {
         UUID userId = UUID.randomUUID();
         LocalDate entryDate = LocalDate.of(2026, 4, 5);

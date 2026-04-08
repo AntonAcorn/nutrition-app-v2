@@ -16,4 +16,9 @@ public interface DailyNutritionEntryRepository extends JpaRepository<DailyNutrit
         LocalDate start,
         LocalDate end
     );
+
+    Optional<DailyNutritionEntryEntity> findFirstByUserIdAndEntryDateLessThanEqualOrderByEntryDateDesc(
+        UUID userId,
+        LocalDate entryDate
+    );
 }
