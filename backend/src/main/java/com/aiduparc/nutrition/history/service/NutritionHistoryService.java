@@ -10,6 +10,7 @@ import com.aiduparc.nutrition.history.repository.DailyNutritionEntryRepository;
 import jakarta.validation.constraints.NotNull;
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.YearMonth;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -75,10 +76,9 @@ public class NutritionHistoryService {
     }
 
     public NutritionStatisticsResponse getStatistics(UUID userId, LocalDate fromInclusive, LocalDate toInclusive) {
-        List<DailyNutritionEntrySnapshot> snapshots = findByUserAndRange(userId, fromInclusive, toInclusive);
+        List<DailyNutritionEntrySnapshot> selectedSnapshots = findByUserAndRange(userId, fromInclusive, toInclusive);
 
-        List<NutritionStatisticsPointResponse> points = snapshots
-            .stream()
+        List<NutritionStatisticsPointResponse> points = selectedSnapshots.stream()
             .map(snapshot -> new NutritionStatisticsPointResponse(
                 snapshot.entryDate(),
                 defaultBigDecimal(snapshot.caloriesConsumedKcal()),
@@ -91,16 +91,24 @@ public class NutritionHistoryService {
             .toList();
 
         LocalDate weeklyFrom = toInclusive.minusDays(6);
-        LocalDate monthlyFrom = toInclusive.minusDays(29);
+        LocalDate monthlyFrom = YearMonth.from(toInclusive).atDay(1);
 
-        NutritionBalanceSummaryResponse weeklySummary = summarizeBalance(
-            snapshots.stream().filter(snapshot -> !snapshot.entryDate().isBefore(weeklyFrom)).toList()
-        );
-        NutritionBalanceSummaryResponse monthlySummary = summarizeBalance(
-            snapshots.stream().filter(snapshot -> !snapshot.entryDate().isBefore(monthlyFrom)).toList()
-        );
+        List<DailyNutritionEntrySnapshot> weeklySnapshots = findByUserAndRange(userId, weeklyFrom, toInclusive);
+        List<DailyNutritionEntrySnapshot> monthlySnapshots = findByUserAndRange(userId, monthlyFrom, toInclusive);
 
-        return new NutritionStatisticsResponse(userId, fromInclusive, toInclusive, weeklySummary, monthlySummary, points);
+        NutritionBalanceSummaryResponse selectedPeriodSummary = summarizeBalance(selectedSnapshots, fromInclusive, toInclusive);
+        NutritionBalanceSummaryResponse weeklySummary = summarizeBalance(weeklySnapshots, weeklyFrom, toInclusive);
+        NutritionBalanceSummaryResponse monthlySummary = summarizeBalance(monthlySnapshots, monthlyFrom, toInclusive);
+
+        return new NutritionStatisticsResponse(
+            userId,
+            fromInclusive,
+            toInclusive,
+            selectedPeriodSummary,
+            weeklySummary,
+            monthlySummary,
+            points
+        );
     }
 
     @Transactional
@@ -198,13 +206,26 @@ public class NutritionHistoryService {
         return value != null ? value : BigDecimal.ZERO;
     }
 
-    private static NutritionBalanceSummaryResponse summarizeBalance(List<DailyNutritionEntrySnapshot> snapshots) {
+    private static NutritionBalanceSummaryResponse summarizeBalance(
+        List<DailyNutritionEntrySnapshot> snapshots,
+        LocalDate fromInclusive,
+        LocalDate toInclusive
+    ) {
         BigDecimal consumed = snapshots.stream()
             .map(snapshot -> defaultBigDecimal(snapshot.caloriesConsumedKcal()))
             .reduce(BigDecimal.ZERO, BigDecimal::add);
-        BigDecimal target = snapshots.stream()
-            .map(snapshot -> defaultBigDecimal(snapshot.calorieTargetKcal()))
-            .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+        BigDecimal target = BigDecimal.ZERO;
+        for (LocalDate cursor = fromInclusive; !cursor.isAfter(toInclusive); cursor = cursor.plusDays(1)) {
+            BigDecimal dayTarget = BigDecimal.valueOf(2000);
+            for (DailyNutritionEntrySnapshot snapshot : snapshots) {
+                if (snapshot.entryDate().equals(cursor)) {
+                    dayTarget = defaultBigDecimal(snapshot.calorieTargetKcal());
+                    break;
+                }
+            }
+            target = target.add(dayTarget);
+        }
 
         return new NutritionBalanceSummaryResponse(consumed, target, consumed.subtract(target));
     }
