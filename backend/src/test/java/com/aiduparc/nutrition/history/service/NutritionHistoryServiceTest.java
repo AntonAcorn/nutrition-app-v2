@@ -83,13 +83,17 @@ class NutritionHistoryServiceTest {
 
         when(repository.findByUserIdAndEntryDateBetweenOrderByEntryDateAsc(userId, fromDate, toDate))
             .thenReturn(java.util.List.of(first, second));
+        when(repository.findByUserIdAndEntryDateBetweenOrderByEntryDateAsc(userId, LocalDate.of(2026, 3, 27), toDate))
+            .thenReturn(java.util.List.of(first, second));
+        when(repository.findByUserIdAndEntryDateBetweenOrderByEntryDateAsc(userId, LocalDate.of(2026, 4, 1), toDate))
+            .thenReturn(java.util.List.of(first, second));
 
         NutritionStatisticsResponse response = service.getStatistics(userId, fromDate, toDate);
 
         assertThat(response.points()).hasSize(2);
         assertThat(response.points().get(0).calorieBalance()).isEqualByComparingTo("-200.00");
         assertThat(response.points().get(1).calorieBalance()).isEqualByComparingTo("150.00");
-        assertThat(response.weeklySummary().calorieBalance()).isEqualByComparingTo("-50.00");
+        assertThat(response.weeklySummary().calorieBalance()).isEqualByComparingTo("-10050.00");
         assertThat(response.monthlySummary().calorieBalance()).isEqualByComparingTo("-50.00");
     }
 

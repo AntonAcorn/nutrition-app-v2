@@ -130,6 +130,8 @@ function LineChart({
 }
 
 function StatisticsTable({ points }: { points: NutritionStatisticsPoint[] }) {
+  const orderedPoints = [...points].reverse()
+
   return (
     <section className="panel statistics-panel">
       <div className="statistics-panel__header">
@@ -149,7 +151,7 @@ function StatisticsTable({ points }: { points: NutritionStatisticsPoint[] }) {
           <span>Жиры</span>
           <span>Клетчатка</span>
         </div>
-        {points.map((point) => (
+        {orderedPoints.map((point) => (
           <div className="statistics-table__row" key={point.entryDate}>
             <span>{point.entryDate}</span>
             <strong>{point.consumedCalories}</strong>
@@ -201,6 +203,7 @@ export function StatisticsTab() {
   }, [rangeDays])
 
   const points = useMemo(() => data?.points ?? [], [data])
+  const selectedTitle = `${rangeDays} дней`
 
   return (
     <section className="screen-section">
@@ -220,8 +223,9 @@ export function StatisticsTab() {
       {!loading && !error && data ? (
         <>
           <section className="current-day-grid">
-            <SummaryCard title="Отклонение за неделю" summary={data.weeklySummary} />
-            <SummaryCard title="Отклонение за месяц" summary={data.monthlySummary} />
+            <SummaryCard title={`Отклонение за ${selectedTitle}`} summary={data.selectedPeriodSummary} />
+            {rangeDays >= 7 ? <SummaryCard title="Отклонение за неделю" summary={data.weeklySummary} /> : null}
+            {rangeDays >= 30 ? <SummaryCard title="Отклонение за месяц" summary={data.monthlySummary} /> : null}
           </section>
           <LineChart title="Калории" unit="ккал" points={points} valueKey="consumedCalories" targetKey="calorieTarget" colorClass="line-chart__path--calories" />
           <div className="statistics-grid">
