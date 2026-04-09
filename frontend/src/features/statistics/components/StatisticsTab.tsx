@@ -110,7 +110,7 @@ function LineChart({
   const values = points.map((point) => point[valueKey] ?? null)
   const targets = targetKey ? points.map((point) => point[targetKey] ?? null) : []
   const width = 760
-  const height = 220
+  const height = 180
   const numericValues = values.filter((value): value is number => value != null)
   const numericTargets = targets.filter((value): value is number => value != null)
   const max = Math.max(1, ...numericValues, ...numericTargets)
