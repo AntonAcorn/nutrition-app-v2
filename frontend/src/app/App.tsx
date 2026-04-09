@@ -30,10 +30,10 @@ export default function App() {
 
   return (
     <main className="app-shell">
-      <header className="app-header">
+      <header className="app-header app-header--compact">
         <div>
           <p className="app-header__eyebrow">Nutrition App v2</p>
-          <h1>Панель питания</h1>
+          <h1>Nutrition</h1>
         </div>
       </header>
 
@@ -46,7 +46,7 @@ export default function App() {
             aria-selected={activeTab === tabs.currentDay}
             onClick={() => setActiveTab(tabs.currentDay)}
           >
-            Текущий день
+            Сегодня
           </button>
           <button
             type="button"
@@ -64,7 +64,7 @@ export default function App() {
             aria-selected={activeTab === tabs.photoAnalyzer}
             onClick={() => setActiveTab(tabs.photoAnalyzer)}
           >
-            Анализатор фото
+            Фото
           </button>
         </div>
 
