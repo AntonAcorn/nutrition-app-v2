@@ -47,7 +47,8 @@ export function CurrentDayTab({ refreshToken = 0, successMessage = '' }: Current
   }, [refreshToken])
 
   async function handleWeightSave() {
-    const parsedWeight = Number(weightInput.replace(',', '.'))
+    const normalizedWeightInput = weightInput.trim().replace(',', '.')
+    const parsedWeight = Number(normalizedWeightInput)
 
     if (!Number.isFinite(parsedWeight) || parsedWeight <= 0) {
       setError('Введи корректный вес в килограммах')
@@ -93,13 +94,11 @@ export function CurrentDayTab({ refreshToken = 0, successMessage = '' }: Current
               <label>
                 Вес, кг
                 <input
-                  type="number"
+                  type="text"
                   inputMode="decimal"
-                  step="0.1"
-                  min="0"
                   value={weightInput}
                   onChange={(event) => setWeightInput(event.target.value)}
-                  placeholder="Например, 82.4"
+                  placeholder="Например, 82,4"
                 />
               </label>
               <button type="button" onClick={handleWeightSave} disabled={savingWeight}>
