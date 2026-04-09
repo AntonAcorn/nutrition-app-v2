@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useState, type ReactNode } from 'react'
 import { fetchNutritionStatistics } from '../model/statisticsApi'
 import type { NutritionBalanceSummary, NutritionStatisticsPoint, NutritionStatisticsResponse } from '../../../shared/types/nutrition'
 
@@ -92,6 +92,38 @@ function RangeSelector({ value, onChange }: { value: RangeDays; onChange: (value
   )
 }
 
+function ChartModal({ title, children, onClose }: { title: string; children: ReactNode; onClose: () => void }) {
+  useEffect(() => {
+    function handleKeyDown(event: KeyboardEvent) {
+      if (event.key === 'Escape') {
+        onClose()
+      }
+    }
+
+    window.addEventListener('keydown', handleKeyDown)
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown)
+    }
+  }, [onClose])
+
+  return (
+    <div className="chart-modal" role="dialog" aria-modal="true" aria-label={title} onClick={onClose}>
+      <div className="chart-modal__content panel" onClick={(event) => event.stopPropagation()}>
+        <div className="chart-modal__header">
+          <div>
+            <p className="screen-header__eyebrow">Статистика</p>
+            <h3>{title}</h3>
+          </div>
+          <button type="button" className="chart-modal__close" onClick={onClose} aria-label="Закрыть график">
+            Закрыть
+          </button>
+        </div>
+        {children}
+      </div>
+    </div>
+  )
+}
+
 function LineChart({
   title,
   unit,
@@ -99,6 +131,8 @@ function LineChart({
   valueKey,
   targetKey,
   colorClass,
+  expanded,
+  onExpand,
 }: {
   title: string
   unit: string
@@ -106,6 +140,8 @@ function LineChart({
   valueKey: 'weightKg' | 'consumedCalories' | 'proteinGrams' | 'fatGrams' | 'fiberGrams'
   targetKey?: 'calorieTarget'
   colorClass: string
+  expanded?: boolean
+  onExpand?: () => void
 }) {
   const values = points.map((point) => point[valueKey] ?? null)
   const targets = targetKey ? points.map((point) => point[targetKey] ?? null) : []
@@ -120,42 +156,64 @@ function LineChart({
   const guideValues = [min, (min + max) / 2, max]
   const labelStep = points.length > 14 ? 4 : points.length > 7 ? 2 : 1
 
-  return (
-    <section className="panel statistics-panel">
-      <div className="statistics-panel__header">
-        <div>
-          <p className="screen-header__eyebrow">Статистика</p>
-          <h3>{title}</h3>
-        </div>
-        <p className="subtle-text">{unit}</p>
+  const chartContent = (
+    <div className={`line-chart line-chart--framed ${expanded ? 'line-chart--expanded' : ''}`}>
+      <div className="line-chart__guides">
+        {guideValues.slice().reverse().map((guide) => (
+          <span key={`${title}-${guide}`}>{Math.round(guide)}</span>
+        ))}
       </div>
+      <div className="line-chart__canvas">
+        <div className="line-chart__grid">
+          {guideValues.map((guide) => (
+            <span key={`${title}-grid-${guide}`} />
+          ))}
+        </div>
+        <svg viewBox={`0 0 ${width} ${height}`} className="line-chart__svg" role="img" aria-label={title}>
+          <path d={valuePath} className={`line-chart__path ${colorClass}`} />
+          {targetPath ? <path d={targetPath} className="line-chart__path line-chart__path--target" /> : null}
+        </svg>
+      </div>
+      <div className="line-chart__labels" style={{ ['--label-count' as string]: String(points.length) }}>
+        {points.map((point, index) => (
+          <span key={`${title}-${point.entryDate}`} className={index % labelStep === 0 || index === points.length - 1 ? '' : 'line-chart__label--ghost'}>
+            {index % labelStep === 0 || index === points.length - 1 ? formatShortDate(point.entryDate) : ''}
+          </span>
+        ))}
+      </div>
+    </div>
+  )
 
-      <div className="line-chart line-chart--framed">
-        <div className="line-chart__guides">
-          {guideValues.slice().reverse().map((guide) => (
-            <span key={`${title}-${guide}`}>{Math.round(guide)}</span>
-          ))}
-        </div>
-        <div className="line-chart__canvas">
-          <div className="line-chart__grid">
-            {guideValues.map((guide) => (
-              <span key={`${title}-grid-${guide}`} />
-            ))}
+  return (
+    <>
+      <section className="panel statistics-panel">
+        <div className="statistics-panel__header">
+          <div>
+            <p className="screen-header__eyebrow">Статистика</p>
+            <h3>{title}</h3>
           </div>
-          <svg viewBox={`0 0 ${width} ${height}`} className="line-chart__svg" role="img" aria-label={title}>
-            <path d={valuePath} className={`line-chart__path ${colorClass}`} />
-            {targetPath ? <path d={targetPath} className="line-chart__path line-chart__path--target" /> : null}
-          </svg>
+          <div className="statistics-panel__actions">
+            <p className="subtle-text">{unit}</p>
+            {onExpand ? (
+              <button type="button" className="chart-expand-button" onClick={onExpand}>
+                Развернуть
+              </button>
+            ) : null}
+          </div>
         </div>
-        <div className="line-chart__labels" style={{ ['--label-count' as string]: String(points.length) }}>
-          {points.map((point, index) => (
-            <span key={`${title}-${point.entryDate}`} className={index % labelStep === 0 || index === points.length - 1 ? '' : 'line-chart__label--ghost'}>
-              {index % labelStep === 0 || index === points.length - 1 ? formatShortDate(point.entryDate) : ''}
-            </span>
-          ))}
-        </div>
-      </div>
-    </section>
+
+        {chartContent}
+      </section>
+
+      {expanded && onExpand ? (
+        <ChartModal title={title} onClose={onExpand}>
+          <div className="statistics-panel__actions statistics-panel__actions--modal">
+            <p className="subtle-text">{unit}</p>
+          </div>
+          {chartContent}
+        </ChartModal>
+      ) : null}
+    </>
   )
 }
 
@@ -208,6 +266,7 @@ export function StatisticsTab({ refreshToken = 0 }: StatisticsTabProps) {
   const [data, setData] = useState<NutritionStatisticsResponse | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
+  const [expandedChart, setExpandedChart] = useState<string | null>(null)
 
   useEffect(() => {
     let cancelled = false
@@ -266,12 +325,53 @@ export function StatisticsTab({ refreshToken = 0 }: StatisticsTabProps) {
             <WeightAverageCard title="Средний вес за неделю" value={data.weeklyAverageWeightKg} />
             <WeightAverageCard title="Средний вес за месяц" value={data.monthlyAverageWeightKg} />
           </section>
-          <LineChart title="Вес" unit="кг" points={points} valueKey="weightKg" colorClass="line-chart__path--weight" />
-          <LineChart title="Калории" unit="ккал" points={points} valueKey="consumedCalories" targetKey="calorieTarget" colorClass="line-chart__path--calories" />
+          <LineChart
+            title="Вес"
+            unit="кг"
+            points={points}
+            valueKey="weightKg"
+            colorClass="line-chart__path--weight"
+            expanded={expandedChart === 'Вес'}
+            onExpand={() => setExpandedChart((current) => (current === 'Вес' ? null : 'Вес'))}
+          />
+          <LineChart
+            title="Калории"
+            unit="ккал"
+            points={points}
+            valueKey="consumedCalories"
+            targetKey="calorieTarget"
+            colorClass="line-chart__path--calories"
+            expanded={expandedChart === 'Калории'}
+            onExpand={() => setExpandedChart((current) => (current === 'Калории' ? null : 'Калории'))}
+          />
           <div className="statistics-grid">
-            <LineChart title="Белок" unit="г" points={points} valueKey="proteinGrams" colorClass="line-chart__path--protein" />
-            <LineChart title="Жиры" unit="г" points={points} valueKey="fatGrams" colorClass="line-chart__path--fat" />
-            <LineChart title="Клетчатка" unit="г" points={points} valueKey="fiberGrams" colorClass="line-chart__path--fiber" />
+            <LineChart
+              title="Белок"
+              unit="г"
+              points={points}
+              valueKey="proteinGrams"
+              colorClass="line-chart__path--protein"
+              expanded={expandedChart === 'Белок'}
+              onExpand={() => setExpandedChart((current) => (current === 'Белок' ? null : 'Белок'))}
+            />
+            <LineChart
+              title="Жиры"
+              unit="г"
+              points={points}
+              valueKey="fatGrams"
+              colorClass="line-chart__path--fat"
+              expanded={expandedChart === 'Жиры'}
+              onExpand={() => setExpandedChart((current) => (current === 'Жиры' ? null : 'Жиры'))}
+            />
+            <LineChart
+              title="Клетчатка"
+              unit="г"
+              points={points}
+              valueKey="fiberGrams"
+              colorClass="line-chart__path--fiber"
+              expanded={expandedChart === 'Клетчатка'}
+              onExpand={() => setExpandedChart((current) => (current === 'Клетчатка' ? null : 'Клетчатка'))}
+            />
           </div>
           <StatisticsTable points={points} />
         </>
