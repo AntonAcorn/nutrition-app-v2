@@ -6,7 +6,7 @@ function currentEntryDate(): string {
 }
 
 export async function updateTodayWeight(weightKg: number): Promise<void> {
-  const response = await fetch(`/api/history/weight?userId=${LIVE_APP_USER_ID}&entryDate=${currentEntryDate()}`, {
+  const response = await fetch(`/api/history/today-summary/weight?userId=${LIVE_APP_USER_ID}&entryDate=${currentEntryDate()}`, {
     method: 'PUT',
     headers: {
       'Content-Type': 'application/json',
