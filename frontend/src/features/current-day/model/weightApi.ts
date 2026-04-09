@@ -1,8 +1,8 @@
 import { LIVE_APP_USER_ID } from '../../../shared/config/appUser'
-import { formatLocalDateInputValue } from '../../../shared/lib/date'
+import { getTodayLocalDateInputValue } from '../../../shared/lib/date'
 
 function currentEntryDate(): string {
-  return formatLocalDateInputValue(new Date())
+  return getTodayLocalDateInputValue()
 }
 
 export async function updateTodayWeight(weightKg: number): Promise<void> {

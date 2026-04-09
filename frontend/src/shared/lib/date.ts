@@ -1,7 +1,16 @@
-export function formatLocalDateInputValue(date: Date): string {
-  const year = date.getFullYear()
-  const month = String(date.getMonth() + 1).padStart(2, '0')
-  const day = String(date.getDate()).padStart(2, '0')
+export const APP_TIME_ZONE = 'America/Toronto'
 
-  return `${year}-${month}-${day}`
+export function formatLocalDateInputValue(date: Date, timeZone: string = APP_TIME_ZONE): string {
+  const formatter = new Intl.DateTimeFormat('en-CA', {
+    timeZone,
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  })
+
+  return formatter.format(date)
+}
+
+export function getTodayLocalDateInputValue(timeZone: string = APP_TIME_ZONE): string {
+  return formatLocalDateInputValue(new Date(), timeZone)
 }

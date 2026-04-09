@@ -1,15 +1,15 @@
 import { LIVE_APP_USER_ID } from '../../../shared/config/appUser'
-import { formatLocalDateInputValue } from '../../../shared/lib/date'
+import { APP_TIME_ZONE, formatLocalDateInputValue } from '../../../shared/lib/date'
 import type { NutritionStatisticsResponse } from '../../../shared/types/nutrition'
 
 function getRange(days: number) {
   const toDate = new Date()
   const fromDate = new Date()
-  fromDate.setDate(toDate.getDate() - (days - 1))
+  fromDate.setDate(fromDate.getDate() - (days - 1))
 
   return {
-    fromDate: formatLocalDateInputValue(fromDate),
-    toDate: formatLocalDateInputValue(toDate),
+    fromDate: formatLocalDateInputValue(fromDate, APP_TIME_ZONE),
+    toDate: formatLocalDateInputValue(toDate, APP_TIME_ZONE),
   }
 }
 

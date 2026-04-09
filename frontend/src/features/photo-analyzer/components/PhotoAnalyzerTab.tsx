@@ -1,6 +1,6 @@
 import { ChangeEvent, useMemo, useState } from 'react'
 import { LIVE_APP_USER_ID } from '../../../shared/config/appUser'
-import { formatLocalDateInputValue } from '../../../shared/lib/date'
+import { getTodayLocalDateInputValue } from '../../../shared/lib/date'
 import { toNumber } from '../../../shared/lib/number'
 import type { DraftItem, PhotoAnalysisDraft } from '../../../shared/types/nutrition'
 import { DraftItemEditor } from './DraftItemEditor'
@@ -12,7 +12,7 @@ interface PhotoAnalyzerTabProps {
 }
 
 function currentEntryDate(): string {
-  return formatLocalDateInputValue(new Date())
+  return getTodayLocalDateInputValue()
 }
 
 export function PhotoAnalyzerTab({ onConfirmed }: PhotoAnalyzerTabProps) {
