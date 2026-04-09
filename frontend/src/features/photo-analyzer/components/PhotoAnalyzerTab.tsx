@@ -1,4 +1,4 @@
-import { ChangeEvent, useMemo, useState } from 'react'
+import { ChangeEvent, useMemo, useRef, useState } from 'react'
 import { LIVE_APP_USER_ID } from '../../../shared/config/appUser'
 import { getTodayLocalDateInputValue } from '../../../shared/lib/date'
 import { toNumber } from '../../../shared/lib/number'
@@ -22,8 +22,10 @@ export function PhotoAnalyzerTab({ onConfirmed }: PhotoAnalyzerTabProps) {
   const [error, setError] = useState('')
   const [successMessage, setSuccessMessage] = useState('')
   const [selectedFileName, setSelectedFileName] = useState('')
+  const [selectedFile, setSelectedFile] = useState<File | null>(null)
   const [previewUrl, setPreviewUrl] = useState('')
   const [userNote, setUserNote] = useState('')
+  const fileInputRef = useRef<HTMLInputElement | null>(null)
 
   const recalculatedTotals = useMemo(() => (draft ? calculateTotals(draft.items) : calculateTotals([])), [draft])
 
@@ -66,21 +68,33 @@ export function PhotoAnalyzerTab({ onConfirmed }: PhotoAnalyzerTabProps) {
     })
   }
 
-  async function handleFileSelected(event: ChangeEvent<HTMLInputElement>) {
+  function handleFileSelected(event: ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0]
     if (!file) {
+      return
+    }
+
+    setError('')
+    setSuccessMessage('')
+    setDraft(null)
+    setSelectedFile(file)
+    setSelectedFileName(file.name)
+    setPreviewUrl(URL.createObjectURL(file))
+  }
+
+  async function startAnalysis() {
+    if (!selectedFile) {
+      setError('Сначала выбери фото')
       return
     }
 
     setUploading(true)
     setError('')
     setSuccessMessage('')
-    setSelectedFileName(file.name)
-    setPreviewUrl(URL.createObjectURL(file))
 
     try {
       const formData = new FormData()
-      formData.append('file', file)
+      formData.append('file', selectedFile)
       formData.append('userId', LIVE_APP_USER_ID)
       formData.append('entryDate', currentEntryDate())
       formData.append('userNote', userNote)
@@ -97,11 +111,13 @@ export function PhotoAnalyzerTab({ onConfirmed }: PhotoAnalyzerTabProps) {
 
       const payload = await response.json()
       setDraft(normalizeDraft(payload.draft))
+      if (fileInputRef.current) {
+        fileInputRef.current.value = ''
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Ошибка загрузки фото')
     } finally {
       setUploading(false)
-      event.target.value = ''
     }
   }
 
@@ -156,9 +172,7 @@ export function PhotoAnalyzerTab({ onConfirmed }: PhotoAnalyzerTabProps) {
       <section className="panel analyzer-panel">
         <div className="upload-panel">
           <div>
-            <p className="screen-header__eyebrow">Загрузка</p>
             <h3>Загрузить новое фото</h3>
-            <p className="subtle-text">Поддерживаются изображения до 10 MB.</p>
           </div>
 
           <div className="upload-panel__controls">
@@ -173,11 +187,17 @@ export function PhotoAnalyzerTab({ onConfirmed }: PhotoAnalyzerTabProps) {
             </label>
 
             <label className="upload-button">
-              <input type="file" accept="image/*" onChange={handleFileSelected} hidden />
-              <span>{uploading ? 'Анализируем...' : 'Выбрать фото'}</span>
+              <input ref={fileInputRef} type="file" accept="image/*" onChange={handleFileSelected} hidden />
+              <span>Выбрать фото</span>
             </label>
 
             {selectedFileName ? <p className="subtle-text">Выбрано: {selectedFileName}</p> : null}
+
+            <div className="primary-actions primary-actions--inline">
+              <button type="button" onClick={startAnalysis} disabled={uploading || !selectedFile}>
+                {uploading ? 'Анализируем...' : 'Начать анализ'}
+              </button>
+            </div>
           </div>
         </div>
 
