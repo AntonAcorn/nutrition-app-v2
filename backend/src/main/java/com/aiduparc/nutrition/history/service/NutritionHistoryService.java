@@ -80,7 +80,7 @@ public class NutritionHistoryService {
     public NutritionStatisticsResponse getStatistics(UUID userId, LocalDate fromInclusive, LocalDate toInclusive) {
         List<DailyNutritionEntrySnapshot> selectedSnapshots = findByUserAndRange(userId, fromInclusive, toInclusive);
 
-        List<NutritionStatisticsPointResponse> points = selectedSnapshots.stream()
+        List<NutritionStatisticsPointResponse> points = completeRangeWithMissingDays(userId, selectedSnapshots, fromInclusive, toInclusive).stream()
             .map(snapshot -> new NutritionStatisticsPointResponse(
                 snapshot.entryDate(),
                 roundToSingleDecimal(snapshot.weightKg()),
@@ -226,6 +226,43 @@ public class NutritionHistoryService {
 
     private static BigDecimal defaultBigDecimal(BigDecimal value) {
         return value != null ? value : BigDecimal.ZERO;
+    }
+
+    private static List<DailyNutritionEntrySnapshot> completeRangeWithMissingDays(
+        UUID userId,
+        List<DailyNutritionEntrySnapshot> snapshots,
+        LocalDate fromInclusive,
+        LocalDate toInclusive
+    ) {
+        java.util.Map<LocalDate, DailyNutritionEntrySnapshot> snapshotsByDate = snapshots.stream()
+            .collect(java.util.stream.Collectors.toMap(DailyNutritionEntrySnapshot::entryDate, snapshot -> snapshot));
+
+        java.util.List<DailyNutritionEntrySnapshot> completed = new java.util.ArrayList<>();
+
+        for (LocalDate cursor = fromInclusive; !cursor.isAfter(toInclusive); cursor = cursor.plusDays(1)) {
+            DailyNutritionEntrySnapshot existing = snapshotsByDate.get(cursor);
+            if (existing != null) {
+                completed.add(existing);
+                continue;
+            }
+
+            completed.add(new DailyNutritionEntrySnapshot(
+                null,
+                userId,
+                cursor,
+                null,
+                BigDecimal.ZERO,
+                BigDecimal.ZERO,
+                BigDecimal.ZERO,
+                BigDecimal.ZERO,
+                BigDecimal.ZERO,
+                null,
+                null,
+                null
+            ));
+        }
+
+        return completed;
     }
 
     private static NutritionBalanceSummaryResponse summarizeBalance(

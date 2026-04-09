@@ -203,6 +203,38 @@ class NutritionHistoryServiceTest {
     }
 
     @Test
+    void getStatisticsIncludesTodayEvenWhenEntryIsMissing() {
+        UUID userId = UUID.randomUUID();
+        LocalDate today = LocalDate.of(2026, 4, 9);
+        LocalDate yesterday = today.minusDays(1);
+
+        DailyNutritionEntryEntity yesterdayEntry = new DailyNutritionEntryEntity();
+        yesterdayEntry.setId(UUID.randomUUID());
+        yesterdayEntry.setUserId(userId);
+        yesterdayEntry.setEntryDate(yesterday);
+        yesterdayEntry.setCaloriesConsumedKcal(new BigDecimal("1800.00"));
+        yesterdayEntry.setCalorieTargetKcal(new BigDecimal("2000.00"));
+        yesterdayEntry.setProteinGrams(new BigDecimal("120.00"));
+        yesterdayEntry.setFatGrams(new BigDecimal("60.00"));
+        yesterdayEntry.setFiberGrams(new BigDecimal("20.00"));
+
+        when(repository.findByUserIdAndEntryDateBetweenOrderByEntryDateAsc(userId, yesterday, today))
+            .thenReturn(java.util.List.of(yesterdayEntry));
+        when(repository.findByUserIdAndEntryDateBetweenOrderByEntryDateAsc(userId, today.minusDays(6), today))
+            .thenReturn(java.util.List.of(yesterdayEntry));
+        when(repository.findByUserIdAndEntryDateBetweenOrderByEntryDateAsc(userId, LocalDate.of(2026, 4, 1), today))
+            .thenReturn(java.util.List.of(yesterdayEntry));
+
+        NutritionStatisticsResponse response = service.getStatistics(userId, yesterday, today);
+
+        assertThat(response.points()).hasSize(2);
+        assertThat(response.points().get(0).entryDate()).isEqualTo(yesterday);
+        assertThat(response.points().get(1).entryDate()).isEqualTo(today);
+        assertThat(response.points().get(1).consumedCalories()).isEqualByComparingTo("0.00");
+        assertThat(response.points().get(1).calorieTarget()).isEqualByComparingTo("0.00");
+    }
+
+    @Test
     void upsertUpdatesExistingEntryForSameUserAndDate() {
         UUID userId = UUID.randomUUID();
         LocalDate entryDate = LocalDate.of(2026, 4, 5);
