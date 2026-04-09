@@ -149,10 +149,7 @@ export function PhotoAnalyzerTab({ onConfirmed }: PhotoAnalyzerTabProps) {
   return (
     <section className="screen-section">
       <header className="screen-header">
-        <div>
-          <p className="screen-header__eyebrow">Анализатор фото</p>
-          <h2>Анализ фото и подтверждение</h2>
-        </div>
+        <div />
         <p className="screen-header__meta">Загрузи фото, получи черновик от модели и сразу подтверди результат.</p>
       </header>
 
