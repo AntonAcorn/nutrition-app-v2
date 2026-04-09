@@ -164,15 +164,12 @@ export function PhotoAnalyzerTab({ onConfirmed }: PhotoAnalyzerTabProps) {
 
   return (
     <section className="screen-section">
-      <header className="screen-header">
-        <div />
-        <p className="screen-header__meta">Загрузи фото, получи черновик от модели и сразу подтверди результат.</p>
-      </header>
-
-      <section className="panel analyzer-panel">
-        <div className="upload-panel">
+      <section className="panel analyzer-panel analyzer-panel--hero">
+        <div className="analyzer-hero">
           <div>
-            <h3>Загрузить новое фото</h3>
+            <p className="screen-header__meta">Фото приёма пищи</p>
+            <h2>{draft ? 'Проверь результат анализа' : 'Добавь фото и запусти анализ'}</h2>
+            <p className="subtle-text">Тот же функционал, но с более чистым mobile-first экраном.</p>
           </div>
 
           <div className="upload-panel__controls">
@@ -214,7 +211,7 @@ export function PhotoAnalyzerTab({ onConfirmed }: PhotoAnalyzerTabProps) {
           <>
             <div className="analyzer-panel__header">
               <div>
-                <p className="screen-header__eyebrow">Черновик</p>
+                <p className="screen-header__meta">Черновик блюда</p>
                 <h3>Проверь, поправь и сохрани</h3>
               </div>
               <div className="status-badge">
@@ -224,6 +221,8 @@ export function PhotoAnalyzerTab({ onConfirmed }: PhotoAnalyzerTabProps) {
             </div>
 
             <p className="subtle-text">Уверенность модели: {draft.confidence || 0}%</p>
+
+            <TotalsRow totals={recalculatedTotals} />
 
             <div className="draft-items-list">
               {draft.items.map((item) => (
@@ -237,8 +236,6 @@ export function PhotoAnalyzerTab({ onConfirmed }: PhotoAnalyzerTabProps) {
                 <textarea value={draft.notes.join('\n')} onChange={(event) => updateNotes(event.target.value)} rows={4} />
               </label>
             </div>
-
-            <TotalsRow totals={recalculatedTotals} />
 
             <div className="primary-actions">
               <button type="button" onClick={saveDraft} disabled={saving || uploading}>

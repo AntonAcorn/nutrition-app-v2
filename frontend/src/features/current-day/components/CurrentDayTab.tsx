@@ -81,11 +81,17 @@ export function CurrentDayTab({ refreshToken = 0, successMessage = '', onDayUpda
       </header>
 
       {successMessage ? <section className="panel detail-panel"><p className="success-text">{successMessage}</p></section> : null}
+      {loading ? <section className="panel detail-panel"><p>Загружаем сводку...</p></section> : null}
+      {!loading && error ? <section className="panel detail-panel"><p className="error-text">{error}</p></section> : null}
+
+      {!loading && !error && summary ? <TodaySummaryBlock summary={summary} /> : null}
+
       {!loading && summary ? (
-        <section className="panel detail-panel weight-panel">
+        <section className="panel detail-panel weight-panel weight-panel--compact">
           <div className="weight-panel__content">
             <div>
-              <h3>Вес на сегодня</h3>
+              <p className="screen-header__meta">Вес сегодня</p>
+              <h3>{summary.weightKg == null ? 'Добавить вес' : `${summary.weightKg.toFixed(1)} кг`}</h3>
             </div>
             <div className="weight-panel__form">
               <label>
@@ -99,16 +105,12 @@ export function CurrentDayTab({ refreshToken = 0, successMessage = '', onDayUpda
                 />
               </label>
               <button type="button" onClick={handleWeightSave} disabled={savingWeight}>
-                {savingWeight ? 'Сохраняем...' : 'Сохранить вес'}
+                {savingWeight ? 'Сохраняем...' : 'Сохранить'}
               </button>
             </div>
           </div>
         </section>
       ) : null}
-      {loading ? <section className="panel detail-panel"><p>Загружаем сводку...</p></section> : null}
-      {!loading && error ? <section className="panel detail-panel"><p className="error-text">{error}</p></section> : null}
-
-      {!loading && !error && summary ? <TodaySummaryBlock summary={summary} /> : null}
     </section>
   )
 }

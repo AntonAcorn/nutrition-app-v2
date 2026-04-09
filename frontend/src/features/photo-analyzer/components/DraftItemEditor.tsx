@@ -17,18 +17,20 @@ const fieldLabels: Record<string, string> = {
 export function DraftItemEditor({ item, onChange }: DraftItemEditorProps) {
   return (
     <article className="draft-item-card">
-      <label>
-        Название
-        <input value={item.name} onChange={(event) => onChange(item.id, 'name', event.target.value)} />
-      </label>
+      <div className="draft-item-card__header">
+        <label>
+          Название
+          <input value={item.name} onChange={(event) => onChange(item.id, 'name', event.target.value)} />
+        </label>
 
-      <label>
-        Оценка порции
-        <input
-          value={item.estimatedPortion}
-          onChange={(event) => onChange(item.id, 'estimatedPortion', event.target.value)}
-        />
-      </label>
+        <label>
+          Порция
+          <input
+            value={item.estimatedPortion}
+            onChange={(event) => onChange(item.id, 'estimatedPortion', event.target.value)}
+          />
+        </label>
+      </div>
 
       <div className="draft-item-card__grid">
         {numericFields.map((field) => (
