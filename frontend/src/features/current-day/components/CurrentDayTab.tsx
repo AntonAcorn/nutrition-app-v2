@@ -76,11 +76,8 @@ export function CurrentDayTab({ refreshToken = 0, successMessage = '', onDayUpda
     <section className="screen-section">
       <header className="screen-header">
         <div>
-          <p className="screen-header__eyebrow">Текущий день</p>
-          <h2>Сегодняшняя сводка</h2>
           {summary ? <p className="screen-header__meta">Дата: {summary.dateLabel}</p> : null}
         </div>
-        <p className="screen-header__meta">Данные загружаются из backend и обновляются после сохранения анализа.</p>
       </header>
 
       {successMessage ? <section className="panel detail-panel"><p className="success-text">{successMessage}</p></section> : null}
@@ -88,9 +85,7 @@ export function CurrentDayTab({ refreshToken = 0, successMessage = '', onDayUpda
         <section className="panel detail-panel weight-panel">
           <div className="weight-panel__content">
             <div>
-              <p className="screen-header__eyebrow">Вес</p>
               <h3>Вес на сегодня</h3>
-              <p className="subtle-text">Сохраняется в БД и попадает в статистику.</p>
             </div>
             <div className="weight-panel__form">
               <label>
