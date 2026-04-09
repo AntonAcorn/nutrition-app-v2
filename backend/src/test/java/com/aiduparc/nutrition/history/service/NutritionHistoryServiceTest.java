@@ -231,7 +231,7 @@ class NutritionHistoryServiceTest {
         assertThat(response.points().get(0).entryDate()).isEqualTo(yesterday);
         assertThat(response.points().get(1).entryDate()).isEqualTo(today);
         assertThat(response.points().get(1).consumedCalories()).isEqualByComparingTo("0.00");
-        assertThat(response.points().get(1).calorieTarget()).isEqualByComparingTo("0.00");
+        assertThat(response.points().get(1).calorieTarget()).isEqualByComparingTo("2000.00");
     }
 
     @Test
