@@ -16,20 +16,36 @@ function formatShortDate(value: string): string {
   return `${day}.${month}`
 }
 
-function buildLinePath(values: number[], width: number, height: number, min: number, max: number) {
+function buildLinePath(values: Array<number | null>, width: number, height: number, min: number, max: number) {
   if (values.length === 0) {
     return ''
   }
 
   const range = Math.max(1, max - min)
+  let hasStarted = false
 
   return values
     .map((value, index) => {
+      if (value == null) {
+        hasStarted = false
+        return ''
+      }
+
       const x = values.length === 1 ? width / 2 : (index / (values.length - 1)) * width
       const y = height - ((value - min) / range) * height
-      return `${index === 0 ? 'M' : 'L'} ${x.toFixed(1)} ${y.toFixed(1)}`
+      const command = hasStarted ? 'L' : 'M'
+      hasStarted = true
+      return `${command} ${x.toFixed(1)} ${y.toFixed(1)}`
     })
+    .filter(Boolean)
     .join(' ')
+}
+
+function formatMetricValue(value: number | null | undefined, digits = 2): string {
+  if (value == null) {
+    return '—'
+  }
+  return value.toFixed(digits)
 }
 
 function SummaryCard({ title, summary }: { title: string; summary: NutritionBalanceSummary }) {
@@ -91,12 +107,14 @@ function LineChart({
   targetKey?: 'calorieTarget'
   colorClass: string
 }) {
-  const values = points.map((point) => point[valueKey] ?? 0)
-  const targets = targetKey ? points.map((point) => point[targetKey]) : []
+  const values = points.map((point) => point[valueKey] ?? null)
+  const targets = targetKey ? points.map((point) => point[targetKey] ?? null) : []
   const width = 760
   const height = 220
-  const max = Math.max(1, ...values, ...targets)
-  const min = Math.min(0, ...values, ...targets)
+  const numericValues = values.filter((value): value is number => value != null)
+  const numericTargets = targets.filter((value): value is number => value != null)
+  const max = Math.max(1, ...numericValues, ...numericTargets)
+  const min = Math.min(0, ...numericValues, ...numericTargets)
   const valuePath = buildLinePath(values, width, height, min, max)
   const targetPath = targets.length > 0 ? buildLinePath(targets, width, height, min, max) : ''
   const guideValues = [min, (min + max) / 2, max]
@@ -168,12 +186,12 @@ function StatisticsTable({ points }: { points: NutritionStatisticsPoint[] }) {
           <div className="statistics-table__row" key={point.entryDate}>
             <span>{point.entryDate}</span>
             <span>{point.weightKg == null ? '—' : point.weightKg.toFixed(1)}</span>
-            <strong>{point.consumedCalories}</strong>
-            <span>{point.calorieTarget}</span>
+            <strong>{formatMetricValue(point.consumedCalories)}</strong>
+            <span>{formatMetricValue(point.calorieTarget)}</span>
             <strong className={point.calorieBalance > 0 ? 'text-over' : 'text-under'}>{formatSigned(point.calorieBalance)}</strong>
-            <span>{point.proteinGrams}</span>
-            <span>{point.fatGrams}</span>
-            <span>{point.fiberGrams}</span>
+            <span>{formatMetricValue(point.proteinGrams)}</span>
+            <span>{formatMetricValue(point.fatGrams)}</span>
+            <span>{formatMetricValue(point.fiberGrams)}</span>
           </div>
         ))}
       </div>
