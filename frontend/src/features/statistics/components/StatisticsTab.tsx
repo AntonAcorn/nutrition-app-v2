@@ -16,19 +16,28 @@ function formatShortDate(value: string): string {
   return `${day}.${month}`
 }
 
-function buildLinePath(values: number[], width: number, height: number, min: number, max: number) {
+function buildLinePath(values: Array<number | null>, width: number, height: number, min: number, max: number) {
   if (values.length === 0) {
     return ''
   }
 
   const range = Math.max(1, max - min)
+  let hasStarted = false
 
   return values
     .map((value, index) => {
+      if (value == null) {
+        hasStarted = false
+        return ''
+      }
+
       const x = values.length === 1 ? width / 2 : (index / (values.length - 1)) * width
       const y = height - ((value - min) / range) * height
-      return `${index === 0 ? 'M' : 'L'} ${x.toFixed(1)} ${y.toFixed(1)}`
+      const command = hasStarted ? 'L' : 'M'
+      hasStarted = true
+      return `${command} ${x.toFixed(1)} ${y.toFixed(1)}`
     })
+    .filter(Boolean)
     .join(' ')
 }
 
@@ -91,12 +100,13 @@ function LineChart({
   targetKey?: 'calorieTarget'
   colorClass: string
 }) {
-  const values = points.map((point) => point[valueKey] ?? 0)
+  const values = points.map((point) => point[valueKey] ?? null)
   const targets = targetKey ? points.map((point) => point[targetKey]) : []
   const width = 760
   const height = 220
-  const max = Math.max(1, ...values, ...targets)
-  const min = Math.min(0, ...values, ...targets)
+  const numericValues = values.filter((value): value is number => value != null)
+  const max = Math.max(1, ...numericValues, ...targets)
+  const min = Math.min(0, ...numericValues, ...targets)
   const valuePath = buildLinePath(values, width, height, min, max)
   const targetPath = targets.length > 0 ? buildLinePath(targets, width, height, min, max) : ''
   const guideValues = [min, (min + max) / 2, max]
