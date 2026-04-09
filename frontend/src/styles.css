@@ -181,6 +181,7 @@ body {
 .line-chart__canvas {
   position: relative;
   min-width: 0;
+  min-height: 180px;
 }
 
 .line-chart__grid {
@@ -627,7 +628,15 @@ body {
   }
 
   .line-chart--framed {
-    grid-template-columns: 42px minmax(0, 1fr);
+    grid-template-columns: 48px minmax(0, 1fr);
+  }
+
+  .line-chart__canvas {
+    min-height: 160px;
+  }
+
+  .line-chart__guides {
+    font-size: 0.72rem;
   }
 
   .line-chart__labels {
@@ -684,17 +693,25 @@ body {
   }
 
   .line-chart--framed {
-    grid-template-columns: 1fr;
+    grid-template-columns: 36px minmax(0, 1fr);
+    gap: 8px;
+  }
+
+  .line-chart__canvas {
+    min-height: 140px;
   }
 
   .line-chart__guides {
-    display: none;
+    display: grid;
+    font-size: 0.68rem;
+    padding-top: 0;
   }
 
   .line-chart__labels {
-    grid-column: 1;
+    grid-column: 2;
     grid-template-columns: repeat(4, minmax(0, 1fr));
     row-gap: 6px;
+    font-size: 0.68rem;
   }
 
   .range-selector {
