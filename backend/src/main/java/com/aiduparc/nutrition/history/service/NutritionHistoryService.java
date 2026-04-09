@@ -25,6 +25,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class NutritionHistoryService {
 
     private static final Logger log = LoggerFactory.getLogger(NutritionHistoryService.class);
+    private static final BigDecimal DEFAULT_DAILY_TARGET_KCAL = BigDecimal.valueOf(2000);
 
     private final DailyNutritionEntryRepository repository;
 
@@ -48,7 +49,7 @@ public class NutritionHistoryService {
         DailyNutritionEntrySnapshot snapshot = getOrCreateEmptySnapshot(userId, entryDate);
 
         BigDecimal consumedCalories = defaultBigDecimal(snapshot.caloriesConsumedKcal());
-        BigDecimal dailyTargetCalories = defaultBigDecimal(snapshot.calorieTargetKcal());
+        BigDecimal dailyTargetCalories = defaultTarget(snapshot.calorieTargetKcal());
         BigDecimal remainingCalories = dailyTargetCalories.subtract(consumedCalories).max(BigDecimal.ZERO);
 
         TodaySummaryResponse response = new TodaySummaryResponse(
@@ -85,8 +86,8 @@ public class NutritionHistoryService {
                 snapshot.entryDate(),
                 roundToSingleDecimal(snapshot.weightKg()),
                 defaultBigDecimal(snapshot.caloriesConsumedKcal()),
-                defaultBigDecimal(snapshot.calorieTargetKcal()),
-                defaultBigDecimal(snapshot.caloriesConsumedKcal()).subtract(defaultBigDecimal(snapshot.calorieTargetKcal())),
+                defaultTarget(snapshot.calorieTargetKcal()),
+                defaultBigDecimal(snapshot.caloriesConsumedKcal()).subtract(defaultTarget(snapshot.calorieTargetKcal())),
                 defaultBigDecimal(snapshot.proteinGrams()),
                 defaultBigDecimal(snapshot.fatGrams()),
                 defaultBigDecimal(snapshot.fiberGrams())
@@ -228,6 +229,10 @@ public class NutritionHistoryService {
         return value != null ? value : BigDecimal.ZERO;
     }
 
+    private static BigDecimal defaultTarget(BigDecimal value) {
+        return value != null ? value : DEFAULT_DAILY_TARGET_KCAL;
+    }
+
     private static List<DailyNutritionEntrySnapshot> completeRangeWithMissingDays(
         UUID userId,
         List<DailyNutritionEntrySnapshot> snapshots,
@@ -276,10 +281,10 @@ public class NutritionHistoryService {
 
         BigDecimal target = BigDecimal.ZERO;
         for (LocalDate cursor = fromInclusive; !cursor.isAfter(toInclusive); cursor = cursor.plusDays(1)) {
-            BigDecimal dayTarget = BigDecimal.valueOf(2000);
+            BigDecimal dayTarget = DEFAULT_DAILY_TARGET_KCAL;
             for (DailyNutritionEntrySnapshot snapshot : snapshots) {
                 if (snapshot.entryDate().equals(cursor)) {
-                    dayTarget = defaultBigDecimal(snapshot.calorieTargetKcal());
+                    dayTarget = defaultTarget(snapshot.calorieTargetKcal());
                     break;
                 }
             }
