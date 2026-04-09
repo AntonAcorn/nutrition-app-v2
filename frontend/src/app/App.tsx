@@ -14,11 +14,17 @@ type TabKey = (typeof tabs)[keyof typeof tabs]
 export default function App() {
   const [activeTab, setActiveTab] = useState<TabKey>(tabs.currentDay)
   const [summaryRefreshToken, setSummaryRefreshToken] = useState(0)
+  const [statisticsRefreshToken, setStatisticsRefreshToken] = useState(0)
   const [daySuccessMessage, setDaySuccessMessage] = useState('')
+
+  function handleDayUpdated() {
+    setSummaryRefreshToken((current) => current + 1)
+    setStatisticsRefreshToken((current) => current + 1)
+  }
 
   function handleDraftConfirmed() {
     setActiveTab(tabs.currentDay)
-    setSummaryRefreshToken((current) => current + 1)
+    handleDayUpdated()
     setDaySuccessMessage('Анализ сохранён, сводка за день обновляется.')
   }
 
@@ -63,8 +69,14 @@ export default function App() {
         </div>
 
         <div className="tabs-body">
-          {activeTab === tabs.currentDay ? <CurrentDayTab refreshToken={summaryRefreshToken} successMessage={daySuccessMessage} /> : null}
-          {activeTab === tabs.statistics ? <StatisticsTab /> : null}
+          {activeTab === tabs.currentDay ? (
+            <CurrentDayTab
+              refreshToken={summaryRefreshToken}
+              successMessage={daySuccessMessage}
+              onDayUpdated={handleDayUpdated}
+            />
+          ) : null}
+          {activeTab === tabs.statistics ? <StatisticsTab refreshToken={statisticsRefreshToken} /> : null}
           {activeTab === tabs.photoAnalyzer ? <PhotoAnalyzerTab onConfirmed={handleDraftConfirmed} /> : null}
         </div>
       </section>

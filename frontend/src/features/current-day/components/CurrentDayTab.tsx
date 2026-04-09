@@ -7,9 +7,10 @@ import type { TodaySummary } from '../../../shared/types/nutrition'
 interface CurrentDayTabProps {
   refreshToken?: number
   successMessage?: string
+  onDayUpdated?: () => void
 }
 
-export function CurrentDayTab({ refreshToken = 0, successMessage = '' }: CurrentDayTabProps) {
+export function CurrentDayTab({ refreshToken = 0, successMessage = '', onDayUpdated }: CurrentDayTabProps) {
   const [summary, setSummary] = useState<TodaySummary | null>(null)
   const [loading, setLoading] = useState(true)
   const [savingWeight, setSavingWeight] = useState(false)
@@ -63,6 +64,7 @@ export function CurrentDayTab({ refreshToken = 0, successMessage = '' }: Current
       const nextSummary = await fetchTodaySummary()
       setSummary(nextSummary)
       setWeightInput(nextSummary.weightKg != null ? String(nextSummary.weightKg) : '')
+      onDayUpdated?.()
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Не удалось сохранить вес')
     } finally {

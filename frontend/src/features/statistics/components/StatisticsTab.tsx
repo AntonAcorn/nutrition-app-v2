@@ -181,7 +181,11 @@ function StatisticsTable({ points }: { points: NutritionStatisticsPoint[] }) {
   )
 }
 
-export function StatisticsTab() {
+interface StatisticsTabProps {
+  refreshToken?: number
+}
+
+export function StatisticsTab({ refreshToken = 0 }: StatisticsTabProps) {
   const [rangeDays, setRangeDays] = useState<RangeDays>(14)
   const [data, setData] = useState<NutritionStatisticsResponse | null>(null)
   const [loading, setLoading] = useState(true)
@@ -214,7 +218,7 @@ export function StatisticsTab() {
     return () => {
       cancelled = true
     }
-  }, [rangeDays])
+  }, [rangeDays, refreshToken])
 
   const points = useMemo(() => data?.points ?? [], [data])
   const selectedTitle = rangeDays === 30 ? 'месяц' : `${rangeDays} дней`
