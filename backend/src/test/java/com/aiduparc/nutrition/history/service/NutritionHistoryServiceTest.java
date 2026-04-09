@@ -39,7 +39,7 @@ class NutritionHistoryServiceTest {
         entity.setEntryDate(entryDate);
         entity.setWeightKg(new BigDecimal("82.40"));
         entity.setCaloriesConsumedKcal(new BigDecimal("1640.00"));
-        entity.setCalorieTargetKcal(new BigDecimal("2100.00"));
+        entity.setCalorieTargetKcal(BigDecimal.ZERO);
         entity.setProteinGrams(new BigDecimal("108.00"));
         entity.setFatGrams(new BigDecimal("52.00"));
         entity.setFiberGrams(new BigDecimal("24.00"));
@@ -50,8 +50,8 @@ class NutritionHistoryServiceTest {
 
         assertThat(summary.weightKg()).isEqualByComparingTo("82.40");
         assertThat(summary.consumedCalories()).isEqualByComparingTo("1640.00");
-        assertThat(summary.dailyTargetCalories()).isEqualByComparingTo("2100.00");
-        assertThat(summary.remainingCalories()).isEqualByComparingTo("460.00");
+        assertThat(summary.dailyTargetCalories()).isEqualByComparingTo("2000.00");
+        assertThat(summary.remainingCalories()).isEqualByComparingTo("360.00");
         assertThat(summary.proteinGrams()).isEqualByComparingTo("108.00");
         assertThat(summary.fatGrams()).isEqualByComparingTo("52.00");
         assertThat(summary.fiberGrams()).isEqualByComparingTo("24.00");

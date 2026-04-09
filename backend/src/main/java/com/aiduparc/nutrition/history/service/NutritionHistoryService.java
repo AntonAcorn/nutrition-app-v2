@@ -230,7 +230,10 @@ public class NutritionHistoryService {
     }
 
     private static BigDecimal defaultTarget(BigDecimal value) {
-        return value != null ? value : DEFAULT_DAILY_TARGET_KCAL;
+        if (value == null || value.compareTo(BigDecimal.ZERO) <= 0) {
+            return DEFAULT_DAILY_TARGET_KCAL;
+        }
+        return value;
     }
 
     private static List<DailyNutritionEntrySnapshot> completeRangeWithMissingDays(
