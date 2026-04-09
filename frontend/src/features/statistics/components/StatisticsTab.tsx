@@ -186,7 +186,18 @@ function LineChart({
 
   return (
     <>
-      <section className="panel statistics-panel">
+      <section
+        className={`panel statistics-panel ${onExpand ? 'statistics-panel--interactive' : ''}`}
+        onClick={onExpand}
+        role={onExpand ? 'button' : undefined}
+        tabIndex={onExpand ? 0 : undefined}
+        onKeyDown={onExpand ? (event) => {
+          if (event.key === 'Enter' || event.key === ' ') {
+            event.preventDefault()
+            onExpand()
+          }
+        } : undefined}
+      >
         <div className="statistics-panel__header">
           <div>
             <p className="screen-header__eyebrow">Статистика</p>
@@ -195,7 +206,10 @@ function LineChart({
           <div className="statistics-panel__actions">
             <p className="subtle-text">{unit}</p>
             {onExpand ? (
-              <button type="button" className="chart-expand-button" onClick={onExpand}>
+              <button type="button" className="chart-expand-button" onClick={(event) => {
+                event.stopPropagation()
+                onExpand()
+              }}>
                 Развернуть
               </button>
             ) : null}
@@ -210,6 +224,7 @@ function LineChart({
           <div className="statistics-panel__actions statistics-panel__actions--modal">
             <p className="subtle-text">{unit}</p>
           </div>
+          <p className="chart-modal__hint subtle-text">На телефоне удобнее смотреть график в развёрнутом виде.</p>
           {chartContent}
         </ChartModal>
       ) : null}
