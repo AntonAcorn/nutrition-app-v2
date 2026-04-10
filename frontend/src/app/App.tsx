@@ -32,8 +32,8 @@ export default function App() {
     <main className="app-shell">
       <header className="app-header app-header--compact">
         <div>
-          <p className="app-header__eyebrow">Personal nutrition</p>
-          <h1>Eat better, track less</h1>
+          <p className="app-header__eyebrow">Nutrition App v2</p>
+          <h1>Nutrition</h1>
         </div>
       </header>
 
