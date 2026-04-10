@@ -50,27 +50,27 @@ function formatMetricValue(value: number | null | undefined, digits = 2): string
 
 function SummaryCard({ title, summary }: { title: string; summary: NutritionBalanceSummary }) {
   return (
-    <section className="summary-card summary-card--stats">
-      <span className="summary-card__label">{title}</span>
-      <strong className={`summary-card__value ${summary.calorieBalance > 0 ? 'text-over' : 'text-under'}`}>
-        {formatSigned(summary.calorieBalance)}
-        <span className="summary-card__unit"> ккал</span>
-      </strong>
-      <p className="subtle-text">
-        Съедено {summary.consumedCalories} из {summary.targetCalories}
-      </p>
+    <section className="stats-metric-card">
+      <div className="stats-metric-card__top">
+        <span>{title}</span>
+        <span className={`stats-metric-card__delta ${summary.calorieBalance > 0 ? 'text-over' : 'text-under'}`}>
+          {formatSigned(summary.calorieBalance)} ккал
+        </span>
+      </div>
+      <strong>{summary.consumedCalories}</strong>
+      <p>из {summary.targetCalories} kcal target</p>
     </section>
   )
 }
 
 function WeightAverageCard({ title, value }: { title: string; value: number | null }) {
   return (
-    <section className="summary-card summary-card--stats">
-      <span className="summary-card__label">{title}</span>
-      <strong className="summary-card__value">
-        {value == null ? '—' : value.toFixed(1)}
-        <span className="summary-card__unit"> кг</span>
-      </strong>
+    <section className="stats-metric-card">
+      <div className="stats-metric-card__top">
+        <span>{title}</span>
+      </div>
+      <strong>{value == null ? '—' : value.toFixed(1)}</strong>
+      <p>kg average</p>
     </section>
   )
 }
@@ -187,7 +187,7 @@ function LineChart({
   return (
     <>
       <section
-        className={`panel statistics-panel ${onExpand ? 'statistics-panel--interactive' : ''}`}
+        className={`panel statistics-panel statistics-panel--dark ${onExpand ? 'statistics-panel--interactive' : ''}`}
         onClick={onExpand}
         role={onExpand ? 'button' : undefined}
         tabIndex={onExpand ? 0 : undefined}
@@ -200,7 +200,7 @@ function LineChart({
       >
         <div className="statistics-panel__header">
           <div>
-            <p className="screen-header__eyebrow">Статистика</p>
+            <p className="screen-header__eyebrow">Metric</p>
             <h3>{title}</h3>
           </div>
           <div className="statistics-panel__actions">
@@ -210,7 +210,7 @@ function LineChart({
                 event.stopPropagation()
                 onExpand()
               }}>
-                Развернуть
+                Expand
               </button>
             ) : null}
           </div>
@@ -236,11 +236,11 @@ function StatisticsTable({ points }: { points: NutritionStatisticsPoint[] }) {
   const orderedPoints = [...points].reverse()
 
   return (
-    <section className="panel statistics-panel">
+    <section className="panel statistics-panel statistics-panel--dark">
       <div className="statistics-panel__header">
         <div>
-          <p className="screen-header__eyebrow">Отклонения</p>
-          <h3>Дневные значения</h3>
+          <p className="screen-header__eyebrow">History</p>
+          <h3>Daily values</h3>
         </div>
       </div>
 
@@ -316,14 +316,14 @@ export function StatisticsTab({ refreshToken = 0 }: StatisticsTabProps) {
   const selectedTitle = rangeDays === 30 ? 'месяц' : `${rangeDays} дней`
 
   return (
-    <section className="screen-section">
-      <header className="screen-header">
+    <section className="screen-section screen-section--statistics-dark">
+      <header className="screen-header screen-header--statistics-dark">
         <div>
-          <p className="screen-header__eyebrow">Статистика</p>
-          <h2>История питания</h2>
+          <p className="screen-header__eyebrow">Analytics</p>
+          <h2>Nutrition trends</h2>
         </div>
         <div className="statistics-toolbar">
-          <p className="screen-header__meta">Дневные, недельные и месячные отклонения.</p>
+          <p className="screen-header__meta">Your weight and intake history in a darker insights view.</p>
           <RangeSelector value={rangeDays} onChange={setRangeDays} />
         </div>
       </header>
@@ -332,7 +332,7 @@ export function StatisticsTab({ refreshToken = 0 }: StatisticsTabProps) {
       {!loading && error ? <section className="panel detail-panel"><p className="error-text">{error}</p></section> : null}
       {!loading && !error && data ? (
         <>
-          <section className="current-day-grid">
+          <section className="stats-metric-grid">
             <SummaryCard
               title={`Отклонение за ${selectedTitle}`}
               summary={rangeDays === 30 ? data.monthlySummary : data.selectedPeriodSummary}
