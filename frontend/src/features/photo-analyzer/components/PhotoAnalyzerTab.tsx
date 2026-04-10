@@ -163,13 +163,13 @@ export function PhotoAnalyzerTab({ onConfirmed }: PhotoAnalyzerTabProps) {
   }
 
   return (
-    <section className="screen-section">
-      <section className="panel analyzer-panel analyzer-panel--hero">
+    <section className="screen-section screen-section--photo-dark">
+      <section className="panel analyzer-panel analyzer-panel--hero analyzer-panel--dark">
         <div className="analyzer-hero">
           <div>
-            <p className="screen-header__meta">Фото приёма пищи</p>
-            <h2>{draft ? 'Проверь результат анализа' : 'Добавь фото и запусти анализ'}</h2>
-            <p className="subtle-text">Тот же функционал, но с более чистым mobile-first экраном.</p>
+            <p className="screen-header__meta">Photo analysis</p>
+            <h2>{draft ? 'Review the result' : 'Add a photo to start analysis'}</h2>
+            <p className="subtle-text">Dark layout first, same analysis flow and same data underneath.</p>
           </div>
 
           <div className="upload-panel__controls">
