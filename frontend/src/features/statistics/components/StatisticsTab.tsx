@@ -241,7 +241,6 @@ function LineChart({
           <div className="statistics-panel__actions statistics-panel__actions--modal">
             <p className="subtle-text">{unit}</p>
           </div>
-          <p className="chart-modal__hint subtle-text">На телефоне удобнее смотреть график в развёрнутом виде.</p>
           {chartContent}
         </ChartModal>
       ) : null}

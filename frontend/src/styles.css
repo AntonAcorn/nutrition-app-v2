@@ -1125,9 +1125,6 @@ ul {
   padding: 0;
 }
 
-.chart-modal__hint {
-  margin-bottom: 14px;
-}
 
 @media (max-width: 900px) {
   .current-day-grid,
@@ -1404,6 +1401,16 @@ ul {
 .line-chart__axis--x span {
   overflow: hidden;
   white-space: nowrap;
+}
+
+.line-chart--expanded .line-chart__axis--x {
+  gap: 10px;
+  font-size: 0.78rem;
+}
+
+.line-chart--expanded .line-chart__axis--x span {
+  overflow: visible;
+  text-overflow: clip;
 }
 
 .line-chart__grid--dark span {
