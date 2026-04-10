@@ -154,8 +154,12 @@ function LineChart({
   const valuePath = buildLinePath(values, width, height, min, max)
   const targetPath = targets.length > 0 ? buildLinePath(targets, width, height, min, max) : ''
   const guideValues = [min, (min + max) / 2, max]
-  const labelStep = points.length > 14 ? 4 : points.length > 7 ? 2 : 1
-  const mobileLabelStep = points.length > 14 ? 5 : points.length > 7 ? 3 : 2
+  const compactLabelIndexes = new Set<number>([
+    0,
+    points.length > 2 ? Math.floor((points.length - 1) / 2) : 0,
+    Math.max(0, points.length - 1),
+  ])
+  const expandedLabelStep = points.length > 14 ? 4 : points.length > 7 ? 2 : 1
 
   const chartContent = (
     <div className={`line-chart line-chart--dark-card ${expanded ? 'line-chart--expanded' : ''}`}>
@@ -177,13 +181,11 @@ function LineChart({
           </svg>
           <div className="line-chart__axis line-chart__axis--x" style={{ ['--label-count' as string]: String(points.length) }}>
             {points.map((point, index) => {
-              const visible = index % labelStep === 0 || index === points.length - 1
-              const mobileVisible = index % mobileLabelStep === 0 || index === points.length - 1
+              const visible = expanded ? (index % expandedLabelStep === 0 || index === points.length - 1) : compactLabelIndexes.has(index)
               return (
                 <span
                   key={`${title}-${point.entryDate}`}
                   className={visible ? '' : 'line-chart__label--ghost'}
-                  data-mobile-hidden={mobileVisible ? 'false' : 'true'}
                 >
                   {visible ? formatShortDate(point.entryDate) : ''}
                 </span>

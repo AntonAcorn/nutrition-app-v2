@@ -1255,10 +1255,6 @@ ul {
     font-size: 0.64rem;
   }
 
-  .line-chart__axis--x span[data-mobile-hidden='true'] {
-    visibility: hidden;
-  }
-
   .line-chart__guides,
   .line-chart__axis--y {
     font-size: 0.64rem;
