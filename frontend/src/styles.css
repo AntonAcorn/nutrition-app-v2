@@ -1004,6 +1004,16 @@ ul {
   box-shadow: 0 22px 60px rgba(0, 0, 0, 0.28);
 }
 
+.screen-section--photo-dark .summary-card__label,
+.screen-section--photo-dark .summary-card__value,
+.screen-section--photo-dark .summary-card__unit,
+.screen-section--photo-dark .totals-row span,
+.screen-section--photo-dark .stats-metric-card,
+.screen-section--photo-dark .stats-metric-card strong,
+.screen-section--photo-dark .stats-metric-card p {
+  color: rgba(255, 255, 255, 0.9);
+}
+
 .screen-section--photo-dark .upload-button {
   background: linear-gradient(135deg, #2b2f38 0%, #3a4050 100%);
   box-shadow: 0 14px 28px rgba(0, 0, 0, 0.28);

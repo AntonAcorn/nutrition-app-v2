@@ -169,7 +169,6 @@ export function PhotoAnalyzerTab({ onConfirmed }: PhotoAnalyzerTabProps) {
           <div>
             <p className="screen-header__meta">Photo analysis</p>
             <h2>{draft ? 'Review the result' : 'Add a photo to start analysis'}</h2>
-            <p className="subtle-text">Dark layout first, same analysis flow and same data underneath.</p>
           </div>
 
           <div className="upload-panel__controls">
