@@ -205,7 +205,7 @@ ul {
   background:
     radial-gradient(circle at top right, rgba(255, 255, 255, 0.35), transparent 32%),
     linear-gradient(135deg, #1f2a44 0%, #25375f 58%, #325c74 100%);
-  color: #fff9f2;
+  color: #1f2a44;
   border: 0;
   box-shadow: 0 24px 60px rgba(31, 42, 68, 0.22);
 }
