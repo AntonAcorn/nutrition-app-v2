@@ -1215,27 +1215,15 @@ ul {
     text-align: left;
   }
 
-  .line-chart--framed,
-  .line-chart--expanded {
-    grid-template-columns: 40px minmax(0, 1fr);
+  .line-chart__canvas--dark {
+    grid-template-columns: 26px minmax(0, 1fr);
     gap: 8px;
+    min-height: 220px;
   }
 
-  .line-chart__canvas,
-  .line-chart--expanded .line-chart__canvas {
-    min-height: 240px;
-  }
-
-  .line-chart__guides {
-    font-size: 0.68rem;
-    padding-top: 0;
-  }
-
-  .line-chart__labels {
-    grid-column: 2;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-    row-gap: 6px;
-    font-size: 0.68rem;
+  .line-chart__plot {
+    min-height: 220px;
+    padding-bottom: 26px;
   }
 
   .range-selector {
@@ -1243,6 +1231,21 @@ ul {
     justify-content: flex-start;
     flex-wrap: nowrap;
     padding-inline: 4px;
+  }
+
+  .screen-section--statistics-dark .statistics-toolbar {
+    width: 100%;
+    justify-items: stretch;
+  }
+
+  .screen-section--statistics-dark .range-selector {
+    width: 100%;
+  }
+
+  .statistics-panel__actions {
+    width: 100%;
+    flex-wrap: wrap;
+    justify-content: space-between;
   }
 
   .upload-button,
@@ -1279,4 +1282,81 @@ ul {
     width: 100%;
     justify-content: space-between;
   }
+}
+
+.statistics-chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 38px;
+  padding: 8px 14px;
+  border-radius: 999px;
+  background: #2c3138;
+  color: rgba(255,255,255,0.82);
+  font-size: 0.86rem;
+  font-weight: 700;
+}
+
+.line-chart--dark-card {
+  display: grid;
+  gap: 14px;
+}
+
+.line-chart__floating-tag {
+  width: fit-content;
+  border: 1px solid rgba(255,255,255,0.85);
+  border-radius: 12px;
+  padding: 8px 12px;
+  color: #ffffff;
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+.line-chart__canvas--dark {
+  display: grid;
+  grid-template-columns: 32px minmax(0, 1fr);
+  gap: 10px;
+  min-height: 240px;
+}
+
+.line-chart__plot {
+  position: relative;
+  min-width: 0;
+  min-height: 240px;
+  padding-bottom: 28px;
+}
+
+.line-chart__axis {
+  color: rgba(255,255,255,0.78);
+  font-size: 0.8rem;
+}
+
+.line-chart__axis--y {
+  display: grid;
+  grid-template-rows: repeat(3, 1fr);
+  align-items: start;
+  padding-top: 8px;
+}
+
+.line-chart__axis--x {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: grid;
+  grid-template-columns: repeat(var(--label-count, 7), minmax(0, 1fr));
+  gap: 8px;
+  text-align: center;
+}
+
+.line-chart__grid--dark span {
+  border-top-color: rgba(255,255,255,0.06);
+}
+
+.line-chart__path--glow {
+  filter: drop-shadow(0 0 6px rgba(255,255,255,0.12));
+}
+
+.screen-section--statistics-dark .statistics-grid {
+  grid-template-columns: 1fr;
 }

@@ -157,29 +157,32 @@ function LineChart({
   const labelStep = points.length > 14 ? 4 : points.length > 7 ? 2 : 1
 
   const chartContent = (
-    <div className={`line-chart line-chart--framed ${expanded ? 'line-chart--expanded' : ''}`}>
-      <div className="line-chart__guides">
-        {guideValues.slice().reverse().map((guide) => (
-          <span key={`${title}-${guide}`}>{Math.round(guide)}</span>
-        ))}
-      </div>
-      <div className="line-chart__canvas">
-        <div className="line-chart__grid">
-          {guideValues.map((guide) => (
-            <span key={`${title}-grid-${guide}`} />
+    <div className={`line-chart line-chart--dark-card ${expanded ? 'line-chart--expanded' : ''}`}>
+      <div className="line-chart__floating-tag">Trend</div>
+      <div className="line-chart__canvas line-chart__canvas--dark">
+        <div className="line-chart__axis line-chart__axis--y">
+          {guideValues.slice().reverse().map((guide) => (
+            <span key={`${title}-${guide}`}>{Math.round(guide)}</span>
           ))}
         </div>
-        <svg viewBox={`0 0 ${width} ${height}`} className="line-chart__svg" role="img" aria-label={title}>
-          <path d={valuePath} className={`line-chart__path ${colorClass}`} />
-          {targetPath ? <path d={targetPath} className="line-chart__path line-chart__path--target" /> : null}
-        </svg>
-      </div>
-      <div className="line-chart__labels" style={{ ['--label-count' as string]: String(points.length) }}>
-        {points.map((point, index) => (
-          <span key={`${title}-${point.entryDate}`} className={index % labelStep === 0 || index === points.length - 1 ? '' : 'line-chart__label--ghost'}>
-            {index % labelStep === 0 || index === points.length - 1 ? formatShortDate(point.entryDate) : ''}
-          </span>
-        ))}
+        <div className="line-chart__plot">
+          <div className="line-chart__grid line-chart__grid--dark">
+            {guideValues.map((guide) => (
+              <span key={`${title}-grid-${guide}`} />
+            ))}
+          </div>
+          <svg viewBox={`0 0 ${width} ${height}`} className="line-chart__svg" role="img" aria-label={title}>
+            <path d={valuePath} className={`line-chart__path ${colorClass} line-chart__path--glow`} />
+            {targetPath ? <path d={targetPath} className="line-chart__path line-chart__path--target" /> : null}
+          </svg>
+          <div className="line-chart__axis line-chart__axis--x" style={{ ['--label-count' as string]: String(points.length) }}>
+            {points.map((point, index) => (
+              <span key={`${title}-${point.entryDate}`} className={index % labelStep === 0 || index === points.length - 1 ? '' : 'line-chart__label--ghost'}>
+                {index % labelStep === 0 || index === points.length - 1 ? formatShortDate(point.entryDate) : ''}
+              </span>
+            ))}
+          </div>
+        </div>
       </div>
     </div>
   )
@@ -204,7 +207,7 @@ function LineChart({
             <h3>{title}</h3>
           </div>
           <div className="statistics-panel__actions">
-            <p className="subtle-text">{unit}</p>
+            <div className="statistics-chip">{unit}</div>
             {onExpand ? (
               <button type="button" className="chart-expand-button" onClick={(event) => {
                 event.stopPropagation()
