@@ -73,43 +73,41 @@ export function CurrentDayTab({ refreshToken = 0, successMessage = '', onDayUpda
   }
 
   return (
-    <section className="screen-section screen-section--today">
-      <header className="screen-header screen-header--today">
+    <section className="screen-section">
+      <header className="screen-header">
         <div>
-          <p className="screen-header__eyebrow">Daily nutrition</p>
-          <h2>Your day, at a glance</h2>
-          {summary ? <p className="screen-header__meta">{summary.dateLabel}</p> : null}
+          {summary ? <p className="screen-header__meta">Дата: {summary.dateLabel}</p> : null}
         </div>
       </header>
 
       {successMessage ? <section className="panel detail-panel"><p className="success-text">{successMessage}</p></section> : null}
-      {loading ? <section className="panel detail-panel"><p>Loading today summary...</p></section> : null}
+      {loading ? <section className="panel detail-panel"><p>Загружаем сводку...</p></section> : null}
       {!loading && error ? <section className="panel detail-panel"><p className="error-text">{error}</p></section> : null}
 
       {!loading && !error && summary ? <TodaySummaryBlock summary={summary} /> : null}
 
       {!loading && summary ? (
-        <section className="weight-card panel">
-          <div className="weight-card__copy">
-            <p className="weight-card__eyebrow">Weight check-in</p>
-            <h3>{summary.weightKg == null ? 'Log your weight for today' : `${summary.weightKg.toFixed(1)} kg today`}</h3>
-            <p className="subtle-text">Keep the trend accurate for your weekly and monthly charts.</p>
-          </div>
-
-          <div className="weight-card__form weight-panel__form">
-            <label>
-              Weight, kg
-              <input
-                type="text"
-                inputMode="decimal"
-                value={weightInput}
-                onChange={(event) => setWeightInput(event.target.value)}
-                placeholder="82.4"
-              />
-            </label>
-            <button type="button" onClick={handleWeightSave} disabled={savingWeight}>
-              {savingWeight ? 'Saving...' : 'Save weight'}
-            </button>
+        <section className="panel detail-panel weight-panel weight-panel--compact">
+          <div className="weight-panel__content">
+            <div>
+              <p className="screen-header__meta">Вес сегодня</p>
+              <h3>{summary.weightKg == null ? 'Добавить вес' : `${summary.weightKg.toFixed(1)} кг`}</h3>
+            </div>
+            <div className="weight-panel__form">
+              <label>
+                Вес, кг
+                <input
+                  type="text"
+                  inputMode="decimal"
+                  value={weightInput}
+                  onChange={(event) => setWeightInput(event.target.value)}
+                  placeholder="Например, 82,4"
+                />
+              </label>
+              <button type="button" onClick={handleWeightSave} disabled={savingWeight}>
+                {savingWeight ? 'Сохраняем...' : 'Сохранить'}
+              </button>
+            </div>
           </div>
         </section>
       ) : null}
