@@ -73,13 +73,7 @@ export function CurrentDayTab({ refreshToken = 0, successMessage = '', onDayUpda
   }
 
   return (
-    <section className="screen-section">
-      <header className="screen-header">
-        <div>
-          {summary ? <p className="screen-header__meta">Дата: {summary.dateLabel}</p> : null}
-        </div>
-      </header>
-
+    <section className="screen-section screen-section--home-dark">
       {successMessage ? <section className="panel detail-panel"><p className="success-text">{successMessage}</p></section> : null}
       {loading ? <section className="panel detail-panel"><p>Загружаем сводку...</p></section> : null}
       {!loading && error ? <section className="panel detail-panel"><p className="error-text">{error}</p></section> : null}
@@ -87,27 +81,25 @@ export function CurrentDayTab({ refreshToken = 0, successMessage = '', onDayUpda
       {!loading && !error && summary ? <TodaySummaryBlock summary={summary} /> : null}
 
       {!loading && summary ? (
-        <section className="panel detail-panel weight-panel weight-panel--compact">
-          <div className="weight-panel__content">
-            <div>
-              <p className="screen-header__meta">Вес сегодня</p>
-              <h3>{summary.weightKg == null ? 'Добавить вес' : `${summary.weightKg.toFixed(1)} кг`}</h3>
-            </div>
-            <div className="weight-panel__form">
-              <label>
-                Вес, кг
-                <input
-                  type="text"
-                  inputMode="decimal"
-                  value={weightInput}
-                  onChange={(event) => setWeightInput(event.target.value)}
-                  placeholder="Например, 82,4"
-                />
-              </label>
-              <button type="button" onClick={handleWeightSave} disabled={savingWeight}>
-                {savingWeight ? 'Сохраняем...' : 'Сохранить'}
-              </button>
-            </div>
+        <section className="weight-inline-card panel">
+          <div>
+            <p className="screen-header__meta">Weight</p>
+            <h3>{summary.weightKg == null ? 'Add today weight' : `${summary.weightKg.toFixed(1)} kg`}</h3>
+          </div>
+          <div className="weight-panel__form">
+            <label>
+              Weight, kg
+              <input
+                type="text"
+                inputMode="decimal"
+                value={weightInput}
+                onChange={(event) => setWeightInput(event.target.value)}
+                placeholder="82.4"
+              />
+            </label>
+            <button type="button" onClick={handleWeightSave} disabled={savingWeight}>
+              {savingWeight ? 'Saving...' : 'Save'}
+            </button>
           </div>
         </section>
       ) : null}
