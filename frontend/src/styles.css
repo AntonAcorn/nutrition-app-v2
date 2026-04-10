@@ -222,6 +222,17 @@ ul {
   box-shadow: 0 16px 36px rgba(244, 162, 97, 0.15);
 }
 
+.summary-card--hero.summary-card--accent,
+.summary-card--hero.summary-card--accent .summary-card__label,
+.summary-card--hero.summary-card--accent .summary-card__value,
+.summary-card--hero.summary-card--accent .summary-card__value--hero,
+.summary-card--hero.summary-card--accent .summary-card__unit,
+.summary-card--hero.summary-card--accent .subtle-text,
+.summary-card--hero.summary-card--accent .summary-card__meta-badge span,
+.summary-card--hero.summary-card--accent .summary-card__meta-badge strong {
+  color: #1f2a44;
+}
+
 .summary-card--macro {
   min-height: 132px;
 }
