@@ -52,13 +52,17 @@ ul {
 }
 
 .app-shell {
-  width: min(1100px, 100%);
+  width: min(520px, 100%);
   margin: 0 auto;
-  padding: 28px 18px 72px;
+  padding: 18px 14px 32px;
 }
 
 .app-header {
   margin-bottom: 14px;
+}
+
+.app-header--dark {
+  padding-inline: 8px;
 }
 
 .app-header__eyebrow,
@@ -70,11 +74,19 @@ ul {
   color: #8d7b68;
 }
 
+.app-header--dark .app-header__eyebrow {
+  color: rgba(255, 255, 255, 0.54);
+}
+
 .app-header h1,
 .screen-header h2,
 .analyzer-panel h3,
 .final-entry-panel h3 {
   color: #14213d;
+}
+
+.app-header--dark h1 {
+  color: #ffffff;
 }
 
 .app-header h1 {
@@ -85,6 +97,10 @@ ul {
 .tabs-shell {
   display: grid;
   gap: 18px;
+}
+
+.tabs-shell--dark {
+  gap: 14px;
 }
 
 .tabs-header {
@@ -103,6 +119,15 @@ ul {
   top: 12px;
   z-index: 10;
   backdrop-filter: blur(16px);
+}
+
+.tabs-header--dark {
+  width: 100%;
+  justify-content: space-between;
+  background: #17191f;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.24);
+  padding: 8px;
 }
 
 .tabs-header::-webkit-scrollbar,
@@ -132,10 +157,21 @@ ul {
   font-weight: 700;
 }
 
+.tab-button--dark {
+  flex: 1 1 0;
+  color: rgba(255, 255, 255, 0.58);
+}
+
 .tab-button--active {
   background: #1f2a44;
   color: #fff9f2;
   box-shadow: 0 10px 20px rgba(31, 42, 68, 0.18);
+}
+
+.tabs-header--dark .tab-button--active {
+  background: #2b2f38;
+  color: #ffffff;
+  box-shadow: none;
 }
 
 .tabs-body,
@@ -143,6 +179,10 @@ ul {
 .today-summary {
   display: grid;
   gap: 18px;
+}
+
+.tabs-body--dark {
+  gap: 14px;
 }
 
 .panel {
