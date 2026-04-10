@@ -213,7 +213,7 @@ ul {
 .summary-card--hero .summary-card__label,
 .summary-card--hero .summary-card__unit,
 .summary-card--hero .subtle-text {
-  color: rgba(255, 249, 242, 0.82);
+  color: #1f2a44;
 }
 
 .summary-card--accent {
@@ -243,7 +243,7 @@ ul {
 
 .summary-card__value--hero {
   font-size: clamp(3rem, 8vw, 4.8rem);
-  color: #fffdf8;
+  color: #1f2a44;
 }
 
 .summary-card__unit {
@@ -263,14 +263,14 @@ ul {
 .summary-card__meta-badge span {
   display: block;
   font-size: 0.78rem;
-  color: rgba(255, 249, 242, 0.72);
+  color: #1f2a44;
 }
 
 .summary-card__meta-badge strong {
   display: block;
   margin-top: 6px;
   font-size: 1.45rem;
-  color: #ffffff;
+  color: #1f2a44;
 }
 
 .current-day-grid {
