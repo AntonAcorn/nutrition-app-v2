@@ -1131,20 +1131,23 @@ ul {
   .analyzer-hero,
   .screen-header,
   .upload-panel,
-  .weight-panel__content {
+  .weight-panel__content,
+  .screen-header--statistics-dark {
     grid-template-columns: 1fr;
     flex-direction: column;
     align-items: flex-start;
   }
 
-  .statistics-toolbar {
+  .statistics-toolbar,
+  .screen-section--statistics-dark .statistics-toolbar {
     width: 100%;
-    justify-items: start;
+    justify-items: stretch;
   }
 
   .statistics-panel__actions {
     flex-wrap: wrap;
-    justify-content: flex-end;
+    justify-content: space-between;
+    width: 100%;
   }
 
   .line-chart--framed {
@@ -1168,6 +1171,10 @@ ul {
 @media (max-width: 640px) {
   .app-shell {
     padding: 18px 14px 60px;
+  }
+
+  .screen-section--statistics-dark {
+    gap: 12px;
   }
 
   .today-dark-card {
@@ -1202,7 +1209,8 @@ ul {
   .current-day-grid,
   .draft-item-card__grid,
   .draft-item-card__header,
-  .stats-metric-grid {
+  .stats-metric-grid,
+  .statistics-grid {
     grid-template-columns: 1fr;
   }
 
@@ -1215,37 +1223,51 @@ ul {
     text-align: left;
   }
 
+  .line-chart__canvas,
   .line-chart__canvas--dark {
-    grid-template-columns: 26px minmax(0, 1fr);
-    gap: 8px;
-    min-height: 220px;
+    grid-template-columns: 24px minmax(0, 1fr);
+    gap: 6px;
+    min-height: 210px;
   }
 
   .line-chart__plot {
-    min-height: 220px;
-    padding-bottom: 26px;
+    min-height: 210px;
+    padding-bottom: 24px;
   }
 
-  .range-selector {
+  .line-chart__labels,
+  .line-chart__axis--x {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 4px;
+    font-size: 0.66rem;
+  }
+
+  .line-chart__guides,
+  .line-chart__axis--y {
+    font-size: 0.66rem;
+  }
+
+  .range-selector,
+  .screen-section--statistics-dark .range-selector {
     width: 100%;
     justify-content: flex-start;
     flex-wrap: nowrap;
     padding-inline: 4px;
   }
 
-  .screen-section--statistics-dark .statistics-toolbar {
-    width: 100%;
-    justify-items: stretch;
+  .screen-section--statistics-dark .range-selector__button {
+    flex: 1 1 0;
+    text-align: center;
   }
 
-  .screen-section--statistics-dark .range-selector {
-    width: 100%;
+  .statistics-panel {
+    padding: 16px;
   }
 
+  .statistics-panel__header,
   .statistics-panel__actions {
     width: 100%;
-    flex-wrap: wrap;
-    justify-content: space-between;
+    gap: 10px;
   }
 
   .upload-button,
