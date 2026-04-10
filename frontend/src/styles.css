@@ -1250,9 +1250,9 @@ ul {
 
   .line-chart__labels,
   .line-chart__axis--x {
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-    gap: 4px;
-    font-size: 0.64rem;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 3px;
+    font-size: 0.6rem;
   }
 
   .line-chart__guides,
@@ -1298,8 +1298,7 @@ ul {
     align-items: stretch;
   }
 
-  .chart-expand-button,
-  .statistics-chip {
+  .chart-expand-button {
     width: 100%;
     justify-content: center;
   }
@@ -1340,32 +1339,9 @@ ul {
   }
 }
 
-.statistics-chip {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 38px;
-  padding: 8px 14px;
-  border-radius: 999px;
-  background: #2c3138;
-  color: rgba(255,255,255,0.82);
-  font-size: 0.86rem;
-  font-weight: 700;
-}
-
 .line-chart--dark-card {
   display: grid;
   gap: 14px;
-}
-
-.line-chart__floating-tag {
-  width: fit-content;
-  border: 1px solid rgba(255,255,255,0.85);
-  border-radius: 12px;
-  padding: 8px 12px;
-  color: #ffffff;
-  font-size: 0.82rem;
-  font-weight: 700;
 }
 
 .line-chart__canvas--dark {
@@ -1401,8 +1377,14 @@ ul {
   bottom: 0;
   display: grid;
   grid-template-columns: repeat(var(--label-count, 7), minmax(0, 1fr));
-  gap: 8px;
+  gap: 6px;
   text-align: center;
+}
+
+.line-chart__axis--x span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .line-chart__grid--dark span {

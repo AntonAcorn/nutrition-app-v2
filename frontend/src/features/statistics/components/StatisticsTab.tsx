@@ -158,7 +158,6 @@ function LineChart({
 
   const chartContent = (
     <div className={`line-chart line-chart--dark-card ${expanded ? 'line-chart--expanded' : ''}`}>
-      <div className="line-chart__floating-tag">Trend</div>
       <div className="line-chart__canvas line-chart__canvas--dark">
         <div className="line-chart__axis line-chart__axis--y">
           {guideValues.slice().reverse().map((guide) => (
@@ -207,7 +206,6 @@ function LineChart({
             <h3>{title}</h3>
           </div>
           <div className="statistics-panel__actions">
-            <div className="statistics-chip">{unit}</div>
             {onExpand ? (
               <button type="button" className="chart-expand-button" onClick={(event) => {
                 event.stopPropagation()
