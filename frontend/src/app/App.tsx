@@ -30,19 +30,19 @@ export default function App() {
 
   return (
     <main className="app-shell">
-      <header className="app-header app-header--compact">
+      <header className="app-header app-header--dark">
         <div>
-          <p className="app-header__eyebrow">Nutrition App v2</p>
+          <p className="app-header__eyebrow">Daily nutrition</p>
           <h1>Nutrition</h1>
         </div>
       </header>
 
-      <section className="tabs-shell">
-        <div className="tabs-header" role="tablist" aria-label="Разделы приложения">
+      <section className="tabs-shell tabs-shell--dark">
+        <div className="tabs-header tabs-header--dark" role="tablist" aria-label="Разделы приложения">
           <button
             type="button"
             role="tab"
-            className={`tab-button ${activeTab === tabs.currentDay ? 'tab-button--active' : ''}`}
+            className={`tab-button tab-button--dark ${activeTab === tabs.currentDay ? 'tab-button--active' : ''}`}
             aria-selected={activeTab === tabs.currentDay}
             onClick={() => setActiveTab(tabs.currentDay)}
           >
@@ -51,7 +51,7 @@ export default function App() {
           <button
             type="button"
             role="tab"
-            className={`tab-button ${activeTab === tabs.statistics ? 'tab-button--active' : ''}`}
+            className={`tab-button tab-button--dark ${activeTab === tabs.statistics ? 'tab-button--active' : ''}`}
             aria-selected={activeTab === tabs.statistics}
             onClick={() => setActiveTab(tabs.statistics)}
           >
@@ -60,7 +60,7 @@ export default function App() {
           <button
             type="button"
             role="tab"
-            className={`tab-button ${activeTab === tabs.photoAnalyzer ? 'tab-button--active' : ''}`}
+            className={`tab-button tab-button--dark ${activeTab === tabs.photoAnalyzer ? 'tab-button--active' : ''}`}
             aria-selected={activeTab === tabs.photoAnalyzer}
             onClick={() => setActiveTab(tabs.photoAnalyzer)}
           >
@@ -68,7 +68,7 @@ export default function App() {
           </button>
         </div>
 
-        <div className="tabs-body">
+        <div className="tabs-body tabs-body--dark">
           {activeTab === tabs.currentDay ? (
             <CurrentDayTab
               refreshToken={summaryRefreshToken}
