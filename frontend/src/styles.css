@@ -1095,7 +1095,7 @@ ul {
   align-items: center;
   justify-content: center;
   padding: 20px;
-  background: rgba(20, 33, 61, 0.5);
+  background: rgba(6, 7, 10, 0.82);
 }
 
 .chart-modal__content {
@@ -1103,6 +1103,26 @@ ul {
   max-height: min(90vh, 900px);
   overflow: auto;
   padding: 22px;
+  background: #17191f;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  color: #ffffff;
+}
+
+.chart-modal__content h3,
+.chart-modal__content .screen-header__eyebrow,
+.chart-modal__content .subtle-text,
+.chart-modal__content .statistics-panel__actions,
+.chart-modal__content .line-chart__axis,
+.chart-modal__content .line-chart__labels,
+.chart-modal__content .line-chart__guides {
+  color: rgba(255, 255, 255, 0.78);
+}
+
+.chart-modal__content .statistics-panel {
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+  padding: 0;
 }
 
 .chart-modal__hint {

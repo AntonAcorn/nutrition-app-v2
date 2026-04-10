@@ -12,6 +12,11 @@ function formatSigned(value: number): string {
 }
 
 function formatShortDate(value: string): string {
+  const [, , day] = value.split('-')
+  return day
+}
+
+function formatExpandedDate(value: string): string {
   const [, month, day] = value.split('-')
   return `${day}.${month}`
 }
@@ -187,7 +192,7 @@ function LineChart({
                   key={`${title}-${point.entryDate}`}
                   className={visible ? '' : 'line-chart__label--ghost'}
                 >
-                  {visible ? formatShortDate(point.entryDate) : ''}
+                  {visible ? (expanded ? formatExpandedDate(point.entryDate) : formatShortDate(point.entryDate)) : ''}
                 </span>
               )
             })}
