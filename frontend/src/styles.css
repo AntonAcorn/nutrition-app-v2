@@ -266,6 +266,14 @@ ul {
   margin-bottom: 18px;
 }
 
+.today-dark-card__topbar--centered {
+  grid-template-columns: 1fr;
+}
+
+.today-dark-card__topbar--centered .today-dark-card__title {
+  text-align: center;
+}
+
 .today-dark-card__back,
 .today-dark-card__spacer {
   width: 44px;
@@ -368,21 +376,6 @@ ul {
   color: rgba(255, 255, 255, 0.66);
   text-transform: uppercase;
   letter-spacing: 0.06em;
-}
-
-.today-dark-card__cta-row {
-  display: flex;
-  justify-content: center;
-  margin-top: 12px;
-}
-
-.today-dark-card__cta {
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  background: rgba(255, 255, 255, 0.06);
-  color: #ffffff;
-  border-radius: 999px;
-  padding: 12px 18px;
-  font-weight: 700;
 }
 
 .macro-meter-grid {

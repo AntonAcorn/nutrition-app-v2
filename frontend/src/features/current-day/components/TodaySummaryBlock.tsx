@@ -40,14 +40,10 @@ export function TodaySummaryBlock({ summary }: TodaySummaryBlockProps) {
   return (
     <section className="today-summary today-summary--dark" aria-label="Сводка питания за день">
       <article className="today-dark-card">
-        <div className="today-dark-card__topbar">
-          <button type="button" className="today-dark-card__back" aria-label="Назад">
-            ‹
-          </button>
+        <div className="today-dark-card__topbar today-dark-card__topbar--centered">
           <div>
             <p className="today-dark-card__title">Calories Details</p>
           </div>
-          <div className="today-dark-card__spacer" />
         </div>
 
         <div className="today-dark-ring-layout">
@@ -78,10 +74,6 @@ export function TodaySummaryBlock({ summary }: TodaySummaryBlockProps) {
             <strong>{target}</strong>
             <span>TARGET</span>
           </div>
-        </div>
-
-        <div className="today-dark-card__cta-row">
-          <button type="button" className="today-dark-card__cta">See stats</button>
         </div>
 
         <div className="macro-meter-grid">
