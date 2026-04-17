@@ -33,7 +33,7 @@ export function CurrentDayTab({ refreshToken = 0, successMessage = '', onDayUpda
         }
       } catch (err) {
         if (!cancelled) {
-          setError(err instanceof Error ? err.message : 'Не удалось загрузить сводку за день')
+          setError(err instanceof Error ? err.message : 'Failed to load daily summary')
         }
       } finally {
         if (!cancelled) {
@@ -53,7 +53,7 @@ export function CurrentDayTab({ refreshToken = 0, successMessage = '', onDayUpda
     const parsedWeight = Number(normalizedWeightInput)
 
     if (!Number.isFinite(parsedWeight) || parsedWeight <= 0) {
-      setError('Введи корректный вес в килограммах')
+      setError('Enter a valid weight in kilograms')
       return
     }
 
@@ -67,7 +67,7 @@ export function CurrentDayTab({ refreshToken = 0, successMessage = '', onDayUpda
       setWeightInput(nextSummary.weightKg != null ? String(nextSummary.weightKg) : '')
       onDayUpdated?.()
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Не удалось сохранить вес')
+      setError(err instanceof Error ? err.message : 'Failed to save weight')
     } finally {
       setSavingWeight(false)
     }
@@ -76,7 +76,7 @@ export function CurrentDayTab({ refreshToken = 0, successMessage = '', onDayUpda
   return (
     <section className="screen-section screen-section--home-dark">
       {successMessage ? <section className="panel detail-panel"><p className="success-text">{successMessage}</p></section> : null}
-      {loading ? <section className="panel detail-panel"><p>Загружаем сводку...</p></section> : null}
+      {loading ? <section className="panel detail-panel"><p>Loading daily summary...</p></section> : null}
       {!loading && error ? <section className="panel detail-panel"><p className="error-text">{error}</p></section> : null}
 
       {!loading && !error && summary ? <TodaySummaryBlock summary={summary} /> : null}

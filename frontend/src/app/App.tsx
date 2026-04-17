@@ -25,7 +25,7 @@ export default function App() {
   function handleDraftConfirmed() {
     setActiveTab(tabs.currentDay)
     handleDayUpdated()
-    setDaySuccessMessage('Анализ сохранён, сводка за день обновляется.')
+    setDaySuccessMessage('Analysis saved, daily summary is updating.')
   }
 
   return (
@@ -38,7 +38,7 @@ export default function App() {
       </header>
 
       <section className="tabs-shell tabs-shell--dark">
-        <div className="tabs-header tabs-header--dark" role="tablist" aria-label="Разделы приложения">
+        <div className="tabs-header tabs-header--dark" role="tablist" aria-label="App sections">
           <button
             type="button"
             role="tab"
@@ -46,7 +46,7 @@ export default function App() {
             aria-selected={activeTab === tabs.currentDay}
             onClick={() => setActiveTab(tabs.currentDay)}
           >
-            Сегодня
+            Today
           </button>
           <button
             type="button"
@@ -55,7 +55,7 @@ export default function App() {
             aria-selected={activeTab === tabs.statistics}
             onClick={() => setActiveTab(tabs.statistics)}
           >
-            Статистика
+            Statistics
           </button>
           <button
             type="button"
@@ -64,7 +64,7 @@ export default function App() {
             aria-selected={activeTab === tabs.photoAnalyzer}
             onClick={() => setActiveTab(tabs.photoAnalyzer)}
           >
-            Фото
+            Photo
           </button>
         </div>
 
