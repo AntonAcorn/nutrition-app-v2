@@ -907,6 +907,7 @@ ul {
 }
 
 .statistics-panel--dark {
+  position: relative;
   background: #17191f;
   border: 1px solid rgba(255, 255, 255, 0.06);
   box-shadow: 0 22px 60px rgba(0, 0, 0, 0.28);
@@ -963,6 +964,13 @@ ul {
   color: rgba(255, 255, 255, 0.86);
   font-size: 0.95rem;
   line-height: 1;
+}
+
+.chart-expand-button--corner {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  z-index: 2;
 }
 
 .chart-expand-button:hover,
