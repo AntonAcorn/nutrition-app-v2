@@ -18,13 +18,13 @@ export function DraftItemEditor({ item, onChange }: DraftItemEditorProps) {
   return (
     <article className="draft-item-card">
       <div className="draft-item-card__header">
-        <label>
-          Name
+        <label className="draft-item-card__name-field">
+          <span className="draft-item-card__field-label">Name</span>
           <input value={item.name} onChange={(event) => onChange(item.id, 'name', event.target.value)} />
         </label>
 
-        <label>
-          Portion
+        <label className="draft-item-card__portion-field">
+          <span className="draft-item-card__field-label">Portion</span>
           <input
             value={item.estimatedPortion}
             onChange={(event) => onChange(item.id, 'estimatedPortion', event.target.value)}
@@ -34,8 +34,8 @@ export function DraftItemEditor({ item, onChange }: DraftItemEditorProps) {
 
       <div className="draft-item-card__grid">
         {numericFields.map((field) => (
-          <label key={field}>
-            {fieldLabels[field] ?? field}
+          <label key={field} className="draft-item-card__metric-field">
+            <span className="draft-item-card__field-label">{fieldLabels[field] ?? field}</span>
             <input
               type="number"
               step="0.1"
