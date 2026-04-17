@@ -791,6 +791,16 @@ ul {
   color: #ffffff;
 }
 
+.stats-metric-card--good {
+  border-color: rgba(74, 222, 128, 0.28);
+  background: linear-gradient(180deg, rgba(19, 30, 24, 0.98) 0%, #17191f 100%);
+}
+
+.stats-metric-card--bad {
+  border-color: rgba(248, 113, 113, 0.22);
+  background: linear-gradient(180deg, rgba(40, 20, 23, 0.98) 0%, #17191f 100%);
+}
+
 .stats-metric-card__top {
   display: flex;
   justify-content: space-between;
@@ -803,12 +813,25 @@ ul {
   color: rgba(255, 255, 255, 0.62);
 }
 
+.stats-metric-card__emoji {
+  font-size: 1.1rem;
+  line-height: 1;
+}
+
 .stats-metric-card strong {
   display: block;
   margin-top: 18px;
   font-size: 2rem;
   line-height: 1;
   color: #ffffff;
+}
+
+.stats-metric-card--good strong {
+  color: #86efac;
+}
+
+.stats-metric-card--bad strong {
+  color: #fca5a5;
 }
 
 .stats-metric-card__delta {

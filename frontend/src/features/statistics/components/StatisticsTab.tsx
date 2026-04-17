@@ -53,13 +53,14 @@ function formatMetricValue(value: number | null | undefined, digits = 2): string
   return value.toFixed(digits)
 }
 
-function MetricCard({ title, value, detail, tone = 'neutral' }: { title: string; value: string; detail: string; tone?: 'neutral' | 'good' | 'bad' }) {
+function MetricCard({ title, value, detail, tone = 'neutral', emoji = '•' }: { title: string; value: string; detail: string; tone?: 'neutral' | 'good' | 'bad'; emoji?: string }) {
   return (
-    <section className="stats-metric-card">
+    <section className={`stats-metric-card stats-metric-card--${tone}`}>
       <div className="stats-metric-card__top">
         <span>{title}</span>
+        <span className="stats-metric-card__emoji" aria-hidden="true">{emoji}</span>
       </div>
-      <strong className={tone === 'good' ? 'text-under' : tone === 'bad' ? 'text-over' : ''}>{value}</strong>
+      <strong>{value}</strong>
       <p>{detail}</p>
     </section>
   )
@@ -362,17 +363,21 @@ export function StatisticsTab({ refreshToken = 0 }: StatisticsTabProps) {
               value={avgCalorieBalance == null ? '—' : `${formatSigned(avgCalorieBalance)} kcal/day`}
               detail={`Across ${selectedTitle}`}
               tone={avgCalorieBalance == null ? 'neutral' : avgCalorieBalance <= 0 ? 'good' : 'bad'}
+              emoji={avgCalorieBalance == null ? '🙂' : avgCalorieBalance <= -150 ? '🟢' : avgCalorieBalance <= 150 ? '🟡' : '🔴'}
             />
             <MetricCard
               title="Weight change"
               value={weightChange == null ? '—' : `${formatSigned(Number(weightChange.toFixed(1)))} kg`}
               detail={weightChange == null ? 'Not enough weigh-ins in this range' : `From first to last weigh-in in ${selectedTitle}`}
               tone={weightChange == null ? 'neutral' : weightChange <= 0 ? 'good' : 'bad'}
+              emoji={weightChange == null ? '⚖️' : weightChange <= -0.2 ? '📉' : weightChange < 0.2 ? '➖' : '📈'}
             />
             <MetricCard
               title="On-target days"
               value={`${onTargetDays} / ${points.length}`}
               detail="Days at or under calorie target"
+              tone={points.length === 0 ? 'neutral' : onTargetDays / points.length >= 0.7 ? 'good' : onTargetDays / points.length >= 0.4 ? 'neutral' : 'bad'}
+              emoji={points.length === 0 ? '🎯' : onTargetDays / points.length >= 0.7 ? '🎯' : onTargetDays / points.length >= 0.4 ? '👀' : '⚠️'}
             />
           </section>
           <LineChart
