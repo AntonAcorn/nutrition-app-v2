@@ -15,6 +15,18 @@ function currentEntryDate(): string {
   return getTodayLocalDateInputValue()
 }
 
+function getConfidenceMessage(confidence: number) {
+  if (confidence >= 80) {
+    return 'Looks good, give it a quick review before saving.'
+  }
+
+  if (confidence >= 55) {
+    return 'Decent match, but review the details before saving.'
+  }
+
+  return 'Low confidence, review carefully before saving.'
+}
+
 export function PhotoAnalyzerTab({ onConfirmed }: PhotoAnalyzerTabProps) {
   const [draft, setDraft] = useState<PhotoAnalysisDraft | null>(null)
   const [uploading, setUploading] = useState(false)
@@ -173,7 +185,7 @@ export function PhotoAnalyzerTab({ onConfirmed }: PhotoAnalyzerTabProps) {
 
           <div className="upload-panel__controls">
             <label className="upload-panel__note">
-              Note for the model
+              Optional note
               <textarea
                 value={userNote}
                 onChange={(event) => setUserNote(event.target.value)}
@@ -211,7 +223,7 @@ export function PhotoAnalyzerTab({ onConfirmed }: PhotoAnalyzerTabProps) {
             <div className="analyzer-panel__header">
               <div>
                 <p className="screen-header__meta">Meal draft</p>
-                <h3>Review, edit, and save</h3>
+                <h3>Check it, fix anything, and save</h3>
               </div>
               <div className="status-badge">
                 <span className={`status-dot ${draft.needsUserConfirmation ? '' : 'status-dot--done'}`} />
@@ -219,7 +231,7 @@ export function PhotoAnalyzerTab({ onConfirmed }: PhotoAnalyzerTabProps) {
               </div>
             </div>
 
-            <p className="subtle-text">Model confidence: {draft.confidence || 0}%</p>
+            <p className="subtle-text">Confidence: {draft.confidence || 0}% · {getConfidenceMessage(draft.confidence || 0)}</p>
 
             <TotalsRow totals={recalculatedTotals} />
 
@@ -238,7 +250,7 @@ export function PhotoAnalyzerTab({ onConfirmed }: PhotoAnalyzerTabProps) {
 
             <div className="primary-actions">
               <button type="button" onClick={saveDraft} disabled={saving || uploading}>
-                {saving ? 'Saving...' : 'Confirm and save'}
+                {saving ? 'Saving...' : 'Save meal'}
               </button>
             </div>
           </>
