@@ -53,6 +53,42 @@ function formatMetricValue(value: number | null | undefined, digits = 2): string
   return value.toFixed(digits)
 }
 
+function getChartBounds({
+  values,
+  targets,
+  valueKey,
+}: {
+  values: Array<number | null>
+  targets: Array<number | null>
+  valueKey: 'weightKg' | 'consumedCalories' | 'proteinGrams' | 'fatGrams' | 'fiberGrams'
+}) {
+  const numericValues = values.filter((value): value is number => value != null)
+  const numericTargets = targets.filter((value): value is number => value != null)
+
+  if (numericValues.length === 0 && numericTargets.length === 0) {
+    return { min: 0, max: 1 }
+  }
+
+  if (valueKey === 'weightKg' && numericValues.length > 0) {
+    const rawMin = Math.min(...numericValues)
+    const rawMax = Math.max(...numericValues)
+    const spread = rawMax - rawMin
+    const visualRange = Math.max(spread, 1.5)
+    const center = (rawMin + rawMax) / 2
+    const padding = Math.max(0.2, visualRange * 0.12)
+
+    return {
+      min: center - visualRange / 2 - padding,
+      max: center + visualRange / 2 + padding,
+    }
+  }
+
+  return {
+    min: Math.min(0, ...numericValues, ...numericTargets),
+    max: Math.max(1, ...numericValues, ...numericTargets),
+  }
+}
+
 function MetricCard({ title, value, detail, tone = 'neutral', emoji = '•' }: { title: string; value: string; detail: string; tone?: 'neutral' | 'good' | 'bad'; emoji?: string }) {
   return (
     <section className={`stats-metric-card stats-metric-card--${tone}`}>
@@ -141,10 +177,7 @@ function LineChart({
   const targets = targetKey ? points.map((point) => point[targetKey] ?? null) : []
   const width = 760
   const height = 180
-  const numericValues = values.filter((value): value is number => value != null)
-  const numericTargets = targets.filter((value): value is number => value != null)
-  const max = Math.max(1, ...numericValues, ...numericTargets)
-  const min = Math.min(0, ...numericValues, ...numericTargets)
+  const { min, max } = getChartBounds({ values, targets, valueKey })
   const valuePath = buildLinePath(values, width, height, min, max)
   const targetPath = targets.length > 0 ? buildLinePath(targets, width, height, min, max) : ''
   const guideValues = [min, (min + max) / 2, max]
