@@ -1,6 +1,8 @@
 package com.aiduparc.nutrition.history.api;
 
 import com.aiduparc.nutrition.history.service.NutritionHistoryService;
+import com.aiduparc.nutrition.security.service.CurrentNutritionUserResolver;
+import jakarta.servlet.http.HttpSession;
 import java.time.LocalDate;
 import java.util.UUID;
 import org.slf4j.Logger;
@@ -20,19 +22,26 @@ public class NutritionStatisticsController {
     private static final Logger log = LoggerFactory.getLogger(NutritionStatisticsController.class);
 
     private final NutritionHistoryService nutritionHistoryService;
+    private final CurrentNutritionUserResolver currentNutritionUserResolver;
 
-    public NutritionStatisticsController(NutritionHistoryService nutritionHistoryService) {
+    public NutritionStatisticsController(
+            NutritionHistoryService nutritionHistoryService,
+            CurrentNutritionUserResolver currentNutritionUserResolver
+    ) {
         this.nutritionHistoryService = nutritionHistoryService;
+        this.currentNutritionUserResolver = currentNutritionUserResolver;
     }
 
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
     public NutritionStatisticsResponse getStatistics(
-        @RequestParam UUID userId,
+        @RequestParam(required = false) UUID userId,
         @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fromDate,
-        @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate toDate
+        @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate toDate,
+        HttpSession session
     ) {
-        log.info("statistics request userId={} fromDate={} toDate={}", userId, fromDate, toDate);
-        return nutritionHistoryService.getStatistics(userId, fromDate, toDate);
+        UUID resolvedUserId = currentNutritionUserResolver.resolve(session, userId);
+        log.info("statistics request userId={} fromDate={} toDate={}", resolvedUserId, fromDate, toDate);
+        return nutritionHistoryService.getStatistics(resolvedUserId, fromDate, toDate);
     }
 }
