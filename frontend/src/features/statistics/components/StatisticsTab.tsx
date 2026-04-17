@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState, type ReactNode } from 'react'
 import { fetchNutritionStatistics } from '../model/statisticsApi'
 import type { NutritionBalanceSummary, NutritionStatisticsPoint, NutritionStatisticsResponse } from '../../../shared/types/nutrition'
 
-const RANGE_OPTIONS = [7, 14, 30] as const
+const RANGE_OPTIONS = [7, 30, 90] as const
 
 type RangeDays = (typeof RANGE_OPTIONS)[number]
 
@@ -83,16 +83,19 @@ function WeightAverageCard({ title, value }: { title: string; value: number | nu
 function RangeSelector({ value, onChange }: { value: RangeDays; onChange: (value: RangeDays) => void }) {
   return (
     <div className="range-selector" role="tablist" aria-label="Statistics range">
-      {RANGE_OPTIONS.map((days) => (
-        <button
-          key={days}
-          type="button"
-          className={`range-selector__button ${value === days ? 'range-selector__button--active' : ''}`}
-          onClick={() => onChange(days)}
-        >
-          {days} days
-        </button>
-      ))}
+      {RANGE_OPTIONS.map((days) => {
+        const label = days === 7 ? 'Last Week' : days === 30 ? 'Last Month' : 'Last 3M'
+        return (
+          <button
+            key={days}
+            type="button"
+            className={`range-selector__button ${value === days ? 'range-selector__button--active' : ''}`}
+            onClick={() => onChange(days)}
+          >
+            {label}
+          </button>
+        )
+      })}
     </div>
   )
 }
@@ -293,7 +296,7 @@ interface StatisticsTabProps {
 }
 
 export function StatisticsTab({ refreshToken = 0 }: StatisticsTabProps) {
-  const [rangeDays, setRangeDays] = useState<RangeDays>(14)
+  const [rangeDays, setRangeDays] = useState<RangeDays>(30)
   const [data, setData] = useState<NutritionStatisticsResponse | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
@@ -329,7 +332,7 @@ export function StatisticsTab({ refreshToken = 0 }: StatisticsTabProps) {
   }, [rangeDays, refreshToken])
 
   const points = useMemo(() => data?.points ?? [], [data])
-  const selectedTitle = rangeDays === 30 ? 'month' : `${rangeDays} days`
+  const selectedTitle = rangeDays === 7 ? 'last week' : rangeDays === 30 ? 'last month' : 'last 3 months'
 
   return (
     <section className="screen-section screen-section--statistics-dark">
@@ -339,7 +342,7 @@ export function StatisticsTab({ refreshToken = 0 }: StatisticsTabProps) {
           <h2>Nutrition trends</h2>
         </div>
         <div className="statistics-toolbar">
-          <p className="screen-header__meta">Your weight and intake history in a darker insights view.</p>
+          <p className="screen-header__meta">Last 7, 30, or 90 days, including today.</p>
           <RangeSelector value={rangeDays} onChange={setRangeDays} />
         </div>
       </header>
@@ -351,7 +354,7 @@ export function StatisticsTab({ refreshToken = 0 }: StatisticsTabProps) {
           <section className="stats-metric-grid">
             <SummaryCard
               title={`Deviation for ${selectedTitle}`}
-              summary={rangeDays === 30 ? data.monthlySummary : data.selectedPeriodSummary}
+              summary={data.selectedPeriodSummary}
             />
             <WeightAverageCard title="Weekly average weight" value={data.weeklyAverageWeightKg} />
             <WeightAverageCard title="Monthly average weight" value={data.monthlyAverageWeightKg} />
