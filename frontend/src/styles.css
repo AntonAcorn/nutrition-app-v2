@@ -952,6 +952,19 @@ ul {
   cursor: pointer;
 }
 
+.chart-expand-button {
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  display: inline-grid;
+  place-items: center;
+  border-color: rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.04);
+  color: rgba(255, 255, 255, 0.86);
+  font-size: 0.95rem;
+  line-height: 1;
+}
+
 .chart-expand-button:hover,
 .chart-modal__close:hover,
 .upload-button:hover {

@@ -212,11 +212,17 @@ function LineChart({
           </div>
           <div className="statistics-panel__actions">
             {onExpand ? (
-              <button type="button" className="chart-expand-button" onClick={(event) => {
-                event.stopPropagation()
-                onExpand()
-              }}>
-                Expand
+              <button
+                type="button"
+                className="chart-expand-button"
+                onClick={(event) => {
+                  event.stopPropagation()
+                  onExpand()
+                }}
+                aria-label={`Expand ${title} chart`}
+                title={`Expand ${title} chart`}
+              >
+                ⤢
               </button>
             ) : null}
           </div>
