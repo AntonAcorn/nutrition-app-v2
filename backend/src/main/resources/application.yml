@@ -33,6 +33,8 @@ management:
         include: health,info
 
 nutrition:
+  auth:
+    enabled: false
   photo-analysis:
     enabled: ${PHOTO_ANALYSIS_ENABLED:true}
     provider: ${PHOTO_ANALYSIS_PROVIDER:openai-stub}
