@@ -1003,8 +1003,16 @@ ul {
   border-top: 1px dashed #dbcbb9;
 }
 
+.line-chart__grid--hidden span {
+  border-top-color: transparent;
+}
+
 .statistics-panel--dark .line-chart__grid span {
-  border-top-color: rgba(255, 255, 255, 0.08);
+  border-top-color: rgba(255, 255, 255, 0.04);
+}
+
+.statistics-panel--dark .line-chart__grid--hidden span {
+  border-top-color: transparent;
 }
 
 .statistics-panel--dark .line-chart__guides,

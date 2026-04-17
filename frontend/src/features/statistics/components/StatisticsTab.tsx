@@ -197,7 +197,7 @@ function LineChart({
           ))}
         </div>
         <div className="line-chart__plot">
-          <div className="line-chart__grid line-chart__grid--dark">
+          <div className={`line-chart__grid line-chart__grid--dark ${valueKey === 'weightKg' ? 'line-chart__grid--hidden' : ''}`}>
             {guideValues.map((guide) => (
               <span key={`${title}-grid-${guide}`} />
             ))}
