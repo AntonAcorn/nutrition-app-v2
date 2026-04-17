@@ -907,7 +907,6 @@ ul {
 }
 
 .statistics-panel--dark {
-  position: relative;
   background: #17191f;
   border: 1px solid rgba(255, 255, 255, 0.06);
   box-shadow: 0 22px 60px rgba(0, 0, 0, 0.28);
@@ -953,23 +952,17 @@ ul {
 }
 
 .chart-expand-button {
-  width: 32px;
-  height: 32px;
+  width: 28px;
+  height: 28px;
   padding: 0;
   display: inline-grid;
+  flex: 0 0 auto;
   place-items: center;
-  border-color: rgba(255, 255, 255, 0.08);
-  background: rgba(255, 255, 255, 0.04);
-  color: rgba(255, 255, 255, 0.86);
-  font-size: 0.95rem;
+  border-color: rgba(255, 255, 255, 0.06);
+  background: rgba(255, 255, 255, 0.03);
+  color: rgba(255, 255, 255, 0.72);
+  font-size: 0.85rem;
   line-height: 1;
-}
-
-.chart-expand-button--corner {
-  position: absolute;
-  top: 14px;
-  right: 14px;
-  z-index: 2;
 }
 
 .chart-expand-button:hover,

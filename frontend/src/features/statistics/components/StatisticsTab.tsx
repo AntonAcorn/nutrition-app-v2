@@ -196,26 +196,25 @@ function LineChart({
       <section
         className={`panel statistics-panel statistics-panel--dark ${onExpand ? 'statistics-panel--interactive' : ''}`}
       >
-        {onExpand ? (
-          <button
-            type="button"
-            className="chart-expand-button chart-expand-button--corner"
-            onClick={(event) => {
-              event.stopPropagation()
-              onExpand()
-            }}
-            aria-label={`Expand ${title} chart`}
-            title={`Expand ${title} chart`}
-          >
-            ⤢
-          </button>
-        ) : null}
-
         <div className="statistics-panel__header">
           <div>
             <p className="screen-header__eyebrow">Metric</p>
             <h3>{title}</h3>
           </div>
+          {onExpand ? (
+            <button
+              type="button"
+              className="chart-expand-button"
+              onClick={(event) => {
+                event.stopPropagation()
+                onExpand()
+              }}
+              aria-label={`Expand ${title} chart`}
+              title={`Expand ${title} chart`}
+            >
+              ⤢
+            </button>
+          ) : null}
         </div>
 
         {chartContent}
