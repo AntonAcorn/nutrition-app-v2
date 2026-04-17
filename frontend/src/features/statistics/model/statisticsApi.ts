@@ -20,7 +20,7 @@ export async function fetchNutritionStatistics(days: number): Promise<NutritionS
   )
 
   if (!response.ok) {
-    throw new Error(`Не удалось загрузить statistics (${response.status})`)
+    throw new Error(`Failed to load statistics (${response.status})`)
   }
 
   return (await response.json()) as NutritionStatisticsResponse

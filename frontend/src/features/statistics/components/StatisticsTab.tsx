@@ -59,11 +59,11 @@ function SummaryCard({ title, summary }: { title: string; summary: NutritionBala
       <div className="stats-metric-card__top">
         <span>{title}</span>
         <span className={`stats-metric-card__delta ${summary.calorieBalance > 0 ? 'text-over' : 'text-under'}`}>
-          {formatSigned(summary.calorieBalance)} ккал
+          {formatSigned(summary.calorieBalance)} kcal
         </span>
       </div>
       <strong>{summary.consumedCalories}</strong>
-      <p>из {summary.targetCalories} kcal target</p>
+      <p>of {summary.targetCalories} kcal target</p>
     </section>
   )
 }
@@ -82,7 +82,7 @@ function WeightAverageCard({ title, value }: { title: string; value: number | nu
 
 function RangeSelector({ value, onChange }: { value: RangeDays; onChange: (value: RangeDays) => void }) {
   return (
-    <div className="range-selector" role="tablist" aria-label="Диапазон статистики">
+    <div className="range-selector" role="tablist" aria-label="Statistics range">
       {RANGE_OPTIONS.map((days) => (
         <button
           key={days}
@@ -90,7 +90,7 @@ function RangeSelector({ value, onChange }: { value: RangeDays; onChange: (value
           className={`range-selector__button ${value === days ? 'range-selector__button--active' : ''}`}
           onClick={() => onChange(days)}
         >
-          {days} дней
+          {days} days
         </button>
       ))}
     </div>
@@ -116,11 +116,11 @@ function ChartModal({ title, children, onClose }: { title: string; children: Rea
       <div className="chart-modal__content panel" onClick={(event) => event.stopPropagation()}>
         <div className="chart-modal__header">
           <div>
-            <p className="screen-header__eyebrow">Статистика</p>
+            <p className="screen-header__eyebrow">Statistics</p>
             <h3>{title}</h3>
           </div>
-          <button type="button" className="chart-modal__close" onClick={onClose} aria-label="Закрыть график">
-            Закрыть
+          <button type="button" className="chart-modal__close" onClick={onClose} aria-label="Close chart">
+            Close
           </button>
         </div>
         {children}
@@ -262,14 +262,14 @@ function StatisticsTable({ points }: { points: NutritionStatisticsPoint[] }) {
 
       <div className="statistics-table">
         <div className="statistics-table__head statistics-table__row">
-          <span>Дата</span>
-          <span>Вес</span>
-          <span>Ккал</span>
-          <span>Цель</span>
-          <span>Баланс</span>
-          <span>Белок</span>
-          <span>Жиры</span>
-          <span>Клетчатка</span>
+          <span>Date</span>
+          <span>Weight</span>
+          <span>Calories</span>
+          <span>Target</span>
+          <span>Balance</span>
+          <span>Protein</span>
+          <span>Fat</span>
+          <span>Fiber</span>
         </div>
         {orderedPoints.map((point) => (
           <div className="statistics-table__row" key={point.entryDate}>
@@ -313,7 +313,7 @@ export function StatisticsTab({ refreshToken = 0 }: StatisticsTabProps) {
         }
       } catch (err) {
         if (!cancelled) {
-          setError(err instanceof Error ? err.message : 'Не удалось загрузить статистику')
+          setError(err instanceof Error ? err.message : 'Failed to load statistics')
         }
       } finally {
         if (!cancelled) {
@@ -329,7 +329,7 @@ export function StatisticsTab({ refreshToken = 0 }: StatisticsTabProps) {
   }, [rangeDays, refreshToken])
 
   const points = useMemo(() => data?.points ?? [], [data])
-  const selectedTitle = rangeDays === 30 ? 'месяц' : `${rangeDays} дней`
+  const selectedTitle = rangeDays === 30 ? 'month' : `${rangeDays} days`
 
   return (
     <section className="screen-section screen-section--statistics-dark">
@@ -344,64 +344,64 @@ export function StatisticsTab({ refreshToken = 0 }: StatisticsTabProps) {
         </div>
       </header>
 
-      {loading ? <section className="panel detail-panel"><p>Загружаем статистику...</p></section> : null}
+      {loading ? <section className="panel detail-panel"><p>Loading statistics...</p></section> : null}
       {!loading && error ? <section className="panel detail-panel"><p className="error-text">{error}</p></section> : null}
       {!loading && !error && data ? (
         <>
           <section className="stats-metric-grid">
             <SummaryCard
-              title={`Отклонение за ${selectedTitle}`}
+              title={`Deviation for ${selectedTitle}`}
               summary={rangeDays === 30 ? data.monthlySummary : data.selectedPeriodSummary}
             />
-            <WeightAverageCard title="Средний вес за неделю" value={data.weeklyAverageWeightKg} />
-            <WeightAverageCard title="Средний вес за месяц" value={data.monthlyAverageWeightKg} />
+            <WeightAverageCard title="Weekly average weight" value={data.weeklyAverageWeightKg} />
+            <WeightAverageCard title="Monthly average weight" value={data.monthlyAverageWeightKg} />
           </section>
           <LineChart
-            title="Вес"
-            unit="кг"
+            title="Weight"
+            unit="kg"
             points={points}
             valueKey="weightKg"
             colorClass="line-chart__path--weight"
-            expanded={expandedChart === 'Вес'}
-            onExpand={() => setExpandedChart((current) => (current === 'Вес' ? null : 'Вес'))}
+            expanded={expandedChart === 'Weight'}
+            onExpand={() => setExpandedChart((current) => (current === 'Weight' ? null : 'Weight'))}
           />
           <LineChart
-            title="Калории"
-            unit="ккал"
+            title="Calories"
+            unit="kcal"
             points={points}
             valueKey="consumedCalories"
             targetKey="calorieTarget"
             colorClass="line-chart__path--calories"
-            expanded={expandedChart === 'Калории'}
-            onExpand={() => setExpandedChart((current) => (current === 'Калории' ? null : 'Калории'))}
+            expanded={expandedChart === 'Calories'}
+            onExpand={() => setExpandedChart((current) => (current === 'Calories' ? null : 'Calories'))}
           />
           <div className="statistics-grid">
             <LineChart
-              title="Белок"
-              unit="г"
+              title="Protein"
+              unit="g"
               points={points}
               valueKey="proteinGrams"
               colorClass="line-chart__path--protein"
-              expanded={expandedChart === 'Белок'}
-              onExpand={() => setExpandedChart((current) => (current === 'Белок' ? null : 'Белок'))}
+              expanded={expandedChart === 'Protein'}
+              onExpand={() => setExpandedChart((current) => (current === 'Protein' ? null : 'Protein'))}
             />
             <LineChart
-              title="Жиры"
-              unit="г"
+              title="Fat"
+              unit="g"
               points={points}
               valueKey="fatGrams"
               colorClass="line-chart__path--fat"
-              expanded={expandedChart === 'Жиры'}
-              onExpand={() => setExpandedChart((current) => (current === 'Жиры' ? null : 'Жиры'))}
+              expanded={expandedChart === 'Fat'}
+              onExpand={() => setExpandedChart((current) => (current === 'Fat' ? null : 'Fat'))}
             />
             <LineChart
-              title="Клетчатка"
-              unit="г"
+              title="Fiber"
+              unit="g"
               points={points}
               valueKey="fiberGrams"
               colorClass="line-chart__path--fiber"
-              expanded={expandedChart === 'Клетчатка'}
-              onExpand={() => setExpandedChart((current) => (current === 'Клетчатка' ? null : 'Клетчатка'))}
+              expanded={expandedChart === 'Fiber'}
+              onExpand={() => setExpandedChart((current) => (current === 'Fiber' ? null : 'Fiber'))}
             />
           </div>
           <StatisticsTable points={points} />
