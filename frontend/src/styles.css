@@ -546,6 +546,12 @@ ul {
   transform: scale(1.1);
 }
 
+.water-card__actions {
+  display: grid;
+  grid-template-columns: minmax(0, 96px) minmax(0, 1fr);
+  gap: 10px;
+}
+
 .water-card__button {
   border: 0;
   border-radius: 18px;
@@ -556,6 +562,11 @@ ul {
   font-size: 0.98rem;
   letter-spacing: 0.01em;
   cursor: pointer;
+}
+
+.water-card__button--secondary {
+  background: rgba(255, 255, 255, 0.03);
+  color: rgba(255, 255, 255, 0.76);
 }
 
 .water-card__button:disabled {

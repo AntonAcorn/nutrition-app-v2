@@ -14,6 +14,10 @@ export function WaterIntakeCard() {
     setGlasses((current) => Math.min(MAX_GLASSES, current + 1))
   }
 
+  function handleReset() {
+    setGlasses(0)
+  }
+
   return (
     <section className="water-card panel" aria-label="Water intake tracker">
       <div className="water-card__header">
@@ -39,9 +43,14 @@ export function WaterIntakeCard() {
         </div>
       </div>
 
-      <button type="button" className="water-card__button" onClick={handleAddGlass} disabled={glasses >= MAX_GLASSES}>
-        {glasses >= MAX_GLASSES ? 'Done for now' : '+1 glass'}
-      </button>
+      <div className="water-card__actions">
+        <button type="button" className="water-card__button water-card__button--secondary" onClick={handleReset} disabled={glasses === 0}>
+          Reset
+        </button>
+        <button type="button" className="water-card__button" onClick={handleAddGlass} disabled={glasses >= MAX_GLASSES}>
+          {glasses >= MAX_GLASSES ? 'Done for now' : '+1 glass'}
+        </button>
+      </div>
     </section>
   )
 }
