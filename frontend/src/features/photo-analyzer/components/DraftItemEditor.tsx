@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react'
 import type { DraftItem } from '../../../shared/types/nutrition'
 import { numericFields } from '../model/photoAnalysis'
 
@@ -15,6 +16,18 @@ const fieldLabels: Record<string, string> = {
 }
 
 export function DraftItemEditor({ item, onChange }: DraftItemEditorProps) {
+  const [fieldValues, setFieldValues] = useState<Record<string, string>>({})
+
+  useEffect(() => {
+    setFieldValues({
+      calories: String(item.calories),
+      protein: String(item.protein),
+      fat: String(item.fat),
+      carbs: String(item.carbs),
+      fiber: String(item.fiber),
+    })
+  }, [item.calories, item.protein, item.fat, item.carbs, item.fiber])
+
   return (
     <article className="draft-item-card">
       <div className="draft-item-card__header">
@@ -39,8 +52,22 @@ export function DraftItemEditor({ item, onChange }: DraftItemEditorProps) {
             <input
               type="number"
               step="0.1"
-              value={item[field]}
-              onChange={(event) => onChange(item.id, field, event.target.value)}
+              value={fieldValues[field] ?? String(item[field])}
+              onChange={(event) => {
+                const nextValue = event.target.value
+                setFieldValues((current) => ({ ...current, [field]: nextValue }))
+                if (nextValue.trim() === '') {
+                  return
+                }
+                onChange(item.id, field, nextValue)
+              }}
+              onBlur={(event) => {
+                const nextValue = event.target.value.trim()
+                if (nextValue === '') {
+                  setFieldValues((current) => ({ ...current, [field]: '0' }))
+                  onChange(item.id, field, '0')
+                }
+              }}
             />
           </label>
         ))}
