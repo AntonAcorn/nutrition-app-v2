@@ -9,6 +9,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.aiduparc.nutrition.photoanalysis.application.PhotoAnalysisService;
+import com.aiduparc.nutrition.security.SecurityConfig;
 import com.aiduparc.nutrition.photoanalysis.application.PhotoUploadAnalysisService;
 import com.aiduparc.nutrition.photoanalysis.application.dto.AnalyzedFoodItem;
 import com.aiduparc.nutrition.photoanalysis.application.dto.PhotoAnalysisResponse;
@@ -26,9 +27,11 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.context.annotation.Import;
 import org.springframework.test.web.servlet.MockMvc;
 
 @WebMvcTest(PhotoAnalysisController.class)
+@Import(SecurityConfig.class)
 class PhotoAnalysisControllerTest {
 
     @Autowired
