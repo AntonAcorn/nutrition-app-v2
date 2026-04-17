@@ -19,11 +19,11 @@ function TotalCard({ label, value, unit, accent = false }: { label: string; valu
 export function TotalsRow({ totals }: TotalsRowProps) {
   return (
     <section className="current-day-grid current-day-grid--macros">
-      <TotalCard label="Калории" value={totals.calories} unit="ккал" accent />
-      <TotalCard label="Белки" value={totals.protein} unit="г" />
-      <TotalCard label="Жиры" value={totals.fat} unit="г" />
-      <TotalCard label="Углеводы" value={totals.carbs} unit="г" />
-      <TotalCard label="Клетчатка" value={totals.fiber} unit="г" />
+      <TotalCard label="Calories" value={totals.calories} unit="kcal" accent />
+      <TotalCard label="Protein" value={totals.protein} unit="g" />
+      <TotalCard label="Fat" value={totals.fat} unit="g" />
+      <TotalCard label="Carbs" value={totals.carbs} unit="g" />
+      <TotalCard label="Fiber" value={totals.fiber} unit="g" />
     </section>
   )
 }

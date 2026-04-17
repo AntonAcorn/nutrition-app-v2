@@ -7,11 +7,11 @@ interface DraftItemEditorProps {
 }
 
 const fieldLabels: Record<string, string> = {
-  calories: 'Калории',
-  protein: 'Белки',
-  fat: 'Жиры',
-  carbs: 'Углеводы',
-  fiber: 'Клетчатка',
+  calories: 'Calories',
+  protein: 'Protein',
+  fat: 'Fat',
+  carbs: 'Carbs',
+  fiber: 'Fiber',
 }
 
 export function DraftItemEditor({ item, onChange }: DraftItemEditorProps) {
@@ -19,12 +19,12 @@ export function DraftItemEditor({ item, onChange }: DraftItemEditorProps) {
     <article className="draft-item-card">
       <div className="draft-item-card__header">
         <label>
-          Название
+          Name
           <input value={item.name} onChange={(event) => onChange(item.id, 'name', event.target.value)} />
         </label>
 
         <label>
-          Порция
+          Portion
           <input
             value={item.estimatedPortion}
             onChange={(event) => onChange(item.id, 'estimatedPortion', event.target.value)}

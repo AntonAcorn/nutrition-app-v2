@@ -84,7 +84,7 @@ export function PhotoAnalyzerTab({ onConfirmed }: PhotoAnalyzerTabProps) {
 
   async function startAnalysis() {
     if (!selectedFile) {
-      setError('Сначала выбери фото')
+      setError('Choose a photo first')
       return
     }
 
@@ -98,7 +98,7 @@ export function PhotoAnalyzerTab({ onConfirmed }: PhotoAnalyzerTabProps) {
       formData.append('userId', LIVE_APP_USER_ID)
       formData.append('entryDate', currentEntryDate())
       formData.append('userNote', userNote)
-      formData.append('locale', 'ru')
+      formData.append('locale', 'en')
 
       const response = await fetch('/api/photo-analysis/upload', {
         method: 'POST',
@@ -106,7 +106,7 @@ export function PhotoAnalyzerTab({ onConfirmed }: PhotoAnalyzerTabProps) {
       })
 
       if (!response.ok) {
-        throw new Error(`Не удалось загрузить и проанализировать фото (${response.status})`)
+        throw new Error(`Failed to upload and analyze the photo (${response.status})`)
       }
 
       const payload = await response.json()
@@ -115,7 +115,7 @@ export function PhotoAnalyzerTab({ onConfirmed }: PhotoAnalyzerTabProps) {
         fileInputRef.current.value = ''
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Ошибка загрузки фото')
+      setError(err instanceof Error ? err.message : 'Photo upload failed')
     } finally {
       setUploading(false)
     }
@@ -148,15 +148,15 @@ export function PhotoAnalyzerTab({ onConfirmed }: PhotoAnalyzerTabProps) {
       })
 
       if (!response.ok) {
-        throw new Error(`Не удалось сохранить черновик (${response.status})`)
+        throw new Error(`Failed to save the draft (${response.status})`)
       }
 
       await response.json()
       setDraft((current) => (current ? { ...current, needsUserConfirmation: false } : current))
-      setSuccessMessage('Сохранено. Сводка за день обновлена.')
+      setSuccessMessage('Saved. Daily summary updated.')
       onConfirmed?.()
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Ошибка сохранения')
+      setError(err instanceof Error ? err.message : 'Save failed')
     } finally {
       setSaving(false)
     }
@@ -173,25 +173,25 @@ export function PhotoAnalyzerTab({ onConfirmed }: PhotoAnalyzerTabProps) {
 
           <div className="upload-panel__controls">
             <label className="upload-panel__note">
-              Комментарий для модели
+              Note for the model
               <textarea
                 value={userNote}
                 onChange={(event) => setUserNote(event.target.value)}
                 rows={3}
-                placeholder="Например: курица, рис, салат"
+                placeholder="For example: chicken, rice, salad"
               />
             </label>
 
             <label className="upload-button">
               <input ref={fileInputRef} type="file" accept="image/*" onChange={handleFileSelected} hidden />
-              <span>Выбрать фото</span>
+              <span>Choose photo</span>
             </label>
 
-            {selectedFileName ? <p className="subtle-text">Выбрано: {selectedFileName}</p> : null}
+            {selectedFileName ? <p className="subtle-text">Selected: {selectedFileName}</p> : null}
 
             <div className="primary-actions primary-actions--inline">
               <button type="button" onClick={startAnalysis} disabled={uploading || !selectedFile}>
-                {uploading ? 'Анализируем...' : 'Начать анализ'}
+                {uploading ? 'Analyzing...' : 'Start analysis'}
               </button>
             </div>
           </div>
@@ -199,7 +199,7 @@ export function PhotoAnalyzerTab({ onConfirmed }: PhotoAnalyzerTabProps) {
 
         {previewUrl ? (
           <div className="image-preview">
-            <img src={previewUrl} alt="Предпросмотр загруженной еды" />
+            <img src={previewUrl} alt="Uploaded meal preview" />
           </div>
         ) : null}
 
@@ -210,16 +210,16 @@ export function PhotoAnalyzerTab({ onConfirmed }: PhotoAnalyzerTabProps) {
           <>
             <div className="analyzer-panel__header">
               <div>
-                <p className="screen-header__meta">Черновик блюда</p>
-                <h3>Проверь, поправь и сохрани</h3>
+                <p className="screen-header__meta">Meal draft</p>
+                <h3>Review, edit, and save</h3>
               </div>
               <div className="status-badge">
                 <span className={`status-dot ${draft.needsUserConfirmation ? '' : 'status-dot--done'}`} />
-                <span>{draft.needsUserConfirmation ? 'Ожидает подтверждения' : 'Подтверждён'}</span>
+                <span>{draft.needsUserConfirmation ? 'Needs confirmation' : 'Confirmed'}</span>
               </div>
             </div>
 
-            <p className="subtle-text">Уверенность модели: {draft.confidence || 0}%</p>
+            <p className="subtle-text">Model confidence: {draft.confidence || 0}%</p>
 
             <TotalsRow totals={recalculatedTotals} />
 
@@ -231,14 +231,14 @@ export function PhotoAnalyzerTab({ onConfirmed }: PhotoAnalyzerTabProps) {
 
             <div className="notes-block">
               <label>
-                Заметки
+                Notes
                 <textarea value={draft.notes.join('\n')} onChange={(event) => updateNotes(event.target.value)} rows={4} />
               </label>
             </div>
 
             <div className="primary-actions">
               <button type="button" onClick={saveDraft} disabled={saving || uploading}>
-                {saving ? 'Сохраняем...' : 'Подтвердить и сохранить'}
+                {saving ? 'Saving...' : 'Confirm and save'}
               </button>
             </div>
           </>
