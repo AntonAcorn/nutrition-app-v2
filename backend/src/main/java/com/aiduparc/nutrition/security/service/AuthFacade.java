@@ -29,7 +29,7 @@ public class AuthFacade {
     }
 
     @Transactional
-    public AuthResponse login(LoginRequest request) {
+    public AuthenticatedSession login(LoginRequest request) {
         AuthAccountEntity account = authAccountService.findByEmail(request.email())
             .orElseThrow(() -> new IllegalArgumentException("Invalid email or password"));
 
@@ -38,15 +38,30 @@ public class AuthFacade {
         }
 
         authAccountService.markLoginSuccess(account);
-        return toResponse(account, true);
+        return new AuthenticatedSession(
+            account.getId(),
+            account.getEmail(),
+            account.getDisplayName(),
+            account.getNutritionUserId()
+        );
     }
 
-    public AuthResponse me() {
-        return new AuthResponse(null, null, null, null, false);
+    public AuthResponse me(AuthenticatedSession session) {
+        if (session == null) {
+            return new AuthResponse(null, null, null, null, false);
+        }
+
+        return new AuthResponse(
+            session.accountId(),
+            session.email(),
+            session.displayName(),
+            session.nutritionUserId(),
+            true
+        );
     }
 
     public void logout() {
-        // Session-based auth is not wired yet. Endpoint exists so frontend integration can start safely.
+        // no-op for now, session invalidation is handled in the controller layer
     }
 
     private AuthResponse toResponse(AuthAccountEntity account, boolean authenticated) {

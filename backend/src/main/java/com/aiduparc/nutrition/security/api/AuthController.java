@@ -1,6 +1,8 @@
 package com.aiduparc.nutrition.security.api;
 
 import com.aiduparc.nutrition.security.service.AuthFacade;
+import com.aiduparc.nutrition.security.service.AuthenticatedSession;
+import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -14,6 +16,8 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/auth")
 public class AuthController {
 
+    private static final String AUTH_SESSION_KEY = "nutrition.auth.session";
+
     private final AuthFacade authFacade;
 
     public AuthController(AuthFacade authFacade) {
@@ -26,18 +30,21 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public AuthResponse login(@Valid @RequestBody LoginRequest request) {
-        return authFacade.login(request);
+    public AuthResponse login(@Valid @RequestBody LoginRequest request, HttpSession session) {
+        AuthenticatedSession authenticatedSession = authFacade.login(request);
+        session.setAttribute(AUTH_SESSION_KEY, authenticatedSession);
+        return authFacade.me(authenticatedSession);
     }
 
     @PostMapping("/logout")
-    public ResponseEntity<Void> logout() {
+    public ResponseEntity<Void> logout(HttpSession session) {
         authFacade.logout();
+        session.invalidate();
         return ResponseEntity.noContent().build();
     }
 
     @GetMapping("/me")
-    public AuthResponse me() {
-        return authFacade.me();
+    public AuthResponse me(HttpSession session) {
+        return authFacade.me((AuthenticatedSession) session.getAttribute(AUTH_SESSION_KEY));
     }
 }
