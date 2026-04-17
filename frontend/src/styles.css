@@ -466,6 +466,103 @@ ul {
   color: rgba(255, 255, 255, 0.7);
 }
 
+.water-card {
+  display: grid;
+  gap: 16px;
+  padding: 18px;
+  border-radius: 24px;
+  background: linear-gradient(180deg, rgba(24, 28, 36, 0.96) 0%, rgba(17, 19, 24, 0.98) 100%);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.water-card__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.water-card__header h3 {
+  margin: 4px 0 0;
+  font-size: clamp(1.5rem, 5vw, 2rem);
+  color: #ffffff;
+}
+
+.water-card__emoji {
+  display: grid;
+  justify-items: center;
+  gap: 4px;
+  min-width: 72px;
+}
+
+.water-card__emoji span {
+  font-size: 2rem;
+  line-height: 1;
+}
+
+.water-card__emoji small {
+  color: rgba(255, 255, 255, 0.58);
+  font-size: 0.76rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.water-card__slider {
+  position: relative;
+  height: 14px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.08);
+  overflow: hidden;
+}
+
+.water-card__slider-fill {
+  position: absolute;
+  inset: 0 auto 0 0;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #60a5fa 0%, #22d3ee 100%);
+  box-shadow: 0 0 22px rgba(34, 211, 238, 0.28);
+}
+
+.water-card__ticks {
+  position: relative;
+  z-index: 1;
+  height: 100%;
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  align-items: center;
+}
+
+.water-card__tick {
+  width: 8px;
+  height: 8px;
+  margin: 0 auto;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.22);
+  transition: transform 160ms ease, background 160ms ease;
+}
+
+.water-card__tick--active {
+  background: #f8fbff;
+  transform: scale(1.1);
+}
+
+.water-card__button {
+  border: 0;
+  border-radius: 18px;
+  padding: 14px 18px;
+  background: rgba(255, 255, 255, 0.06);
+  color: #ffffff;
+  font-weight: 700;
+  font-size: 0.98rem;
+  letter-spacing: 0.01em;
+  cursor: pointer;
+}
+
+.water-card__button:disabled {
+  opacity: 0.56;
+  cursor: default;
+}
+
 .weight-inline-card {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(220px, 320px);

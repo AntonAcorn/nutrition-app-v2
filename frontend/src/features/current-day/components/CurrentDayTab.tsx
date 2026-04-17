@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { TodaySummaryBlock } from './TodaySummaryBlock'
+import { WaterIntakeCard } from './WaterIntakeCard'
 import { fetchTodaySummary } from '../model/todaySummaryApi'
 import { updateTodayWeight } from '../model/weightApi'
 import type { TodaySummary } from '../../../shared/types/nutrition'
@@ -79,6 +80,7 @@ export function CurrentDayTab({ refreshToken = 0, successMessage = '', onDayUpda
       {!loading && error ? <section className="panel detail-panel"><p className="error-text">{error}</p></section> : null}
 
       {!loading && !error && summary ? <TodaySummaryBlock summary={summary} /> : null}
+      {!loading && !error && summary ? <WaterIntakeCard /> : null}
 
       {!loading && summary ? (
         <section className="weight-inline-card panel">
