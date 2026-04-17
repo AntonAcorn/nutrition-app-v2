@@ -1,5 +1,7 @@
 package com.aiduparc.nutrition.history.api;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -8,6 +10,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.aiduparc.nutrition.history.service.NutritionHistoryService;
 import com.aiduparc.nutrition.security.SecurityConfig;
+import com.aiduparc.nutrition.security.service.CurrentNutritionUserResolver;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.UUID;
@@ -28,10 +31,15 @@ class TodaySummaryControllerTest {
     @MockBean
     private NutritionHistoryService nutritionHistoryService;
 
+    @MockBean
+    private CurrentNutritionUserResolver currentNutritionUserResolver;
+
     @Test
     void shouldReturnTodaySummary() throws Exception {
         UUID userId = UUID.randomUUID();
         LocalDate entryDate = LocalDate.of(2026, 4, 8);
+
+        when(currentNutritionUserResolver.resolve(any(), eq(userId))).thenReturn(userId);
 
         when(nutritionHistoryService.getTodaySummary(userId, entryDate)).thenReturn(
                 new TodaySummaryResponse(

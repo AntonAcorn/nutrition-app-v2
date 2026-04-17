@@ -1,6 +1,8 @@
 package com.aiduparc.nutrition.history.api;
 
 import com.aiduparc.nutrition.history.service.NutritionHistoryService;
+import com.aiduparc.nutrition.security.service.CurrentNutritionUserResolver;
+import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,32 +25,41 @@ public class TodaySummaryController {
     private static final Logger log = LoggerFactory.getLogger(TodaySummaryController.class);
 
     private final NutritionHistoryService nutritionHistoryService;
+    private final CurrentNutritionUserResolver currentNutritionUserResolver;
 
-    public TodaySummaryController(NutritionHistoryService nutritionHistoryService) {
+    public TodaySummaryController(
+            NutritionHistoryService nutritionHistoryService,
+            CurrentNutritionUserResolver currentNutritionUserResolver
+    ) {
         this.nutritionHistoryService = nutritionHistoryService;
+        this.currentNutritionUserResolver = currentNutritionUserResolver;
     }
 
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
     public TodaySummaryResponse getTodaySummary(
-            @RequestParam UUID userId,
-            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate entryDate
+            @RequestParam(required = false) UUID userId,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate entryDate,
+            HttpSession session
     ) {
         LocalDate safeDate = entryDate != null ? entryDate : LocalDate.now();
-        log.info("today-summary request userId={} entryDate={}", userId, safeDate);
-        return nutritionHistoryService.getTodaySummary(userId, safeDate);
+        UUID resolvedUserId = currentNutritionUserResolver.resolve(session, userId);
+        log.info("today-summary request userId={} entryDate={}", resolvedUserId, safeDate);
+        return nutritionHistoryService.getTodaySummary(resolvedUserId, safeDate);
     }
 
     @PutMapping("/weight")
     @ResponseStatus(HttpStatus.OK)
     public TodaySummaryResponse updateWeight(
-            @RequestParam UUID userId,
+            @RequestParam(required = false) UUID userId,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate entryDate,
-            @Valid @RequestBody UpdateWeightRequest request
+            @Valid @RequestBody UpdateWeightRequest request,
+            HttpSession session
     ) {
         LocalDate safeDate = entryDate != null ? entryDate : LocalDate.now();
-        log.info("weight update request userId={} entryDate={} weightKg={}", userId, safeDate, request.weightKg());
-        nutritionHistoryService.updateWeight(userId, safeDate, request.weightKg());
-        return nutritionHistoryService.getTodaySummary(userId, safeDate);
+        UUID resolvedUserId = currentNutritionUserResolver.resolve(session, userId);
+        log.info("weight update request userId={} entryDate={} weightKg={}", resolvedUserId, safeDate, request.weightKg());
+        nutritionHistoryService.updateWeight(resolvedUserId, safeDate, request.weightKg());
+        return nutritionHistoryService.getTodaySummary(resolvedUserId, safeDate);
     }
 }
