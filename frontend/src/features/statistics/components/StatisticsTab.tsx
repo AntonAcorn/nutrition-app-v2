@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState, type ReactNode } from 'react'
 import { fetchNutritionStatistics } from '../model/statisticsApi'
-import type { NutritionBalanceSummary, NutritionStatisticsPoint, NutritionStatisticsResponse } from '../../../shared/types/nutrition'
+import type { NutritionStatisticsPoint, NutritionStatisticsResponse } from '../../../shared/types/nutrition'
 
 const RANGE_OPTIONS = [7, 30, 90] as const
 
@@ -53,29 +53,14 @@ function formatMetricValue(value: number | null | undefined, digits = 2): string
   return value.toFixed(digits)
 }
 
-function SummaryCard({ title, summary }: { title: string; summary: NutritionBalanceSummary }) {
-  return (
-    <section className="stats-metric-card">
-      <div className="stats-metric-card__top">
-        <span>{title}</span>
-        <span className={`stats-metric-card__delta ${summary.calorieBalance > 0 ? 'text-over' : 'text-under'}`}>
-          {formatSigned(summary.calorieBalance)} kcal
-        </span>
-      </div>
-      <strong>{summary.consumedCalories}</strong>
-      <p>of {summary.targetCalories} kcal target</p>
-    </section>
-  )
-}
-
-function WeightAverageCard({ title, value }: { title: string; value: number | null }) {
+function MetricCard({ title, value, detail, tone = 'neutral' }: { title: string; value: string; detail: string; tone?: 'neutral' | 'good' | 'bad' }) {
   return (
     <section className="stats-metric-card">
       <div className="stats-metric-card__top">
         <span>{title}</span>
       </div>
-      <strong>{value == null ? '—' : value.toFixed(1)}</strong>
-      <p>kg average</p>
+      <strong className={tone === 'good' ? 'text-under' : tone === 'bad' ? 'text-over' : ''}>{value}</strong>
+      <p>{detail}</p>
     </section>
   )
 }
@@ -334,6 +319,26 @@ export function StatisticsTab({ refreshToken = 0 }: StatisticsTabProps) {
   const points = useMemo(() => data?.points ?? [], [data])
   const selectedTitle = rangeDays === 7 ? 'last week' : rangeDays === 30 ? 'last month' : 'last 3 months'
 
+  const avgCalorieBalance = useMemo(() => {
+    if (points.length === 0) return null
+    const total = points.reduce((sum, point) => sum + point.calorieBalance, 0)
+    return Math.round(total / points.length)
+  }, [points])
+
+  const weightChange = useMemo(() => {
+    const weightPoints = points.filter((point) => point.weightKg != null)
+    if (weightPoints.length < 2) return null
+    const first = weightPoints[0].weightKg
+    const last = weightPoints[weightPoints.length - 1].weightKg
+    if (first == null || last == null) return null
+    return last - first
+  }, [points])
+
+  const onTargetDays = useMemo(() => {
+    if (points.length === 0) return 0
+    return points.filter((point) => point.calorieBalance <= 0).length
+  }, [points])
+
   return (
     <section className="screen-section screen-section--statistics-dark">
       <header className="screen-header screen-header--statistics-dark">
@@ -352,12 +357,23 @@ export function StatisticsTab({ refreshToken = 0 }: StatisticsTabProps) {
       {!loading && !error && data ? (
         <>
           <section className="stats-metric-grid">
-            <SummaryCard
-              title={`Deviation for ${selectedTitle}`}
-              summary={data.selectedPeriodSummary}
+            <MetricCard
+              title="Avg calorie balance"
+              value={avgCalorieBalance == null ? '—' : `${formatSigned(avgCalorieBalance)} kcal/day`}
+              detail={`Across ${selectedTitle}`}
+              tone={avgCalorieBalance == null ? 'neutral' : avgCalorieBalance <= 0 ? 'good' : 'bad'}
             />
-            <WeightAverageCard title="Weekly average weight" value={data.weeklyAverageWeightKg} />
-            <WeightAverageCard title="Monthly average weight" value={data.monthlyAverageWeightKg} />
+            <MetricCard
+              title="Weight change"
+              value={weightChange == null ? '—' : `${formatSigned(Number(weightChange.toFixed(1)))} kg`}
+              detail={weightChange == null ? 'Not enough weigh-ins in this range' : `From first to last weigh-in in ${selectedTitle}`}
+              tone={weightChange == null ? 'neutral' : weightChange <= 0 ? 'good' : 'bad'}
+            />
+            <MetricCard
+              title="On-target days"
+              value={`${onTargetDays} / ${points.length}`}
+              detail="Days at or under calorie target"
+            />
           </section>
           <LineChart
             title="Weight"
