@@ -195,15 +195,6 @@ function LineChart({
     <>
       <section
         className={`panel statistics-panel statistics-panel--dark ${onExpand ? 'statistics-panel--interactive' : ''}`}
-        onClick={onExpand}
-        role={onExpand ? 'button' : undefined}
-        tabIndex={onExpand ? 0 : undefined}
-        onKeyDown={onExpand ? (event) => {
-          if (event.key === 'Enter' || event.key === ' ') {
-            event.preventDefault()
-            onExpand()
-          }
-        } : undefined}
       >
         {onExpand ? (
           <button
