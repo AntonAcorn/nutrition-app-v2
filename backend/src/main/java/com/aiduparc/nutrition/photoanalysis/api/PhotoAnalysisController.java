@@ -5,6 +5,8 @@ import com.aiduparc.nutrition.photoanalysis.application.PhotoUploadAnalysisServi
 import com.aiduparc.nutrition.photoanalysis.application.dto.PhotoAnalysisRequest;
 import com.aiduparc.nutrition.photoanalysis.application.dto.PhotoAnalysisResponse;
 import com.aiduparc.nutrition.photoanalysis.application.dto.PhotoUploadAnalysisRequest;
+import com.aiduparc.nutrition.security.service.CurrentNutritionUserResolver;
+import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import java.io.IOException;
 import java.time.LocalDate;
@@ -28,13 +30,16 @@ public class PhotoAnalysisController {
 
     private final PhotoAnalysisService photoAnalysisService;
     private final PhotoUploadAnalysisService photoUploadAnalysisService;
+    private final CurrentNutritionUserResolver currentNutritionUserResolver;
 
     public PhotoAnalysisController(
             PhotoAnalysisService photoAnalysisService,
-            PhotoUploadAnalysisService photoUploadAnalysisService
+            PhotoUploadAnalysisService photoUploadAnalysisService,
+            CurrentNutritionUserResolver currentNutritionUserResolver
     ) {
         this.photoAnalysisService = photoAnalysisService;
         this.photoUploadAnalysisService = photoUploadAnalysisService;
+        this.currentNutritionUserResolver = currentNutritionUserResolver;
     }
 
     @PostMapping
@@ -46,19 +51,21 @@ public class PhotoAnalysisController {
     @PostMapping(path = "/upload", consumes = "multipart/form-data")
     @ResponseStatus(HttpStatus.CREATED)
     public PhotoUploadAnalysisResponse uploadAndAnalyze(
-            @RequestParam UUID userId,
+            @RequestParam(required = false) UUID userId,
             @RequestParam(required = false) String entryDate,
             @RequestParam(required = false) String userNote,
             @RequestParam(required = false) String locale,
-            @RequestParam("file") MultipartFile file
+            @RequestParam("file") MultipartFile file,
+            HttpSession session
     ) {
         validateUpload(file);
 
         try {
             LocalDate safeEntryDate = StringUtils.hasText(entryDate) ? LocalDate.parse(entryDate) : LocalDate.now();
+            UUID resolvedUserId = currentNutritionUserResolver.resolve(session, userId);
             return new PhotoUploadAnalysisResponse(photoUploadAnalysisService.analyzeAndCreateDraft(
                     new PhotoUploadAnalysisRequest(
-                            userId,
+                            resolvedUserId,
                             safeEntryDate,
                             file.getOriginalFilename(),
                             file.getContentType(),

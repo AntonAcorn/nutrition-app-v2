@@ -1,6 +1,7 @@
 package com.aiduparc.nutrition.photoanalysis.api;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
@@ -10,6 +11,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.aiduparc.nutrition.photoanalysis.application.PhotoAnalysisService;
 import com.aiduparc.nutrition.security.SecurityConfig;
+import com.aiduparc.nutrition.security.service.CurrentNutritionUserResolver;
 import com.aiduparc.nutrition.photoanalysis.application.PhotoUploadAnalysisService;
 import com.aiduparc.nutrition.photoanalysis.application.dto.AnalyzedFoodItem;
 import com.aiduparc.nutrition.photoanalysis.application.dto.PhotoAnalysisResponse;
@@ -42,6 +44,9 @@ class PhotoAnalysisControllerTest {
 
     @MockBean
     private PhotoUploadAnalysisService photoUploadAnalysisService;
+
+    @MockBean
+    private CurrentNutritionUserResolver currentNutritionUserResolver;
 
     @Test
     void shouldReturnStructuredPhotoAnalysisResponse() throws Exception {
@@ -92,6 +97,7 @@ class PhotoAnalysisControllerTest {
         UUID userId = UUID.randomUUID();
         UUID draftId = UUID.randomUUID();
 
+        when(currentNutritionUserResolver.resolve(any(), eq(userId))).thenReturn(userId);
         when(photoUploadAnalysisService.analyzeAndCreateDraft(any())).thenReturn(new PhotoAnalysisDraftResponse(
                 draftId,
                 userId,

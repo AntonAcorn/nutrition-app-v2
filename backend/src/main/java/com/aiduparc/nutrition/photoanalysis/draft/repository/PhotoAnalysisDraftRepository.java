@@ -9,6 +9,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface PhotoAnalysisDraftRepository extends JpaRepository<PhotoAnalysisDraftEntity, UUID> {
     Optional<PhotoAnalysisDraftEntity> findById(UUID id);
-    Optional<PhotoAnalysisDraftEntity> findTopByStatusOrderByCreatedAtDesc(PhotoAnalysisDraftStatus status);
+    Optional<PhotoAnalysisDraftEntity> findByIdAndUserId(UUID id, UUID userId);
+    Optional<PhotoAnalysisDraftEntity> findTopByUserIdAndStatusOrderByCreatedAtDesc(UUID userId, PhotoAnalysisDraftStatus status);
 }
 

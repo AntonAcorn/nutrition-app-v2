@@ -59,15 +59,15 @@ public class DefaultPhotoAnalysisDraftService implements PhotoAnalysisDraftServi
     }
 
     @Override
-    public PhotoAnalysisDraftResponse get(UUID draftId) {
-        PhotoAnalysisDraftEntity entity = getExistingDraft(draftId);
+    public PhotoAnalysisDraftResponse get(UUID draftId, UUID userId) {
+        PhotoAnalysisDraftEntity entity = getExistingDraft(draftId, userId);
         return toResponse(entity);
     }
 
     @Override
     @Transactional
-    public PhotoAnalysisDraftResponse confirm(UUID draftId, ConfirmPhotoAnalysisDraftRequest request) {
-        PhotoAnalysisDraftEntity entity = getExistingDraft(draftId);
+    public PhotoAnalysisDraftResponse confirm(UUID draftId, UUID userId, ConfirmPhotoAnalysisDraftRequest request) {
+        PhotoAnalysisDraftEntity entity = getExistingDraft(draftId, userId);
 
         if (entity.getStatus() == PhotoAnalysisDraftStatus.CONFIRMED) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Draft already confirmed");
@@ -112,16 +112,16 @@ public class DefaultPhotoAnalysisDraftService implements PhotoAnalysisDraftServi
     }
 
     @Override
-    public PhotoAnalysisDraftResponse getLatest() {
+    public PhotoAnalysisDraftResponse getLatest(UUID userId) {
         PhotoAnalysisDraftEntity entity = repository
-                .findTopByStatusOrderByCreatedAtDesc(PhotoAnalysisDraftStatus.DRAFT)
+                .findTopByUserIdAndStatusOrderByCreatedAtDesc(userId, PhotoAnalysisDraftStatus.DRAFT)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "No drafts found"));
 
         return toResponse(entity);
     }
 
-    private PhotoAnalysisDraftEntity getExistingDraft(UUID draftId) {
-        return repository.findById(draftId)
+    private PhotoAnalysisDraftEntity getExistingDraft(UUID draftId, UUID userId) {
+        return repository.findByIdAndUserId(draftId, userId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Draft not found"));
     }
 

@@ -7,7 +7,7 @@ import java.time.LocalDate;
 import java.util.UUID;
 
 public record CreatePhotoAnalysisDraftRequest(
-        @NotNull UUID userId,
+        UUID userId,
         @NotNull LocalDate entryDate,
         @NotNull @Valid PhotoAnalysisResponse analysis
 ) {

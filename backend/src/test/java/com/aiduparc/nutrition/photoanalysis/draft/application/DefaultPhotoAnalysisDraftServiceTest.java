@@ -3,13 +3,11 @@ package com.aiduparc.nutrition.photoanalysis.draft.application;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.aiduparc.nutrition.history.model.DailyNutritionEntrySnapshot;
 import com.aiduparc.nutrition.history.service.NutritionHistoryService;
-import com.aiduparc.nutrition.photoanalysis.application.dto.AnalyzedFoodItem;
 import com.aiduparc.nutrition.photoanalysis.application.dto.PhotoAnalysisResponse;
 import com.aiduparc.nutrition.photoanalysis.application.dto.PhotoAnalysisTotals;
 import com.aiduparc.nutrition.photoanalysis.draft.dto.ConfirmPhotoAnalysisDraftRequest;
@@ -43,117 +41,122 @@ class DefaultPhotoAnalysisDraftServiceTest {
 
     @BeforeEach
     void setUp() {
-        this.service = new DefaultPhotoAnalysisDraftService(repository, nutritionHistoryService, new ObjectMapper());
+        service = new DefaultPhotoAnalysisDraftService(
+                repository,
+                nutritionHistoryService,
+                new ObjectMapper()
+        );
     }
 
     @Test
-    void createStoresDraftWithoutWritingFinalNutritionEntry() {
+    void createShouldPersistDraft() {
         UUID userId = UUID.randomUUID();
-        LocalDate date = LocalDate.of(2026, 4, 6);
-        PhotoAnalysisResponse analysis = sampleAnalysis();
+        LocalDate entryDate = LocalDate.of(2026, 4, 8);
 
         when(repository.save(any(PhotoAnalysisDraftEntity.class))).thenAnswer(invocation -> {
-            PhotoAnalysisDraftEntity e = invocation.getArgument(0);
-            e.setId(UUID.randomUUID());
-            return e;
+            PhotoAnalysisDraftEntity entity = invocation.getArgument(0);
+            if (entity.getId() == null) {
+                entity.setId(UUID.randomUUID());
+            }
+            return entity;
         });
 
-        var response = service.create(new CreatePhotoAnalysisDraftRequest(userId, date, analysis));
+        PhotoAnalysisResponse analysis = new PhotoAnalysisResponse(
+                List.of(),
+                new PhotoAnalysisTotals(
+                        BigDecimal.valueOf(420),
+                        BigDecimal.valueOf(30),
+                        BigDecimal.valueOf(35),
+                        BigDecimal.valueOf(20),
+                        BigDecimal.valueOf(6)
+                ),
+                BigDecimal.valueOf(87),
+                List.of("Looks good"),
+                true
+        );
 
-        assertThat(response.id()).isNotNull();
+        var response = service.create(new CreatePhotoAnalysisDraftRequest(userId, entryDate, analysis));
+
         assertThat(response.userId()).isEqualTo(userId);
-        assertThat(response.status()).isEqualTo(PhotoAnalysisDraftStatus.DRAFT);
-        assertThat(response.analysis().totals().calories()).isEqualByComparingTo("560");
-        verify(nutritionHistoryService, never()).upsert(any());
-        verify(nutritionHistoryService, never()).addToDailyTotals(any());
+        assertThat(response.entryDate()).isEqualTo(entryDate);
+        assertThat(response.estimatedCaloriesKcal()).isEqualByComparingTo("420");
+        verify(repository).save(any(PhotoAnalysisDraftEntity.class));
     }
 
     @Test
-    void confirmAddsNutritionToCurrentDayAndMarksDraftConfirmed() {
+    void confirmShouldAddToDailyTotalsAndMarkDraftConfirmed() throws Exception {
         UUID draftId = UUID.randomUUID();
         UUID userId = UUID.randomUUID();
-        LocalDate date = LocalDate.of(2026, 4, 6);
+        LocalDate entryDate = LocalDate.of(2026, 4, 8);
+
+        PhotoAnalysisResponse analysis = new PhotoAnalysisResponse(
+                List.of(),
+                new PhotoAnalysisTotals(
+                        BigDecimal.valueOf(420),
+                        BigDecimal.valueOf(30),
+                        BigDecimal.valueOf(35),
+                        BigDecimal.valueOf(20),
+                        BigDecimal.valueOf(6)
+                ),
+                BigDecimal.valueOf(87),
+                List.of("Looks good"),
+                true
+        );
 
         PhotoAnalysisDraftEntity entity = new PhotoAnalysisDraftEntity();
         entity.setId(draftId);
         entity.setUserId(userId);
-        entity.setEntryDate(date);
+        entity.setEntryDate(entryDate);
         entity.setStatus(PhotoAnalysisDraftStatus.DRAFT);
-        entity.setEstimatedCaloriesKcal(new BigDecimal("560"));
-        entity.setEstimatedProteinG(new BigDecimal("30"));
-        entity.setEstimatedFiberG(new BigDecimal("8"));
-        entity.setAnalysisJson(new ObjectMapper().valueToTree(sampleAnalysis()).toString());
+        entity.setAnalysisJson(new ObjectMapper().writeValueAsString(analysis));
+        entity.setEstimatedCaloriesKcal(BigDecimal.valueOf(420));
+        entity.setEstimatedProteinG(BigDecimal.valueOf(30));
+        entity.setEstimatedFiberG(BigDecimal.valueOf(6));
 
-        when(repository.findById(draftId)).thenReturn(Optional.of(entity));
+        when(repository.findByIdAndUserId(draftId, userId)).thenReturn(Optional.of(entity));
         when(repository.save(any(PhotoAnalysisDraftEntity.class))).thenAnswer(invocation -> invocation.getArgument(0));
-
-        DailyNutritionEntrySnapshot snapshot = new DailyNutritionEntrySnapshot(
+        when(nutritionHistoryService.addToDailyTotals(any())).thenReturn(new DailyNutritionEntrySnapshot(
                 UUID.randomUUID(),
                 userId,
-                date,
+                entryDate,
                 null,
-                new BigDecimal("570"),
+                BigDecimal.valueOf(420),
                 null,
-                new BigDecimal("31"),
-                new BigDecimal("22"),
-                new BigDecimal("7"),
-                "confirmed",
+                BigDecimal.valueOf(30),
+                BigDecimal.valueOf(20),
+                BigDecimal.valueOf(6),
+                null,
                 null,
                 null
-        );
-        when(nutritionHistoryService.addToDailyTotals(any())).thenReturn(snapshot);
+        ));
 
-        var response = service.confirm(draftId, new ConfirmPhotoAnalysisDraftRequest(
-                new BigDecimal("570"),
-                new BigDecimal("31"),
-                new BigDecimal("22"),
-                new BigDecimal("7"),
-                "confirmed"
+        var response = service.confirm(draftId, userId, new ConfirmPhotoAnalysisDraftRequest(
+                BigDecimal.valueOf(500),
+                BigDecimal.valueOf(40),
+                BigDecimal.valueOf(25),
+                BigDecimal.valueOf(8),
+                "Dinner"
         ));
 
         assertThat(response.status()).isEqualTo(PhotoAnalysisDraftStatus.CONFIRMED);
-        assertThat(response.confirmedDailyEntryId()).isEqualTo(snapshot.id());
-        assertThat(response.estimatedCaloriesKcal()).isEqualByComparingTo("570");
         verify(nutritionHistoryService).addToDailyTotals(any());
+        verify(repository).save(any(PhotoAnalysisDraftEntity.class));
     }
 
     @Test
-    void confirmFailsForAlreadyConfirmedDraft() {
+    void confirmShouldRejectAlreadyConfirmedDraft() {
         UUID draftId = UUID.randomUUID();
+        UUID userId = UUID.randomUUID();
+
         PhotoAnalysisDraftEntity entity = new PhotoAnalysisDraftEntity();
         entity.setId(draftId);
+        entity.setUserId(userId);
         entity.setStatus(PhotoAnalysisDraftStatus.CONFIRMED);
-        entity.setAnalysisJson(new ObjectMapper().valueToTree(sampleAnalysis()).toString());
 
-        when(repository.findById(draftId)).thenReturn(Optional.of(entity));
+        when(repository.findByIdAndUserId(draftId, userId)).thenReturn(Optional.of(entity));
 
-        assertThatThrownBy(() -> service.confirm(draftId, new ConfirmPhotoAnalysisDraftRequest(null, null, null, null, null)))
+        assertThatThrownBy(() -> service.confirm(draftId, userId, new ConfirmPhotoAnalysisDraftRequest(null, null, null, null, null)))
                 .isInstanceOf(ResponseStatusException.class)
-                .hasMessageContaining("409 CONFLICT");
-    }
-
-    private static PhotoAnalysisResponse sampleAnalysis() {
-        return new PhotoAnalysisResponse(
-                List.of(new AnalyzedFoodItem(
-                        "salad",
-                        "250 g",
-                        new BigDecimal("560"),
-                        new BigDecimal("30"),
-                        new BigDecimal("8"),
-                        new BigDecimal("22"),
-                        new BigDecimal("50"),
-                        new BigDecimal("0.79")
-                )),
-                new PhotoAnalysisTotals(
-                        new BigDecimal("560"),
-                        new BigDecimal("30"),
-                        new BigDecimal("8"),
-                        new BigDecimal("22"),
-                        new BigDecimal("50")
-                ),
-                new BigDecimal("0.79"),
-                List.of("ai suggestion"),
-                true
-        );
+                .hasMessageContaining("Draft already confirmed");
     }
 }

@@ -1,6 +1,7 @@
 package com.aiduparc.nutrition.photoanalysis.draft.api;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -10,6 +11,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.aiduparc.nutrition.photoanalysis.application.dto.AnalyzedFoodItem;
 import com.aiduparc.nutrition.security.SecurityConfig;
+import com.aiduparc.nutrition.security.service.CurrentNutritionUserResolver;
 import com.aiduparc.nutrition.photoanalysis.application.dto.PhotoAnalysisResponse;
 import com.aiduparc.nutrition.photoanalysis.application.dto.PhotoAnalysisTotals;
 import com.aiduparc.nutrition.photoanalysis.draft.application.PhotoAnalysisDraftService;
@@ -38,6 +40,9 @@ class PhotoAnalysisDraftControllerTest {
     @MockBean
     private PhotoAnalysisDraftService draftService;
 
+    @MockBean
+    private CurrentNutritionUserResolver currentNutritionUserResolver;
+
     @Test
     void shouldCreateAndFetchDraft() throws Exception {
         UUID draftId = UUID.randomUUID();
@@ -59,8 +64,9 @@ class PhotoAnalysisDraftControllerTest {
                 OffsetDateTime.now()
         );
 
+        when(currentNutritionUserResolver.resolve(any(), eq(userId))).thenReturn(userId);
         when(draftService.create(any())).thenReturn(response);
-        when(draftService.get(draftId)).thenReturn(response);
+        when(draftService.get(draftId, userId)).thenReturn(response);
 
         mockMvc.perform(post("/api/photo-analysis/drafts")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -96,12 +102,13 @@ class PhotoAnalysisDraftControllerTest {
                 .andExpect(jsonPath("$.id").value(draftId.toString()))
                 .andExpect(jsonPath("$.status").value("DRAFT"));
 
-        mockMvc.perform(get("/api/photo-analysis/drafts/{draftId}", draftId))
+        mockMvc.perform(get("/api/photo-analysis/drafts/{draftId}", draftId)
+                        .param("userId", userId.toString()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.analysis.totals.calories").value(560));
 
         verify(draftService).create(any());
-        verify(draftService).get(draftId);
+        verify(draftService).get(draftId, userId);
     }
 
     private static PhotoAnalysisResponse sampleAnalysis() {
