@@ -1,5 +1,6 @@
 import { ChangeEvent, useMemo, useRef, useState } from 'react'
 import { LIVE_APP_USER_ID } from '../../../shared/config/appUser'
+import { LIVE_APP_USER_ID } from '../../../shared/config/appUser'
 import { getTodayLocalDateInputValue } from '../../../shared/lib/date'
 import { toNumber } from '../../../shared/lib/number'
 import type { DraftItem, PhotoAnalysisDraft } from '../../../shared/types/nutrition'
@@ -151,7 +152,7 @@ export function PhotoAnalyzerTab({ onConfirmed }: PhotoAnalyzerTabProps) {
     }
 
     try {
-      const response = await fetch(`/api/photo-analysis/drafts/${draft.id}/confirm`, {
+      const response = await fetch(`/api/photo-analysis/drafts/${draft.id}/confirm?userId=${LIVE_APP_USER_ID}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
