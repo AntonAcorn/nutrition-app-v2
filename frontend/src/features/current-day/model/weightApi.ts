@@ -1,4 +1,3 @@
-import { LIVE_APP_USER_ID } from '../../../shared/config/appUser'
 import { getTodayLocalDateInputValue } from '../../../shared/lib/date'
 
 function currentEntryDate(): string {
@@ -6,8 +5,9 @@ function currentEntryDate(): string {
 }
 
 export async function updateTodayWeight(weightKg: number): Promise<void> {
-  const response = await fetch(`/api/history/today-summary/weight?userId=${LIVE_APP_USER_ID}&entryDate=${currentEntryDate()}`, {
+  const response = await fetch(`/api/history/today-summary/weight?entryDate=${currentEntryDate()}`, {
     method: 'PUT',
+    credentials: 'include',
     headers: {
       'Content-Type': 'application/json',
     },
