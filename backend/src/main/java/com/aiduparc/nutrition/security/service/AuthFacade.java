@@ -4,6 +4,8 @@ import com.aiduparc.nutrition.security.api.AuthResponse;
 import com.aiduparc.nutrition.security.api.LoginRequest;
 import com.aiduparc.nutrition.security.api.RegisterRequest;
 import com.aiduparc.nutrition.security.model.AuthAccountEntity;
+import com.aiduparc.nutrition.user.model.UserEntity;
+import com.aiduparc.nutrition.user.service.NutritionUserService;
 import java.util.UUID;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -12,18 +14,21 @@ import org.springframework.transaction.annotation.Transactional;
 public class AuthFacade {
 
     private final AuthAccountService authAccountService;
+    private final NutritionUserService nutritionUserService;
 
-    public AuthFacade(AuthAccountService authAccountService) {
+    public AuthFacade(AuthAccountService authAccountService, NutritionUserService nutritionUserService) {
         this.authAccountService = authAccountService;
+        this.nutritionUserService = nutritionUserService;
     }
 
     @Transactional
     public AuthenticatedSession register(RegisterRequest request) {
+        UserEntity nutritionUser = nutritionUserService.createUser(request.displayName(), request.email());
         AuthAccountEntity account = authAccountService.createAccount(
             request.email(),
             request.password(),
             request.displayName(),
-            null
+            nutritionUser.getId()
         );
         return new AuthenticatedSession(
             account.getId(),
