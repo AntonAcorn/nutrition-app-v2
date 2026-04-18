@@ -37,7 +37,7 @@ public class PhotoAnalysisDraftController {
     @ResponseStatus(HttpStatus.CREATED)
     public PhotoAnalysisDraftResponse create(@Valid @RequestBody CreatePhotoAnalysisDraftRequest request, HttpSession session) {
         CreatePhotoAnalysisDraftRequest resolvedRequest = new CreatePhotoAnalysisDraftRequest(
-                currentNutritionUserResolver.resolve(session, request.userId()),
+                currentNutritionUserResolver.resolve(session, null),
                 request.entryDate(),
                 request.analysis()
         );
@@ -47,27 +47,25 @@ public class PhotoAnalysisDraftController {
     @GetMapping("/{draftId}")
     @ResponseStatus(HttpStatus.OK)
     public PhotoAnalysisDraftResponse get(@PathVariable UUID draftId,
-                                          @RequestParam(required = false) UUID userId,
                                           HttpSession session) {
-        return draftService.get(draftId, currentNutritionUserResolver.resolve(session, userId));
+        return draftService.get(draftId, currentNutritionUserResolver.resolve(session, null));
     }
 
     @PostMapping("/{draftId}/confirm")
     @ResponseStatus(HttpStatus.OK)
     public PhotoAnalysisDraftResponse confirm(@PathVariable UUID draftId,
-                                              @RequestParam(required = false) UUID userId,
                                               @RequestBody(required = false) ConfirmPhotoAnalysisDraftRequest request,
                                               HttpSession session) {
         ConfirmPhotoAnalysisDraftRequest safeRequest = request == null
                 ? new ConfirmPhotoAnalysisDraftRequest(null, null, null, null, null)
                 : request;
-        return draftService.confirm(draftId, currentNutritionUserResolver.resolve(session, userId), safeRequest);
+        return draftService.confirm(draftId, currentNutritionUserResolver.resolve(session, null), safeRequest);
     }
 
     @GetMapping("/latest")
     @ResponseStatus(HttpStatus.OK)
-    public PhotoAnalysisDraftResponse getLatest(@RequestParam(required = false) UUID userId, HttpSession session) {
-        return draftService.getLatest(currentNutritionUserResolver.resolve(session, userId));
+    public PhotoAnalysisDraftResponse getLatest(HttpSession session) {
+        return draftService.getLatest(currentNutritionUserResolver.resolve(session, null));
     }
 }
 

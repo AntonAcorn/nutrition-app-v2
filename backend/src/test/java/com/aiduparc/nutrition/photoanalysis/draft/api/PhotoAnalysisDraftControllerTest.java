@@ -64,7 +64,7 @@ class PhotoAnalysisDraftControllerTest {
                 OffsetDateTime.now()
         );
 
-        when(currentNutritionUserResolver.resolve(any(), eq(userId))).thenReturn(userId);
+        when(currentNutritionUserResolver.resolve(any(), eq(null))).thenReturn(userId);
         when(draftService.create(any())).thenReturn(response);
         when(draftService.get(draftId, userId)).thenReturn(response);
 
@@ -72,7 +72,6 @@ class PhotoAnalysisDraftControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
                                 {
-                                  "userId": "%s",
                                   "entryDate": "2026-04-06",
                                   "analysis": {
                                     "items": [{
@@ -97,13 +96,12 @@ class PhotoAnalysisDraftControllerTest {
                                     "needsUserConfirmation": true
                                   }
                                 }
-                                """.formatted(userId)))
+                                """))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.id").value(draftId.toString()))
                 .andExpect(jsonPath("$.status").value("DRAFT"));
 
-        mockMvc.perform(get("/api/photo-analysis/drafts/{draftId}", draftId)
-                        .param("userId", userId.toString()))
+        mockMvc.perform(get("/api/photo-analysis/drafts/{draftId}", draftId))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.analysis.totals.calories").value(560));
 

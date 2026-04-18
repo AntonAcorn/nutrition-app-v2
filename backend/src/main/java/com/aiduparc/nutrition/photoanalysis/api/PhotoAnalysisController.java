@@ -51,7 +51,6 @@ public class PhotoAnalysisController {
     @PostMapping(path = "/upload", consumes = "multipart/form-data")
     @ResponseStatus(HttpStatus.CREATED)
     public PhotoUploadAnalysisResponse uploadAndAnalyze(
-            @RequestParam(required = false) UUID userId,
             @RequestParam(required = false) String entryDate,
             @RequestParam(required = false) String userNote,
             @RequestParam(required = false) String locale,
@@ -62,7 +61,7 @@ public class PhotoAnalysisController {
 
         try {
             LocalDate safeEntryDate = StringUtils.hasText(entryDate) ? LocalDate.parse(entryDate) : LocalDate.now();
-            UUID resolvedUserId = currentNutritionUserResolver.resolve(session, userId);
+            UUID resolvedUserId = currentNutritionUserResolver.resolve(session, null);
             return new PhotoUploadAnalysisResponse(photoUploadAnalysisService.analyzeAndCreateDraft(
                     new PhotoUploadAnalysisRequest(
                             resolvedUserId,

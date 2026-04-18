@@ -97,7 +97,7 @@ class PhotoAnalysisControllerTest {
         UUID userId = UUID.randomUUID();
         UUID draftId = UUID.randomUUID();
 
-        when(currentNutritionUserResolver.resolve(any(), eq(userId))).thenReturn(userId);
+        when(currentNutritionUserResolver.resolve(any(), eq(null))).thenReturn(userId);
         when(photoUploadAnalysisService.analyzeAndCreateDraft(any())).thenReturn(new PhotoAnalysisDraftResponse(
                 draftId,
                 userId,
@@ -143,7 +143,6 @@ class PhotoAnalysisControllerTest {
 
         mockMvc.perform(multipart("/api/photo-analysis/upload")
                         .file(file)
-                        .param("userId", userId.toString())
                         .param("entryDate", "2026-04-08")
                         .param("userNote", "Lunch")
                         .param("locale", "en"))
@@ -179,8 +178,7 @@ class PhotoAnalysisControllerTest {
         );
 
         mockMvc.perform(multipart("/api/photo-analysis/upload")
-                        .file(file)
-                        .param("userId", UUID.randomUUID().toString()))
+                        .file(file))
                 .andExpect(status().isBadRequest());
     }
 }
