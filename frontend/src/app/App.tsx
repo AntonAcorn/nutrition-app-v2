@@ -108,8 +108,8 @@ export default function App() {
           </div>
         </header>
 
-        <section className="panel detail-panel auth-panel auth-panel--dark">
-          <div className="auth-switch-row">
+        <section className="auth-panel auth-panel--dark">
+          <div className="tabs-header tabs-header--dark auth-switch-row">
             <button type="button" className={`tab-button tab-button--dark ${authMode === 'login' ? 'tab-button--active' : ''}`} onClick={() => setAuthMode('login')}>
               Login
             </button>
