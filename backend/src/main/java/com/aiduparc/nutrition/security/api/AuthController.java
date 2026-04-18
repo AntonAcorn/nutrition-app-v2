@@ -25,8 +25,10 @@ public class AuthController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<AuthResponse> register(@Valid @RequestBody RegisterRequest request) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(authFacade.register(request));
+    public ResponseEntity<AuthResponse> register(@Valid @RequestBody RegisterRequest request, HttpSession session) {
+        AuthenticatedSession authenticatedSession = authFacade.register(request);
+        session.setAttribute(AUTH_SESSION_KEY, authenticatedSession);
+        return ResponseEntity.status(HttpStatus.CREATED).body(authFacade.me(authenticatedSession));
     }
 
     @PostMapping("/login")

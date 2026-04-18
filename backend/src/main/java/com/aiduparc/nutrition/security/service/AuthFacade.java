@@ -18,14 +18,19 @@ public class AuthFacade {
     }
 
     @Transactional
-    public AuthResponse register(RegisterRequest request) {
+    public AuthenticatedSession register(RegisterRequest request) {
         AuthAccountEntity account = authAccountService.createAccount(
             request.email(),
             request.password(),
             request.displayName(),
             null
         );
-        return toResponse(account, false);
+        return new AuthenticatedSession(
+            account.getId(),
+            account.getEmail(),
+            account.getDisplayName(),
+            account.getNutritionUserId()
+        );
     }
 
     @Transactional
