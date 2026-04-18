@@ -38,7 +38,7 @@ class NutritionStatisticsControllerTest {
     @Test
     void returnsStatisticsPayload() throws Exception {
         UUID userId = UUID.fromString("00000000-0000-0000-0000-000000000001");
-        when(currentNutritionUserResolver.resolve(any(), eq(userId))).thenReturn(userId);
+        when(currentNutritionUserResolver.resolve(any(), eq(null))).thenReturn(userId);
         when(nutritionHistoryService.getStatistics(userId, LocalDate.of(2026, 3, 26), LocalDate.of(2026, 4, 8)))
             .thenReturn(new NutritionStatisticsResponse(
                 userId,
@@ -74,7 +74,6 @@ class NutritionStatisticsControllerTest {
             ));
 
         mockMvc.perform(get("/api/history/statistics")
-                .param("userId", userId.toString())
                 .param("fromDate", "2026-03-26")
                 .param("toDate", "2026-04-08"))
             .andExpect(status().isOk())

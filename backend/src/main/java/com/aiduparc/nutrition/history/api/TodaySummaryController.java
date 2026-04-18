@@ -38,12 +38,11 @@ public class TodaySummaryController {
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
     public TodaySummaryResponse getTodaySummary(
-            @RequestParam(required = false) UUID userId,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate entryDate,
             HttpSession session
     ) {
         LocalDate safeDate = entryDate != null ? entryDate : LocalDate.now();
-        UUID resolvedUserId = currentNutritionUserResolver.resolve(session, userId);
+        UUID resolvedUserId = currentNutritionUserResolver.resolve(session, null);
         log.info("today-summary request userId={} entryDate={}", resolvedUserId, safeDate);
         return nutritionHistoryService.getTodaySummary(resolvedUserId, safeDate);
     }
@@ -51,13 +50,12 @@ public class TodaySummaryController {
     @PutMapping("/weight")
     @ResponseStatus(HttpStatus.OK)
     public TodaySummaryResponse updateWeight(
-            @RequestParam(required = false) UUID userId,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate entryDate,
             @Valid @RequestBody UpdateWeightRequest request,
             HttpSession session
     ) {
         LocalDate safeDate = entryDate != null ? entryDate : LocalDate.now();
-        UUID resolvedUserId = currentNutritionUserResolver.resolve(session, userId);
+        UUID resolvedUserId = currentNutritionUserResolver.resolve(session, null);
         log.info("weight update request userId={} entryDate={} weightKg={}", resolvedUserId, safeDate, request.weightKg());
         nutritionHistoryService.updateWeight(resolvedUserId, safeDate, request.weightKg());
         return nutritionHistoryService.getTodaySummary(resolvedUserId, safeDate);

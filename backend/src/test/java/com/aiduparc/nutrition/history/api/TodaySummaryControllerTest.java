@@ -39,7 +39,7 @@ class TodaySummaryControllerTest {
         UUID userId = UUID.randomUUID();
         LocalDate entryDate = LocalDate.of(2026, 4, 8);
 
-        when(currentNutritionUserResolver.resolve(any(), eq(userId))).thenReturn(userId);
+        when(currentNutritionUserResolver.resolve(any(), eq(null))).thenReturn(userId);
 
         when(nutritionHistoryService.getTodaySummary(userId, entryDate)).thenReturn(
                 new TodaySummaryResponse(
@@ -56,7 +56,6 @@ class TodaySummaryControllerTest {
         );
 
         mockMvc.perform(get("/api/history/today-summary")
-                        .param("userId", userId.toString())
                         .param("entryDate", "2026-04-08"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.weightKg").value(82.40))

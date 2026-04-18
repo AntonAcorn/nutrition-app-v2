@@ -35,12 +35,11 @@ public class NutritionStatisticsController {
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
     public NutritionStatisticsResponse getStatistics(
-        @RequestParam(required = false) UUID userId,
         @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fromDate,
         @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate toDate,
         HttpSession session
     ) {
-        UUID resolvedUserId = currentNutritionUserResolver.resolve(session, userId);
+        UUID resolvedUserId = currentNutritionUserResolver.resolve(session, null);
         log.info("statistics request userId={} fromDate={} toDate={}", resolvedUserId, fromDate, toDate);
         return nutritionHistoryService.getStatistics(resolvedUserId, fromDate, toDate);
     }
