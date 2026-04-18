@@ -2,7 +2,9 @@ package com.aiduparc.nutrition.security.service;
 
 import jakarta.servlet.http.HttpSession;
 import java.util.UUID;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
+import org.springframework.web.server.ResponseStatusException;
 
 @Component
 public class CurrentNutritionUserResolver {
@@ -17,6 +19,10 @@ public class CurrentNutritionUserResolver {
             }
         }
 
-        return fallbackUserId;
+        if (fallbackUserId != null) {
+            return fallbackUserId;
+        }
+
+        throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Authentication required");
     }
 }

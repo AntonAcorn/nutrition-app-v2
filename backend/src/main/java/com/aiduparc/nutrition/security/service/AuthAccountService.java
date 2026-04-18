@@ -45,6 +45,14 @@ public class AuthAccountService {
         return authAccountRepository.save(account);
     }
 
+    @Transactional
+    public AuthAccountEntity bindExistingAccountToNutritionUser(String email, UUID nutritionUserId) {
+        AuthAccountEntity account = findByEmail(email)
+                .orElseThrow(() -> new IllegalArgumentException("Account not found for this email"));
+        account.setNutritionUserId(nutritionUserId);
+        return authAccountRepository.save(account);
+    }
+
     @Transactional(readOnly = true)
     public boolean passwordMatches(AuthAccountEntity account, String rawPassword) {
         return rawPassword != null && passwordEncoder.matches(rawPassword, account.getPasswordHash());
