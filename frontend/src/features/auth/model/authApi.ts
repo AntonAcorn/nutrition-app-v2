@@ -1,0 +1,71 @@
+export interface AuthUser {
+  accountId: string | null
+  email: string | null
+  displayName: string | null
+  nutritionUserId: string | null
+  authenticated: boolean
+}
+
+export interface LoginPayload {
+  email: string
+  password: string
+}
+
+export interface RegisterPayload {
+  email: string
+  password: string
+  displayName: string
+}
+
+async function parseAuthResponse(response: Response): Promise<AuthUser> {
+  if (!response.ok) {
+    throw new Error(`Auth request failed (${response.status})`)
+  }
+
+  return (await response.json()) as AuthUser
+}
+
+export async function fetchMe(): Promise<AuthUser> {
+  const response = await fetch('/api/auth/me', {
+    credentials: 'include',
+  })
+
+  return parseAuthResponse(response)
+}
+
+export async function login(payload: LoginPayload): Promise<AuthUser> {
+  const response = await fetch('/api/auth/login', {
+    method: 'POST',
+    credentials: 'include',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(payload),
+  })
+
+  return parseAuthResponse(response)
+}
+
+export async function register(payload: RegisterPayload): Promise<AuthUser> {
+  const response = await fetch('/api/auth/register', {
+    method: 'POST',
+    credentials: 'include',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(payload),
+  })
+
+  return parseAuthResponse(response)
+}
+
+export async function logout(): Promise<void> {
+  const response = await fetch('/api/auth/logout', {
+    method: 'POST',
+    credentials: 'include',
+  })
+
+  if (!response.ok && response.status !== 204) {
+    throw new Error(`Logout failed (${response.status})`)
+  }
+}
