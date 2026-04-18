@@ -21,6 +21,9 @@ spring:
 
 server:
   port: ${PORT:8080}
+  servlet:
+    session:
+      timeout: ${SESSION_TIMEOUT:30d}
 
 management:
   endpoint:

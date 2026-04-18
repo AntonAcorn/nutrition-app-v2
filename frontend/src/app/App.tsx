@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { FormEvent, useEffect, useState } from 'react'
 import { CurrentDayTab } from '../features/current-day/components/CurrentDayTab'
 import { login, logout, register, fetchMe, type AuthUser } from '../features/auth/model/authApi'
 import { PhotoAnalyzerTab } from '../features/photo-analyzer/components/PhotoAnalyzerTab'
@@ -57,7 +57,8 @@ export default function App() {
     setStatisticsRefreshToken((current) => current + 1)
   }
 
-  async function handleAuthSubmit() {
+  async function handleAuthSubmit(event?: FormEvent<HTMLFormElement>) {
+    event?.preventDefault()
     setAuthSubmitting(true)
     setAuthError('')
 
@@ -117,25 +118,45 @@ export default function App() {
             </button>
           </div>
 
-          <div className="auth-form-grid">
+          <form className="auth-form-grid" onSubmit={handleAuthSubmit}>
             {authMode === 'register' ? (
               <label>
                 Display name
-                <input value={authDisplayName} onChange={(event) => setAuthDisplayName(event.target.value)} placeholder="Anton" />
+                <input
+                  name="name"
+                  autoComplete="name"
+                  value={authDisplayName}
+                  onChange={(event) => setAuthDisplayName(event.target.value)}
+                  placeholder="Anton"
+                />
               </label>
             ) : null}
             <label>
               Email
-              <input value={authEmail} onChange={(event) => setAuthEmail(event.target.value)} placeholder="you@example.com" />
+              <input
+                type="email"
+                name="email"
+                autoComplete="email"
+                value={authEmail}
+                onChange={(event) => setAuthEmail(event.target.value)}
+                placeholder="you@example.com"
+              />
             </label>
             <label>
               Password
-              <input type="password" value={authPassword} onChange={(event) => setAuthPassword(event.target.value)} placeholder="••••••••" />
+              <input
+                type="password"
+                name="password"
+                autoComplete={authMode === 'login' ? 'current-password' : 'new-password'}
+                value={authPassword}
+                onChange={(event) => setAuthPassword(event.target.value)}
+                placeholder="••••••••"
+              />
             </label>
-            <button type="button" onClick={handleAuthSubmit} disabled={authSubmitting}>
+            <button type="submit" disabled={authSubmitting}>
               {authSubmitting ? 'Please wait...' : authMode === 'login' ? 'Login' : 'Create account'}
             </button>
-          </div>
+          </form>
 
           {authError ? <p className="error-text">{authError}</p> : null}
         </section>
