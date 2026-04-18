@@ -55,7 +55,7 @@ export interface NutritionBalanceSummary {
 }
 
 export interface NutritionStatisticsResponse {
-  userId: string
+  userId?: string
   fromDate: string
   toDate: string
   selectedPeriodSummary: NutritionBalanceSummary
