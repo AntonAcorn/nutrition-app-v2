@@ -1,6 +1,4 @@
 import { ChangeEvent, useMemo, useRef, useState } from 'react'
-import { LIVE_APP_USER_ID } from '../../../shared/config/appUser'
-import { LIVE_APP_USER_ID } from '../../../shared/config/appUser'
 import { getTodayLocalDateInputValue } from '../../../shared/lib/date'
 import { toNumber } from '../../../shared/lib/number'
 import type { DraftItem, PhotoAnalysisDraft } from '../../../shared/types/nutrition'
@@ -108,13 +106,13 @@ export function PhotoAnalyzerTab({ onConfirmed }: PhotoAnalyzerTabProps) {
     try {
       const formData = new FormData()
       formData.append('file', selectedFile)
-      formData.append('userId', LIVE_APP_USER_ID)
       formData.append('entryDate', currentEntryDate())
       formData.append('userNote', userNote)
       formData.append('locale', 'en')
 
       const response = await fetch('/api/photo-analysis/upload', {
         method: 'POST',
+        credentials: 'include',
         body: formData,
       })
 
@@ -152,8 +150,9 @@ export function PhotoAnalyzerTab({ onConfirmed }: PhotoAnalyzerTabProps) {
     }
 
     try {
-      const response = await fetch(`/api/photo-analysis/drafts/${draft.id}/confirm?userId=${LIVE_APP_USER_ID}`, {
+      const response = await fetch(`/api/photo-analysis/drafts/${draft.id}/confirm`, {
         method: 'POST',
+        credentials: 'include',
         headers: {
           'Content-Type': 'application/json',
         },
