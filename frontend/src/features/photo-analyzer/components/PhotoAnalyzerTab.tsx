@@ -194,10 +194,16 @@ export function PhotoAnalyzerTab({ onConfirmed }: PhotoAnalyzerTabProps) {
               />
             </label>
 
-            <label className="upload-button">
-              <input ref={fileInputRef} type="file" accept="image/*" onChange={handleFileSelected} hidden />
-              <span>Choose photo</span>
-            </label>
+            <div className="upload-button-group">
+              <label className="upload-button">
+                <input ref={fileInputRef} type="file" accept="image/*" capture="environment" onChange={handleFileSelected} hidden />
+                <span>Take photo</span>
+              </label>
+              <label className="upload-button upload-button--secondary">
+                <input type="file" accept="image/*" onChange={handleFileSelected} hidden />
+                <span>Choose from gallery</span>
+              </label>
+            </div>
 
             {selectedFileName ? <p className="subtle-text">Selected: {selectedFileName}</p> : null}
 

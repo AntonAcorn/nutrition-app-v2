@@ -1329,6 +1329,19 @@ ul {
   box-shadow: 0 16px 28px rgba(231, 111, 81, 0.22);
 }
 
+.upload-button-group {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.upload-button--secondary {
+  background: linear-gradient(135deg, #2b2f38 0%, #3a4050 100%);
+  box-shadow: none;
+  color: #a0a8b8;
+  font-weight: 700;
+}
+
 .primary-actions {
   margin-top: 18px;
 }
