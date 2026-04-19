@@ -19,17 +19,20 @@ public class AuthFacade {
     private final NutritionUserService nutritionUserService;
     private final UserProfileService userProfileService;
     private final TelegramNotificationService telegramNotificationService;
+    private final EmailVerificationService emailVerificationService;
 
     public AuthFacade(
             AuthAccountService authAccountService,
             NutritionUserService nutritionUserService,
             UserProfileService userProfileService,
-            TelegramNotificationService telegramNotificationService
+            TelegramNotificationService telegramNotificationService,
+            EmailVerificationService emailVerificationService
     ) {
         this.authAccountService = authAccountService;
         this.nutritionUserService = nutritionUserService;
         this.userProfileService = userProfileService;
         this.telegramNotificationService = telegramNotificationService;
+        this.emailVerificationService = emailVerificationService;
     }
 
     @Transactional
@@ -42,6 +45,7 @@ public class AuthFacade {
             nutritionUser.getId()
         );
         telegramNotificationService.notifyNewUser(account.getEmail(), account.getDisplayName());
+        emailVerificationService.sendVerificationEmail(account);
         return new AuthenticatedSession(
             account.getId(),
             account.getEmail(),
@@ -84,6 +88,10 @@ public class AuthFacade {
             true,
             hasProfile
         );
+    }
+
+    public boolean verifyEmail(String token) {
+        return emailVerificationService.verify(token);
     }
 
     public void logout() {

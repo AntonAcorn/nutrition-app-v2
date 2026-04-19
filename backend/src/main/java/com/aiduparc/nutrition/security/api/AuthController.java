@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -48,5 +49,14 @@ public class AuthController {
     @GetMapping("/me")
     public AuthResponse me(HttpSession session) {
         return authFacade.me((AuthenticatedSession) session.getAttribute(AUTH_SESSION_KEY));
+    }
+
+    @GetMapping("/verify")
+    public ResponseEntity<String> verifyEmail(@RequestParam String token) {
+        boolean ok = authFacade.verifyEmail(token);
+        if (ok) {
+            return ResponseEntity.ok("Email verified. You can close this page.");
+        }
+        return ResponseEntity.badRequest().body("Invalid or expired verification link.");
     }
 }

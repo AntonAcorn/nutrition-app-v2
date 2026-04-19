@@ -8,4 +8,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 public interface AuthAccountRepository extends JpaRepository<AuthAccountEntity, UUID> {
 
     Optional<AuthAccountEntity> findByEmailIgnoreCase(String email);
+
+    Optional<AuthAccountEntity> findByVerificationToken(String token);
 }
