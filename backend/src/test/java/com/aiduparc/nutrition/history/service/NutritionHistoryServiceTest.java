@@ -9,6 +9,7 @@ import com.aiduparc.nutrition.history.api.NutritionStatisticsResponse;
 import com.aiduparc.nutrition.history.api.TodaySummaryResponse;
 import com.aiduparc.nutrition.history.model.DailyNutritionEntryEntity;
 import com.aiduparc.nutrition.history.repository.DailyNutritionEntryRepository;
+import com.aiduparc.nutrition.notifications.TelegramNotificationService;
 import com.aiduparc.nutrition.user.service.UserProfileService;
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -35,6 +36,9 @@ class NutritionHistoryServiceTest {
 
     @Mock
     private UserProfileService userProfileService;
+
+    @Mock
+    private TelegramNotificationService telegramNotificationService;
 
     @InjectMocks
     private NutritionHistoryService service;

@@ -7,6 +7,7 @@ import com.aiduparc.nutrition.history.api.TodaySummaryResponse;
 import com.aiduparc.nutrition.history.model.DailyNutritionEntryEntity;
 import com.aiduparc.nutrition.history.model.DailyNutritionEntrySnapshot;
 import com.aiduparc.nutrition.history.repository.DailyNutritionEntryRepository;
+import com.aiduparc.nutrition.notifications.TelegramNotificationService;
 import com.aiduparc.nutrition.user.service.UserProfileService;
 import jakarta.validation.constraints.NotNull;
 import java.math.BigDecimal;
@@ -30,10 +31,16 @@ public class NutritionHistoryService {
 
     private final DailyNutritionEntryRepository repository;
     private final UserProfileService userProfileService;
+    private final TelegramNotificationService telegramNotificationService;
 
-    public NutritionHistoryService(DailyNutritionEntryRepository repository, UserProfileService userProfileService) {
+    public NutritionHistoryService(
+            DailyNutritionEntryRepository repository,
+            UserProfileService userProfileService,
+            TelegramNotificationService telegramNotificationService
+    ) {
         this.repository = repository;
         this.userProfileService = userProfileService;
+        this.telegramNotificationService = telegramNotificationService;
     }
 
     public Optional<DailyNutritionEntrySnapshot> findByUserAndDate(UUID userId, LocalDate entryDate) {
@@ -124,7 +131,7 @@ public class NutritionHistoryService {
     public DailyNutritionEntrySnapshot updateWeight(UUID userId, LocalDate entryDate, BigDecimal weightKg) {
         DailyNutritionEntrySnapshot current = getOrCreateEmptySnapshot(userId, entryDate);
 
-        return upsert(new UpsertDailyNutritionEntryCommand(
+        DailyNutritionEntrySnapshot result = upsert(new UpsertDailyNutritionEntryCommand(
             userId,
             entryDate,
             defaultBigDecimal(current.caloriesConsumedKcal()),
@@ -135,6 +142,8 @@ public class NutritionHistoryService {
             current.fiberGrams(),
             current.notes()
         ));
+        telegramNotificationService.notifyActivity(userId, "weight update");
+        return result;
     }
 
     @Transactional
@@ -162,7 +171,7 @@ public class NutritionHistoryService {
             result.fatGrams(),
             result.fiberGrams()
         );
-
+        telegramNotificationService.notifyActivity(command.userId(), "added calories");
         return result;
     }
 

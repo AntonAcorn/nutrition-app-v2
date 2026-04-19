@@ -25,14 +25,20 @@ public class TelegramNotificationService {
                 .build();
     }
 
+    public void notifyActivity(java.util.UUID userId, String activity) {
+        send("Activity: " + userId + " — " + activity);
+    }
+
     public void notifyNewUser(String email, String displayName) {
+        send("New user: " + displayName + " (" + email + ")");
+    }
+
+    private void send(String text) {
         if (!properties.enabled()) {
             return;
         }
-        String text = "New user: " + displayName + " (" + email + ")";
         String url = API_BASE + properties.botToken() + "/sendMessage";
         String body = "{\"chat_id\":\"" + properties.chatId() + "\",\"text\":\"" + escapeJson(text) + "\"}";
-
         try {
             HttpRequest request = HttpRequest.newBuilder(URI.create(url))
                     .header("Content-Type", "application/json")
