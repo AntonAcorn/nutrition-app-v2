@@ -74,7 +74,7 @@ class CalorieTargetCalculatorTest {
     @Test
     void loseWithAggressiveStrategy() {
         BigDecimal result = CalorieTargetCalculator.calculate(30, "male", bd("180"), bd("80"), "sedentary", "lose", "aggressive");
-        assertThat(result).isEqualByComparingTo("1136"); // 2136 - 1000
+        assertThat(result).isEqualByComparingTo("1436"); // 2136 - 700
     }
 
     private static BigDecimal bd(String val) {

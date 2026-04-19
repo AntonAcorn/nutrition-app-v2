@@ -209,7 +209,7 @@ export function OnboardingWizard({ onComplete }: Props) {
                   [
                     { value: 'mild',       label: 'Mild',       desc: '~0.25 kg per week' },
                     { value: 'optimal',    label: 'Optimal',    desc: '~0.5 kg per week' },
-                    { value: 'aggressive', label: 'Aggressive', desc: '~1 kg per week' },
+                    { value: 'aggressive', label: 'Aggressive', desc: '~0.7 kg per week' },
                   ] as const
                 ).map(({ value, label, desc }) => (
                   <button
@@ -223,6 +223,11 @@ export function OnboardingWizard({ onComplete }: Props) {
                   </button>
                 ))}
               </div>
+              {weightLossStrategy === 'aggressive' && (
+                <p style={{ color: 'rgba(255,200,80,0.85)', fontSize: '0.8rem', margin: '2px 0 0' }}>
+                  ⚠️ Warning: your fridge will start looking at you funny.
+                </p>
+              )}
             </>
           )}
 

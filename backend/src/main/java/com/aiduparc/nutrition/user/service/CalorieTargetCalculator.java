@@ -35,7 +35,7 @@ class CalorieTargetCalculator {
 
         double loseDeficit = switch (weightLossStrategy != null ? weightLossStrategy : "optimal") {
             case "mild"       -> 250;
-            case "aggressive" -> 1000;
+            case "aggressive" -> 700;
             default           -> 500; // optimal
         };
 
