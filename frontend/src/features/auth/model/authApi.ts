@@ -20,7 +20,8 @@ export interface RegisterPayload {
 
 async function parseAuthResponse(response: Response): Promise<AuthUser> {
   if (!response.ok) {
-    throw new Error(`Auth request failed (${response.status})`)
+    const body = await response.json().catch(() => ({}))
+    throw new Error((body as { message?: string }).message ?? `Auth request failed (${response.status})`)
   }
 
   return (await response.json()) as AuthUser
