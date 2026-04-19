@@ -1,4 +1,4 @@
-import { FormEvent, useState } from 'react'
+import { CSSProperties, FormEvent, useState } from 'react'
 import { submitProfile, type OnboardingPayload } from '../model/profileApi'
 
 interface Props {
@@ -6,6 +6,13 @@ interface Props {
 }
 
 type Step = 1 | 2 | 3
+
+const optionStyle = (selected: boolean): CSSProperties => ({
+  border: selected ? '1.5px solid rgba(255,255,255,0.75)' : '1px solid rgba(255,255,255,0.12)',
+  color: selected ? '#ffffff' : 'rgba(255,255,255,0.45)',
+  background: selected ? 'rgba(255,255,255,0.08)' : 'transparent',
+  textAlign: 'left',
+})
 
 export function OnboardingWizard({ onComplete }: Props) {
   const [step, setStep] = useState<Step>(1)
@@ -72,14 +79,16 @@ export function OnboardingWizard({ onComplete }: Props) {
           <div style={{ display: 'flex', gap: '0.5rem' }}>
             <button
               type="button"
-              className={`tab-button tab-button--dark ${gender === 'male' ? 'tab-button--active' : ''}`}
+              className="tab-button tab-button--dark"
+              style={optionStyle(gender === 'male')}
               onClick={() => setGender('male')}
             >
               Male
             </button>
             <button
               type="button"
-              className={`tab-button tab-button--dark ${gender === 'female' ? 'tab-button--active' : ''}`}
+              className="tab-button tab-button--dark"
+              style={optionStyle(gender === 'female')}
               onClick={() => setGender('female')}
             >
               Female
@@ -136,7 +145,8 @@ export function OnboardingWizard({ onComplete }: Props) {
               <button
                 key={value}
                 type="button"
-                className={`tab-button tab-button--dark ${activityLevel === value ? 'tab-button--active' : ''}`}
+                className="tab-button tab-button--dark"
+                style={optionStyle(activityLevel === value)}
                 onClick={() => setActivityLevel(value)}
               >
                 {label}
@@ -174,7 +184,8 @@ export function OnboardingWizard({ onComplete }: Props) {
               <button
                 key={value}
                 type="button"
-                className={`tab-button tab-button--dark ${goal === value ? 'tab-button--active' : ''}`}
+                className="tab-button tab-button--dark"
+                style={optionStyle(goal === value)}
                 onClick={() => setGoal(value)}
               >
                 {label}
