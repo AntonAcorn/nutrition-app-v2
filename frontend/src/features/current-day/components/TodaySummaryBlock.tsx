@@ -99,7 +99,7 @@ export function TodaySummaryBlock({ summary }: TodaySummaryBlockProps) {
           <h3>Today insight</h3>
           <p>
             {summary.weightKg == null
-              ? 'Add your weight to keep the daily timeline complete.'
+              ? 'Your scale is getting bored.'
               : `Weight logged: ${summary.weightKg.toFixed(1)} kg. Keep going.`}
           </p>
         </div>

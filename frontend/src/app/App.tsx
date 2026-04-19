@@ -24,6 +24,14 @@ import { PhotoAnalyzerTab } from '../features/photo-analyzer/components/PhotoAna
 import { StatisticsTab } from '../features/statistics/components/StatisticsTab'
 import { OnboardingWizard } from '../features/onboarding/components/OnboardingWizard'
 
+function getGreeting(): string {
+  const hour = new Date().getHours()
+  if (hour >= 5  && hour < 12) return 'Good morning, future athlete 👀'
+  if (hour >= 12 && hour < 17) return 'Good afternoon. Still going? Impressive.'
+  if (hour >= 17 && hour < 22) return 'Survived another day. Respect.'
+  return 'Still awake? Bold choice.'
+}
+
 const tabs = {
   currentDay: 'current-day',
   statistics: 'statistics',
@@ -243,7 +251,7 @@ export default function App() {
       <header className="app-header app-header--dark">
         <div>
           <p className="app-header__eyebrow">Daily nutrition</p>
-          <h1>Nutrition</h1>
+          <h1>{getGreeting()}</h1>
         </div>
         <div className="app-header__actions">
           <span className="subtle-text">{authUser.displayName || authUser.email}</span>
