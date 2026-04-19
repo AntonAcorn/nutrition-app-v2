@@ -7,6 +7,7 @@ public record AuthResponse(
         String email,
         String displayName,
         UUID nutritionUserId,
-        boolean authenticated
+        boolean authenticated,
+        boolean hasProfile
 ) {
 }

@@ -9,6 +9,7 @@ import com.aiduparc.nutrition.history.api.NutritionStatisticsResponse;
 import com.aiduparc.nutrition.history.api.TodaySummaryResponse;
 import com.aiduparc.nutrition.history.model.DailyNutritionEntryEntity;
 import com.aiduparc.nutrition.history.repository.DailyNutritionEntryRepository;
+import com.aiduparc.nutrition.user.service.UserProfileService;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Optional;
@@ -20,14 +21,28 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.when;
+
+import org.junit.jupiter.api.BeforeEach;
+
 @ExtendWith(MockitoExtension.class)
 class NutritionHistoryServiceTest {
 
     @Mock
     private DailyNutritionEntryRepository repository;
 
+    @Mock
+    private UserProfileService userProfileService;
+
     @InjectMocks
     private NutritionHistoryService service;
+
+    @BeforeEach
+    void stubNoProfile() {
+        lenient().when(userProfileService.findByNutritionUserId(any())).thenReturn(Optional.empty());
+    }
 
     @Test
     void getTodaySummaryReturnsPersistedValues() {

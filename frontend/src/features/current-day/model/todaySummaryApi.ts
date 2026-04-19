@@ -12,8 +12,6 @@ interface TodaySummaryApiResponse {
   fiberGrams: number
 }
 
-const HARD_CODED_DAILY_TARGET_CALORIES = 2000
-
 function currentEntryDate(): string {
   return getTodayLocalDateInputValue()
 }
@@ -33,7 +31,7 @@ export async function fetchTodaySummary(): Promise<TodaySummary> {
   )
 
   if (!response.ok) {
-    throw new Error(`Не удалось загрузить current day summary (${response.status})`)
+    throw new Error(`Failed to load daily summary (${response.status})`)
   }
 
   const payload = (await response.json()) as TodaySummaryApiResponse
@@ -42,8 +40,8 @@ export async function fetchTodaySummary(): Promise<TodaySummary> {
     dateLabel: formatDateLabel(payload.entryDate),
     weightKg: payload.weightKg,
     consumedCalories: payload.consumedCalories,
-    dailyTargetCalories: HARD_CODED_DAILY_TARGET_CALORIES,
-    remainingCalories: Math.max(0, HARD_CODED_DAILY_TARGET_CALORIES - payload.consumedCalories),
+    dailyTargetCalories: payload.dailyTargetCalories,
+    remainingCalories: payload.remainingCalories,
     proteinGrams: payload.proteinGrams,
     fatGrams: payload.fatGrams,
     fiberGrams: payload.fiberGrams,

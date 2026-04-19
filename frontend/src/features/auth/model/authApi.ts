@@ -4,6 +4,7 @@ export interface AuthUser {
   displayName: string | null
   nutritionUserId: string | null
   authenticated: boolean
+  hasProfile: boolean
 }
 
 export interface LoginPayload {

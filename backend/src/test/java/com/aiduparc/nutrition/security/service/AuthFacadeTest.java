@@ -9,6 +9,7 @@ import com.aiduparc.nutrition.security.api.RegisterRequest;
 import com.aiduparc.nutrition.security.model.AuthAccountEntity;
 import com.aiduparc.nutrition.user.model.UserEntity;
 import com.aiduparc.nutrition.user.service.NutritionUserService;
+import com.aiduparc.nutrition.user.service.UserProfileService;
 import java.util.UUID;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -24,6 +25,9 @@ class AuthFacadeTest {
 
     @Mock
     private NutritionUserService nutritionUserService;
+
+    @Mock
+    private UserProfileService userProfileService;
 
     @InjectMocks
     private AuthFacade authFacade;

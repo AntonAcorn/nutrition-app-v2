@@ -3,6 +3,7 @@ import { CurrentDayTab } from '../features/current-day/components/CurrentDayTab'
 import { login, logout, register, fetchMe, type AuthUser } from '../features/auth/model/authApi'
 import { PhotoAnalyzerTab } from '../features/photo-analyzer/components/PhotoAnalyzerTab'
 import { StatisticsTab } from '../features/statistics/components/StatisticsTab'
+import { OnboardingWizard } from '../features/onboarding/components/OnboardingWizard'
 
 const tabs = {
   currentDay: 'current-day',
@@ -37,7 +38,7 @@ export default function App() {
         }
       } catch {
         if (!cancelled) {
-          setAuthUser({ accountId: null, email: null, displayName: null, nutritionUserId: null, authenticated: false })
+          setAuthUser({ accountId: null, email: null, displayName: null, nutritionUserId: null, authenticated: false, hasProfile: false })
         }
       } finally {
         if (!cancelled) {
@@ -78,8 +79,17 @@ export default function App() {
 
   async function handleLogout() {
     await logout()
-    setAuthUser({ accountId: null, email: null, displayName: null, nutritionUserId: null, authenticated: false })
+    setAuthUser({ accountId: null, email: null, displayName: null, nutritionUserId: null, authenticated: false, hasProfile: false })
     setAuthPassword('')
+  }
+
+  async function handleOnboardingComplete() {
+    try {
+      const me = await fetchMe()
+      setAuthUser(me)
+    } catch {
+      // session already active, keep current state
+    }
   }
 
   function handleDraftConfirmed() {
@@ -94,6 +104,20 @@ export default function App() {
         <section className="panel detail-panel">
           <p>Loading session...</p>
         </section>
+      </main>
+    )
+  }
+
+  if (authUser?.authenticated && !authUser.hasProfile) {
+    return (
+      <main className="app-shell">
+        <header className="app-header app-header--dark">
+          <div>
+            <p className="app-header__eyebrow">Daily nutrition</p>
+            <h1>Set up your profile</h1>
+          </div>
+        </header>
+        <OnboardingWizard onComplete={handleOnboardingComplete} />
       </main>
     )
   }

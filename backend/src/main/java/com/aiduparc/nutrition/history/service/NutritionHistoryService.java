@@ -7,6 +7,7 @@ import com.aiduparc.nutrition.history.api.TodaySummaryResponse;
 import com.aiduparc.nutrition.history.model.DailyNutritionEntryEntity;
 import com.aiduparc.nutrition.history.model.DailyNutritionEntrySnapshot;
 import com.aiduparc.nutrition.history.repository.DailyNutritionEntryRepository;
+import com.aiduparc.nutrition.user.service.UserProfileService;
 import jakarta.validation.constraints.NotNull;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -28,9 +29,11 @@ public class NutritionHistoryService {
     private static final BigDecimal DEFAULT_DAILY_TARGET_KCAL = BigDecimal.valueOf(2000);
 
     private final DailyNutritionEntryRepository repository;
+    private final UserProfileService userProfileService;
 
-    public NutritionHistoryService(DailyNutritionEntryRepository repository) {
+    public NutritionHistoryService(DailyNutritionEntryRepository repository, UserProfileService userProfileService) {
         this.repository = repository;
+        this.userProfileService = userProfileService;
     }
 
     public Optional<DailyNutritionEntrySnapshot> findByUserAndDate(UUID userId, LocalDate entryDate) {
@@ -49,7 +52,7 @@ public class NutritionHistoryService {
         DailyNutritionEntrySnapshot snapshot = getOrCreateEmptySnapshot(userId, entryDate);
 
         BigDecimal consumedCalories = defaultBigDecimal(snapshot.caloriesConsumedKcal());
-        BigDecimal dailyTargetCalories = defaultTarget(snapshot.calorieTargetKcal());
+        BigDecimal dailyTargetCalories = defaultTarget(snapshot.calorieTargetKcal(), userId);
         BigDecimal remainingCalories = dailyTargetCalories.subtract(consumedCalories).max(BigDecimal.ZERO);
 
         TodaySummaryResponse response = new TodaySummaryResponse(
@@ -86,8 +89,8 @@ public class NutritionHistoryService {
                 snapshot.entryDate(),
                 roundToSingleDecimal(snapshot.weightKg()),
                 defaultBigDecimal(snapshot.caloriesConsumedKcal()),
-                defaultTarget(snapshot.calorieTargetKcal()),
-                defaultBigDecimal(snapshot.caloriesConsumedKcal()).subtract(defaultTarget(snapshot.calorieTargetKcal())),
+                defaultTarget(snapshot.calorieTargetKcal(), userId),
+                defaultBigDecimal(snapshot.caloriesConsumedKcal()).subtract(defaultTarget(snapshot.calorieTargetKcal(), userId)),
                 defaultBigDecimal(snapshot.proteinGrams()),
                 defaultBigDecimal(snapshot.fatGrams()),
                 defaultBigDecimal(snapshot.fiberGrams())
@@ -100,9 +103,9 @@ public class NutritionHistoryService {
         List<DailyNutritionEntrySnapshot> weeklySnapshots = findByUserAndRange(userId, weeklyFrom, toInclusive);
         List<DailyNutritionEntrySnapshot> monthlySnapshots = findByUserAndRange(userId, monthlyFrom, toInclusive);
 
-        NutritionBalanceSummaryResponse selectedPeriodSummary = summarizeBalance(selectedSnapshots, fromInclusive, toInclusive);
-        NutritionBalanceSummaryResponse weeklySummary = summarizeBalance(weeklySnapshots, weeklyFrom, toInclusive);
-        NutritionBalanceSummaryResponse monthlySummary = summarizeBalance(monthlySnapshots, monthlyFrom, toInclusive);
+        NutritionBalanceSummaryResponse selectedPeriodSummary = summarizeBalance(selectedSnapshots, fromInclusive, toInclusive, userId);
+        NutritionBalanceSummaryResponse weeklySummary = summarizeBalance(weeklySnapshots, weeklyFrom, toInclusive, userId);
+        NutritionBalanceSummaryResponse monthlySummary = summarizeBalance(monthlySnapshots, monthlyFrom, toInclusive, userId);
 
         return new NutritionStatisticsResponse(
             userId,
@@ -229,9 +232,15 @@ public class NutritionHistoryService {
         return value != null ? value : BigDecimal.ZERO;
     }
 
-    private static BigDecimal defaultTarget(BigDecimal value) {
+    private BigDecimal resolvedDefaultTarget(UUID userId) {
+        return userProfileService.findByNutritionUserId(userId)
+            .map(p -> p.getDailyCalorieTargetKcal())
+            .orElse(DEFAULT_DAILY_TARGET_KCAL);
+    }
+
+    private BigDecimal defaultTarget(BigDecimal value, UUID userId) {
         if (value == null || value.compareTo(BigDecimal.ZERO) <= 0) {
-            return DEFAULT_DAILY_TARGET_KCAL;
+            return resolvedDefaultTarget(userId);
         }
         return value;
     }
@@ -273,10 +282,11 @@ public class NutritionHistoryService {
         return completed;
     }
 
-    private static NutritionBalanceSummaryResponse summarizeBalance(
+    private NutritionBalanceSummaryResponse summarizeBalance(
         List<DailyNutritionEntrySnapshot> snapshots,
         LocalDate fromInclusive,
-        LocalDate toInclusive
+        LocalDate toInclusive,
+        UUID userId
     ) {
         BigDecimal consumed = snapshots.stream()
             .map(snapshot -> defaultBigDecimal(snapshot.caloriesConsumedKcal()))
@@ -284,10 +294,10 @@ public class NutritionHistoryService {
 
         BigDecimal target = BigDecimal.ZERO;
         for (LocalDate cursor = fromInclusive; !cursor.isAfter(toInclusive); cursor = cursor.plusDays(1)) {
-            BigDecimal dayTarget = DEFAULT_DAILY_TARGET_KCAL;
+            BigDecimal dayTarget = resolvedDefaultTarget(userId);
             for (DailyNutritionEntrySnapshot snapshot : snapshots) {
                 if (snapshot.entryDate().equals(cursor)) {
-                    dayTarget = defaultTarget(snapshot.calorieTargetKcal());
+                    dayTarget = defaultTarget(snapshot.calorieTargetKcal(), userId);
                     break;
                 }
             }

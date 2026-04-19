@@ -44,7 +44,8 @@ class AuthControllerTest {
                 authenticatedSession.email(),
                 authenticatedSession.displayName(),
                 authenticatedSession.nutritionUserId(),
-                true
+                true,
+                false
         ));
 
         mockMvc.perform(post("/api/auth/register")

@@ -6,6 +6,7 @@ import com.aiduparc.nutrition.security.api.RegisterRequest;
 import com.aiduparc.nutrition.security.model.AuthAccountEntity;
 import com.aiduparc.nutrition.user.model.UserEntity;
 import com.aiduparc.nutrition.user.service.NutritionUserService;
+import com.aiduparc.nutrition.user.service.UserProfileService;
 import java.util.UUID;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -15,10 +16,16 @@ public class AuthFacade {
 
     private final AuthAccountService authAccountService;
     private final NutritionUserService nutritionUserService;
+    private final UserProfileService userProfileService;
 
-    public AuthFacade(AuthAccountService authAccountService, NutritionUserService nutritionUserService) {
+    public AuthFacade(
+            AuthAccountService authAccountService,
+            NutritionUserService nutritionUserService,
+            UserProfileService userProfileService
+    ) {
         this.authAccountService = authAccountService;
         this.nutritionUserService = nutritionUserService;
+        this.userProfileService = userProfileService;
     }
 
     @Transactional
@@ -58,15 +65,19 @@ public class AuthFacade {
 
     public AuthResponse me(AuthenticatedSession session) {
         if (session == null) {
-            return new AuthResponse(null, null, null, null, false);
+            return new AuthResponse(null, null, null, null, false, false);
         }
+
+        boolean hasProfile = session.nutritionUserId() != null
+            && userProfileService.existsByNutritionUserId(session.nutritionUserId());
 
         return new AuthResponse(
             session.accountId(),
             session.email(),
             session.displayName(),
             session.nutritionUserId(),
-            true
+            true,
+            hasProfile
         );
     }
 
@@ -76,12 +87,14 @@ public class AuthFacade {
 
     private AuthResponse toResponse(AuthAccountEntity account, boolean authenticated) {
         UUID nutritionUserId = account.getNutritionUserId();
+        boolean hasProfile = nutritionUserId != null && userProfileService.existsByNutritionUserId(nutritionUserId);
         return new AuthResponse(
             account.getId(),
             account.getEmail(),
             account.getDisplayName(),
             nutritionUserId,
-            authenticated
+            authenticated,
+            hasProfile
         );
     }
 }
