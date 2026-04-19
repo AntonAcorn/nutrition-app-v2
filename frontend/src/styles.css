@@ -461,6 +461,14 @@ ul {
   letter-spacing: 0.06em;
 }
 
+.today-ring__caption {
+  text-align: center;
+  font-size: 0.78rem;
+  font-style: italic;
+  color: rgba(255, 255, 255, 0.42);
+  margin: 4px 0 0;
+}
+
 .macro-meter-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));

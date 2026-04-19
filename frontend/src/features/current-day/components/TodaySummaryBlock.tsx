@@ -1,5 +1,15 @@
 import type { TodaySummary } from '../../../shared/types/nutrition'
 
+function getCaptionText(consumed: number, target: number, remaining: number): string {
+  if (consumed === 0)           return 'A blank canvas. A legendary opportunity.'
+  if (remaining > target * 0.7) return "Plenty of room. Don't waste it on salad."
+  if (remaining > target * 0.4) return 'On track. Suspicious, but on track.'
+  if (remaining > target * 0.15) return 'Getting tight. Choose wisely.'
+  if (remaining > 0)            return 'You could still eat a small horse. A very small one.'
+  if (remaining === 0)          return "Congrats, you've eaten yourself into tomorrow's problem."
+  return 'Bold. Absolutely bold.'
+}
+
 interface MacroCardProps {
   label: string
   value: number
@@ -75,6 +85,8 @@ export function TodaySummaryBlock({ summary }: TodaySummaryBlockProps) {
             <span>TARGET</span>
           </div>
         </div>
+
+        <p className="today-ring__caption">{getCaptionText(consumed, target, remaining)}</p>
 
         <div className="macro-meter-grid">
           <MacroCard label="Protein" value={summary.proteinGrams} unit="g" progress={Math.min(100, Math.round((summary.proteinGrams / 180) * 100))} tone="purple" />
