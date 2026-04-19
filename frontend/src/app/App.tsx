@@ -19,7 +19,7 @@ function EyeOffIcon() {
   )
 }
 import { CurrentDayTab } from '../features/current-day/components/CurrentDayTab'
-import { login, logout, register, fetchMe, type AuthUser } from '../features/auth/model/authApi'
+import { login, logout, register, fetchMe, requestPasswordReset, resetPassword, type AuthUser } from '../features/auth/model/authApi'
 import { PhotoAnalyzerTab } from '../features/photo-analyzer/components/PhotoAnalyzerTab'
 import { StatisticsTab } from '../features/statistics/components/StatisticsTab'
 import { OnboardingWizard } from '../features/onboarding/components/OnboardingWizard'
@@ -47,7 +47,7 @@ export default function App() {
   const [daySuccessMessage, setDaySuccessMessage] = useState('')
   const [authUser, setAuthUser] = useState<AuthUser | null>(null)
   const [authLoading, setAuthLoading] = useState(true)
-  const [authMode, setAuthMode] = useState<'login' | 'register'>('login')
+  const [authMode, setAuthMode] = useState<'login' | 'register' | 'forgot-password' | 'reset-password'>('login')
   const [authEmail, setAuthEmail] = useState('')
   const [authPassword, setAuthPassword] = useState('')
   const [authDisplayName, setAuthDisplayName] = useState('')
@@ -56,6 +56,17 @@ export default function App() {
   const [authConfirmPassword, setAuthConfirmPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
+  const [authSuccessMessage, setAuthSuccessMessage] = useState('')
+  const [resetToken, setResetToken] = useState('')
+
+  useEffect(() => {
+    const token = new URLSearchParams(window.location.search).get('reset_token')
+    if (token) {
+      setResetToken(token)
+      setAuthMode('reset-password')
+      window.history.replaceState({}, '', window.location.pathname)
+    }
+  }, [])
 
   useEffect(() => {
     let cancelled = false
@@ -112,6 +123,42 @@ export default function App() {
     }
   }
 
+  async function handleForgotPassword(event?: FormEvent<HTMLFormElement>) {
+    event?.preventDefault()
+    setAuthSubmitting(true)
+    setAuthError('')
+    setAuthSuccessMessage('')
+    try {
+      await requestPasswordReset(authEmail)
+      setAuthSuccessMessage('If this email is registered, you will receive a reset link.')
+    } catch {
+      setAuthError('Something went wrong. Please try again.')
+    } finally {
+      setAuthSubmitting(false)
+    }
+  }
+
+  async function handleResetPassword(event?: FormEvent<HTMLFormElement>) {
+    event?.preventDefault()
+    if (authPassword !== authConfirmPassword) {
+      setAuthError('Passwords do not match')
+      return
+    }
+    setAuthSubmitting(true)
+    setAuthError('')
+    try {
+      await resetPassword(resetToken, authPassword)
+      setAuthPassword('')
+      setAuthConfirmPassword('')
+      setAuthSuccessMessage('Password updated. You can now log in.')
+      setAuthMode('login')
+    } catch (error) {
+      setAuthError(error instanceof Error ? error.message : 'Reset failed')
+    } finally {
+      setAuthSubmitting(false)
+    }
+  }
+
   async function handleLogout() {
     await logout()
     setAuthUser({ accountId: null, email: null, displayName: null, nutritionUserId: null, authenticated: false, hasProfile: false })
@@ -158,89 +205,170 @@ export default function App() {
   }
 
   if (!authUser?.authenticated) {
+    const headerTitle = authMode === 'login' ? 'Welcome back'
+      : authMode === 'register' ? 'Create your account'
+      : authMode === 'forgot-password' ? 'Reset password'
+      : 'Set new password'
+
     return (
       <main className="app-shell">
         <header className="app-header app-header--dark">
           <div>
             <p className="app-header__eyebrow">Daily nutrition</p>
-            <h1>{authMode === 'login' ? 'Welcome back' : 'Create your account'}</h1>
+            <h1>{headerTitle}</h1>
           </div>
         </header>
 
         <section className="auth-panel auth-panel--dark">
-          <div className="tabs-header tabs-header--dark auth-switch-row">
-            <button type="button" className={`tab-button tab-button--dark ${authMode === 'login' ? 'tab-button--active' : ''}`} onClick={() => setAuthMode('login')}>
-              Login
-            </button>
-            <button type="button" className={`tab-button tab-button--dark ${authMode === 'register' ? 'tab-button--active' : ''}`} onClick={() => setAuthMode('register')}>
-              Register
-            </button>
-          </div>
-
-          <form className="auth-form-grid" onSubmit={handleAuthSubmit}>
-            {authMode === 'register' ? (
-              <label>
-                Display name
-                <input
-                  name="name"
-                  autoComplete="name"
-                  value={authDisplayName}
-                  onChange={(event) => setAuthDisplayName(event.target.value)}
-                  placeholder="Anton"
-                />
-              </label>
-            ) : null}
-            <label>
-              Email
-              <input
-                type="email"
-                name="email"
-                autoComplete="email"
-                value={authEmail}
-                onChange={(event) => setAuthEmail(event.target.value)}
-                placeholder="you@example.com"
-              />
-            </label>
-            <label>
-              Password
-              <div className="password-input-wrap">
-                <input
-                  type={showPassword ? 'text' : 'password'}
-                  name="password"
-                  autoComplete={authMode === 'login' ? 'current-password' : 'new-password'}
-                  value={authPassword}
-                  onChange={(event) => setAuthPassword(event.target.value)}
-                  placeholder="••••••••"
-                />
-                <button type="button" className="password-toggle" onClick={() => setShowPassword((v) => !v)} tabIndex={-1} aria-label={showPassword ? 'Hide password' : 'Show password'}>
-                  {showPassword ? <EyeOffIcon /> : <EyeIcon />}
+          {authMode === 'forgot-password' ? (
+            <>
+              <form className="auth-form-grid" onSubmit={handleForgotPassword}>
+                <label>
+                  Email
+                  <input
+                    type="email"
+                    name="email"
+                    autoComplete="email"
+                    value={authEmail}
+                    onChange={(event) => setAuthEmail(event.target.value)}
+                    placeholder="you@example.com"
+                  />
+                </label>
+                <button type="submit" disabled={authSubmitting}>
+                  {authSubmitting ? 'Please wait...' : 'Send reset link'}
+                </button>
+              </form>
+              {authSuccessMessage ? <p className="success-text">{authSuccessMessage}</p> : null}
+              {authError ? <p className="error-text">{authError}</p> : null}
+              <button type="button" className="link-button" onClick={() => { setAuthMode('login'); setAuthError(''); setAuthSuccessMessage('') }}>
+                Back to login
+              </button>
+            </>
+          ) : authMode === 'reset-password' ? (
+            <>
+              <form className="auth-form-grid" onSubmit={handleResetPassword}>
+                <label>
+                  New password
+                  <div className="password-input-wrap">
+                    <input
+                      type={showPassword ? 'text' : 'password'}
+                      name="password"
+                      autoComplete="new-password"
+                      value={authPassword}
+                      onChange={(event) => setAuthPassword(event.target.value)}
+                      placeholder="••••••••"
+                    />
+                    <button type="button" className="password-toggle" onClick={() => setShowPassword((v) => !v)} tabIndex={-1} aria-label={showPassword ? 'Hide password' : 'Show password'}>
+                      {showPassword ? <EyeOffIcon /> : <EyeIcon />}
+                    </button>
+                  </div>
+                </label>
+                <label>
+                  Confirm new password
+                  <div className="password-input-wrap">
+                    <input
+                      type={showConfirmPassword ? 'text' : 'password'}
+                      name="confirm-password"
+                      autoComplete="new-password"
+                      value={authConfirmPassword}
+                      onChange={(event) => setAuthConfirmPassword(event.target.value)}
+                      placeholder="••••••••"
+                    />
+                    <button type="button" className="password-toggle" onClick={() => setShowConfirmPassword((v) => !v)} tabIndex={-1} aria-label={showConfirmPassword ? 'Hide password' : 'Show password'}>
+                      {showConfirmPassword ? <EyeOffIcon /> : <EyeIcon />}
+                    </button>
+                  </div>
+                </label>
+                <button type="submit" disabled={authSubmitting}>
+                  {authSubmitting ? 'Please wait...' : 'Set new password'}
+                </button>
+              </form>
+              {authError ? <p className="error-text">{authError}</p> : null}
+            </>
+          ) : (
+            <>
+              <div className="tabs-header tabs-header--dark auth-switch-row">
+                <button type="button" className={`tab-button tab-button--dark ${authMode === 'login' ? 'tab-button--active' : ''}`} onClick={() => { setAuthMode('login'); setAuthError(''); setAuthSuccessMessage('') }}>
+                  Login
+                </button>
+                <button type="button" className={`tab-button tab-button--dark ${authMode === 'register' ? 'tab-button--active' : ''}`} onClick={() => { setAuthMode('register'); setAuthError(''); setAuthSuccessMessage('') }}>
+                  Register
                 </button>
               </div>
-            </label>
-            {authMode === 'register' ? (
-              <label>
-                Confirm password
-                <div className="password-input-wrap">
-                  <input
-                    type={showConfirmPassword ? 'text' : 'password'}
-                    name="confirm-password"
-                    autoComplete="new-password"
-                    value={authConfirmPassword}
-                    onChange={(event) => setAuthConfirmPassword(event.target.value)}
-                    placeholder="••••••••"
-                  />
-                  <button type="button" className="password-toggle" onClick={() => setShowConfirmPassword((v) => !v)} tabIndex={-1} aria-label={showConfirmPassword ? 'Hide password' : 'Show password'}>
-                    {showConfirmPassword ? <EyeOffIcon /> : <EyeIcon />}
-                  </button>
-                </div>
-              </label>
-            ) : null}
-            <button type="submit" disabled={authSubmitting}>
-              {authSubmitting ? 'Please wait...' : authMode === 'login' ? 'Login' : 'Create account'}
-            </button>
-          </form>
 
-          {authError ? <p className="error-text">{authError}</p> : null}
+              <form className="auth-form-grid" onSubmit={handleAuthSubmit}>
+                {authMode === 'register' ? (
+                  <label>
+                    Display name
+                    <input
+                      name="name"
+                      autoComplete="name"
+                      value={authDisplayName}
+                      onChange={(event) => setAuthDisplayName(event.target.value)}
+                      placeholder="Anton"
+                    />
+                  </label>
+                ) : null}
+                <label>
+                  Email
+                  <input
+                    type="email"
+                    name="email"
+                    autoComplete="email"
+                    value={authEmail}
+                    onChange={(event) => setAuthEmail(event.target.value)}
+                    placeholder="you@example.com"
+                  />
+                </label>
+                <label>
+                  Password
+                  <div className="password-input-wrap">
+                    <input
+                      type={showPassword ? 'text' : 'password'}
+                      name="password"
+                      autoComplete={authMode === 'login' ? 'current-password' : 'new-password'}
+                      value={authPassword}
+                      onChange={(event) => setAuthPassword(event.target.value)}
+                      placeholder="••••••••"
+                    />
+                    <button type="button" className="password-toggle" onClick={() => setShowPassword((v) => !v)} tabIndex={-1} aria-label={showPassword ? 'Hide password' : 'Show password'}>
+                      {showPassword ? <EyeOffIcon /> : <EyeIcon />}
+                    </button>
+                  </div>
+                </label>
+                {authMode === 'register' ? (
+                  <label>
+                    Confirm password
+                    <div className="password-input-wrap">
+                      <input
+                        type={showConfirmPassword ? 'text' : 'password'}
+                        name="confirm-password"
+                        autoComplete="new-password"
+                        value={authConfirmPassword}
+                        onChange={(event) => setAuthConfirmPassword(event.target.value)}
+                        placeholder="••••••••"
+                      />
+                      <button type="button" className="password-toggle" onClick={() => setShowConfirmPassword((v) => !v)} tabIndex={-1} aria-label={showConfirmPassword ? 'Hide password' : 'Show password'}>
+                        {showConfirmPassword ? <EyeOffIcon /> : <EyeIcon />}
+                      </button>
+                    </div>
+                  </label>
+                ) : null}
+                <button type="submit" disabled={authSubmitting}>
+                  {authSubmitting ? 'Please wait...' : authMode === 'login' ? 'Login' : 'Create account'}
+                </button>
+              </form>
+
+              {authSuccessMessage ? <p className="success-text">{authSuccessMessage}</p> : null}
+              {authError ? <p className="error-text">{authError}</p> : null}
+
+              {authMode === 'login' ? (
+                <button type="button" className="link-button" onClick={() => { setAuthMode('forgot-password'); setAuthError(''); setAuthSuccessMessage('') }}>
+                  Forgot password?
+                </button>
+              ) : null}
+            </>
+          )}
         </section>
       </main>
     )

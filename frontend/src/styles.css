@@ -321,6 +321,21 @@ ul {
   color: #b42318;
 }
 
+.link-button {
+  background: none;
+  border: none;
+  padding: 0;
+  color: #a0a0b0;
+  font-size: 0.85rem;
+  cursor: pointer;
+  text-decoration: underline;
+  margin-top: 8px;
+}
+
+.link-button:hover {
+  color: #ffffff;
+}
+
 .today-summary {
   gap: 16px;
 }

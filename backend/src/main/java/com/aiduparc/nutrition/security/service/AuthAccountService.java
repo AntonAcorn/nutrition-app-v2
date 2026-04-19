@@ -59,6 +59,12 @@ public class AuthAccountService {
     }
 
     @Transactional
+    public void updatePassword(AuthAccountEntity account, String rawPassword) {
+        account.setPasswordHash(passwordEncoder.encode(rawPassword));
+        authAccountRepository.save(account);
+    }
+
+    @Transactional
     public void markLoginSuccess(AuthAccountEntity account) {
         account.setLastLoginAt(OffsetDateTime.now(ZoneOffset.UTC));
         authAccountRepository.save(account);

@@ -8,6 +8,7 @@ import static org.mockito.Mockito.when;
 import com.aiduparc.nutrition.notifications.TelegramNotificationService;
 import com.aiduparc.nutrition.security.api.RegisterRequest;
 import com.aiduparc.nutrition.security.service.EmailVerificationService;
+import com.aiduparc.nutrition.security.service.PasswordResetService;
 import com.aiduparc.nutrition.security.model.AuthAccountEntity;
 import com.aiduparc.nutrition.user.model.UserEntity;
 import com.aiduparc.nutrition.user.service.NutritionUserService;
@@ -36,6 +37,9 @@ class AuthFacadeTest {
 
     @Mock
     private EmailVerificationService emailVerificationService;
+
+    @Mock
+    private PasswordResetService passwordResetService;
 
     @InjectMocks
     private AuthFacade authFacade;

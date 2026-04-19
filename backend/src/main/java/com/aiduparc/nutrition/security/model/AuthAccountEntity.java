@@ -47,6 +47,12 @@ public class AuthAccountEntity {
     @Column(name = "verification_token_expires_at")
     private OffsetDateTime verificationTokenExpiresAt;
 
+    @Column(name = "password_reset_token")
+    private String passwordResetToken;
+
+    @Column(name = "password_reset_token_expires_at")
+    private OffsetDateTime passwordResetTokenExpiresAt;
+
     public UUID getId() {
         return id;
     }
@@ -125,6 +131,22 @@ public class AuthAccountEntity {
 
     public void setVerificationTokenExpiresAt(OffsetDateTime verificationTokenExpiresAt) {
         this.verificationTokenExpiresAt = verificationTokenExpiresAt;
+    }
+
+    public String getPasswordResetToken() {
+        return passwordResetToken;
+    }
+
+    public void setPasswordResetToken(String passwordResetToken) {
+        this.passwordResetToken = passwordResetToken;
+    }
+
+    public OffsetDateTime getPasswordResetTokenExpiresAt() {
+        return passwordResetTokenExpiresAt;
+    }
+
+    public void setPasswordResetTokenExpiresAt(OffsetDateTime passwordResetTokenExpiresAt) {
+        this.passwordResetTokenExpiresAt = passwordResetTokenExpiresAt;
     }
 
     @PrePersist

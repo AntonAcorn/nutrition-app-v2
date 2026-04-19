@@ -60,6 +60,28 @@ export async function register(payload: RegisterPayload): Promise<AuthUser> {
   return parseAuthResponse(response)
 }
 
+export async function requestPasswordReset(email: string): Promise<void> {
+  await fetch('/api/auth/forgot-password', {
+    method: 'POST',
+    credentials: 'include',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email }),
+  })
+}
+
+export async function resetPassword(token: string, newPassword: string): Promise<void> {
+  const res = await fetch('/api/auth/reset-password', {
+    method: 'POST',
+    credentials: 'include',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ token, newPassword }),
+  })
+  if (!res.ok) {
+    const body = await res.json().catch(() => ({}))
+    throw new Error((body as { message?: string }).message ?? 'Reset failed')
+  }
+}
+
 export async function logout(): Promise<void> {
   const response = await fetch('/api/auth/logout', {
     method: 'POST',

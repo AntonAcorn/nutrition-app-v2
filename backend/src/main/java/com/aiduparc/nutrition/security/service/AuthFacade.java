@@ -20,19 +20,22 @@ public class AuthFacade {
     private final UserProfileService userProfileService;
     private final TelegramNotificationService telegramNotificationService;
     private final EmailVerificationService emailVerificationService;
+    private final PasswordResetService passwordResetService;
 
     public AuthFacade(
             AuthAccountService authAccountService,
             NutritionUserService nutritionUserService,
             UserProfileService userProfileService,
             TelegramNotificationService telegramNotificationService,
-            EmailVerificationService emailVerificationService
+            EmailVerificationService emailVerificationService,
+            PasswordResetService passwordResetService
     ) {
         this.authAccountService = authAccountService;
         this.nutritionUserService = nutritionUserService;
         this.userProfileService = userProfileService;
         this.telegramNotificationService = telegramNotificationService;
         this.emailVerificationService = emailVerificationService;
+        this.passwordResetService = passwordResetService;
     }
 
     @Transactional
@@ -92,6 +95,15 @@ public class AuthFacade {
 
     public boolean verifyEmail(String token) {
         return emailVerificationService.verify(token);
+    }
+
+    public void requestPasswordReset(String email) {
+        authAccountService.findByEmail(email)
+                .ifPresent(passwordResetService::sendPasswordResetEmail);
+    }
+
+    public boolean resetPassword(String token, String newPassword) {
+        return passwordResetService.resetPassword(token, newPassword);
     }
 
     public void logout() {

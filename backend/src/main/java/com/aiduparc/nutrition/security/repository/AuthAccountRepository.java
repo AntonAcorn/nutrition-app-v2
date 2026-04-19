@@ -10,4 +10,6 @@ public interface AuthAccountRepository extends JpaRepository<AuthAccountEntity, 
     Optional<AuthAccountEntity> findByEmailIgnoreCase(String email);
 
     Optional<AuthAccountEntity> findByVerificationToken(String token);
+
+    Optional<AuthAccountEntity> findByPasswordResetToken(String token);
 }
