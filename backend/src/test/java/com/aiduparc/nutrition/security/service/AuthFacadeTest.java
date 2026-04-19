@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
+import com.aiduparc.nutrition.notifications.TelegramNotificationService;
 import com.aiduparc.nutrition.security.api.RegisterRequest;
 import com.aiduparc.nutrition.security.model.AuthAccountEntity;
 import com.aiduparc.nutrition.user.model.UserEntity;
@@ -28,6 +29,9 @@ class AuthFacadeTest {
 
     @Mock
     private UserProfileService userProfileService;
+
+    @Mock
+    private TelegramNotificationService telegramNotificationService;
 
     @InjectMocks
     private AuthFacade authFacade;

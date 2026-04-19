@@ -1,5 +1,6 @@
 package com.aiduparc.nutrition.security.service;
 
+import com.aiduparc.nutrition.notifications.TelegramNotificationService;
 import com.aiduparc.nutrition.security.api.AuthResponse;
 import com.aiduparc.nutrition.security.api.LoginRequest;
 import com.aiduparc.nutrition.security.api.RegisterRequest;
@@ -17,15 +18,18 @@ public class AuthFacade {
     private final AuthAccountService authAccountService;
     private final NutritionUserService nutritionUserService;
     private final UserProfileService userProfileService;
+    private final TelegramNotificationService telegramNotificationService;
 
     public AuthFacade(
             AuthAccountService authAccountService,
             NutritionUserService nutritionUserService,
-            UserProfileService userProfileService
+            UserProfileService userProfileService,
+            TelegramNotificationService telegramNotificationService
     ) {
         this.authAccountService = authAccountService;
         this.nutritionUserService = nutritionUserService;
         this.userProfileService = userProfileService;
+        this.telegramNotificationService = telegramNotificationService;
     }
 
     @Transactional
@@ -37,6 +41,7 @@ public class AuthFacade {
             request.displayName(),
             nutritionUser.getId()
         );
+        telegramNotificationService.notifyNewUser(account.getEmail(), account.getDisplayName());
         return new AuthenticatedSession(
             account.getId(),
             account.getEmail(),
