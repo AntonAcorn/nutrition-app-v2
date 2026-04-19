@@ -11,7 +11,8 @@ class CalorieTargetCalculator {
             BigDecimal heightCm,
             BigDecimal weightKg,
             String activityLevel,
-            String goal
+            String goal,
+            String weightLossStrategy
     ) {
         double bmr;
         double w = weightKg.doubleValue();
@@ -32,8 +33,14 @@ class CalorieTargetCalculator {
 
         double tdee = bmr * activityFactor;
 
+        double loseDeficit = switch (weightLossStrategy != null ? weightLossStrategy : "optimal") {
+            case "mild"       -> 250;
+            case "aggressive" -> 1000;
+            default           -> 500; // optimal
+        };
+
         double adjusted = switch (goal) {
-            case "lose" -> tdee - 500;
+            case "lose" -> tdee - loseDeficit;
             case "gain" -> tdee + 300;
             default -> tdee; // maintain
         };

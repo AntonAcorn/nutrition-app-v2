@@ -48,7 +48,8 @@ public class UserProfileController {
             request.heightCm(),
             request.startingWeightKg(),
             request.activityLevel(),
-            request.goal()
+            request.goal(),
+            request.weightLossStrategy()
         ));
 
         return ResponseEntity.status(HttpStatus.CREATED).body(UserProfileResponse.from(entity));

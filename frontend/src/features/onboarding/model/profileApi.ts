@@ -5,6 +5,7 @@ export interface OnboardingPayload {
   startingWeightKg: number
   activityLevel: 'sedentary' | 'lightly_active' | 'moderately_active' | 'very_active'
   goal: 'lose' | 'maintain' | 'gain'
+  weightLossStrategy?: 'mild' | 'optimal' | 'aggressive'
 }
 
 export async function submitProfile(payload: OnboardingPayload): Promise<void> {

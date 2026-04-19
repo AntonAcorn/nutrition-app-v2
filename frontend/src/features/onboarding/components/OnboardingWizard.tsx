@@ -22,6 +22,7 @@ export function OnboardingWizard({ onComplete }: Props) {
   const [startingWeightKg, setStartingWeightKg] = useState('')
   const [activityLevel, setActivityLevel] = useState<OnboardingPayload['activityLevel'] | ''>('')
   const [goal, setGoal] = useState<OnboardingPayload['goal'] | ''>('')
+  const [weightLossStrategy, setWeightLossStrategy] = useState<OnboardingPayload['weightLossStrategy'] | ''>('')
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState('')
 
@@ -33,9 +34,15 @@ export function OnboardingWizard({ onComplete }: Props) {
     return startingWeightKg && activityLevel
   }
 
+  function canFinish() {
+    if (!goal) return false
+    if (goal === 'lose' && !weightLossStrategy) return false
+    return true
+  }
+
   async function handleFinish(event: FormEvent) {
     event.preventDefault()
-    if (!goal) return
+    if (!canFinish()) return
     setSubmitting(true)
     setError('')
     try {
@@ -46,6 +53,7 @@ export function OnboardingWizard({ onComplete }: Props) {
         startingWeightKg: Number(startingWeightKg),
         activityLevel: activityLevel as OnboardingPayload['activityLevel'],
         goal: goal as OnboardingPayload['goal'],
+        weightLossStrategy: goal === 'lose' ? weightLossStrategy as OnboardingPayload['weightLossStrategy'] : undefined,
       })
       onComplete()
     } catch (err) {
@@ -186,12 +194,37 @@ export function OnboardingWizard({ onComplete }: Props) {
                 type="button"
                 className="tab-button tab-button--dark"
                 style={optionStyle(goal === value)}
-                onClick={() => setGoal(value)}
+                onClick={() => { setGoal(value); setWeightLossStrategy('') }}
               >
                 {label}
               </button>
             ))}
           </div>
+
+          {goal === 'lose' && (
+            <>
+              <label style={{ marginTop: '0.25rem' }}>Weight loss pace</label>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                {(
+                  [
+                    { value: 'mild',       label: 'Mild',       desc: '~0.25 kg per week' },
+                    { value: 'optimal',    label: 'Optimal',    desc: '~0.5 kg per week' },
+                    { value: 'aggressive', label: 'Aggressive', desc: '~1 kg per week' },
+                  ] as const
+                ).map(({ value, label, desc }) => (
+                  <button
+                    key={value}
+                    type="button"
+                    className="tab-button tab-button--dark"
+                    style={optionStyle(weightLossStrategy === value)}
+                    onClick={() => setWeightLossStrategy(value)}
+                  >
+                    {label} — <span style={{ opacity: 0.65, fontWeight: 400 }}>{desc}</span>
+                  </button>
+                ))}
+              </div>
+            </>
+          )}
 
           <div style={{ display: 'flex', gap: '0.5rem' }}>
             <button type="button" className="tab-button tab-button--dark" onClick={() => setStep(2)}>
@@ -199,7 +232,7 @@ export function OnboardingWizard({ onComplete }: Props) {
             </button>
             <button
               type="submit"
-              disabled={!goal || submitting}
+              disabled={!canFinish() || submitting}
               style={{ flex: 1 }}
             >
               {submitting ? 'Saving...' : 'Finish'}

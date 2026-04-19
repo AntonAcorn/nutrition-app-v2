@@ -13,6 +13,7 @@ public record UserProfileResponse(
     BigDecimal startingWeightKg,
     String activityLevel,
     String goal,
+    String weightLossStrategy,
     BigDecimal dailyCalorieTargetKcal
 ) {
     static UserProfileResponse from(UserProfileEntity entity) {
@@ -25,6 +26,7 @@ public record UserProfileResponse(
             entity.getStartingWeightKg(),
             entity.getActivityLevel(),
             entity.getGoal(),
+            entity.getWeightLossStrategy(),
             entity.getDailyCalorieTargetKcal()
         );
     }

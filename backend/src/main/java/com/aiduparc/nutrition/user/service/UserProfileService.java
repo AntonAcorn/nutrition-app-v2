@@ -26,7 +26,8 @@ public class UserProfileService {
             command.heightCm(),
             command.startingWeightKg(),
             command.activityLevel(),
-            command.goal()
+            command.goal(),
+            command.weightLossStrategy()
         );
 
         UserProfileEntity entity = new UserProfileEntity();
@@ -37,6 +38,7 @@ public class UserProfileService {
         entity.setStartingWeightKg(command.startingWeightKg());
         entity.setActivityLevel(command.activityLevel());
         entity.setGoal(command.goal());
+        entity.setWeightLossStrategy(command.weightLossStrategy());
         entity.setDailyCalorieTargetKcal(target);
 
         return repository.save(entity);
@@ -57,6 +59,7 @@ public class UserProfileService {
         BigDecimal heightCm,
         BigDecimal startingWeightKg,
         String activityLevel,
-        String goal
+        String goal,
+        String weightLossStrategy
     ) {}
 }

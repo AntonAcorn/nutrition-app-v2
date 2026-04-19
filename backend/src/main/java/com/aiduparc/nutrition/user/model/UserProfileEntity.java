@@ -39,6 +39,9 @@ public class UserProfileEntity {
     @Column(name = "goal", nullable = false)
     private String goal;
 
+    @Column(name = "weight_loss_strategy")
+    private String weightLossStrategy;
+
     @Column(name = "daily_calorie_target_kcal", precision = 10, scale = 2, nullable = false)
     private BigDecimal dailyCalorieTargetKcal;
 
@@ -71,6 +74,9 @@ public class UserProfileEntity {
 
     public String getGoal() { return goal; }
     public void setGoal(String goal) { this.goal = goal; }
+
+    public String getWeightLossStrategy() { return weightLossStrategy; }
+    public void setWeightLossStrategy(String weightLossStrategy) { this.weightLossStrategy = weightLossStrategy; }
 
     public BigDecimal getDailyCalorieTargetKcal() { return dailyCalorieTargetKcal; }
     public void setDailyCalorieTargetKcal(BigDecimal dailyCalorieTargetKcal) { this.dailyCalorieTargetKcal = dailyCalorieTargetKcal; }
