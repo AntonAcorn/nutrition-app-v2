@@ -1,4 +1,4 @@
-:80 {
+puzometr.org {
   encode gzip
 
   handle /api/* {
