@@ -16,6 +16,7 @@ frontend/dist/
 # backend
 backend/target/
 backend/.mvn/
+backend/src/main/resources/application-local.yml
 
 # analyzer
 analyzer/.venv/

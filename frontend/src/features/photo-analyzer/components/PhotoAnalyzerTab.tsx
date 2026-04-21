@@ -176,44 +176,48 @@ export function PhotoAnalyzerTab({ onConfirmed }: PhotoAnalyzerTabProps) {
 
   return (
     <section className="screen-section screen-section--photo-dark">
-      <section className="panel analyzer-panel analyzer-panel--hero analyzer-panel--dark">
-        <div className="analyzer-hero">
-          <div>
-            <p className="screen-header__meta">Photo analysis</p>
-            <h2>{draft ? 'Review the result' : 'Add a photo to start analysis'}</h2>
-          </div>
+      <section className="panel analyzer-panel analyzer-panel--dark">
+        <p className="screen-header__meta" style={{ textAlign: 'center' }}>Photo analysis</p>
 
-          <div className="upload-panel__controls">
-            <label className="upload-panel__note">
+        {!draft ? (
+          <div className="photo-upload-hero">
+            <img src="/mascot/camera.png" alt="Puzometr" className="photo-upload-hero__mascot" />
+            <h2 className="photo-upload-hero__title">Take a photo of your meal</h2>
+
+            <label className="upload-panel__note photo-upload-hero__note">
               Optional note
               <textarea
                 value={userNote}
                 onChange={(event) => setUserNote(event.target.value)}
-                rows={3}
-                placeholder="For example: chicken, rice, salad"
+                rows={2}
+                placeholder="e.g. chicken, rice, salad"
               />
             </label>
 
-            <div className="upload-button-group">
-              <label className="upload-button">
+            <div className="photo-upload-hero__buttons">
+              <label className="upload-button photo-upload-hero__btn-primary">
                 <input ref={fileInputRef} type="file" accept="image/*" capture="environment" onChange={handleFileSelected} hidden />
                 <span>Take photo</span>
               </label>
               <label className="upload-button upload-button--secondary">
                 <input type="file" accept="image/*" onChange={handleFileSelected} hidden />
-                <span>Choose from gallery</span>
+                <span>Gallery</span>
               </label>
             </div>
 
-            {selectedFileName ? <p className="subtle-text">Selected: {selectedFileName}</p> : null}
+            {selectedFileName ? <p className="subtle-text" style={{ textAlign: 'center', fontSize: '0.8rem' }}>📎 {selectedFileName}</p> : null}
 
-            <div className="primary-actions primary-actions--inline">
-              <button type="button" onClick={startAnalysis} disabled={uploading || !selectedFile}>
+            {selectedFile ? (
+              <button type="button" className="photo-upload-hero__analyze-btn" onClick={startAnalysis} disabled={uploading}>
                 {uploading ? 'Analyzing...' : 'Start analysis'}
               </button>
-            </div>
+            ) : null}
           </div>
-        </div>
+        ) : (
+          <div>
+            <h2 style={{ color: '#ffffff', marginBottom: 8 }}>Review the result</h2>
+          </div>
+        )}
 
         {previewUrl ? (
           <div className="image-preview">

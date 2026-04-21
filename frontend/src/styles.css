@@ -252,9 +252,9 @@ ul {
 }
 
 .tabs-header--dark .tab-button--active {
-  background: #2b2f38;
+  background: linear-gradient(135deg, #3b7dff 0%, #2060e8 100%);
   color: #ffffff;
-  box-shadow: none;
+  box-shadow: 0 4px 16px rgba(59, 125, 255, 0.35);
 }
 
 .tabs-body,
@@ -448,7 +448,7 @@ ul {
 }
 
 .today-ring__progress {
-  stroke: #ffbf3f;
+  stroke: url(#ringGradient);
   stroke-linecap: round;
 }
 
@@ -662,12 +662,13 @@ ul {
   border: 0;
   border-radius: 18px;
   padding: 14px 18px;
-  background: rgba(255, 255, 255, 0.06);
+  background: linear-gradient(135deg, #3b7dff 0%, #2060e8 100%);
   color: #ffffff;
   font-weight: 700;
   font-size: 0.98rem;
   letter-spacing: 0.01em;
   cursor: pointer;
+  box-shadow: 0 6px 20px rgba(59, 125, 255, 0.35);
 }
 
 .water-card__button--secondary {
@@ -680,34 +681,46 @@ ul {
   cursor: default;
 }
 
-.weight-inline-card {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(220px, 320px);
-  align-items: end;
-  justify-content: space-between;
-  gap: 16px;
-  padding: 18px 20px;
+.weight-mascot-card {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 16px 18px;
 }
 
-.weight-inline-card .weight-panel__form {
+.weight-mascot-card__img {
+  width: 80px;
+  height: 80px;
+  object-fit: contain;
+  flex-shrink: 0;
+  filter: drop-shadow(0 4px 12px rgba(100, 160, 255, 0.3));
+}
+
+.weight-mascot-card__body {
+  flex: 1;
+  display: grid;
+  gap: 10px;
+}
+
+.weight-mascot-card .weight-panel__form {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
   align-items: end;
-  gap: 12px;
+  gap: 10px;
 }
 
-.weight-inline-card .weight-panel__form label {
+.weight-mascot-card .weight-panel__form label {
   min-width: 0;
 }
 
-.weight-inline-card .weight-panel__form input {
+.weight-mascot-card .weight-panel__form input {
   background: #111318;
   border-color: rgba(255, 255, 255, 0.08);
   color: #ffffff;
 }
 
-.weight-inline-card .weight-panel__form button {
-  min-width: 120px;
+.weight-mascot-card .weight-panel__form button {
+  min-width: 100px;
 }
 
 .summary-card {
@@ -859,13 +872,15 @@ ul {
 }
 
 .weight-panel__form button,
-.primary-actions button {
+.primary-actions button,
+.weight-mascot-card .weight-panel__form button {
   border: 0;
   border-radius: 18px;
   padding: 13px 18px;
-  background: linear-gradient(135deg, #1f2a44 0%, #314d78 100%);
-  color: #fff9f2;
+  background: linear-gradient(135deg, #3b7dff 0%, #2060e8 100%);
+  color: #ffffff;
   font-weight: 700;
+  box-shadow: 0 6px 20px rgba(59, 125, 255, 0.35);
   cursor: pointer;
   box-shadow: 0 14px 28px rgba(31, 42, 68, 0.2);
 }
@@ -987,8 +1002,9 @@ ul {
 }
 
 .screen-section--statistics-dark .range-selector__button--active {
-  background: #2b2f38;
+  background: linear-gradient(135deg, #3b7dff 0%, #2060e8 100%);
   color: #ffffff;
+  box-shadow: 0 4px 14px rgba(59, 125, 255, 0.35);
 }
 
 .range-selector__button {
@@ -1228,7 +1244,7 @@ ul {
 
 .statistics-table__row {
   padding: 12px 0;
-  border-top: 1px solid #eadfce;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
 }
 
 .summary-card--stats .subtle-text {
@@ -1273,15 +1289,22 @@ ul {
 }
 
 .screen-section--photo-dark .upload-button {
-  background: linear-gradient(135deg, #2b2f38 0%, #3a4050 100%);
-  box-shadow: 0 14px 28px rgba(0, 0, 0, 0.28);
+  background: linear-gradient(135deg, #3b7dff 0%, #2060e8 100%);
+  box-shadow: 0 8px 24px rgba(59, 125, 255, 0.35);
+  color: #ffffff;
+}
+
+.screen-section--photo-dark .upload-button--secondary {
+  background: rgba(255, 255, 255, 0.07);
+  box-shadow: none;
+  color: rgba(255, 255, 255, 0.7);
 }
 
 .screen-section--photo-dark .primary-actions button,
 .screen-section--photo-dark .weight-panel__form button {
-  background: linear-gradient(135deg, #ffffff 0%, #d5d8df 100%);
-  color: #101114;
-  box-shadow: 0 14px 28px rgba(0, 0, 0, 0.22);
+  background: linear-gradient(135deg, #3b7dff 0%, #2060e8 100%);
+  color: #ffffff;
+  box-shadow: 0 8px 24px rgba(59, 125, 255, 0.35);
 }
 
 .screen-section--photo-dark input,
@@ -1336,9 +1359,9 @@ ul {
 }
 
 .upload-button--secondary {
-  background: linear-gradient(135deg, #2b2f38 0%, #3a4050 100%);
+  background: rgba(255, 255, 255, 0.08);
   box-shadow: none;
-  color: #a0a8b8;
+  color: rgba(255, 255, 255, 0.7);
   font-weight: 700;
 }
 
@@ -1781,4 +1804,185 @@ ul {
 
 .screen-section--statistics-dark .statistics-grid {
   grid-template-columns: 1fr;
+}
+
+/* ── Mascot hero card (Today tab) ───────────────────────────────────────── */
+.mascot-hero-card {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  background: linear-gradient(135deg, #1a1d27 0%, #12141b 100%);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 28px;
+  padding: 12px 20px 12px 8px;
+  margin-bottom: 14px;
+  overflow: hidden;
+}
+
+.mascot-hero-card__image {
+  width: 130px;
+  height: 130px;
+  object-fit: contain;
+  flex-shrink: 0;
+  filter: drop-shadow(0 8px 20px rgba(100, 160, 255, 0.35));
+}
+
+.mascot-hero-card__text {
+  flex: 1;
+}
+
+.mascot-hero-card__greeting {
+  font-size: clamp(1.1rem, 3.5vw, 1.5rem);
+  font-weight: 700;
+  color: #ffffff;
+  line-height: 1.2;
+}
+
+.mascot-hero-card__name {
+  margin-top: 6px;
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.45);
+}
+
+/* ── Auth mascot hero ───────────────────────────────────────────────────── */
+.auth-mascot-hero {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 18px;
+  padding-inline: 8px;
+}
+
+.auth-mascot-hero__image {
+  width: 90px;
+  height: 90px;
+  object-fit: contain;
+  flex-shrink: 0;
+  filter: drop-shadow(0 6px 16px rgba(100, 160, 255, 0.3));
+}
+
+/* ── Water card mascot ──────────────────────────────────────────────────── */
+.water-card__mascot {
+  width: 80px;
+  height: 80px;
+  object-fit: contain;
+  flex-shrink: 0;
+  filter: drop-shadow(0 4px 12px rgba(100, 160, 255, 0.3));
+  transition: all 0.3s ease;
+}
+
+.water-card__header {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 14px;
+}
+
+.water-card__header-info {
+  flex: 1;
+}
+
+.water-card__mood {
+  color: rgba(255, 255, 255, 0.45);
+  font-size: 0.8rem;
+}
+
+/* ── Photo mascot ───────────────────────────────────────────────────────── */
+.photo-mascot {
+  width: 120px;
+  height: 120px;
+  object-fit: contain;
+  margin-top: 12px;
+  filter: drop-shadow(0 6px 16px rgba(100, 160, 255, 0.3));
+}
+
+/* ── Photo upload hero (centered layout) ───────────────────────────────── */
+.photo-upload-hero {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  padding: 8px 0 4px;
+  text-align: center;
+}
+
+.photo-upload-hero__mascot {
+  width: 160px;
+  height: 160px;
+  object-fit: contain;
+  filter: drop-shadow(0 8px 24px rgba(100, 160, 255, 0.35));
+}
+
+.photo-upload-hero__title {
+  font-size: clamp(1.2rem, 3vw, 1.6rem);
+  font-weight: 700;
+  color: #ffffff;
+}
+
+.photo-upload-hero__note {
+  width: 100%;
+  max-width: 360px;
+  display: grid;
+  gap: 6px;
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 0.88rem;
+}
+
+.photo-upload-hero__buttons {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.photo-upload-hero__btn-primary {
+  min-width: 140px;
+}
+
+.photo-upload-hero__analyze-btn {
+  width: 100%;
+  max-width: 360px;
+  border: 0;
+  border-radius: 18px;
+  padding: 14px 18px;
+  background: linear-gradient(135deg, #3b7dff 0%, #2060e8 100%);
+  color: #ffffff;
+  font-weight: 700;
+  font-size: 1rem;
+  cursor: pointer;
+  box-shadow: 0 6px 20px rgba(59, 125, 255, 0.4);
+}
+
+.photo-upload-hero__analyze-btn:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+/* ── Google Sign In button ──────────────────────────────────────────────── */
+.auth-divider {
+  text-align: center;
+  color: rgba(255, 255, 255, 0.3);
+  font-size: 0.85rem;
+  margin: 4px 0;
+}
+
+.google-signin-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  border-radius: 18px;
+  padding: 13px 18px;
+  background: #ffffff;
+  color: #1a1a1a;
+  font-weight: 700;
+  font-size: 0.95rem;
+  text-decoration: none;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  transition: 0.18s ease;
+}
+
+.google-signin-btn:hover {
+  background: #f5f5f5;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.25);
 }

@@ -20,8 +20,11 @@ public class AuthAccountEntity {
     @Column(name = "email", nullable = false)
     private String email;
 
-    @Column(name = "password_hash", nullable = false)
+    @Column(name = "password_hash")
     private String passwordHash;
+
+    @Column(name = "google_oauth_id")
+    private String googleOauthId;
 
     @Column(name = "display_name")
     private String displayName;
@@ -75,6 +78,14 @@ public class AuthAccountEntity {
 
     public void setPasswordHash(String passwordHash) {
         this.passwordHash = passwordHash;
+    }
+
+    public String getGoogleOauthId() {
+        return googleOauthId;
+    }
+
+    public void setGoogleOauthId(String googleOauthId) {
+        this.googleOauthId = googleOauthId;
     }
 
     public String getDisplayName() {

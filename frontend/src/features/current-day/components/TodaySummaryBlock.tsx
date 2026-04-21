@@ -64,6 +64,12 @@ export function TodaySummaryBlock({ summary }: TodaySummaryBlockProps) {
 
           <div className="today-ring">
             <svg viewBox="0 0 160 160" className="today-ring__svg" aria-hidden="true">
+              <defs>
+                <linearGradient id="ringGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                  <stop offset="0%" stopColor="#3b7dff" />
+                  <stop offset="100%" stopColor="#22d3ee" />
+                </linearGradient>
+              </defs>
               <circle cx="80" cy="80" r="64" className="today-ring__track" />
               <circle
                 cx="80"

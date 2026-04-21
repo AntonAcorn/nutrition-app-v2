@@ -2,8 +2,8 @@ import { useMemo, useState } from 'react'
 
 const MAX_GLASSES = 4
 const glassLabels = ['0 / 4', '1 / 4', '2 / 4', '3 / 4', '4 / 4']
-const moodEmoji = ['😔', '🙂', '😊', '😁', '🤩']
-const moodText = ['Dry start', 'Nice', 'Better', 'Great', 'Hydrated']
+const moodText = ['Dry start', 'Nice', 'Better', 'Great', 'Hydrated!']
+const mascotByGlasses = ['/mascot/sad.png', '/mascot/happy.png', '/mascot/happy.png', '/mascot/water.png', '/mascot/joy.png']
 
 export function WaterIntakeCard() {
   const [glasses, setGlasses] = useState(0)
@@ -21,13 +21,11 @@ export function WaterIntakeCard() {
   return (
     <section className="water-card panel" aria-label="Water intake tracker">
       <div className="water-card__header">
-        <div>
+        <img src={mascotByGlasses[glasses]} alt="Puzometr" className="water-card__mascot" aria-live="polite" />
+        <div className="water-card__header-info">
           <p className="screen-header__meta">Water</p>
           <h3>{glassLabels[glasses]}</h3>
-        </div>
-        <div className="water-card__emoji" aria-live="polite">
-          <span>{moodEmoji[glasses]}</span>
-          <small>{moodText[glasses]}</small>
+          <small className="water-card__mood">{moodText[glasses]}</small>
         </div>
       </div>
 

@@ -1,5 +1,16 @@
 import { FormEvent, useEffect, useState } from 'react'
 
+function GoogleIcon() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 48 48" aria-hidden="true">
+      <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
+      <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
+      <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
+      <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.18 1.48-4.97 2.31-8.16 2.31-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
+    </svg>
+  )
+}
+
 function EyeIcon() {
   return (
     <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -60,10 +71,28 @@ export default function App() {
   const [resetToken, setResetToken] = useState('')
 
   useEffect(() => {
-    const token = new URLSearchParams(window.location.search).get('reset_token')
+    const params = new URLSearchParams(window.location.search)
+
+    const token = params.get('reset_token')
     if (token) {
       setResetToken(token)
       setAuthMode('reset-password')
+      window.history.replaceState({}, '', window.location.pathname)
+      return
+    }
+
+    const oauthStatus = params.get('status')
+    if (oauthStatus === 'success') {
+      window.history.replaceState({}, '', window.location.pathname)
+      setAuthLoading(true)
+      fetchMe()
+        .then(setAuthUser)
+        .catch(() => setAuthUser({ accountId: null, email: null, displayName: null, nutritionUserId: null, authenticated: false, hasProfile: false }))
+        .finally(() => setAuthLoading(false))
+      return
+    }
+    if (oauthStatus === 'error') {
+      setAuthError('Google sign-in failed. Please try again.')
       window.history.replaceState({}, '', window.location.pathname)
     }
   }, [])
@@ -212,12 +241,13 @@ export default function App() {
 
     return (
       <main className="app-shell">
-        <header className="app-header app-header--dark">
+        <div className="auth-mascot-hero">
+          <img src="/mascot/happy.png" alt="Puzometr" className="auth-mascot-hero__image" />
           <div>
-            <p className="app-header__eyebrow">Daily nutrition</p>
-            <h1>{headerTitle}</h1>
+            <p className="app-header__eyebrow" style={{ color: 'rgba(255,255,255,0.54)' }}>Daily nutrition</p>
+            <h1 style={{ color: '#ffffff', fontSize: 'clamp(1.6rem, 4vw, 2.2rem)', lineHeight: 1.1 }}>{headerTitle}</h1>
           </div>
-        </header>
+        </div>
 
         <section className="auth-panel auth-panel--dark">
           {authMode === 'forgot-password' ? (
@@ -363,9 +393,16 @@ export default function App() {
               {authError ? <p className="error-text">{authError}</p> : null}
 
               {authMode === 'login' ? (
-                <button type="button" className="link-button" onClick={() => { setAuthMode('forgot-password'); setAuthError(''); setAuthSuccessMessage('') }}>
-                  Forgot password?
-                </button>
+                <>
+                  <button type="button" className="link-button" onClick={() => { setAuthMode('forgot-password'); setAuthError(''); setAuthSuccessMessage('') }}>
+                    Forgot password?
+                  </button>
+                  <div className="auth-divider">or</div>
+                  <a href="/oauth2/authorization/google" className="google-signin-btn">
+                    <GoogleIcon />
+                    Sign in with Google
+                  </a>
+                </>
               ) : null}
             </>
           )}
@@ -379,7 +416,6 @@ export default function App() {
       <header className="app-header app-header--dark">
         <div>
           <p className="app-header__eyebrow">Daily nutrition</p>
-          <h1>{getGreeting()}</h1>
         </div>
         <div className="app-header__actions">
           <span className="subtle-text">{authUser.displayName || authUser.email}</span>
@@ -424,6 +460,7 @@ export default function App() {
               refreshToken={summaryRefreshToken}
               successMessage={daySuccessMessage}
               onDayUpdated={handleDayUpdated}
+              displayName={authUser.displayName}
             />
           ) : null}
           {activeTab === tabs.statistics ? <StatisticsTab refreshToken={statisticsRefreshToken} /> : null}
