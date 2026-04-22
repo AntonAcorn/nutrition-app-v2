@@ -1,7 +1,5 @@
 package com.aiduparc.nutrition.security;
 
-import com.aiduparc.nutrition.security.oauth2.GoogleOAuth2FailureHandler;
-import com.aiduparc.nutrition.security.oauth2.GoogleOAuth2SuccessHandler;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.Customizer;
@@ -13,15 +11,6 @@ import org.springframework.security.web.SecurityFilterChain;
 
 @Configuration
 public class SecurityConfig {
-
-    private final GoogleOAuth2SuccessHandler successHandler;
-    private final GoogleOAuth2FailureHandler failureHandler;
-
-    public SecurityConfig(GoogleOAuth2SuccessHandler successHandler,
-                          GoogleOAuth2FailureHandler failureHandler) {
-        this.successHandler = successHandler;
-        this.failureHandler = failureHandler;
-    }
 
     @Bean
     SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -39,11 +28,7 @@ public class SecurityConfig {
             .authorizeHttpRequests(authorize -> authorize
                 .anyRequest().permitAll()
             )
-            .anonymous(Customizer.withDefaults())
-            .oauth2Login(oauth2 -> oauth2
-                .successHandler(successHandler)
-                .failureHandler(failureHandler)
-            );
+            .anonymous(Customizer.withDefaults());
 
         return http.build();
     }

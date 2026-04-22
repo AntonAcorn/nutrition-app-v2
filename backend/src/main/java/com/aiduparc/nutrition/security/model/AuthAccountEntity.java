@@ -23,8 +23,8 @@ public class AuthAccountEntity {
     @Column(name = "password_hash")
     private String passwordHash;
 
-    @Column(name = "google_oauth_id")
-    private String googleOauthId;
+    @Column(name = "google_id")
+    private String googleId;
 
     @Column(name = "display_name")
     private String displayName;
@@ -78,14 +78,6 @@ public class AuthAccountEntity {
 
     public void setPasswordHash(String passwordHash) {
         this.passwordHash = passwordHash;
-    }
-
-    public String getGoogleOauthId() {
-        return googleOauthId;
-    }
-
-    public void setGoogleOauthId(String googleOauthId) {
-        this.googleOauthId = googleOauthId;
     }
 
     public String getDisplayName() {
@@ -158,6 +150,14 @@ public class AuthAccountEntity {
 
     public void setPasswordResetTokenExpiresAt(OffsetDateTime passwordResetTokenExpiresAt) {
         this.passwordResetTokenExpiresAt = passwordResetTokenExpiresAt;
+    }
+
+    public String getGoogleId() {
+        return googleId;
+    }
+
+    public void setGoogleId(String googleId) {
+        this.googleId = googleId;
     }
 
     @PrePersist

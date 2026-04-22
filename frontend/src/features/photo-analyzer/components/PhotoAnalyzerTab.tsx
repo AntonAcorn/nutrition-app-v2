@@ -1,10 +1,40 @@
 import { ChangeEvent, useMemo, useRef, useState } from 'react'
 import { getTodayLocalDateInputValue } from '../../../shared/lib/date'
+import { API_BASE } from '../../../shared/lib/apiBase'
 import { toNumber } from '../../../shared/lib/number'
 import type { DraftItem, PhotoAnalysisDraft } from '../../../shared/types/nutrition'
 import { DraftItemEditor } from './DraftItemEditor'
 import { TotalsRow } from './TotalsRow'
 import { calculateTotals, normalizeDraft } from '../model/photoAnalysis'
+
+// Capacitor Camera is loaded dynamically to avoid breaking web builds
+// when native packages aren't installed yet
+async function pickPhotoNative(): Promise<File | null> {
+  try {
+    const { Camera, CameraResultType, CameraSource } = await import('@capacitor/camera')
+    const photo = await Camera.getPhoto({
+      quality: 85,
+      allowEditing: false,
+      resultType: CameraResultType.Uri,
+      source: CameraSource.Prompt,
+    })
+    if (!photo.webPath) return null
+    const res = await fetch(photo.webPath)
+    const blob = await res.blob()
+    return new File([blob], 'photo.jpg', { type: blob.type || 'image/jpeg' })
+  } catch {
+    return null
+  }
+}
+
+async function isNativePlatform(): Promise<boolean> {
+  try {
+    const { Capacitor } = await import('@capacitor/core')
+    return Capacitor.isNativePlatform()
+  } catch {
+    return false
+  }
+}
 
 interface PhotoAnalyzerTabProps {
   onConfirmed?: () => void
@@ -37,8 +67,32 @@ export function PhotoAnalyzerTab({ onConfirmed }: PhotoAnalyzerTabProps) {
   const [previewUrl, setPreviewUrl] = useState('')
   const [userNote, setUserNote] = useState('')
   const fileInputRef = useRef<HTMLInputElement | null>(null)
+  const galleryInputRef = useRef<HTMLInputElement | null>(null)
 
   const recalculatedTotals = useMemo(() => (draft ? calculateTotals(draft.items) : calculateTotals([])), [draft])
+
+  function applyFile(file: File) {
+    setError('')
+    setSuccessMessage('')
+    setDraft(null)
+    setSelectedFile(file)
+    setSelectedFileName(file.name)
+    setPreviewUrl(URL.createObjectURL(file))
+  }
+
+  function handleFileSelected(event: ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0]
+    if (file) applyFile(file)
+  }
+
+  async function handleTakePhoto() {
+    if (await isNativePlatform()) {
+      const file = await pickPhotoNative()
+      if (file) applyFile(file)
+    } else {
+      fileInputRef.current?.click()
+    }
+  }
 
   function updateItem(itemId: string, field: keyof DraftItem, value: string) {
     setDraft((current) => {
@@ -79,20 +133,6 @@ export function PhotoAnalyzerTab({ onConfirmed }: PhotoAnalyzerTabProps) {
     })
   }
 
-  function handleFileSelected(event: ChangeEvent<HTMLInputElement>) {
-    const file = event.target.files?.[0]
-    if (!file) {
-      return
-    }
-
-    setError('')
-    setSuccessMessage('')
-    setDraft(null)
-    setSelectedFile(file)
-    setSelectedFileName(file.name)
-    setPreviewUrl(URL.createObjectURL(file))
-  }
-
   async function startAnalysis() {
     if (!selectedFile) {
       setError('Choose a photo first')
@@ -110,7 +150,7 @@ export function PhotoAnalyzerTab({ onConfirmed }: PhotoAnalyzerTabProps) {
       formData.append('userNote', userNote)
       formData.append('locale', 'en')
 
-      const response = await fetch('/api/photo-analysis/upload', {
+      const response = await fetch(`${API_BASE}/api/photo-analysis/upload`, {
         method: 'POST',
         credentials: 'include',
         body: formData,
@@ -150,7 +190,7 @@ export function PhotoAnalyzerTab({ onConfirmed }: PhotoAnalyzerTabProps) {
     }
 
     try {
-      const response = await fetch(`/api/photo-analysis/drafts/${draft.id}/confirm`, {
+      const response = await fetch(`${API_BASE}/api/photo-analysis/drafts/${draft.id}/confirm`, {
         method: 'POST',
         credentials: 'include',
         headers: {
@@ -194,15 +234,16 @@ export function PhotoAnalyzerTab({ onConfirmed }: PhotoAnalyzerTabProps) {
               />
             </label>
 
-            <div className="photo-upload-hero__buttons">
-              <label className="upload-button photo-upload-hero__btn-primary">
-                <input ref={fileInputRef} type="file" accept="image/*" capture="environment" onChange={handleFileSelected} hidden />
+            <div className="upload-button-group">
+              <button type="button" className="upload-button" onClick={handleTakePhoto}>
                 <span>Take photo</span>
-              </label>
+              </button>
               <label className="upload-button upload-button--secondary">
-                <input type="file" accept="image/*" onChange={handleFileSelected} hidden />
-                <span>Gallery</span>
+                <input ref={galleryInputRef} type="file" accept="image/*" onChange={handleFileSelected} hidden />
+                <span>Choose from gallery</span>
               </label>
+              {/* Hidden input for web camera fallback */}
+              <input ref={fileInputRef} type="file" accept="image/*" capture="environment" onChange={handleFileSelected} hidden />
             </div>
 
             {selectedFileName ? <p className="subtle-text" style={{ textAlign: 'center', fontSize: '0.8rem' }}>📎 {selectedFileName}</p> : null}

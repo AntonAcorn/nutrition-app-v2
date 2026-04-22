@@ -1,3 +1,5 @@
+import { API_BASE } from '../../../shared/lib/apiBase'
+
 export interface OnboardingPayload {
   ageYears: number
   gender: 'male' | 'female'
@@ -9,7 +11,7 @@ export interface OnboardingPayload {
 }
 
 export async function submitProfile(payload: OnboardingPayload): Promise<void> {
-  const response = await fetch('/api/profile', {
+  const response = await fetch(`${API_BASE}/api/profile`, {
     method: 'POST',
     credentials: 'include',
     headers: { 'Content-Type': 'application/json' },

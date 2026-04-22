@@ -54,6 +54,31 @@ public class AuthAccountService {
     }
 
     @Transactional(readOnly = true)
+    public Optional<AuthAccountEntity> findByGoogleId(String googleId) {
+        if (googleId == null || googleId.isBlank()) {
+            return Optional.empty();
+        }
+        return authAccountRepository.findByGoogleId(googleId);
+    }
+
+    @Transactional
+    public AuthAccountEntity createGoogleAccount(String googleId, String email, String displayName, UUID nutritionUserId) {
+        var account = new AuthAccountEntity();
+        account.setEmail(email.trim().toLowerCase());
+        account.setGoogleId(googleId);
+        account.setDisplayName(displayName == null || displayName.isBlank() ? null : displayName.trim());
+        account.setNutritionUserId(nutritionUserId);
+        account.setEmailVerified(true);
+        return authAccountRepository.save(account);
+    }
+
+    @Transactional
+    public void linkGoogleId(AuthAccountEntity account, String googleId) {
+        account.setGoogleId(googleId);
+        authAccountRepository.save(account);
+    }
+
+    @Transactional(readOnly = true)
     public boolean passwordMatches(AuthAccountEntity account, String rawPassword) {
         return rawPassword != null && passwordEncoder.matches(rawPassword, account.getPasswordHash());
     }

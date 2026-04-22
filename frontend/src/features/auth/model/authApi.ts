@@ -1,3 +1,5 @@
+import { API_BASE } from '../../../shared/lib/apiBase'
+
 export interface AuthUser {
   accountId: string | null
   email: string | null
@@ -28,7 +30,7 @@ async function parseAuthResponse(response: Response): Promise<AuthUser> {
 }
 
 export async function fetchMe(): Promise<AuthUser> {
-  const response = await fetch('/api/auth/me', {
+  const response = await fetch(`${API_BASE}/api/auth/me`, {
     credentials: 'include',
   })
 
@@ -36,7 +38,7 @@ export async function fetchMe(): Promise<AuthUser> {
 }
 
 export async function login(payload: LoginPayload): Promise<AuthUser> {
-  const response = await fetch('/api/auth/login', {
+  const response = await fetch(`${API_BASE}/api/auth/login`, {
     method: 'POST',
     credentials: 'include',
     headers: {
@@ -49,7 +51,7 @@ export async function login(payload: LoginPayload): Promise<AuthUser> {
 }
 
 export async function register(payload: RegisterPayload): Promise<AuthUser> {
-  const response = await fetch('/api/auth/register', {
+  const response = await fetch(`${API_BASE}/api/auth/register`, {
     method: 'POST',
     credentials: 'include',
     headers: {
@@ -62,7 +64,7 @@ export async function register(payload: RegisterPayload): Promise<AuthUser> {
 }
 
 export async function requestPasswordReset(email: string): Promise<void> {
-  await fetch('/api/auth/forgot-password', {
+  await fetch(`${API_BASE}/api/auth/forgot-password`, {
     method: 'POST',
     credentials: 'include',
     headers: { 'Content-Type': 'application/json' },
@@ -71,7 +73,7 @@ export async function requestPasswordReset(email: string): Promise<void> {
 }
 
 export async function resetPassword(token: string, newPassword: string): Promise<void> {
-  const res = await fetch('/api/auth/reset-password', {
+  const res = await fetch(`${API_BASE}/api/auth/reset-password`, {
     method: 'POST',
     credentials: 'include',
     headers: { 'Content-Type': 'application/json' },
@@ -84,7 +86,7 @@ export async function resetPassword(token: string, newPassword: string): Promise
 }
 
 export async function logout(): Promise<void> {
-  const response = await fetch('/api/auth/logout', {
+  const response = await fetch(`${API_BASE}/api/auth/logout`, {
     method: 'POST',
     credentials: 'include',
   })

@@ -1,4 +1,5 @@
 import { getTodayLocalDateInputValue } from '../../../shared/lib/date'
+import { API_BASE } from '../../../shared/lib/apiBase'
 import type { TodaySummary } from '../../../shared/types/nutrition'
 
 interface TodaySummaryApiResponse {
@@ -26,7 +27,7 @@ function formatDateLabel(entryDate: string): string {
 
 export async function fetchTodaySummary(): Promise<TodaySummary> {
   const response = await fetch(
-    `/api/history/today-summary?entryDate=${currentEntryDate()}`,
+    `${API_BASE}/api/history/today-summary?entryDate=${currentEntryDate()}`,
     { credentials: 'include' },
   )
 

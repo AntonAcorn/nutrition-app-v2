@@ -8,6 +8,7 @@ import com.aiduparc.nutrition.security.model.AuthAccountEntity;
 import com.aiduparc.nutrition.user.model.UserEntity;
 import com.aiduparc.nutrition.user.service.NutritionUserService;
 import com.aiduparc.nutrition.user.service.UserProfileService;
+import java.util.Optional;
 import java.util.UUID;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -104,6 +105,32 @@ public class AuthFacade {
 
     public boolean resetPassword(String token, String newPassword) {
         return passwordResetService.resetPassword(token, newPassword);
+    }
+
+    @Transactional
+    public AuthenticatedSession loginWithGoogle(GoogleUserInfo googleUser) {
+        AuthAccountEntity account = authAccountService.findByGoogleId(googleUser.id())
+            .orElseGet(() -> {
+                Optional<AuthAccountEntity> byEmail = authAccountService.findByEmail(googleUser.email());
+                if (byEmail.isPresent()) {
+                    authAccountService.linkGoogleId(byEmail.get(), googleUser.id());
+                    return byEmail.get();
+                }
+                UserEntity user = nutritionUserService.createUser(googleUser.name(), googleUser.email());
+                AuthAccountEntity newAccount = authAccountService.createGoogleAccount(
+                    googleUser.id(), googleUser.email(), googleUser.name(), user.getId()
+                );
+                telegramNotificationService.notifyNewUser(newAccount.getEmail(), newAccount.getDisplayName());
+                return newAccount;
+            });
+
+        authAccountService.markLoginSuccess(account);
+        return new AuthenticatedSession(
+            account.getId(),
+            account.getEmail(),
+            account.getDisplayName(),
+            account.getNutritionUserId()
+        );
     }
 
     public void logout() {

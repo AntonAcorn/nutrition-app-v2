@@ -1,4 +1,5 @@
 import { APP_TIME_ZONE, formatLocalDateInputValue } from '../../../shared/lib/date'
+import { API_BASE } from '../../../shared/lib/apiBase'
 import type { NutritionStatisticsResponse } from '../../../shared/types/nutrition'
 
 function getRange(days: number) {
@@ -15,7 +16,7 @@ function getRange(days: number) {
 export async function fetchNutritionStatistics(days: number): Promise<NutritionStatisticsResponse> {
   const { fromDate, toDate } = getRange(days)
   const response = await fetch(
-    `/api/history/statistics?fromDate=${fromDate}&toDate=${toDate}`,
+    `${API_BASE}/api/history/statistics?fromDate=${fromDate}&toDate=${toDate}`,
     { credentials: 'include' },
   )
 
