@@ -411,7 +411,7 @@ export default function App() {
                     Forgot password?
                   </button>
                   <div className="auth-divider">or</div>
-                  <a href="/oauth2/authorization/google" className="google-signin-btn">
+                  <a href={`${API_BASE}/api/auth/google`} className="google-signin-btn">
                     <GoogleIcon />
                     Sign in with Google
                   </a>

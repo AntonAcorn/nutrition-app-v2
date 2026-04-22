@@ -90,12 +90,19 @@ public class AuthController {
 
     @GetMapping("/google/callback")
     public void googleCallback(
-            @RequestParam String code,
-            @RequestParam String state,
+            @RequestParam(required = false) String code,
+            @RequestParam(required = false) String state,
+            @RequestParam(required = false) String error,
             HttpSession session,
             HttpServletResponse response) throws IOException {
         String expectedState = (String) session.getAttribute(GOOGLE_STATE_KEY);
+        session.removeAttribute(GOOGLE_STATE_KEY);
         String frontendUrl = authProperties.googleRedirectUri().replaceAll("/api/auth/google/callback$", "");
+
+        if (error != null) {
+            response.sendRedirect(frontendUrl + "/?google_error=" + error);
+            return;
+        }
 
         if (expectedState == null || !expectedState.equals(state)) {
             response.sendRedirect(frontendUrl + "/?google_error=state");
