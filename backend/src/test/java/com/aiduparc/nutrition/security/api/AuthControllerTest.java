@@ -7,9 +7,11 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.request;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import com.aiduparc.nutrition.security.AuthProperties;
 import com.aiduparc.nutrition.security.SecurityConfig;
 import com.aiduparc.nutrition.security.service.AuthFacade;
 import com.aiduparc.nutrition.security.service.AuthenticatedSession;
+import com.aiduparc.nutrition.security.service.GoogleOAuthService;
 import java.util.UUID;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,6 +30,12 @@ class AuthControllerTest {
 
     @MockBean
     private AuthFacade authFacade;
+
+    @MockBean
+    private GoogleOAuthService googleOAuthService;
+
+    @MockBean
+    private AuthProperties authProperties;
 
     @Test
     void registerShouldCreateAuthenticatedSession() throws Exception {
