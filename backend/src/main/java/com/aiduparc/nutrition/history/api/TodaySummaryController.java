@@ -60,4 +60,22 @@ public class TodaySummaryController {
         nutritionHistoryService.updateWeight(resolvedUserId, safeDate, request.weightKg());
         return nutritionHistoryService.getTodaySummary(resolvedUserId, safeDate);
     }
+
+    @PutMapping("/nutrition-totals")
+    @ResponseStatus(HttpStatus.OK)
+    public TodaySummaryResponse updateNutritionTotals(
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate entryDate,
+            @Valid @RequestBody UpdateNutritionTotalsRequest request,
+            HttpSession session
+    ) {
+        LocalDate safeDate = entryDate != null ? entryDate : LocalDate.now();
+        UUID resolvedUserId = currentNutritionUserResolver.resolve(session, null);
+        log.info("nutrition-totals update userId={} entryDate={} kcal={} protein={} fat={} fiber={}",
+            resolvedUserId, safeDate,
+            request.caloriesConsumedKcal(), request.proteinGrams(), request.fatGrams(), request.fiberGrams());
+        nutritionHistoryService.updateNutritionTotals(
+            resolvedUserId, safeDate,
+            request.caloriesConsumedKcal(), request.proteinGrams(), request.fatGrams(), request.fiberGrams());
+        return nutritionHistoryService.getTodaySummary(resolvedUserId, safeDate);
+    }
 }

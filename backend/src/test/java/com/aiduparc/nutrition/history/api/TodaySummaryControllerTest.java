@@ -5,8 +5,10 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import org.springframework.http.MediaType;
 
 import com.aiduparc.nutrition.history.service.NutritionHistoryService;
 import com.aiduparc.nutrition.security.SecurityConfig;
@@ -66,5 +68,49 @@ class TodaySummaryControllerTest {
                 .andExpect(jsonPath("$.fiberGrams").value(24.00));
 
         verify(nutritionHistoryService).getTodaySummary(userId, entryDate);
+    }
+
+    @Test
+    void shouldUpdateNutritionTotals() throws Exception {
+        UUID userId = UUID.randomUUID();
+        LocalDate entryDate = LocalDate.of(2026, 4, 8);
+
+        when(currentNutritionUserResolver.resolve(any(), eq(null))).thenReturn(userId);
+        when(nutritionHistoryService.getTodaySummary(userId, entryDate)).thenReturn(
+            new TodaySummaryResponse(
+                userId, entryDate,
+                null,
+                new BigDecimal("1200.00"),
+                new BigDecimal("2000.00"),
+                new BigDecimal("800.00"),
+                new BigDecimal("90.00"),
+                new BigDecimal("40.00"),
+                new BigDecimal("18.00")
+            )
+        );
+
+        mockMvc.perform(put("/api/history/today-summary/nutrition-totals")
+                .param("entryDate", "2026-04-08")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\"caloriesConsumedKcal\":1200,\"proteinGrams\":90,\"fatGrams\":40,\"fiberGrams\":18}"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.consumedCalories").value(1200.00))
+            .andExpect(jsonPath("$.proteinGrams").value(90.00));
+
+        verify(nutritionHistoryService).updateNutritionTotals(
+            eq(userId), eq(entryDate),
+            any(), any(), any(), any()
+        );
+    }
+
+    @Test
+    void shouldRejectNegativeNutritionTotals() throws Exception {
+        when(currentNutritionUserResolver.resolve(any(), eq(null))).thenReturn(UUID.randomUUID());
+
+        mockMvc.perform(put("/api/history/today-summary/nutrition-totals")
+                .param("entryDate", "2026-04-08")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\"caloriesConsumedKcal\":-1,\"proteinGrams\":90,\"fatGrams\":40,\"fiberGrams\":18}"))
+            .andExpect(status().isBadRequest());
     }
 }

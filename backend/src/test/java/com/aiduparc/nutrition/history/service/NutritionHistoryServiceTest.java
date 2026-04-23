@@ -285,4 +285,64 @@ class NutritionHistoryServiceTest {
         assertThat(saved.caloriesConsumedKcal()).isEqualByComparingTo("2050.00");
         assertThat(saved.notes()).isEqualTo("corrected");
     }
+
+    @Test
+    void updateNutritionTotalsReplacesValuesAndPreservesWeightAndNotes() {
+        UUID userId = UUID.randomUUID();
+        LocalDate entryDate = LocalDate.of(2026, 4, 5);
+        DailyNutritionEntryEntity existing = new DailyNutritionEntryEntity();
+        existing.setId(UUID.randomUUID());
+        existing.setUserId(userId);
+        existing.setEntryDate(entryDate);
+        existing.setWeightKg(new BigDecimal("81.74"));
+        existing.setCaloriesConsumedKcal(new BigDecimal("1800.00"));
+        existing.setCalorieTargetKcal(new BigDecimal("2000.00"));
+        existing.setProteinGrams(new BigDecimal("120.00"));
+        existing.setFatGrams(new BigDecimal("60.00"));
+        existing.setFiberGrams(new BigDecimal("20.00"));
+        existing.setNotes("breakfast");
+
+        when(repository.findByUserIdAndEntryDate(userId, entryDate)).thenReturn(Optional.of(existing));
+        when(repository.save(any(DailyNutritionEntryEntity.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        var saved = service.updateNutritionTotals(
+            userId, entryDate,
+            new BigDecimal("1200.00"),
+            new BigDecimal("90.00"),
+            new BigDecimal("40.00"),
+            new BigDecimal("18.00")
+        );
+
+        assertThat(saved.caloriesConsumedKcal()).isEqualByComparingTo("1200.00");
+        assertThat(saved.proteinGrams()).isEqualByComparingTo("90.00");
+        assertThat(saved.fatGrams()).isEqualByComparingTo("40.00");
+        assertThat(saved.fiberGrams()).isEqualByComparingTo("18.00");
+        assertThat(saved.weightKg()).isEqualByComparingTo("81.74");
+        assertThat(saved.notes()).isEqualTo("breakfast");
+    }
+
+    @Test
+    void updateNutritionTotalsCreatesEntryWhenNoneExists() {
+        UUID userId = UUID.randomUUID();
+        LocalDate entryDate = LocalDate.of(2026, 4, 5);
+
+        when(repository.findByUserIdAndEntryDate(userId, entryDate)).thenReturn(Optional.empty());
+        when(repository.save(any(DailyNutritionEntryEntity.class))).thenAnswer(invocation -> {
+            DailyNutritionEntryEntity entity = invocation.getArgument(0);
+            entity.setId(UUID.randomUUID());
+            return entity;
+        });
+
+        var saved = service.updateNutritionTotals(
+            userId, entryDate,
+            new BigDecimal("900.00"),
+            new BigDecimal("70.00"),
+            new BigDecimal("30.00"),
+            new BigDecimal("12.00")
+        );
+
+        assertThat(saved.caloriesConsumedKcal()).isEqualByComparingTo("900.00");
+        assertThat(saved.proteinGrams()).isEqualByComparingTo("70.00");
+        assertThat(saved.weightKg()).isNull();
+    }
 }

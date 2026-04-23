@@ -147,6 +147,32 @@ public class NutritionHistoryService {
     }
 
     @Transactional
+    public DailyNutritionEntrySnapshot updateNutritionTotals(
+            UUID userId,
+            LocalDate entryDate,
+            BigDecimal caloriesConsumedKcal,
+            BigDecimal proteinGrams,
+            BigDecimal fatGrams,
+            BigDecimal fiberGrams
+    ) {
+        DailyNutritionEntrySnapshot current = getOrCreateEmptySnapshot(userId, entryDate);
+
+        DailyNutritionEntrySnapshot result = upsert(new UpsertDailyNutritionEntryCommand(
+            userId,
+            entryDate,
+            caloriesConsumedKcal,
+            current.calorieTargetKcal(),
+            current.weightKg(),
+            proteinGrams,
+            fatGrams,
+            fiberGrams,
+            current.notes()
+        ));
+        telegramNotificationService.notifyActivity(userId, "nutrition totals update");
+        return result;
+    }
+
+    @Transactional
     public DailyNutritionEntrySnapshot addToDailyTotals(AddToDailyTotalsCommand command) {
         DailyNutritionEntrySnapshot current = getOrCreateEmptySnapshot(command.userId(), command.entryDate());
 

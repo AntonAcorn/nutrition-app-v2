@@ -3,6 +3,7 @@ import { TodaySummaryBlock } from './TodaySummaryBlock'
 import { WaterIntakeCard } from './WaterIntakeCard'
 import { fetchTodaySummary } from '../model/todaySummaryApi'
 import { updateTodayWeight } from '../model/weightApi'
+import { updateTodayNutritionTotals } from '../model/nutritionTotalsApi'
 import type { TodaySummary } from '../../../shared/types/nutrition'
 
 function getGreeting(): string {
@@ -26,6 +27,12 @@ export function CurrentDayTab({ refreshToken = 0, successMessage = '', onDayUpda
   const [savingWeight, setSavingWeight] = useState(false)
   const [weightInput, setWeightInput] = useState('')
   const [error, setError] = useState('')
+  const [showNutritionEdit, setShowNutritionEdit] = useState(false)
+  const [savingNutrition, setSavingNutrition] = useState(false)
+  const [caloriesInput, setCaloriesInput] = useState('')
+  const [proteinInput, setProteinInput] = useState('')
+  const [fatInput, setFatInput] = useState('')
+  const [fiberInput, setFiberInput] = useState('')
 
   useEffect(() => {
     let cancelled = false
@@ -39,6 +46,10 @@ export function CurrentDayTab({ refreshToken = 0, successMessage = '', onDayUpda
         if (!cancelled) {
           setSummary(nextSummary)
           setWeightInput(nextSummary.weightKg != null ? String(nextSummary.weightKg) : '')
+          setCaloriesInput(String(Math.round(Number(nextSummary.consumedCalories))))
+          setProteinInput(String(Math.round(Number(nextSummary.proteinGrams))))
+          setFatInput(String(Math.round(Number(nextSummary.fatGrams))))
+          setFiberInput(String(Math.round(Number(nextSummary.fiberGrams))))
         }
       } catch (err) {
         if (!cancelled) {
@@ -56,6 +67,37 @@ export function CurrentDayTab({ refreshToken = 0, successMessage = '', onDayUpda
       cancelled = true
     }
   }, [refreshToken])
+
+  async function handleNutritionSave() {
+    const kcal = Number(caloriesInput)
+    const protein = Number(proteinInput)
+    const fat = Number(fatInput)
+    const fiber = Number(fiberInput)
+
+    if ([kcal, protein, fat, fiber].some((v) => !Number.isFinite(v) || v < 0)) {
+      setError('Enter valid non-negative numbers for all fields')
+      return
+    }
+
+    setSavingNutrition(true)
+    setError('')
+
+    try {
+      await updateTodayNutritionTotals({ caloriesConsumedKcal: kcal, proteinGrams: protein, fatGrams: fat, fiberGrams: fiber })
+      const nextSummary = await fetchTodaySummary()
+      setSummary(nextSummary)
+      setCaloriesInput(String(Math.round(Number(nextSummary.consumedCalories))))
+      setProteinInput(String(Math.round(Number(nextSummary.proteinGrams))))
+      setFatInput(String(Math.round(Number(nextSummary.fatGrams))))
+      setFiberInput(String(Math.round(Number(nextSummary.fiberGrams))))
+      setShowNutritionEdit(false)
+      onDayUpdated?.()
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to save nutrition totals')
+    } finally {
+      setSavingNutrition(false)
+    }
+  }
 
   async function handleWeightSave() {
     const normalizedWeightInput = weightInput.trim().replace(',', '.')
@@ -98,6 +140,40 @@ export function CurrentDayTab({ refreshToken = 0, successMessage = '', onDayUpda
 
       {!loading && !error && summary ? <TodaySummaryBlock summary={summary} /> : null}
       {!loading && !error && summary ? <WaterIntakeCard /> : null}
+
+      {!loading && summary ? (
+        <section className="panel detail-panel">
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <p className="screen-header__meta">Adjust today's totals</p>
+            <button type="button" onClick={() => setShowNutritionEdit((v) => !v)}>
+              {showNutritionEdit ? 'Cancel' : 'Edit'}
+            </button>
+          </div>
+          {showNutritionEdit ? (
+            <div className="weight-panel__form">
+              <label>
+                Calories, kcal
+                <input type="text" inputMode="decimal" value={caloriesInput} onChange={(e) => setCaloriesInput(e.target.value)} />
+              </label>
+              <label>
+                Protein, g
+                <input type="text" inputMode="decimal" value={proteinInput} onChange={(e) => setProteinInput(e.target.value)} />
+              </label>
+              <label>
+                Fat, g
+                <input type="text" inputMode="decimal" value={fatInput} onChange={(e) => setFatInput(e.target.value)} />
+              </label>
+              <label>
+                Fiber, g
+                <input type="text" inputMode="decimal" value={fiberInput} onChange={(e) => setFiberInput(e.target.value)} />
+              </label>
+              <button type="button" onClick={handleNutritionSave} disabled={savingNutrition}>
+                {savingNutrition ? 'Saving...' : 'Save'}
+              </button>
+            </div>
+          ) : null}
+        </section>
+      ) : null}
 
       {!loading && summary ? (
         <section className="weight-mascot-card panel">
