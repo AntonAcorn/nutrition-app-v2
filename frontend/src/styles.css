@@ -713,6 +713,7 @@ ul {
 .water-card__button--secondary {
   background: rgba(255, 255, 255, 0.03);
   color: rgba(255, 255, 255, 0.76);
+  box-shadow: none;
 }
 
 .water-card__button:disabled {
