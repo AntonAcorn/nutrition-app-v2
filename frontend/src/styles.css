@@ -672,15 +672,15 @@ ul {
   position: relative;
   z-index: 1;
   height: 100%;
-  display: grid;
-  grid-template-columns: repeat(5, 1fr);
+  display: flex;
+  justify-content: space-between;
   align-items: center;
 }
 
 .water-card__tick {
   width: 8px;
   height: 8px;
-  margin: 0 auto;
+  flex-shrink: 0;
   border-radius: 999px;
   background: rgba(255, 255, 255, 0.22);
   transition: transform 160ms ease, background 160ms ease;
