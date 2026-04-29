@@ -1908,7 +1908,8 @@ ul {
   object-fit: contain;
   flex-shrink: 0;
   filter: drop-shadow(0 4px 12px rgba(100, 160, 255, 0.3));
-  transition: all 0.3s ease;
+  transition: filter 0.3s ease;
+  background: transparent;
 }
 
 .water-card__header {
