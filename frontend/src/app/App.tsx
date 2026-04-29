@@ -470,8 +470,8 @@ export default function App() {
             aria-selected={activeTab === tabs.profile}
             onClick={() => setActiveTab(tabs.profile)}
           >
-            Profile
-          </button>
+            Me
+</button>
         </div>
 
         <div className="tabs-body tabs-body--dark">
