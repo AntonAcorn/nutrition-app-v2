@@ -5,16 +5,42 @@ const glassLabels = ['0 / 4', '1 / 4', '2 / 4', '3 / 4', '4 / 4']
 const moodText = ['Dry start', 'Nice', 'Better', 'Great', 'Hydrated!']
 const mascotByGlasses = ['/mascot/sad.png', '/mascot/happy.png', '/mascot/happy.png', '/mascot/water.png', '/mascot/joy.png']
 
+const STORAGE_KEY = 'water_intake'
+
+function todayString() {
+  return new Date().toISOString().slice(0, 10)
+}
+
+function loadGlasses(): number {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY)
+    if (!raw) return 0
+    const parsed = JSON.parse(raw)
+    return parsed.date === todayString() ? (parsed.glasses ?? 0) : 0
+  } catch {
+    return 0
+  }
+}
+
+function saveGlasses(glasses: number) {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify({ date: todayString(), glasses }))
+}
+
 export function WaterIntakeCard() {
-  const [glasses, setGlasses] = useState(0)
+  const [glasses, setGlasses] = useState(loadGlasses)
 
   const progress = useMemo(() => (glasses / MAX_GLASSES) * 100, [glasses])
 
   function handleAddGlass() {
-    setGlasses((current) => Math.min(MAX_GLASSES, current + 1))
+    setGlasses((current) => {
+      const next = Math.min(MAX_GLASSES, current + 1)
+      saveGlasses(next)
+      return next
+    })
   }
 
   function handleReset() {
+    saveGlasses(0)
     setGlasses(0)
   }
 
