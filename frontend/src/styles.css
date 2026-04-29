@@ -1871,10 +1871,11 @@ ul {
 }
 
 .mascot-hero-card__greeting {
-  font-size: clamp(1.1rem, 3.5vw, 1.5rem);
+  font-size: clamp(1.35rem, 4.5vw, 1.75rem);
   font-weight: 700;
   color: #ffffff;
   line-height: 1.2;
+  white-space: pre-line;
 }
 
 .mascot-hero-card__name {

@@ -8,10 +8,10 @@ import type { TodaySummary } from '../../../shared/types/nutrition'
 
 function getGreeting(): string {
   const hour = new Date().getHours()
-  if (hour >= 5  && hour < 12) return 'Good morning, future athlete 👀'
-  if (hour >= 12 && hour < 17) return 'Good afternoon. Still going? Impressive.'
-  if (hour >= 17 && hour < 22) return 'Survived another day. Respect.'
-  return 'Still awake? Bold choice.'
+  if (hour >= 5  && hour < 12) return 'Good morning,\nfuture athlete 👀'
+  if (hour >= 12 && hour < 17) return 'Good afternoon.\nStill going? Impressive.'
+  if (hour >= 17 && hour < 22) return 'Survived another day.\nRespect.'
+  return 'Still awake?\nBold choice.'
 }
 
 interface CurrentDayTabProps {
