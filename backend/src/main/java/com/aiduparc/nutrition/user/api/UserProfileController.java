@@ -10,6 +10,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -53,6 +54,27 @@ public class UserProfileController {
         ));
 
         return ResponseEntity.status(HttpStatus.CREATED).body(UserProfileResponse.from(entity));
+    }
+
+    @PutMapping
+    public UserProfileResponse updateProfile(
+            @Valid @RequestBody CreateProfileRequest request,
+            HttpSession session
+    ) {
+        UUID nutritionUserId = currentNutritionUserResolver.resolve(session, null);
+
+        var entity = userProfileService.updateProfile(new UserProfileService.UpdateUserProfileCommand(
+            nutritionUserId,
+            request.ageYears(),
+            request.gender(),
+            request.heightCm(),
+            request.startingWeightKg(),
+            request.activityLevel(),
+            request.goal(),
+            request.weightLossStrategy()
+        ));
+
+        return UserProfileResponse.from(entity);
     }
 
     @GetMapping

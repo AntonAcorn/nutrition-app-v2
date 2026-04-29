@@ -35,6 +35,7 @@ import { login, logout, register, fetchMe, requestPasswordReset, resetPassword, 
 import { PhotoAnalyzerTab } from '../features/photo-analyzer/components/PhotoAnalyzerTab'
 import { StatisticsTab } from '../features/statistics/components/StatisticsTab'
 import { OnboardingWizard } from '../features/onboarding/components/OnboardingWizard'
+import { ProfileTab } from '../features/profile/components/ProfileTab'
 
 function getGreeting(): string {
   const hour = new Date().getHours()
@@ -48,6 +49,7 @@ const tabs = {
   currentDay: 'current-day',
   statistics: 'statistics',
   photoAnalyzer: 'photo-analyzer',
+  profile: 'profile',
 } as const
 
 type TabKey = (typeof tabs)[keyof typeof tabs]
@@ -430,10 +432,6 @@ export default function App() {
         <div>
           <p className="app-header__eyebrow">Daily nutrition</p>
         </div>
-        <div className="app-header__actions">
-          <span className="subtle-text">{authUser.displayName || authUser.email}</span>
-          <button type="button" className="chart-expand-button" onClick={handleLogout}>Log out</button>
-        </div>
       </header>
 
       <section className="tabs-shell tabs-shell--dark">
@@ -465,6 +463,15 @@ export default function App() {
           >
             Photo
           </button>
+          <button
+            type="button"
+            role="tab"
+            className={`tab-button tab-button--dark ${activeTab === tabs.profile ? 'tab-button--active' : ''}`}
+            aria-selected={activeTab === tabs.profile}
+            onClick={() => setActiveTab(tabs.profile)}
+          >
+            Profile
+          </button>
         </div>
 
         <div className="tabs-body tabs-body--dark">
@@ -478,6 +485,13 @@ export default function App() {
           ) : null}
           {activeTab === tabs.statistics ? <StatisticsTab refreshToken={statisticsRefreshToken} /> : null}
           {activeTab === tabs.photoAnalyzer ? <PhotoAnalyzerTab onConfirmed={handleDraftConfirmed} /> : null}
+          {activeTab === tabs.profile ? (
+            <ProfileTab
+              displayName={authUser.displayName}
+              email={authUser.email}
+              onLogout={handleLogout}
+            />
+          ) : null}
         </div>
       </section>
     </main>

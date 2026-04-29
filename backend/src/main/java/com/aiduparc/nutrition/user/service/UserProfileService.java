@@ -52,7 +52,45 @@ public class UserProfileService {
         return repository.existsByNutritionUserId(nutritionUserId);
     }
 
+    @Transactional
+    public UserProfileEntity updateProfile(UpdateUserProfileCommand command) {
+        UserProfileEntity entity = repository.findByNutritionUserId(command.nutritionUserId())
+            .orElseThrow(() -> new IllegalArgumentException("Profile not found"));
+
+        BigDecimal target = CalorieTargetCalculator.calculate(
+            command.ageYears(),
+            command.gender(),
+            command.heightCm(),
+            command.startingWeightKg(),
+            command.activityLevel(),
+            command.goal(),
+            command.weightLossStrategy()
+        );
+
+        entity.setAgeYears(command.ageYears());
+        entity.setGender(command.gender());
+        entity.setHeightCm(command.heightCm());
+        entity.setStartingWeightKg(command.startingWeightKg());
+        entity.setActivityLevel(command.activityLevel());
+        entity.setGoal(command.goal());
+        entity.setWeightLossStrategy(command.weightLossStrategy());
+        entity.setDailyCalorieTargetKcal(target);
+
+        return repository.save(entity);
+    }
+
     public record CreateUserProfileCommand(
+        UUID nutritionUserId,
+        int ageYears,
+        String gender,
+        BigDecimal heightCm,
+        BigDecimal startingWeightKg,
+        String activityLevel,
+        String goal,
+        String weightLossStrategy
+    ) {}
+
+    public record UpdateUserProfileCommand(
         UUID nutritionUserId,
         int ageYears,
         String gender,
