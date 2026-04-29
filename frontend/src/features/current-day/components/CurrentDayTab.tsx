@@ -27,7 +27,6 @@ export function CurrentDayTab({ refreshToken = 0, successMessage = '', onDayUpda
   const [savingWeight, setSavingWeight] = useState(false)
   const [weightInput, setWeightInput] = useState('')
   const [error, setError] = useState('')
-  const [showNutritionEdit, setShowNutritionEdit] = useState(false)
   const [savingNutrition, setSavingNutrition] = useState(false)
   const [resettingDay, setResettingDay] = useState(false)
   const [caloriesInput, setCaloriesInput] = useState('0')
@@ -155,41 +154,47 @@ export function CurrentDayTab({ refreshToken = 0, successMessage = '', onDayUpda
       {!loading && !error && summary ? <WaterIntakeCard /> : null}
 
       {!loading && summary ? (
-        <section className="panel detail-panel">
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <p className="screen-header__meta">Add meal manually</p>
-            <button type="button" onClick={() => setShowNutritionEdit((v) => !v)}>
-              {showNutritionEdit ? 'Cancel' : 'Add'}
-            </button>
+        <section className="panel quick-add-card">
+          <div className="quick-add-card__header">
+            <p className="quick-add-card__title">Quick add</p>
+            <p className="quick-add-card__subtitle">No photo? Log it manually.</p>
           </div>
-          {!showNutritionEdit ? (
-            <button type="button" className="chart-expand-button" onClick={handleResetDay} disabled={resettingDay} style={{ marginTop: '8px', width: '100%' }}>
-              {resettingDay ? 'Resetting...' : 'Reset day'}
-            </button>
-          ) : null}
-          {showNutritionEdit ? (
-            <div className="weight-panel__form">
-              <label>
-                Calories, kcal
+          <div className="quick-add-grid">
+            <label className="quick-add-field">
+              <span>Calories</span>
+              <div className="quick-add-field__wrap">
                 <input type="text" inputMode="decimal" value={caloriesInput} onChange={(e) => setCaloriesInput(e.target.value)} />
-              </label>
-              <label>
-                Protein, g
+                <span className="quick-add-field__unit">kcal</span>
+              </div>
+            </label>
+            <label className="quick-add-field">
+              <span>Protein</span>
+              <div className="quick-add-field__wrap">
                 <input type="text" inputMode="decimal" value={proteinInput} onChange={(e) => setProteinInput(e.target.value)} />
-              </label>
-              <label>
-                Fat, g
+                <span className="quick-add-field__unit">g</span>
+              </div>
+            </label>
+            <label className="quick-add-field">
+              <span>Fat</span>
+              <div className="quick-add-field__wrap">
                 <input type="text" inputMode="decimal" value={fatInput} onChange={(e) => setFatInput(e.target.value)} />
-              </label>
-              <label>
-                Fiber, g
+                <span className="quick-add-field__unit">g</span>
+              </div>
+            </label>
+            <label className="quick-add-field">
+              <span>Fiber</span>
+              <div className="quick-add-field__wrap">
                 <input type="text" inputMode="decimal" value={fiberInput} onChange={(e) => setFiberInput(e.target.value)} />
-              </label>
-              <button type="button" onClick={handleMealAdd} disabled={savingNutrition}>
-                {savingNutrition ? 'Adding...' : 'Add to today'}
-              </button>
-            </div>
-          ) : null}
+                <span className="quick-add-field__unit">g</span>
+              </div>
+            </label>
+          </div>
+          <button type="button" className="quick-add-card__submit" onClick={handleMealAdd} disabled={savingNutrition}>
+            {savingNutrition ? 'Adding...' : '+ Add to today'}
+          </button>
+          <button type="button" className="quick-add-card__reset" onClick={handleResetDay} disabled={resettingDay}>
+            {resettingDay ? 'Resetting...' : 'Reset today\'s data'}
+          </button>
         </section>
       ) : null}
 
