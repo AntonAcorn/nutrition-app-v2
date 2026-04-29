@@ -158,15 +158,15 @@ export function CurrentDayTab({ refreshToken = 0, successMessage = '', onDayUpda
         <section className="panel detail-panel">
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <p className="screen-header__meta">Add meal manually</p>
-            <div style={{ display: 'flex', gap: '8px' }}>
-              <button type="button" className="chart-expand-button" onClick={handleResetDay} disabled={resettingDay}>
-                {resettingDay ? '...' : 'Reset day'}
-              </button>
-              <button type="button" onClick={() => setShowNutritionEdit((v) => !v)}>
-                {showNutritionEdit ? 'Cancel' : 'Add'}
-              </button>
-            </div>
+            <button type="button" onClick={() => setShowNutritionEdit((v) => !v)}>
+              {showNutritionEdit ? 'Cancel' : 'Add'}
+            </button>
           </div>
+          {!showNutritionEdit ? (
+            <button type="button" className="chart-expand-button" onClick={handleResetDay} disabled={resettingDay} style={{ marginTop: '8px', width: '100%' }}>
+              {resettingDay ? 'Resetting...' : 'Reset day'}
+            </button>
+          ) : null}
           {showNutritionEdit ? (
             <div className="weight-panel__form">
               <label>
