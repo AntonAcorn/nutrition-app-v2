@@ -3,7 +3,7 @@ import { useMemo, useState } from 'react'
 const MAX_GLASSES = 4
 const glassLabels = ['0 / 4', '1 / 4', '2 / 4', '3 / 4', '4 / 4']
 const moodText = ['Dry start', 'Nice', 'Better', 'Great', 'Hydrated!']
-const mascotByGlasses = ['/mascot/sad.png', '/mascot/happy.png', '/mascot/happy.png', '/mascot/water.png', '/mascot/joy.png']
+const mascotByGlasses = ['/mascot/sad.png', '/mascot/happy.png', '/mascot/cheer.png', '/mascot/water.png', '/mascot/joy.png']
 
 const STORAGE_KEY = 'water_intake'
 
