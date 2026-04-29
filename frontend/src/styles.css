@@ -244,6 +244,7 @@ ul {
 .tab-button--dark {
   flex: 1 1 0;
   color: rgba(255, 255, 255, 0.58);
+  font-size: 0.875rem;
 }
 
 .tab-button--active {
