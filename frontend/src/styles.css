@@ -211,6 +211,7 @@ ul {
   border: 1px solid rgba(255, 255, 255, 0.06);
   box-shadow: 0 16px 36px rgba(0, 0, 0, 0.24);
   padding: 8px;
+  overflow: hidden;
 }
 
 .tabs-header::-webkit-scrollbar,
