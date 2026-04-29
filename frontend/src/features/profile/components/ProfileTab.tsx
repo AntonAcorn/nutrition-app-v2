@@ -100,7 +100,7 @@ export function ProfileTab({ displayName, email, onLogout }: Props) {
 
   if (loading) {
     return (
-      <section className="screen-section--home-dark">
+      <section className="screen-section screen-section--home-dark">
         <p className="subtle-text">Loading...</p>
       </section>
     )
@@ -108,7 +108,7 @@ export function ProfileTab({ displayName, email, onLogout }: Props) {
 
   if (error || !profile) {
     return (
-      <section className="screen-section--home-dark">
+      <section className="screen-section screen-section--home-dark">
         <p className="error-text">{error || 'Profile not found'}</p>
       </section>
     )
@@ -116,8 +116,8 @@ export function ProfileTab({ displayName, email, onLogout }: Props) {
 
   if (editing) {
     return (
-      <section className="screen-section--home-dark">
-        <form className="auth-panel--dark" onSubmit={handleSave}>
+      <section className="screen-section screen-section--home-dark">
+        <form className="panel profile-edit-form" onSubmit={handleSave}>
           <div className="auth-form-grid">
             <label>
               Age (years)
@@ -200,15 +200,15 @@ export function ProfileTab({ displayName, email, onLogout }: Props) {
             )}
 
             {saveError ? <p className="error-text">{saveError}</p> : null}
+          </div>
 
-            <div style={{ display: 'flex', gap: '0.5rem' }}>
-              <button type="button" className="tab-button tab-button--dark" onClick={() => setEditing(false)}>
-                Cancel
-              </button>
-              <button type="submit" disabled={saving} style={{ flex: 1 }}>
-                {saving ? 'Saving...' : 'Save'}
-              </button>
-            </div>
+          <div style={{ display: 'flex', gap: '0.5rem' }}>
+            <button type="button" className="profile-logout-btn" onClick={() => setEditing(false)}>
+              Cancel
+            </button>
+            <button type="submit" className="profile-edit-btn" disabled={saving} style={{ flex: 1 }}>
+              {saving ? 'Saving...' : 'Save'}
+            </button>
           </div>
         </form>
       </section>
@@ -216,7 +216,7 @@ export function ProfileTab({ displayName, email, onLogout }: Props) {
   }
 
   return (
-    <section className="screen-section--home-dark">
+    <section className="screen-section screen-section--home-dark">
       <div className="panel profile-header-card">
         <div className="profile-avatar">{initials}</div>
         <div>
@@ -275,8 +275,8 @@ export function ProfileTab({ displayName, email, onLogout }: Props) {
         </div>
       </div>
 
-      <div className="auth-form-grid">
-        <button type="button" onClick={startEditing}>Edit profile</button>
+      <div className="panel profile-actions">
+        <button type="button" className="profile-edit-btn" onClick={startEditing}>Edit profile</button>
         <button type="button" className="profile-logout-btn" onClick={onLogout}>Log out</button>
       </div>
     </section>

@@ -2260,3 +2260,32 @@ ul {
   background: transparent;
   box-shadow: none;
 }
+
+.profile-actions {
+  display: grid;
+  gap: 10px;
+  padding: 18px 20px;
+}
+
+.profile-edit-btn {
+  border: 0;
+  border-radius: 18px;
+  padding: 14px 18px;
+  background: linear-gradient(135deg, #ffffff 0%, #d5d8df 100%);
+  color: #101114;
+  font-weight: 700;
+  font-size: 0.97rem;
+  cursor: pointer;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.22);
+  transition: opacity 0.15s;
+}
+
+.profile-edit-btn:hover {
+  opacity: 0.92;
+}
+
+.profile-edit-form {
+  display: grid;
+  gap: 14px;
+  padding: 20px;
+}
