@@ -3,7 +3,7 @@ import { TodaySummaryBlock } from './TodaySummaryBlock'
 import { WaterIntakeCard } from './WaterIntakeCard'
 import { fetchTodaySummary } from '../model/todaySummaryApi'
 import { updateTodayWeight } from '../model/weightApi'
-import { updateTodayNutritionTotals } from '../model/nutritionTotalsApi'
+import { addMealManually, resetToday } from '../model/nutritionTotalsApi'
 import type { TodaySummary } from '../../../shared/types/nutrition'
 
 function getGreeting(): string {
@@ -29,10 +29,11 @@ export function CurrentDayTab({ refreshToken = 0, successMessage = '', onDayUpda
   const [error, setError] = useState('')
   const [showNutritionEdit, setShowNutritionEdit] = useState(false)
   const [savingNutrition, setSavingNutrition] = useState(false)
-  const [caloriesInput, setCaloriesInput] = useState('')
-  const [proteinInput, setProteinInput] = useState('')
-  const [fatInput, setFatInput] = useState('')
-  const [fiberInput, setFiberInput] = useState('')
+  const [resettingDay, setResettingDay] = useState(false)
+  const [caloriesInput, setCaloriesInput] = useState('0')
+  const [proteinInput, setProteinInput] = useState('0')
+  const [fatInput, setFatInput] = useState('0')
+  const [fiberInput, setFiberInput] = useState('0')
 
   useEffect(() => {
     let cancelled = false
@@ -46,10 +47,6 @@ export function CurrentDayTab({ refreshToken = 0, successMessage = '', onDayUpda
         if (!cancelled) {
           setSummary(nextSummary)
           setWeightInput(nextSummary.weightKg != null ? String(nextSummary.weightKg) : '')
-          setCaloriesInput(String(Math.round(Number(nextSummary.consumedCalories))))
-          setProteinInput(String(Math.round(Number(nextSummary.proteinGrams))))
-          setFatInput(String(Math.round(Number(nextSummary.fatGrams))))
-          setFiberInput(String(Math.round(Number(nextSummary.fiberGrams))))
         }
       } catch (err) {
         if (!cancelled) {
@@ -68,7 +65,7 @@ export function CurrentDayTab({ refreshToken = 0, successMessage = '', onDayUpda
     }
   }, [refreshToken])
 
-  async function handleNutritionSave() {
+  async function handleMealAdd() {
     const kcal = Number(caloriesInput)
     const protein = Number(proteinInput)
     const fat = Number(fatInput)
@@ -83,19 +80,35 @@ export function CurrentDayTab({ refreshToken = 0, successMessage = '', onDayUpda
     setError('')
 
     try {
-      await updateTodayNutritionTotals({ caloriesConsumedKcal: kcal, proteinGrams: protein, fatGrams: fat, fiberGrams: fiber })
+      await addMealManually({ caloriesConsumedKcal: kcal, proteinGrams: protein, fatGrams: fat, fiberGrams: fiber })
       const nextSummary = await fetchTodaySummary()
       setSummary(nextSummary)
-      setCaloriesInput(String(Math.round(Number(nextSummary.consumedCalories))))
-      setProteinInput(String(Math.round(Number(nextSummary.proteinGrams))))
-      setFatInput(String(Math.round(Number(nextSummary.fatGrams))))
-      setFiberInput(String(Math.round(Number(nextSummary.fiberGrams))))
+      setCaloriesInput('0')
+      setProteinInput('0')
+      setFatInput('0')
+      setFiberInput('0')
       setShowNutritionEdit(false)
       onDayUpdated?.()
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to save nutrition totals')
+      setError(err instanceof Error ? err.message : 'Failed to add meal')
     } finally {
       setSavingNutrition(false)
+    }
+  }
+
+  async function handleResetDay() {
+    if (!window.confirm('Reset today\'s nutrition totals to zero?')) return
+    setResettingDay(true)
+    setError('')
+    try {
+      await resetToday()
+      const nextSummary = await fetchTodaySummary()
+      setSummary(nextSummary)
+      onDayUpdated?.()
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to reset day')
+    } finally {
+      setResettingDay(false)
     }
   }
 
@@ -144,10 +157,15 @@ export function CurrentDayTab({ refreshToken = 0, successMessage = '', onDayUpda
       {!loading && summary ? (
         <section className="panel detail-panel">
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <p className="screen-header__meta">Adjust today's totals</p>
-            <button type="button" onClick={() => setShowNutritionEdit((v) => !v)}>
-              {showNutritionEdit ? 'Cancel' : 'Edit'}
-            </button>
+            <p className="screen-header__meta">Add meal manually</p>
+            <div style={{ display: 'flex', gap: '8px' }}>
+              <button type="button" className="chart-expand-button" onClick={handleResetDay} disabled={resettingDay}>
+                {resettingDay ? '...' : 'Reset day'}
+              </button>
+              <button type="button" onClick={() => setShowNutritionEdit((v) => !v)}>
+                {showNutritionEdit ? 'Cancel' : 'Add'}
+              </button>
+            </div>
           </div>
           {showNutritionEdit ? (
             <div className="weight-panel__form">
@@ -167,8 +185,8 @@ export function CurrentDayTab({ refreshToken = 0, successMessage = '', onDayUpda
                 Fiber, g
                 <input type="text" inputMode="decimal" value={fiberInput} onChange={(e) => setFiberInput(e.target.value)} />
               </label>
-              <button type="button" onClick={handleNutritionSave} disabled={savingNutrition}>
-                {savingNutrition ? 'Saving...' : 'Save'}
+              <button type="button" onClick={handleMealAdd} disabled={savingNutrition}>
+                {savingNutrition ? 'Adding...' : 'Add to today'}
               </button>
             </div>
           ) : null}

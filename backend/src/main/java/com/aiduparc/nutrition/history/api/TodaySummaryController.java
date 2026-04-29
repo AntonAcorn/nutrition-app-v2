@@ -11,6 +11,7 @@ import java.util.UUID;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -58,6 +59,39 @@ public class TodaySummaryController {
         UUID resolvedUserId = currentNutritionUserResolver.resolve(session, null);
         log.info("weight update request userId={} entryDate={} weightKg={}", resolvedUserId, safeDate, request.weightKg());
         nutritionHistoryService.updateWeight(resolvedUserId, safeDate, request.weightKg());
+        return nutritionHistoryService.getTodaySummary(resolvedUserId, safeDate);
+    }
+
+    @PostMapping("/add-meal")
+    @ResponseStatus(HttpStatus.OK)
+    public TodaySummaryResponse addMeal(
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate entryDate,
+            @Valid @RequestBody UpdateNutritionTotalsRequest request,
+            HttpSession session
+    ) {
+        LocalDate safeDate = entryDate != null ? entryDate : LocalDate.now();
+        UUID resolvedUserId = currentNutritionUserResolver.resolve(session, null);
+        nutritionHistoryService.addToDailyTotals(new NutritionHistoryService.AddToDailyTotalsCommand(
+            resolvedUserId, safeDate,
+            request.caloriesConsumedKcal(), request.proteinGrams(), request.fatGrams(), request.fiberGrams(),
+            null
+        ));
+        return nutritionHistoryService.getTodaySummary(resolvedUserId, safeDate);
+    }
+
+    @PostMapping("/reset")
+    @ResponseStatus(HttpStatus.OK)
+    public TodaySummaryResponse resetDay(
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate entryDate,
+            HttpSession session
+    ) {
+        LocalDate safeDate = entryDate != null ? entryDate : LocalDate.now();
+        UUID resolvedUserId = currentNutritionUserResolver.resolve(session, null);
+        nutritionHistoryService.updateNutritionTotals(
+            resolvedUserId, safeDate,
+            java.math.BigDecimal.ZERO, java.math.BigDecimal.ZERO,
+            java.math.BigDecimal.ZERO, java.math.BigDecimal.ZERO
+        );
         return nutritionHistoryService.getTodaySummary(resolvedUserId, safeDate);
     }
 
