@@ -2059,6 +2059,7 @@ ul {
   display: grid;
   gap: 5px;
   cursor: text;
+  min-width: 0;
 }
 
 .quick-add-field > span {
@@ -2074,6 +2075,7 @@ ul {
 }
 
 .quick-add-field__wrap input {
+  width: 100%;
   border: 1px solid rgba(255, 255, 255, 0.09);
   background: rgba(255, 255, 255, 0.05);
   color: #ffffff;
