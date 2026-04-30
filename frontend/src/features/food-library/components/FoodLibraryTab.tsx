@@ -1,12 +1,18 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { getTodayLocalDateInputValue } from '../../../shared/lib/date'
 import type { MealTemplate, MealTemplateItem } from '../../../shared/types/nutrition'
-import { listTemplates, createTemplate, updateTemplate, deleteTemplate, logTemplate } from '../model/mealTemplateApi'
+import { listTemplates, createTemplate, updateTemplate, deleteTemplate, logTemplate, unlogTemplate } from '../model/mealTemplateApi'
 
 interface FoodLibraryTabProps {
   onLogged?: () => void
   initialSave?: { name: string; items: MealTemplateItem[] } | null
   onInitialSaveDone?: () => void
+}
+
+interface LoggedToast {
+  templateId: string
+  templateName: string
+  entryDate: string
 }
 
 const EMPTY_ITEM = (): MealTemplateItem => ({
@@ -21,11 +27,12 @@ const MACRO_FIELDS: { field: keyof MealTemplateItem; label: string }[] = [
   { field: 'fiber',    label: 'Fiber'    },
 ]
 
+const UNDO_TIMEOUT_MS = 6000
+
 export function FoodLibraryTab({ onLogged, initialSave, onInitialSaveDone }: FoodLibraryTabProps) {
   const [templates, setTemplates] = useState<MealTemplate[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
-  const [success, setSuccess] = useState('')
   const [editing, setEditing] = useState<MealTemplate | null>(null)
   const [creating, setCreating] = useState(false)
   const [editName, setEditName] = useState('')
@@ -33,6 +40,9 @@ export function FoodLibraryTab({ onLogged, initialSave, onInitialSaveDone }: Foo
   const [saving, setSaving] = useState(false)
   const [loggingId, setLoggingId] = useState<string | null>(null)
   const [confirmTarget, setConfirmTarget] = useState<MealTemplate | null>(null)
+  const [loggedToast, setLoggedToast] = useState<LoggedToast | null>(null)
+  const [undoing, setUndoing] = useState(false)
+  const undoTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   useEffect(() => { load() }, [])
 
@@ -44,6 +54,10 @@ export function FoodLibraryTab({ onLogged, initialSave, onInitialSaveDone }: Foo
       setEditItems(initialSave.items.length ? initialSave.items : [EMPTY_ITEM()])
     }
   }, [initialSave])
+
+  useEffect(() => () => {
+    if (undoTimerRef.current) clearTimeout(undoTimerRef.current)
+  }, [])
 
   async function load() {
     setLoading(true)
@@ -89,9 +103,7 @@ export function FoodLibraryTab({ onLogged, initialSave, onInitialSaveDone }: Foo
         const created = await createTemplate(editName.trim(), editItems)
         setTemplates(prev => [created, ...prev])
       }
-      setSuccess(editing ? 'Saved' : 'Added to library')
       closeEditor()
-      setTimeout(() => setSuccess(''), 2000)
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Save failed')
     } finally { setSaving(false) }
@@ -102,19 +114,38 @@ export function FoodLibraryTab({ onLogged, initialSave, onInitialSaveDone }: Foo
     catch { setError('Could not delete') }
   }
 
+  function showUndoToast(toast: LoggedToast) {
+    if (undoTimerRef.current) clearTimeout(undoTimerRef.current)
+    setLoggedToast(toast)
+    undoTimerRef.current = setTimeout(() => setLoggedToast(null), UNDO_TIMEOUT_MS)
+  }
+
   async function confirmLog() {
     if (!confirmTarget) return
     const t = confirmTarget
     setConfirmTarget(null)
-    setLoggingId(t.id); setError('')
+    setLoggingId(t.id)
+    const entryDate = getTodayLocalDateInputValue()
     try {
-      await logTemplate(t.id, getTodayLocalDateInputValue())
-      setSuccess(`"${t.name}" added to today`)
+      await logTemplate(t.id, entryDate)
       onLogged?.()
-      setTimeout(() => setSuccess(''), 3000)
+      showUndoToast({ templateId: t.id, templateName: t.name, entryDate })
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Log failed')
     } finally { setLoggingId(null) }
+  }
+
+  async function handleUndo() {
+    if (!loggedToast) return
+    if (undoTimerRef.current) clearTimeout(undoTimerRef.current)
+    setLoggedToast(null)
+    setUndoing(true)
+    try {
+      await unlogTemplate(loggedToast.templateId, loggedToast.entryDate)
+      onLogged?.()
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Undo failed')
+    } finally { setUndoing(false) }
   }
 
   /* ── Editor ── */
@@ -212,7 +243,7 @@ export function FoodLibraryTab({ onLogged, initialSave, onInitialSaveDone }: Foo
       </div>
 
       {error && <p className="error-text">{error}</p>}
-      {success && <p className="library-success-toast">{success}</p>}
+      {undoing && <p className="subtle-text" style={{ textAlign: 'center', fontSize: '0.85rem' }}>Removing...</p>}
 
       {loading ? (
         <p className="subtle-text" style={{ textAlign: 'center', marginTop: 32 }}>Loading...</p>
@@ -265,6 +296,15 @@ export function FoodLibraryTab({ onLogged, initialSave, onInitialSaveDone }: Foo
               </button>
             </div>
           </div>
+        </div>
+      )}
+
+      {loggedToast && (
+        <div className="library-undo-toast">
+          <span className="library-undo-toast__text">"{loggedToast.templateName}" added to today</span>
+          <button type="button" className="library-undo-toast__btn" onClick={handleUndo}>
+            Undo
+          </button>
         </div>
       )}
     </div>

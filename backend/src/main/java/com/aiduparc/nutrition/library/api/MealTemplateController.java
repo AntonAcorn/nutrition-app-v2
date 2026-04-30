@@ -69,4 +69,15 @@ public class MealTemplateController {
         UUID userId = resolver.resolve(session, null);
         service.log(userId, id, request.entryDate());
     }
+
+    @PostMapping("/{id}/unlog")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void unlog(
+            @PathVariable UUID id,
+            @Valid @RequestBody LogTemplateRequest request,
+            HttpSession session
+    ) {
+        UUID userId = resolver.resolve(session, null);
+        service.unlog(userId, id, request.entryDate());
+    }
 }

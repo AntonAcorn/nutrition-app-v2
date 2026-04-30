@@ -44,3 +44,10 @@ export function logTemplate(id: string, entryDate: string): Promise<void> {
     body: JSON.stringify({ entryDate }),
   })
 }
+
+export function unlogTemplate(id: string, entryDate: string): Promise<void> {
+  return request(`/api/meal-templates/${id}/unlog`, {
+    method: 'POST',
+    body: JSON.stringify({ entryDate }),
+  })
+}

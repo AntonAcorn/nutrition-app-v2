@@ -173,6 +173,32 @@ public class NutritionHistoryService {
     }
 
     @Transactional
+    public void subtractFromDailyTotals(SubtractFromDailyTotalsCommand command) {
+        DailyNutritionEntrySnapshot current = getOrCreateEmptySnapshot(command.userId(), command.entryDate());
+
+        upsert(new UpsertDailyNutritionEntryCommand(
+            command.userId(),
+            command.entryDate(),
+            defaultBigDecimal(current.caloriesConsumedKcal()).subtract(defaultBigDecimal(command.caloriesConsumedKcal())).max(BigDecimal.ZERO),
+            current.calorieTargetKcal(),
+            current.weightKg(),
+            defaultBigDecimal(current.proteinGrams()).subtract(defaultBigDecimal(command.proteinGrams())).max(BigDecimal.ZERO),
+            defaultBigDecimal(current.fatGrams()).subtract(defaultBigDecimal(command.fatGrams())).max(BigDecimal.ZERO),
+            defaultBigDecimal(current.fiberGrams()).subtract(defaultBigDecimal(command.fiberGrams())).max(BigDecimal.ZERO),
+            current.notes()
+        ));
+    }
+
+    public record SubtractFromDailyTotalsCommand(
+        @NotNull UUID userId,
+        @NotNull LocalDate entryDate,
+        @NotNull BigDecimal caloriesConsumedKcal,
+        BigDecimal proteinGrams,
+        BigDecimal fatGrams,
+        BigDecimal fiberGrams
+    ) {}
+
+    @Transactional
     public DailyNutritionEntrySnapshot addToDailyTotals(AddToDailyTotalsCommand command) {
         DailyNutritionEntrySnapshot current = getOrCreateEmptySnapshot(command.userId(), command.entryDate());
 

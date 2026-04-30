@@ -94,6 +94,22 @@ public class MealTemplateService {
                 userId, templateId, entryDate, entity.getTotalCalories());
     }
 
+    @Transactional
+    public void unlog(UUID userId, UUID templateId, LocalDate entryDate) {
+        var entity = repository.findByIdAndNutritionUserId(templateId, userId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Template not found"));
+
+        nutritionHistoryService.subtractFromDailyTotals(new NutritionHistoryService.SubtractFromDailyTotalsCommand(
+                userId,
+                entryDate,
+                entity.getTotalCalories(),
+                entity.getTotalProtein(),
+                entity.getTotalFat(),
+                entity.getTotalFiber()
+        ));
+        log.info("meal-template unlogged userId={} templateId={} entryDate={}", userId, templateId, entryDate);
+    }
+
     private void applyRequest(MealTemplateEntity entity, MealTemplateRequest request) {
         entity.setName(request.name().trim());
         entity.setItemsJson(toJson(request.items()));

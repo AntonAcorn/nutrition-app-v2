@@ -2954,3 +2954,39 @@ ul {
   font-weight: 700;
   cursor: pointer;
 }
+
+.library-undo-toast {
+  position: fixed;
+  bottom: 28px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #1c1f27;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 20px;
+  padding: 14px 18px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  z-index: 300;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+  white-space: nowrap;
+  max-width: calc(100vw - 40px);
+}
+
+.library-undo-toast__text {
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.8);
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.library-undo-toast__btn {
+  border: none;
+  background: transparent;
+  color: #60a5fa;
+  font-size: 0.9rem;
+  font-weight: 700;
+  cursor: pointer;
+  padding: 0;
+  flex-shrink: 0;
+}
