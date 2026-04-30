@@ -62,7 +62,7 @@ public class DefaultVoiceAnalysisService {
         String rawResponse = callOpenAi(description.trim(), safeLocale, apiKey.trim());
 
         try {
-            var analysis = OpenAiPhotoAnalysisResponseMapper.fromModelJson(rawResponse, objectMapper);
+            var analysis = OpenAiPhotoAnalysisResponseMapper.fromModelJsonVoice(rawResponse, objectMapper);
             var draft = draftService.create(new CreatePhotoAnalysisDraftRequest(userId, entryDate, analysis));
             log.info("voice analysis userId={} draftId={} items={} calories={}",
                     userId, draft.id(), analysis.items().size(), analysis.totals().calories());

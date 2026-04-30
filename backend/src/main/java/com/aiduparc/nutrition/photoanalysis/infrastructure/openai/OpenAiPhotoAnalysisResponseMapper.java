@@ -15,7 +15,18 @@ public final class OpenAiPhotoAnalysisResponseMapper {
     private OpenAiPhotoAnalysisResponseMapper() {
     }
 
+    private static final String PHOTO_FALLBACK_NOTE = "Estimated from image; verify portions before saving meal.";
+    private static final String VOICE_FALLBACK_NOTE = "Estimated from voice description; verify portions before saving meal.";
+
     public static PhotoAnalysisResponse fromModelJson(String rawModelJson, ObjectMapper objectMapper) throws IOException {
+        return fromModelJson(rawModelJson, objectMapper, PHOTO_FALLBACK_NOTE);
+    }
+
+    public static PhotoAnalysisResponse fromModelJsonVoice(String rawModelJson, ObjectMapper objectMapper) throws IOException {
+        return fromModelJson(rawModelJson, objectMapper, VOICE_FALLBACK_NOTE);
+    }
+
+    private static PhotoAnalysisResponse fromModelJson(String rawModelJson, ObjectMapper objectMapper, String fallbackNote) throws IOException {
         var root = objectMapper.readTree(stripCodeFences(rawModelJson));
 
         var items = new ArrayList<AnalyzedFoodItem>();
@@ -51,7 +62,7 @@ public final class OpenAiPhotoAnalysisResponseMapper {
         }
 
         if (notes.isEmpty()) {
-            notes.add("Estimated from image; verify portions before saving meal.");
+            notes.add(fallbackNote);
         }
 
         return new PhotoAnalysisResponse(
