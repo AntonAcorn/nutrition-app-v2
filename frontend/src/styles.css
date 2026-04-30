@@ -2200,6 +2200,10 @@ ul {
   letter-spacing: 0.01em;
   box-shadow: 0 4px 18px rgba(59, 125, 255, 0.28);
   transition: opacity 0.15s, transform 0.12s;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .voice-record-btn:active {
