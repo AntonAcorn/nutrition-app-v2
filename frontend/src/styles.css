@@ -2673,18 +2673,18 @@ ul {
 }
 
 .library-tab__title {
-  font-size: 1.1rem;
+  font-size: 1rem;
   font-weight: 700;
-  color: #1a1a2e;
+  color: rgba(255, 255, 255, 0.9);
   margin: 0;
 }
 
 .library-new-btn {
-  padding: 6px 14px;
+  padding: 7px 16px;
   border-radius: 20px;
-  border: none;
-  background: #1a1a2e;
-  color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  background: rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.8);
   font-size: 0.82rem;
   font-weight: 600;
   cursor: pointer;
@@ -2692,8 +2692,9 @@ ul {
 
 .library-empty {
   text-align: center;
-  padding: 32px 0;
-  color: #6b7280;
+  padding: 40px 0;
+  color: rgba(255, 255, 255, 0.4);
+  line-height: 1.6;
 }
 
 .library-list {
@@ -2708,9 +2709,9 @@ ul {
   justify-content: space-between;
   gap: 12px;
   padding: 14px 16px;
-  border-radius: 16px;
-  background: #fff;
-  border: 1px solid #e5e7eb;
+  border-radius: 18px;
+  background: #17191f;
+  border: 1px solid rgba(255, 255, 255, 0.06);
 }
 
 .library-card__info {
@@ -2721,8 +2722,8 @@ ul {
 .library-card__name {
   font-weight: 600;
   font-size: 0.95rem;
-  color: #1a1a2e;
-  margin: 0 0 2px;
+  color: rgba(255, 255, 255, 0.9);
+  margin: 0 0 3px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -2730,7 +2731,7 @@ ul {
 
 .library-card__meta {
   font-size: 0.78rem;
-  color: #6b7280;
+  color: rgba(255, 255, 255, 0.38);
   margin: 0;
 }
 
@@ -2742,26 +2743,28 @@ ul {
 }
 
 .library-card__log-btn {
-  padding: 6px 14px;
+  padding: 7px 16px;
   border-radius: 20px;
   border: none;
-  background: #1a1a2e;
+  background: linear-gradient(135deg, #3b7dff 0%, #2060e8 100%);
   color: #fff;
   font-size: 0.8rem;
   font-weight: 600;
   cursor: pointer;
+  box-shadow: 0 4px 12px rgba(59, 125, 255, 0.3);
 }
 
 .library-card__log-btn:disabled {
   opacity: 0.5;
+  box-shadow: none;
 }
 
 .library-card__edit-btn {
-  padding: 6px 12px;
+  padding: 7px 12px;
   border-radius: 20px;
-  border: 1.5px solid #d1d5db;
+  border: 1px solid rgba(255, 255, 255, 0.12);
   background: transparent;
-  color: #374151;
+  color: rgba(255, 255, 255, 0.6);
   font-size: 0.8rem;
   font-weight: 500;
   cursor: pointer;
@@ -2773,12 +2776,13 @@ ul {
   border-radius: 50%;
   border: none;
   background: transparent;
-  color: #9ca3af;
-  font-size: 1.1rem;
+  color: rgba(255, 255, 255, 0.25);
+  font-size: 1.2rem;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
+  line-height: 1;
 }
 
 .library-card__delete-btn:hover {
@@ -2798,144 +2802,59 @@ ul {
   display: flex;
   align-items: center;
   gap: 12px;
+  margin-bottom: 4px;
 }
 
 .library-editor__title {
-  font-size: 1.05rem;
+  font-size: 1rem;
   font-weight: 700;
-  color: #1a1a2e;
+  color: rgba(255, 255, 255, 0.9);
   margin: 0;
 }
 
 .library-back-btn {
   border: none;
   background: transparent;
-  color: #6b7280;
+  color: rgba(255, 255, 255, 0.4);
   font-size: 0.88rem;
   cursor: pointer;
   padding: 0;
 }
 
-.library-field-label {
-  display: grid;
-  gap: 5px;
-  font-size: 0.85rem;
-  color: #374151;
-  font-weight: 500;
-}
-
-.library-field-input {
-  border: 1px solid #d1d5db;
-  border-radius: 12px;
-  padding: 10px 12px;
-  font-size: 0.9rem;
-  background: #fff;
-  color: #1a1a2e;
-  width: 100%;
-  box-sizing: border-box;
-}
-
-.library-field-input--portion {
-  width: auto;
-  min-width: 90px;
-}
-
-.library-items {
+.library-items-list {
   display: flex;
   flex-direction: column;
-  gap: 10px;
-}
-
-.library-item-card {
-  border: 1px solid #e5e7eb;
-  border-radius: 14px;
-  padding: 12px;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  background: #fafafa;
-}
-
-.library-item-card__row {
-  display: flex;
-  gap: 8px;
-  flex-wrap: wrap;
-}
-
-.library-item-card__row--name {
-  flex-wrap: nowrap;
-}
-
-.library-macro-field {
-  display: grid;
-  gap: 3px;
-  font-size: 0.75rem;
-  color: #6b7280;
-  flex: 1;
-  min-width: 60px;
-}
-
-.library-macro-field input {
-  border: 1px solid #d1d5db;
-  border-radius: 8px;
-  padding: 6px 8px;
-  font-size: 0.85rem;
-  background: #fff;
-  color: #1a1a2e;
-  width: 100%;
-  box-sizing: border-box;
+  gap: 12px;
 }
 
 .library-remove-item-btn {
   border: none;
   background: transparent;
-  color: #ef4444;
-  font-size: 0.8rem;
+  color: rgba(239, 68, 68, 0.7);
+  font-size: 0.78rem;
   cursor: pointer;
   padding: 0;
   text-align: left;
+  margin-top: 2px;
 }
 
 .library-add-item-btn {
-  border: 1.5px dashed #d1d5db;
-  border-radius: 12px;
-  padding: 10px;
+  border: 1px dashed rgba(255, 255, 255, 0.15);
+  border-radius: 14px;
+  padding: 12px;
   background: transparent;
-  color: #6b7280;
+  color: rgba(255, 255, 255, 0.4);
   font-size: 0.85rem;
   cursor: pointer;
   width: 100%;
 }
 
-.library-total-preview {
-  font-size: 0.88rem;
-  color: #6b7280;
-  margin: 0;
-  text-align: right;
-}
-
-.library-save-btn {
-  padding: 14px;
-  border-radius: 16px;
-  border: none;
-  background: #1a1a2e;
-  color: #fff;
-  font-size: 1rem;
-  font-weight: 600;
-  cursor: pointer;
-  width: 100%;
-}
-
-.library-save-btn:disabled {
-  opacity: 0.5;
-}
-
 .library-save-from-draft-btn {
   padding: 14px;
   border-radius: 16px;
-  border: 1.5px solid #1a1a2e;
-  background: transparent;
-  color: #1a1a2e;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  background: rgba(255, 255, 255, 0.06);
+  color: rgba(255, 255, 255, 0.75);
   font-size: 1rem;
   font-weight: 600;
   cursor: pointer;
