@@ -100,6 +100,9 @@ export function PhotoAnalyzerTab({ onConfirmed }: PhotoAnalyzerTabProps) {
   const [analyzing, setAnalyzing] = useState(false)
   const [speechSupported, setSpeechSupported] = useState(false)
   const recognitionRef = useRef<SpeechRecognition | null>(null)
+  // Cached at mount so startRecording() needs no await before recognition.start()
+  // (Safari loses the user gesture context on any await before getUserMedia/start)
+  const isNativeRef = useRef<boolean>(false)
 
   const recalculatedTotals = useMemo(() => (draft ? calculateTotals(draft.items) : calculateTotals([])), [draft])
 
@@ -107,10 +110,12 @@ export function PhotoAnalyzerTab({ onConfirmed }: PhotoAnalyzerTabProps) {
     async function checkSpeech() {
       const native = await nativeSpeechAvailable()
       if (native) {
+        isNativeRef.current = true
         setSpeechSupported(true)
       } else {
-        // On native platform, webkitSpeechRecognition exists but doesn't work in WKWebView
         const onNative = await isNativePlatform()
+        isNativeRef.current = onNative
+        // On native platform, webkitSpeechRecognition exists but doesn't work in WKWebView
         setSpeechSupported(!onNative && getWebSpeechRecognition() !== null)
       }
     }
@@ -184,10 +189,11 @@ export function PhotoAnalyzerTab({ onConfirmed }: PhotoAnalyzerTabProps) {
   async function startRecording() {
     setError('')
     try {
-      const onNative = await isNativePlatform()
-      if (onNative) {
+      if (isNativeRef.current) {
         await startNativeRecording()
       } else {
+        // Must be called without any preceding await so Safari preserves
+        // the user gesture context required for microphone access
         startWebRecording()
       }
     } catch (err) {
@@ -248,7 +254,7 @@ export function PhotoAnalyzerTab({ onConfirmed }: PhotoAnalyzerTabProps) {
   }
 
   async function stopRecording() {
-    if (await isNativePlatform()) {
+    if (isNativeRef.current) {
       try {
         const { SpeechRecognition } = await import('@capacitor-community/speech-recognition')
         await SpeechRecognition.stop()
