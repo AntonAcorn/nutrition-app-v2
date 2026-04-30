@@ -403,7 +403,7 @@ export function PhotoAnalyzerTab({ onConfirmed }: PhotoAnalyzerTabProps) {
               className={`analyzer-mode-btn ${mode === 'voice' ? 'analyzer-mode-btn--active' : ''}`}
               onClick={() => switchMode('voice')}
             >
-              Voice
+              Describe
             </button>
             <button
               type="button"
@@ -496,81 +496,66 @@ export function PhotoAnalyzerTab({ onConfirmed }: PhotoAnalyzerTabProps) {
           </div>
         ) : null}
 
-        {/* Voice mode */}
+        {/* Voice / Text mode */}
         {mode === 'voice' && !draft ? (
           <div className="voice-hero">
             <img src="/mascot/happy.png" alt="" className="voice-hero__mascot" />
             <h2 className="voice-hero__title">Describe your meal</h2>
-            <p className="voice-hero__hint">
-              {speechSupported
-                ? 'Tap the mic and say what you ate'
-                : 'Type what you ate below'}
-            </p>
+            <p className="voice-hero__hint">Speak or type what you ate</p>
 
-            {speechSupported ? (
-              <div className="voice-record-area">
-                <div className="voice-lang-picker">
-                  {[
-                    { code: 'en-US', label: 'EN' },
-                    { code: 'ru-RU', label: 'RU' },
-                    { code: 'fr-FR', label: 'FR' },
-                    { code: 'es-ES', label: 'ES' },
-                  ].map(({ code, label }) => (
+            <div className="upload-panel__note voice-hero__input">
+              <div className="note-label-row">
+                <span>Your meal</span>
+                {speechSupported && (
+                  <div className="note-mic-controls">
+                    <div className="voice-lang-picker">
+                      {[
+                        { code: 'en-US', label: 'EN' },
+                        { code: 'ru-RU', label: 'RU' },
+                        { code: 'fr-FR', label: 'FR' },
+                        { code: 'es-ES', label: 'ES' },
+                      ].map(({ code, label }) => (
+                        <button
+                          key={code}
+                          type="button"
+                          className={`voice-lang-btn ${recognitionLang === code ? 'voice-lang-btn--active' : ''}`}
+                          onClick={() => setRecognitionLang(code)}
+                          disabled={recording}
+                        >
+                          {label}
+                        </button>
+                      ))}
+                    </div>
                     <button
-                      key={code}
                       type="button"
-                      className={`voice-lang-btn ${recognitionLang === code ? 'voice-lang-btn--active' : ''}`}
-                      onClick={() => setRecognitionLang(code)}
-                      disabled={recording}
+                      className={`note-mic-btn ${recording ? 'note-mic-btn--active' : ''}`}
+                      onClick={recording ? stopRecording : startRecording}
+                      aria-label={recording ? 'Stop recording' : 'Start recording'}
                     >
-                      {label}
+                      {recording ? (
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                          <rect x="4" y="4" width="16" height="16" rx="3"/>
+                        </svg>
+                      ) : (
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                          <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"/>
+                          <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
+                          <line x1="12" y1="19" x2="12" y2="23"/>
+                          <line x1="8" y1="23" x2="16" y2="23"/>
+                        </svg>
+                      )}
                     </button>
-                  ))}
-                </div>
-                {recording && (
-                  <div className="voice-recording-indicator">
-                    <span className="voice-rec-dot" />
-                    <span>Recording...</span>
                   </div>
                 )}
-                <button
-                  type="button"
-                  className={`voice-record-btn ${recording ? 'voice-record-btn--stop' : ''}`}
-                  onClick={recording ? stopRecording : startRecording}
-                  aria-label={recording ? 'Stop recording' : 'Start recording'}
-                >
-                  {recording ? (
-                    <>
-                      <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                        <rect x="4" y="4" width="16" height="16" rx="3"/>
-                      </svg>
-                      Stop
-                    </>
-                  ) : (
-                    <>
-                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                        <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"/>
-                        <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
-                        <line x1="12" y1="19" x2="12" y2="23"/>
-                        <line x1="8" y1="23" x2="16" y2="23"/>
-                      </svg>
-                      Start Recording
-                    </>
-                  )}
-                </button>
               </div>
-            ) : null}
-
-            <label className="voice-transcript-label">
-              {recording ? 'Listening...' : 'What you said'}
               <textarea
-                className="voice-transcript"
                 value={transcript}
                 onChange={(e) => setTranscript(e.target.value)}
-                rows={4}
+                rows={5}
                 placeholder="e.g. I had a bowl of oatmeal with banana and a cup of coffee"
+                className={recording ? 'note-textarea--recording' : ''}
               />
-            </label>
+            </div>
 
             {transcript.trim() ? (
               <button

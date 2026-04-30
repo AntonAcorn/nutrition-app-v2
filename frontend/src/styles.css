@@ -2155,6 +2155,10 @@ ul {
   margin: 0;
 }
 
+.voice-hero__input {
+  width: 100%;
+}
+
 .voice-record-area {
   display: flex;
   flex-direction: column;
