@@ -390,14 +390,28 @@ export function PhotoAnalyzerTab({ onConfirmed }: PhotoAnalyzerTabProps) {
             </p>
 
             {speechSupported ? (
-              <button
-                type="button"
-                className={`voice-mic-btn ${recording ? 'voice-mic-btn--recording' : ''}`}
-                onClick={recording ? stopRecording : startRecording}
-              >
-                <span className="voice-mic-btn__icon">{recording ? '⏹' : '🎤'}</span>
-                <span>{recording ? 'Stop' : 'Start recording'}</span>
-              </button>
+              <div className="voice-mic-wrap">
+                <button
+                  type="button"
+                  className={`voice-mic-btn ${recording ? 'voice-mic-btn--recording' : ''}`}
+                  onClick={recording ? stopRecording : startRecording}
+                  aria-label={recording ? 'Stop recording' : 'Start recording'}
+                >
+                  {recording ? (
+                    <svg width="26" height="26" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                      <rect x="4" y="4" width="16" height="16" rx="3"/>
+                    </svg>
+                  ) : (
+                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                      <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"/>
+                      <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
+                      <line x1="12" y1="19" x2="12" y2="23"/>
+                      <line x1="8" y1="23" x2="16" y2="23"/>
+                    </svg>
+                  )}
+                </button>
+                <span className="voice-mic-label">{recording ? 'Tap to stop' : 'Tap to record'}</span>
+              </div>
             ) : null}
 
             <label className="voice-transcript-label">
