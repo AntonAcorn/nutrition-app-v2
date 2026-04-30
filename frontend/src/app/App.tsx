@@ -461,7 +461,7 @@ export default function App() {
             aria-selected={activeTab === tabs.photoAnalyzer}
             onClick={() => setActiveTab(tabs.photoAnalyzer)}
           >
-            Photo
+            Log
           </button>
           <button
             type="button"

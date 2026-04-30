@@ -2095,31 +2095,32 @@ ul {
 /* ── Analyzer mode toggle ───────────────────────────────────────────────── */
 .analyzer-mode-toggle {
   display: flex;
-  gap: 8px;
+  gap: 3px;
   margin-bottom: 20px;
-  background: rgba(255, 255, 255, 0.04);
-  border-radius: 14px;
-  padding: 4px;
+  background: rgba(255, 255, 255, 0.06);
+  border-radius: 12px;
+  padding: 3px;
 }
 
 .analyzer-mode-btn {
   flex: 1;
   border: none;
-  border-radius: 11px;
-  padding: 9px 12px;
-  font-size: 0.88rem;
+  border-radius: 9px;
+  padding: 10px 14px;
+  font-size: 0.9rem;
   font-weight: 600;
   cursor: pointer;
   background: transparent;
-  color: rgba(255, 255, 255, 0.4);
+  color: rgba(255, 255, 255, 0.38);
   box-shadow: none;
-  transition: background 0.15s, color 0.15s;
+  transition: background 0.18s, color 0.18s, box-shadow 0.18s;
+  letter-spacing: 0.01em;
 }
 
 .analyzer-mode-btn--active {
-  background: #17191f;
+  background: rgba(255, 255, 255, 0.12);
   color: #ffffff;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.28);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
 }
 
 /* ── Voice hero ─────────────────────────────────────────────────────────── */

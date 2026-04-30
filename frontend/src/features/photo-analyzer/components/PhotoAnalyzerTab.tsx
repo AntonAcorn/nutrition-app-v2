@@ -329,14 +329,14 @@ export function PhotoAnalyzerTab({ onConfirmed }: PhotoAnalyzerTabProps) {
               className={`analyzer-mode-btn ${mode === 'photo' ? 'analyzer-mode-btn--active' : ''}`}
               onClick={() => switchMode('photo')}
             >
-              📷 Photo
+              Photo
             </button>
             <button
               type="button"
               className={`analyzer-mode-btn ${mode === 'voice' ? 'analyzer-mode-btn--active' : ''}`}
               onClick={() => switchMode('voice')}
             >
-              🎤 Voice
+              Voice
             </button>
           </div>
         ) : null}
