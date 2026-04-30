@@ -1578,6 +1578,9 @@ ul {
 
 .primary-actions {
   margin-top: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
 }
 
 .primary-actions--inline {
