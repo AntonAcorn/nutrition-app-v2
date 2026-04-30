@@ -45,8 +45,9 @@ function currentEntryDate(): string {
 }
 
 function getConfidenceMessage(confidence: number) {
-  if (confidence >= 80) return 'Looks good, give it a quick review before saving.'
-  if (confidence >= 55) return 'Decent match, but review the details before saving.'
+  const pct = confidence > 1 ? confidence : confidence * 100
+  if (pct >= 80) return 'Looks good, give it a quick review before saving.'
+  if (pct >= 55) return 'Decent match, but review the details before saving.'
   return 'Low confidence, review carefully before saving.'
 }
 
@@ -513,7 +514,7 @@ export function PhotoAnalyzerTab({ onConfirmed }: PhotoAnalyzerTabProps) {
               </div>
             </div>
 
-            <p className="subtle-text">Confidence: {draft.confidence || 0}% · {getConfidenceMessage(draft.confidence || 0)}</p>
+            <p className="subtle-text">{getConfidenceMessage(draft.confidence || 0)}</p>
 
             <TotalsRow totals={recalculatedTotals} />
 
