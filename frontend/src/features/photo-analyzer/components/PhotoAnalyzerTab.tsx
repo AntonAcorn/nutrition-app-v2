@@ -178,10 +178,14 @@ export function PhotoAnalyzerTab({ onConfirmed }: PhotoAnalyzerTabProps) {
 
   async function startRecording() {
     setError('')
-    if (await isNativePlatform()) {
-      await startNativeRecording()
-    } else {
-      startWebRecording()
+    try {
+      if (await isNativePlatform()) {
+        await startNativeRecording()
+      } else {
+        startWebRecording()
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Could not start recording')
     }
   }
 
@@ -225,7 +229,12 @@ export function PhotoAnalyzerTab({ onConfirmed }: PhotoAnalyzerTabProps) {
       }
       setTranscript(final + (interim ? ' ' + interim : ''))
     }
-    recognition.onerror = () => setRecording(false)
+    recognition.onerror = (event: SpeechRecognitionErrorEvent) => {
+      if (event.error && event.error !== 'no-speech' && event.error !== 'aborted') {
+        setError(`Microphone error: ${event.error}`)
+      }
+      setRecording(false)
+    }
     recognition.onend = () => setRecording(false)
     recognitionRef.current = recognition
     recognition.start()
