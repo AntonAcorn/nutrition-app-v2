@@ -106,6 +106,11 @@ export function PhotoAnalyzerTab({ onConfirmed }: PhotoAnalyzerTabProps) {
   // (Safari loses the user gesture context on any await before getUserMedia/start)
   const isNativeRef = useRef<boolean>(false)
 
+  // Note voice input state
+  const [noteRecording, setNoteRecording] = useState(false)
+  const noteRecognitionRef = useRef<SpeechRecognition | null>(null)
+  const noteBaseRef = useRef<string>('')
+
   const recalculatedTotals = useMemo(() => (draft ? calculateTotals(draft.items) : calculateTotals([])), [draft])
 
   useEffect(() => {
@@ -268,6 +273,43 @@ export function PhotoAnalyzerTab({ onConfirmed }: PhotoAnalyzerTabProps) {
     setRecording(false)
   }
 
+  function startNoteRecording() {
+    const WebSpeech = getWebSpeechRecognition()
+    if (!WebSpeech) return
+    noteBaseRef.current = userNote
+    const recognition = new WebSpeech()
+    recognition.continuous = true
+    recognition.interimResults = true
+    recognition.lang = recognitionLang
+    recognition.onresult = (event: SpeechRecognitionEvent) => {
+      let final = ''
+      let interim = ''
+      for (let i = 0; i < event.results.length; i++) {
+        const r = event.results[i]
+        if (r.isFinal) final += r[0].transcript
+        else interim += r[0].transcript
+      }
+      const spoken = final + (interim ? interim : '')
+      const base = noteBaseRef.current
+      setUserNote(base ? base + ' ' + spoken : spoken)
+    }
+    recognition.onerror = (event: SpeechRecognitionErrorEvent) => {
+      if (event.error && event.error !== 'no-speech' && event.error !== 'aborted') {
+        setError(`Microphone error: ${event.error}`)
+      }
+      setNoteRecording(false)
+    }
+    recognition.onend = () => setNoteRecording(false)
+    noteRecognitionRef.current = recognition
+    recognition.start()
+    setNoteRecording(true)
+  }
+
+  function stopNoteRecording() {
+    noteRecognitionRef.current?.stop()
+    setNoteRecording(false)
+  }
+
   async function startVoiceAnalysis() {
     if (!transcript.trim()) { setError('Dictate something first'); return }
     setAnalyzing(true)
@@ -370,15 +412,59 @@ export function PhotoAnalyzerTab({ onConfirmed }: PhotoAnalyzerTabProps) {
             <img src="/mascot/camera.png" alt="" className="photo-upload-hero__mascot" />
             <h2 className="photo-upload-hero__title">Take a photo of your meal</h2>
 
-            <label className="upload-panel__note photo-upload-hero__note">
-              Optional note
+            <div className="upload-panel__note photo-upload-hero__note">
+              <div className="note-label-row">
+                <span>Optional note</span>
+                {speechSupported && (
+                  <div className="note-mic-controls">
+                    <div className="voice-lang-picker">
+                      {[
+                        { code: 'en-US', label: 'EN' },
+                        { code: 'ru-RU', label: 'RU' },
+                        { code: 'fr-FR', label: 'FR' },
+                        { code: 'es-ES', label: 'ES' },
+                      ].map(({ code, label }) => (
+                        <button
+                          key={code}
+                          type="button"
+                          className={`voice-lang-btn ${recognitionLang === code ? 'voice-lang-btn--active' : ''}`}
+                          onClick={() => setRecognitionLang(code)}
+                          disabled={noteRecording}
+                        >
+                          {label}
+                        </button>
+                      ))}
+                    </div>
+                    <button
+                      type="button"
+                      className={`note-mic-btn ${noteRecording ? 'note-mic-btn--active' : ''}`}
+                      onClick={noteRecording ? stopNoteRecording : startNoteRecording}
+                      aria-label={noteRecording ? 'Stop dictation' : 'Dictate note'}
+                    >
+                      {noteRecording ? (
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                          <rect x="4" y="4" width="16" height="16" rx="3"/>
+                        </svg>
+                      ) : (
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                          <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"/>
+                          <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
+                          <line x1="12" y1="19" x2="12" y2="23"/>
+                          <line x1="8" y1="23" x2="16" y2="23"/>
+                        </svg>
+                      )}
+                    </button>
+                  </div>
+                )}
+              </div>
               <textarea
                 value={userNote}
                 onChange={(event) => setUserNote(event.target.value)}
                 rows={2}
                 placeholder="e.g. chicken, rice, salad"
+                className={noteRecording ? 'note-textarea--recording' : ''}
               />
-            </label>
+            </div>
 
             <div className="upload-button-group">
               <button type="button" className="upload-button" onClick={handleTakePhoto}>

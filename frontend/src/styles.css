@@ -2327,6 +2327,45 @@ ul {
   font-size: 0.88rem;
 }
 
+.note-label-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.note-mic-controls {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.note-mic-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 1.5px solid rgba(255, 255, 255, 0.4);
+  background: transparent;
+  color: rgba(255, 255, 255, 0.7);
+  cursor: pointer;
+  transition: all 0.15s;
+  flex-shrink: 0;
+}
+
+.note-mic-btn--active {
+  border-color: #ff5252;
+  color: #ff5252;
+  background: rgba(255, 82, 82, 0.1);
+}
+
+.note-textarea--recording {
+  border-color: rgba(255, 82, 82, 0.5) !important;
+  outline: none;
+}
+
 .photo-upload-hero__buttons {
   display: flex;
   gap: 10px;
