@@ -2160,6 +2160,35 @@ ul {
   width: 100%;
 }
 
+.voice-lang-picker {
+  display: flex;
+  gap: 6px;
+}
+
+.voice-lang-btn {
+  padding: 4px 12px;
+  border-radius: 20px;
+  border: 1.5px solid #d1d5db;
+  background: transparent;
+  color: #6b7280;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.voice-lang-btn:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.voice-lang-btn--active {
+  border-color: #1a1a2e;
+  background: #1a1a2e;
+  color: #fff;
+}
+
 .voice-recording-indicator {
   display: flex;
   align-items: center;

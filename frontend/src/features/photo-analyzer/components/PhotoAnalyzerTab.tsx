@@ -99,6 +99,7 @@ export function PhotoAnalyzerTab({ onConfirmed }: PhotoAnalyzerTabProps) {
   const [recording, setRecording] = useState(false)
   const [analyzing, setAnalyzing] = useState(false)
   const [speechSupported, setSpeechSupported] = useState(false)
+  const [recognitionLang, setRecognitionLang] = useState('en-US')
   const recognitionRef = useRef<SpeechRecognition | null>(null)
   // Cached at mount so startRecording() needs no await before recognition.start()
   // (Safari loses the user gesture context on any await before getUserMedia/start)
@@ -210,7 +211,7 @@ export function PhotoAnalyzerTab({ onConfirmed }: PhotoAnalyzerTabProps) {
         return
       }
       await SpeechRecognition.start({
-        language: navigator.language || 'en-US',
+        language: recognitionLang,
         maxResults: 1,
         partialResults: true,
         popup: false,
@@ -230,7 +231,7 @@ export function PhotoAnalyzerTab({ onConfirmed }: PhotoAnalyzerTabProps) {
     const recognition = new WebSpeech()
     recognition.continuous = true
     recognition.interimResults = true
-    recognition.lang = navigator.language || 'en-US'
+    recognition.lang = recognitionLang
     recognition.onresult = (event: SpeechRecognitionEvent) => {
       let final = ''
       let interim = ''
@@ -412,6 +413,24 @@ export function PhotoAnalyzerTab({ onConfirmed }: PhotoAnalyzerTabProps) {
 
             {speechSupported ? (
               <div className="voice-record-area">
+                <div className="voice-lang-picker">
+                  {[
+                    { code: 'en-US', label: 'EN' },
+                    { code: 'ru-RU', label: 'RU' },
+                    { code: 'fr-FR', label: 'FR' },
+                    { code: 'es-ES', label: 'ES' },
+                  ].map(({ code, label }) => (
+                    <button
+                      key={code}
+                      type="button"
+                      className={`voice-lang-btn ${recognitionLang === code ? 'voice-lang-btn--active' : ''}`}
+                      onClick={() => setRecognitionLang(code)}
+                      disabled={recording}
+                    >
+                      {label}
+                    </button>
+                  ))}
+                </div>
                 {recording && (
                   <div className="voice-recording-indicator">
                     <span className="voice-rec-dot" />
