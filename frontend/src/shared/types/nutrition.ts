@@ -37,6 +37,28 @@ export interface PhotoAnalysisDraft {
   needsUserConfirmation: boolean
 }
 
+export interface MealTemplateItem {
+  name: string
+  estimatedPortion: string
+  calories: number
+  protein: number
+  carbs: number
+  fat: number
+  fiber: number
+}
+
+export interface MealTemplate {
+  id: string
+  name: string
+  items: MealTemplateItem[]
+  totalCalories: number
+  totalProtein: number
+  totalFat: number
+  totalFiber: number
+  createdAt: string
+  updatedAt: string
+}
+
 export interface NutritionStatisticsPoint {
   entryDate: string
   weightKg: number | null

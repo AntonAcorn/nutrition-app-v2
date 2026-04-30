@@ -2,11 +2,12 @@ import { ChangeEvent, useEffect, useMemo, useRef, useState } from 'react'
 import { getTodayLocalDateInputValue } from '../../../shared/lib/date'
 import { API_BASE } from '../../../shared/lib/apiBase'
 import { toNumber } from '../../../shared/lib/number'
-import type { DraftItem, PhotoAnalysisDraft } from '../../../shared/types/nutrition'
+import type { DraftItem, MealTemplateItem, PhotoAnalysisDraft } from '../../../shared/types/nutrition'
 import { DraftItemEditor } from './DraftItemEditor'
 import { TotalsRow } from './TotalsRow'
 import { calculateTotals, normalizeDraft } from '../model/photoAnalysis'
 import { analyzeVoice } from '../model/voiceAnalysisApi'
+import { FoodLibraryTab } from '../../food-library/components/FoodLibraryTab'
 
 // Capacitor Camera is loaded dynamically to avoid breaking web builds
 async function pickPhotoNative(): Promise<File | null> {
@@ -51,7 +52,7 @@ function getConfidenceMessage(confidence: number) {
   return 'Low confidence, review carefully before saving.'
 }
 
-type AnalyzerMode = 'photo' | 'voice'
+type AnalyzerMode = 'photo' | 'voice' | 'library'
 
 // Web Speech API types (web fallback)
 declare global {
@@ -79,6 +80,7 @@ async function nativeSpeechAvailable(): Promise<boolean> {
 
 export function PhotoAnalyzerTab({ onConfirmed }: PhotoAnalyzerTabProps) {
   const [mode, setMode] = useState<AnalyzerMode>('photo')
+  const [pendingLibrarySave, setPendingLibrarySave] = useState<{ name: string; items: MealTemplateItem[] } | null>(null)
 
   // Shared draft state
   const [draft, setDraft] = useState<PhotoAnalysisDraft | null>(null)
@@ -403,6 +405,13 @@ export function PhotoAnalyzerTab({ onConfirmed }: PhotoAnalyzerTabProps) {
             >
               Voice
             </button>
+            <button
+              type="button"
+              className={`analyzer-mode-btn ${mode === 'library' ? 'analyzer-mode-btn--active' : ''}`}
+              onClick={() => switchMode('library')}
+            >
+              Library
+            </button>
           </div>
         ) : null}
 
@@ -621,11 +630,42 @@ export function PhotoAnalyzerTab({ onConfirmed }: PhotoAnalyzerTabProps) {
               <button type="button" onClick={saveDraft} disabled={saving}>
                 {saving ? 'Saving...' : 'Save meal'}
               </button>
+              <button
+                type="button"
+                className="library-save-from-draft-btn"
+                onClick={() => {
+                  const items = draft.items.map(item => ({
+                    name: item.name,
+                    estimatedPortion: item.estimatedPortion,
+                    calories: item.calories,
+                    protein: item.protein,
+                    carbs: item.carbs,
+                    fat: item.fat,
+                    fiber: item.fiber,
+                  }))
+                  setPendingLibrarySave({ name: '', items })
+                  switchMode('library')
+                }}
+              >
+                Save to library
+              </button>
               <button type="button" className="voice-discard-btn" onClick={() => { setDraft(null); setTranscript('') }}>
                 Discard
               </button>
             </div>
           </>
+        ) : null}
+
+        {/* Library mode */}
+        {mode === 'library' && !draft ? (
+          <FoodLibraryTab
+            onLogged={() => {
+              setSuccessMessage('Logged from library')
+              setTimeout(() => setSuccessMessage(''), 2500)
+            }}
+            initialSave={pendingLibrarySave}
+            onInitialSaveDone={() => setPendingLibrarySave(null)}
+          />
         ) : null}
 
       </section>
