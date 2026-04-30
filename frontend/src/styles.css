@@ -2798,6 +2798,14 @@ ul {
   padding-top: 4px;
 }
 
+.library-editor > label input {
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: #101114;
+  color: #ffffff;
+  padding: 12px 14px;
+}
+
 .library-editor__header {
   display: flex;
   align-items: center;
