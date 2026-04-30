@@ -59,9 +59,9 @@ public class PasswordResetService {
                     + "If you did not request a password reset, ignore this email.");
 
             mailSender.send(message);
-            log.info("Password reset email sent to {}", account.getEmail());
+            log.info("Password reset email sent accountId={}", account.getId());
         } catch (Exception e) {
-            log.warn("Failed to send password reset email to {}: {}", account.getEmail(), e.getMessage());
+            log.warn("Failed to send password reset email accountId={}: {}", account.getId(), e.getMessage());
         }
     }
 
@@ -75,7 +75,7 @@ public class PasswordResetService {
                     account.setPasswordResetToken(null);
                     account.setPasswordResetTokenExpiresAt(null);
                     authAccountRepository.save(account);
-                    log.info("Password reset for account {}", account.getEmail());
+                    log.info("Password reset for account accountId={}", account.getId());
                     return true;
                 })
                 .orElse(false);

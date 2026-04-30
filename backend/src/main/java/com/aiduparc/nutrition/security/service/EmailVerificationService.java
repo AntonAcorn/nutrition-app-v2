@@ -56,9 +56,9 @@ public class EmailVerificationService {
                     + "If you did not register, ignore this email.");
 
             mailSender.send(message);
-            log.info("Verification email sent to {}", account.getEmail());
+            log.info("Verification email sent accountId={}", account.getId());
         } catch (Exception e) {
-            log.warn("Failed to send verification email to {}: {}", account.getEmail(), e.getMessage());
+            log.warn("Failed to send verification email accountId={}: {}", account.getId(), e.getMessage());
         }
     }
 
@@ -72,7 +72,7 @@ public class EmailVerificationService {
                     account.setVerificationToken(null);
                     account.setVerificationTokenExpiresAt(null);
                     authAccountRepository.save(account);
-                    log.info("Email verified for account {}", account.getEmail());
+                    log.info("Email verified for account accountId={}", account.getId());
                     return true;
                 })
                 .orElse(false);

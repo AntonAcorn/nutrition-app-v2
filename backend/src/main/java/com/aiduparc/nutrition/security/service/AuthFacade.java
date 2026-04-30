@@ -112,7 +112,7 @@ public class AuthFacade {
         AuthAccountEntity account = authAccountService.findByGoogleId(googleUser.id())
             .orElseGet(() -> {
                 Optional<AuthAccountEntity> byEmail = authAccountService.findByEmail(googleUser.email());
-                if (byEmail.isPresent()) {
+                if (byEmail.isPresent() && byEmail.get().isEmailVerified()) {
                     authAccountService.linkGoogleId(byEmail.get(), googleUser.id());
                     return byEmail.get();
                 }
