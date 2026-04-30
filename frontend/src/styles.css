@@ -2092,6 +2092,148 @@ ul {
   filter: drop-shadow(0 6px 16px rgba(100, 160, 255, 0.3));
 }
 
+/* ── Analyzer mode toggle ───────────────────────────────────────────────── */
+.analyzer-mode-toggle {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 20px;
+  background: rgba(255, 255, 255, 0.04);
+  border-radius: 14px;
+  padding: 4px;
+}
+
+.analyzer-mode-btn {
+  flex: 1;
+  border: none;
+  border-radius: 11px;
+  padding: 9px 12px;
+  font-size: 0.88rem;
+  font-weight: 600;
+  cursor: pointer;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.4);
+  box-shadow: none;
+  transition: background 0.15s, color 0.15s;
+}
+
+.analyzer-mode-btn--active {
+  background: #17191f;
+  color: #ffffff;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.28);
+}
+
+/* ── Voice hero ─────────────────────────────────────────────────────────── */
+.voice-hero {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  text-align: center;
+}
+
+.voice-hero__mascot {
+  width: 100px;
+  height: 100px;
+  object-fit: contain;
+  filter: drop-shadow(0 6px 18px rgba(100, 160, 255, 0.35));
+}
+
+.voice-hero__title {
+  color: #ffffff;
+  font-size: 1.25rem;
+  font-weight: 700;
+  margin: 0;
+}
+
+.voice-hero__hint {
+  color: rgba(255, 255, 255, 0.35);
+  font-size: 0.85rem;
+  margin: 0;
+}
+
+.voice-mic-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  border: none;
+  border-radius: 50%;
+  width: 88px;
+  height: 88px;
+  background: linear-gradient(135deg, #3b7dff 0%, #2060e8 100%);
+  color: #ffffff;
+  font-weight: 700;
+  font-size: 0.78rem;
+  cursor: pointer;
+  box-shadow: 0 8px 24px rgba(59, 125, 255, 0.35);
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+
+.voice-mic-btn:hover {
+  transform: scale(1.06);
+}
+
+.voice-mic-btn--recording {
+  background: linear-gradient(135deg, #ff4d4d 0%, #c0392b 100%);
+  box-shadow: 0 8px 28px rgba(255, 77, 77, 0.45);
+  animation: mic-pulse 1.2s ease-in-out infinite;
+}
+
+@keyframes mic-pulse {
+  0%, 100% { box-shadow: 0 8px 28px rgba(255, 77, 77, 0.45); }
+  50%       { box-shadow: 0 8px 36px rgba(255, 77, 77, 0.7); }
+}
+
+.voice-mic-btn__icon {
+  font-size: 1.6rem;
+  line-height: 1;
+}
+
+.voice-transcript-label {
+  display: grid;
+  gap: 7px;
+  width: 100%;
+  font-size: 0.82rem;
+  color: rgba(255, 255, 255, 0.4);
+  text-align: left;
+}
+
+.voice-transcript {
+  width: 100%;
+  background: #0f1014;
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  border-radius: 14px;
+  color: #ffffff;
+  padding: 12px 14px;
+  font-size: 0.97rem;
+  resize: vertical;
+  line-height: 1.5;
+  outline: none;
+  transition: border-color 0.15s;
+}
+
+.voice-transcript:focus {
+  border-color: rgba(59, 125, 255, 0.45);
+}
+
+.voice-discard-btn {
+  border: none;
+  background: none;
+  color: rgba(255, 255, 255, 0.25);
+  font-size: 0.82rem;
+  cursor: pointer;
+  padding: 2px 0;
+  text-align: center;
+  box-shadow: none;
+  transition: color 0.15s;
+}
+
+.voice-discard-btn:hover {
+  color: rgba(255, 90, 90, 0.65);
+  background: none;
+  box-shadow: none;
+}
+
 /* ── Photo upload hero (centered layout) ───────────────────────────────── */
 .photo-upload-hero {
   display: flex;

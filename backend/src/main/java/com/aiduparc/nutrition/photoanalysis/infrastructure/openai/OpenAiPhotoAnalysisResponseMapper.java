@@ -10,12 +10,12 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
-final class OpenAiPhotoAnalysisResponseMapper {
+public final class OpenAiPhotoAnalysisResponseMapper {
 
     private OpenAiPhotoAnalysisResponseMapper() {
     }
 
-    static PhotoAnalysisResponse fromModelJson(String rawModelJson, ObjectMapper objectMapper) throws IOException {
+    public static PhotoAnalysisResponse fromModelJson(String rawModelJson, ObjectMapper objectMapper) throws IOException {
         var root = objectMapper.readTree(stripCodeFences(rawModelJson));
 
         var items = new ArrayList<AnalyzedFoodItem>();
