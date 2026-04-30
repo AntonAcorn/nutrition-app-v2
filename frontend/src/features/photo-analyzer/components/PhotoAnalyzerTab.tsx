@@ -52,7 +52,7 @@ function getConfidenceMessage(confidence: number) {
 
 type AnalyzerMode = 'photo' | 'voice'
 
-// Web Speech API types
+// Web Speech API types (web fallback)
 declare global {
   interface Window {
     SpeechRecognition: new () => SpeechRecognition
@@ -60,9 +60,20 @@ declare global {
   }
 }
 
-function getSpeechRecognition(): (new () => SpeechRecognition) | null {
+function getWebSpeechRecognition(): (new () => SpeechRecognition) | null {
   if (typeof window === 'undefined') return null
   return window.SpeechRecognition || window.webkitSpeechRecognition || null
+}
+
+async function nativeSpeechAvailable(): Promise<boolean> {
+  if (!(await isNativePlatform())) return false
+  try {
+    const { SpeechRecognition } = await import('@capacitor-community/speech-recognition')
+    const { available } = await SpeechRecognition.available()
+    return available
+  } catch {
+    return false
+  }
 }
 
 export function PhotoAnalyzerTab({ onConfirmed }: PhotoAnalyzerTabProps) {
@@ -87,20 +98,23 @@ export function PhotoAnalyzerTab({ onConfirmed }: PhotoAnalyzerTabProps) {
   const [transcript, setTranscript] = useState('')
   const [recording, setRecording] = useState(false)
   const [analyzing, setAnalyzing] = useState(false)
-  const [speechSupported] = useState(() => getSpeechRecognition() !== null)
+  const [speechSupported, setSpeechSupported] = useState(false)
   const recognitionRef = useRef<SpeechRecognition | null>(null)
-  const interimRef = useRef('')
 
   const recalculatedTotals = useMemo(() => (draft ? calculateTotals(draft.items) : calculateTotals([])), [draft])
 
   useEffect(() => {
+    // Check speech support: native plugin or web API
+    nativeSpeechAvailable().then((native) => {
+      setSpeechSupported(native || getWebSpeechRecognition() !== null)
+    })
     return () => {
-      recognitionRef.current?.stop()
+      stopRecording()
     }
   }, [])
 
   function switchMode(next: AnalyzerMode) {
-    recognitionRef.current?.stop()
+    stopRecording()
     setMode(next)
     setDraft(null)
     setError('')
@@ -162,46 +176,72 @@ export function PhotoAnalyzerTab({ onConfirmed }: PhotoAnalyzerTabProps) {
 
   // ── Voice mode ──────────────────────────────────────────────────────────
 
-  function startRecording() {
-    const SpeechRecognition = getSpeechRecognition()
-    if (!SpeechRecognition) return
-    const recognition = new SpeechRecognition()
+  async function startRecording() {
+    setError('')
+    if (await isNativePlatform()) {
+      await startNativeRecording()
+    } else {
+      startWebRecording()
+    }
+  }
+
+  async function startNativeRecording() {
+    try {
+      const { SpeechRecognition } = await import('@capacitor-community/speech-recognition')
+      const perm = await SpeechRecognition.requestPermissions()
+      if (perm.speechRecognition !== 'granted' || perm.microphone !== 'granted') {
+        setError('Microphone permission is required')
+        return
+      }
+      await SpeechRecognition.start({
+        language: navigator.language || 'en-US',
+        maxResults: 1,
+        partialResults: true,
+        popup: false,
+      })
+      await SpeechRecognition.addListener('partialResults', (data: { matches: string[] }) => {
+        if (data.matches?.length) setTranscript(data.matches[0])
+      })
+      setRecording(true)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Could not start recording')
+    }
+  }
+
+  function startWebRecording() {
+    const WebSpeech = getWebSpeechRecognition()
+    if (!WebSpeech) return
+    const recognition = new WebSpeech()
     recognition.continuous = true
     recognition.interimResults = true
     recognition.lang = navigator.language || 'en-US'
-    interimRef.current = ''
-
     recognition.onresult = (event: SpeechRecognitionEvent) => {
-      let finalPart = ''
-      let interimPart = ''
+      let final = ''
+      let interim = ''
       for (let i = 0; i < event.results.length; i++) {
-        const result = event.results[i]
-        if (result.isFinal) {
-          finalPart += result[0].transcript
-        } else {
-          interimPart += result[0].transcript
-        }
+        const r = event.results[i]
+        if (r.isFinal) final += r[0].transcript
+        else interim += r[0].transcript
       }
-      interimRef.current = interimPart
-      setTranscript(finalPart + (interimPart ? ' ' + interimPart : ''))
+      setTranscript(final + (interim ? ' ' + interim : ''))
     }
-
-    recognition.onerror = () => {
-      setRecording(false)
-    }
-
-    recognition.onend = () => {
-      setRecording(false)
-    }
-
+    recognition.onerror = () => setRecording(false)
+    recognition.onend = () => setRecording(false)
     recognitionRef.current = recognition
     recognition.start()
     setRecording(true)
-    setError('')
   }
 
-  function stopRecording() {
-    recognitionRef.current?.stop()
+  async function stopRecording() {
+    if (await isNativePlatform()) {
+      try {
+        const { SpeechRecognition } = await import('@capacitor-community/speech-recognition')
+        await SpeechRecognition.stop()
+        await SpeechRecognition.removeAllListeners()
+      } catch {}
+    } else {
+      recognitionRef.current?.stop()
+    }
     setRecording(false)
   }
 
