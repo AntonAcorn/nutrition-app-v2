@@ -104,13 +104,18 @@ export function PhotoAnalyzerTab({ onConfirmed }: PhotoAnalyzerTabProps) {
   const recalculatedTotals = useMemo(() => (draft ? calculateTotals(draft.items) : calculateTotals([])), [draft])
 
   useEffect(() => {
-    // Check speech support: native plugin or web API
-    nativeSpeechAvailable().then((native) => {
-      setSpeechSupported(native || getWebSpeechRecognition() !== null)
-    })
-    return () => {
-      stopRecording()
+    async function checkSpeech() {
+      const native = await nativeSpeechAvailable()
+      if (native) {
+        setSpeechSupported(true)
+      } else {
+        // On native platform, webkitSpeechRecognition exists but doesn't work in WKWebView
+        const onNative = await isNativePlatform()
+        setSpeechSupported(!onNative && getWebSpeechRecognition() !== null)
+      }
     }
+    checkSpeech()
+    return () => { stopRecording() }
   }, [])
 
   function switchMode(next: AnalyzerMode) {
@@ -179,7 +184,8 @@ export function PhotoAnalyzerTab({ onConfirmed }: PhotoAnalyzerTabProps) {
   async function startRecording() {
     setError('')
     try {
-      if (await isNativePlatform()) {
+      const onNative = await isNativePlatform()
+      if (onNative) {
         await startNativeRecording()
       } else {
         startWebRecording()
