@@ -32,6 +32,7 @@ export function FoodLibraryTab({ onLogged, initialSave, onInitialSaveDone }: Foo
   const [editItems, setEditItems] = useState<MealTemplateItem[]>([])
   const [saving, setSaving] = useState(false)
   const [loggingId, setLoggingId] = useState<string | null>(null)
+  const [confirmTarget, setConfirmTarget] = useState<MealTemplate | null>(null)
 
   useEffect(() => { load() }, [])
 
@@ -101,13 +102,16 @@ export function FoodLibraryTab({ onLogged, initialSave, onInitialSaveDone }: Foo
     catch { setError('Could not delete') }
   }
 
-  async function handleLog(t: MealTemplate) {
+  async function confirmLog() {
+    if (!confirmTarget) return
+    const t = confirmTarget
+    setConfirmTarget(null)
     setLoggingId(t.id); setError('')
     try {
       await logTemplate(t.id, getTodayLocalDateInputValue())
-      setSuccess(`"${t.name}" logged`)
+      setSuccess(`"${t.name}" added to today`)
       onLogged?.()
-      setTimeout(() => setSuccess(''), 2500)
+      setTimeout(() => setSuccess(''), 3000)
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Log failed')
     } finally { setLoggingId(null) }
@@ -208,7 +212,7 @@ export function FoodLibraryTab({ onLogged, initialSave, onInitialSaveDone }: Foo
       </div>
 
       {error && <p className="error-text">{error}</p>}
-      {success && <p className="success-text">{success}</p>}
+      {success && <p className="library-success-toast">{success}</p>}
 
       {loading ? (
         <p className="subtle-text" style={{ textAlign: 'center', marginTop: 32 }}>Loading...</p>
@@ -232,7 +236,7 @@ export function FoodLibraryTab({ onLogged, initialSave, onInitialSaveDone }: Foo
                 <button
                   type="button"
                   className="library-card__log-btn"
-                  onClick={() => handleLog(t)}
+                  onClick={() => setConfirmTarget(t)}
                   disabled={loggingId === t.id}
                 >
                   {loggingId === t.id ? '...' : 'Log'}
@@ -241,6 +245,26 @@ export function FoodLibraryTab({ onLogged, initialSave, onInitialSaveDone }: Foo
               </div>
             </div>
           ))}
+        </div>
+      )}
+
+      {confirmTarget && (
+        <div className="library-confirm-overlay" onClick={() => setConfirmTarget(null)}>
+          <div className="library-confirm-modal" onClick={e => e.stopPropagation()}>
+            <p className="library-confirm-title">Log this meal?</p>
+            <p className="library-confirm-meal">{confirmTarget.name}</p>
+            <p className="library-confirm-meta">
+              {Math.round(confirmTarget.totalCalories)} kcal · {confirmTarget.items.length} item{confirmTarget.items.length !== 1 ? 's' : ''}
+            </p>
+            <div className="library-confirm-actions">
+              <button type="button" className="library-confirm-cancel" onClick={() => setConfirmTarget(null)}>
+                Cancel
+              </button>
+              <button type="button" className="library-confirm-ok" onClick={confirmLog}>
+                Log meal
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>
