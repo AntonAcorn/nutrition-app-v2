@@ -3036,8 +3036,8 @@ ul {
 }
 
 .barcode-viewfinder {
-  width: 220px;
-  height: 110px;
+  width: min(55vw, 240px);
+  height: min(18vw, 80px);
   border: 2px solid rgba(255, 255, 255, 0.8);
   border-radius: 8px;
   box-shadow: 0 0 0 2000px rgba(0, 0, 0, 0.45);
