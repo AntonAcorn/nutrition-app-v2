@@ -97,8 +97,8 @@ export function TodaySummaryBlock({ summary }: TodaySummaryBlockProps) {
         <div className="macro-meter-grid">
           <MacroCard label="Protein" value={summary.proteinGrams} unit="g" progress={Math.min(100, Math.round((summary.proteinGrams / 180) * 100))} tone="purple" />
           <MacroCard label="Fat" value={summary.fatGrams} unit="g" progress={Math.min(100, Math.round((summary.fatGrams / 90) * 100))} tone="orange" />
-          <MacroCard label="Fiber" value={summary.fiberGrams} unit="g" progress={Math.min(100, Math.round((summary.fiberGrams / 35) * 100))} tone="pink" />
           <MacroCard label="Carbs" value={summary.carbsGrams} unit="g" progress={Math.min(100, Math.round((summary.carbsGrams / 250) * 100))} tone="teal" />
+          <MacroCard label="Fiber" value={summary.fiberGrams} unit="g" progress={Math.min(100, Math.round((summary.fiberGrams / 35) * 100))} tone="pink" />
         </div>
 
         <div className="today-insight-card">

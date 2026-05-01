@@ -286,8 +286,8 @@ function StatisticsTable({ points }: { points: NutritionStatisticsPoint[] }) {
           <span>Balance</span>
           <span>Protein</span>
           <span>Fat</span>
-          <span>Fiber</span>
           <span>Carbs</span>
+          <span>Fiber</span>
         </div>
         {orderedPoints.map((point) => (
           <div className="statistics-table__row" key={point.entryDate}>
@@ -298,8 +298,8 @@ function StatisticsTable({ points }: { points: NutritionStatisticsPoint[] }) {
             <strong className={point.calorieBalance > 0 ? 'text-over' : 'text-under'}>{formatSigned(point.calorieBalance)}</strong>
             <span>{formatMetricValue(point.proteinGrams)}</span>
             <span>{formatMetricValue(point.fatGrams)}</span>
-            <span>{formatMetricValue(point.fiberGrams)}</span>
             <span>{formatMetricValue(point.carbsGrams)}</span>
+            <span>{formatMetricValue(point.fiberGrams)}</span>
           </div>
         ))}
       </div>
