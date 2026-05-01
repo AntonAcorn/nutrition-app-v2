@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { TodaySummaryBlock } from './TodaySummaryBlock'
 import { WaterIntakeCard } from './WaterIntakeCard'
+import { QuickAddSheet } from './QuickAddSheet'
 import { fetchTodaySummary } from '../model/todaySummaryApi'
 import { updateTodayWeight } from '../model/weightApi'
 import { addMealManually, resetToday } from '../model/nutritionTotalsApi'
@@ -29,10 +30,7 @@ export function CurrentDayTab({ refreshToken = 0, successMessage = '', onDayUpda
   const [error, setError] = useState('')
   const [savingNutrition, setSavingNutrition] = useState(false)
   const [resettingDay, setResettingDay] = useState(false)
-  const [caloriesInput, setCaloriesInput] = useState('0')
-  const [proteinInput, setProteinInput] = useState('0')
-  const [fatInput, setFatInput] = useState('0')
-  const [fiberInput, setFiberInput] = useState('0')
+  const [showQuickAdd, setShowQuickAdd] = useState(false)
 
   useEffect(() => {
     let cancelled = false
@@ -64,32 +62,14 @@ export function CurrentDayTab({ refreshToken = 0, successMessage = '', onDayUpda
     }
   }, [refreshToken])
 
-  async function handleMealAdd() {
-    const kcal = Number(caloriesInput)
-    const protein = Number(proteinInput)
-    const fat = Number(fatInput)
-    const fiber = Number(fiberInput)
-
-    if ([kcal, protein, fat, fiber].some((v) => !Number.isFinite(v) || v < 0)) {
-      setError('Enter valid non-negative numbers for all fields')
-      return
-    }
-
+  async function handleMealAdd(kcal: number, protein: number, fat: number, fiber: number, carbs: number) {
     setSavingNutrition(true)
-    setError('')
-
     try {
-      await addMealManually({ caloriesConsumedKcal: kcal, proteinGrams: protein, fatGrams: fat, fiberGrams: fiber })
+      await addMealManually({ caloriesConsumedKcal: kcal, proteinGrams: protein, fatGrams: fat, fiberGrams: fiber, carbsGrams: carbs })
       const nextSummary = await fetchTodaySummary()
       setSummary(nextSummary)
-      setCaloriesInput('0')
-      setProteinInput('0')
-      setFatInput('0')
-      setFiberInput('0')
-      setShowNutritionEdit(false)
+      setShowQuickAdd(false)
       onDayUpdated?.()
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to add meal')
     } finally {
       setSavingNutrition(false)
     }
@@ -154,49 +134,23 @@ export function CurrentDayTab({ refreshToken = 0, successMessage = '', onDayUpda
       {!loading && !error && summary ? <WaterIntakeCard /> : null}
 
       {!loading && summary ? (
-        <section className="panel quick-add-card">
-          <div className="quick-add-card__header">
-            <p className="quick-add-card__title">Quick add</p>
-            <p className="quick-add-card__subtitle">No photo? Log it manually.</p>
+        <section className="panel quick-add-trigger-card">
+          <div className="quick-add-trigger-card__left">
+            <p className="quick-add-trigger-card__title">Quick add</p>
+            <p className="quick-add-trigger-card__subtitle">No photo? Log it manually.</p>
           </div>
-          <div className="quick-add-grid">
-            <label className="quick-add-field">
-              <span>Calories</span>
-              <div className="quick-add-field__wrap">
-                <input type="text" inputMode="decimal" value={caloriesInput} onChange={(e) => setCaloriesInput(e.target.value)} />
-                <span className="quick-add-field__unit">kcal</span>
-              </div>
-            </label>
-            <label className="quick-add-field">
-              <span>Protein</span>
-              <div className="quick-add-field__wrap">
-                <input type="text" inputMode="decimal" value={proteinInput} onChange={(e) => setProteinInput(e.target.value)} />
-                <span className="quick-add-field__unit">g</span>
-              </div>
-            </label>
-            <label className="quick-add-field">
-              <span>Fat</span>
-              <div className="quick-add-field__wrap">
-                <input type="text" inputMode="decimal" value={fatInput} onChange={(e) => setFatInput(e.target.value)} />
-                <span className="quick-add-field__unit">g</span>
-              </div>
-            </label>
-            <label className="quick-add-field">
-              <span>Fiber</span>
-              <div className="quick-add-field__wrap">
-                <input type="text" inputMode="decimal" value={fiberInput} onChange={(e) => setFiberInput(e.target.value)} />
-                <span className="quick-add-field__unit">g</span>
-              </div>
-            </label>
-          </div>
-          <button type="button" className="quick-add-card__submit" onClick={handleMealAdd} disabled={savingNutrition}>
-            {savingNutrition ? 'Adding...' : '+ Add to today'}
-          </button>
-          <button type="button" className="quick-add-card__reset" onClick={handleResetDay} disabled={resettingDay}>
-            {resettingDay ? 'Resetting...' : 'Reset today\'s data'}
+          <button type="button" className="quick-add-trigger-card__btn" onClick={() => setShowQuickAdd(true)}>
+            +
           </button>
         </section>
       ) : null}
+
+      {showQuickAdd && (
+        <QuickAddSheet
+          onAdd={handleMealAdd}
+          onClose={() => setShowQuickAdd(false)}
+        />
+      )}
 
       {!loading && summary ? (
         <section className="weight-mascot-card panel">
@@ -223,6 +177,12 @@ export function CurrentDayTab({ refreshToken = 0, successMessage = '', onDayUpda
             </div>
           </div>
         </section>
+      ) : null}
+
+      {!loading && summary ? (
+        <button type="button" className="reset-day-link" onClick={handleResetDay} disabled={resettingDay}>
+          {resettingDay ? 'Resetting...' : 'Reset today\'s data'}
+        </button>
       ) : null}
     </section>
   )

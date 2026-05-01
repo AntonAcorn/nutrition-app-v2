@@ -2409,72 +2409,224 @@ ul {
 }
 
 /* ── Quick Add Card ─────────────────────────────────────────────────────── */
-.quick-add-card {
-  padding: 20px;
-  display: grid;
-  gap: 14px;
+/* ── Quick Add Trigger Card ──────────────────────────────────────────────── */
+.quick-add-trigger-card {
+  padding: 16px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
 }
 
-.quick-add-card__header {
+.quick-add-trigger-card__left {
   display: grid;
   gap: 3px;
 }
 
-.quick-add-card__title {
+.quick-add-trigger-card__title {
   font-size: 1rem;
   font-weight: 700;
   color: #ffffff;
 }
 
-.quick-add-card__subtitle {
+.quick-add-trigger-card__subtitle {
   font-size: 0.8rem;
   color: rgba(255, 255, 255, 0.35);
 }
 
-.quick-add-grid {
+.quick-add-trigger-card__btn {
+  flex-shrink: 0;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: none;
+  background: linear-gradient(135deg, #3b7dff 0%, #2060e8 100%);
+  color: #ffffff;
+  font-size: 1.5rem;
+  font-weight: 300;
+  line-height: 1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 6px 18px rgba(59, 125, 255, 0.35);
+  transition: opacity 0.15s, transform 0.1s;
+}
+
+.quick-add-trigger-card__btn:active {
+  transform: scale(0.93);
+  opacity: 0.85;
+}
+
+/* ── Reset Day Link ───────────────────────────────────────────────────────── */
+.reset-day-link {
+  border: none;
+  background: none;
+  color: rgba(255, 255, 255, 0.2);
+  font-size: 0.78rem;
+  cursor: pointer;
+  padding: 4px 0 16px;
+  text-align: center;
+  width: 100%;
+  display: block;
+  transition: color 0.15s;
+}
+
+.reset-day-link:hover {
+  color: rgba(255, 90, 90, 0.55);
+}
+
+.reset-day-link:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+/* ── Quick Add Sheet (bottom sheet modal) ────────────────────────────────── */
+.qs-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+  z-index: 200;
+  display: flex;
+  align-items: flex-end;
+  animation: qs-fade-in 0.18s ease;
+}
+
+@keyframes qs-fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+.qs-sheet {
+  width: 100%;
+  background: #1c1c1e;
+  border-radius: 24px 24px 0 0;
+  padding: 20px 20px 36px;
+  display: grid;
+  gap: 18px;
+  animation: qs-slide-up 0.22s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@keyframes qs-slide-up {
+  from { transform: translateY(100%); }
+  to   { transform: translateY(0); }
+}
+
+.qs-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.qs-title {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #ffffff;
+}
+
+.qs-subtitle {
+  font-size: 0.8rem;
+  color: rgba(255, 255, 255, 0.35);
+  margin-top: 3px;
+}
+
+.qs-close {
+  border: none;
+  background: rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.6);
+  border-radius: 50%;
+  width: 30px;
+  height: 30px;
+  font-size: 0.8rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: background 0.15s;
+}
+
+.qs-close:hover {
+  background: rgba(255, 255, 255, 0.16);
+}
+
+.qs-calories-row {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.qs-calories-input {
+  flex: 1;
+  min-width: 0;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+  color: #ffffff;
+  font-size: 2rem;
+  font-weight: 700;
+  padding: 14px 18px;
+  text-align: center;
+  transition: border-color 0.15s, background 0.15s;
+}
+
+.qs-calories-input:focus {
+  outline: none;
+  border-color: rgba(59, 125, 255, 0.55);
+  background: rgba(59, 125, 255, 0.07);
+}
+
+.qs-calories-unit {
+  font-size: 0.95rem;
+  color: rgba(255, 255, 255, 0.4);
+  font-weight: 600;
+}
+
+.qs-macros-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 10px;
 }
 
-.quick-add-field {
+.qs-macro-field {
   display: grid;
   gap: 5px;
   cursor: text;
   min-width: 0;
 }
 
-.quick-add-field > span {
+.qs-macro-label {
   font-size: 0.72rem;
   color: rgba(255, 255, 255, 0.4);
   text-transform: uppercase;
   letter-spacing: 0.06em;
 }
 
-.quick-add-field__wrap {
+.qs-macro-input-wrap {
   position: relative;
   display: grid;
 }
 
-.quick-add-field__wrap input {
+.qs-macro-input-wrap input {
   width: 100%;
   border: 1px solid rgba(255, 255, 255, 0.09);
   background: rgba(255, 255, 255, 0.05);
   color: #ffffff;
   border-radius: 14px;
-  padding: 11px 36px 11px 13px;
+  padding: 11px 32px 11px 13px;
   font-size: 1rem;
   font-weight: 600;
   transition: border-color 0.15s, background 0.15s;
 }
 
-.quick-add-field__wrap input:focus {
+.qs-macro-input-wrap input:focus {
   outline: none;
   border-color: rgba(59, 125, 255, 0.55);
   background: rgba(59, 125, 255, 0.07);
 }
 
-.quick-add-field__unit {
+.qs-macro-unit {
   position: absolute;
   right: 11px;
   top: 50%;
@@ -2482,48 +2634,6 @@ ul {
   font-size: 0.72rem;
   color: rgba(255, 255, 255, 0.3);
   pointer-events: none;
-}
-
-.quick-add-card__submit {
-  border: 0;
-  border-radius: 18px;
-  padding: 14px 18px;
-  background: linear-gradient(135deg, #3b7dff 0%, #2060e8 100%);
-  color: #ffffff;
-  font-weight: 700;
-  font-size: 0.97rem;
-  cursor: pointer;
-  box-shadow: 0 8px 24px rgba(59, 125, 255, 0.28);
-  transition: opacity 0.15s;
-}
-
-.quick-add-card__submit:disabled {
-  opacity: 0.6;
-  cursor: default;
-  box-shadow: none;
-}
-
-.quick-add-card__reset {
-  border: none;
-  background: none;
-  color: rgba(255, 255, 255, 0.25);
-  font-size: 0.82rem;
-  cursor: pointer;
-  padding: 2px 0;
-  text-align: center;
-  box-shadow: none;
-  transition: color 0.15s;
-}
-
-.quick-add-card__reset:hover {
-  color: rgba(255, 90, 90, 0.65);
-  background: none;
-  box-shadow: none;
-}
-
-.quick-add-card__reset:disabled {
-  opacity: 0.4;
-  cursor: default;
 }
 
 /* ── Profile Tab ─────────────────────────────────────────────────────────── */
