@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { TodaySummaryBlock } from './TodaySummaryBlock'
 import { WaterIntakeCard } from './WaterIntakeCard'
 import { QuickAddSheet } from './QuickAddSheet'
+import { SavedMealsCard } from './SavedMealsCard'
 import { fetchTodaySummary } from '../model/todaySummaryApi'
 import { updateTodayWeight } from '../model/weightApi'
 import { addMealManually, resetToday } from '../model/nutritionTotalsApi'
@@ -132,6 +133,7 @@ export function CurrentDayTab({ refreshToken = 0, successMessage = '', onDayUpda
 
       {!loading && !error && summary ? <TodaySummaryBlock summary={summary} /> : null}
       {!loading && !error && summary ? <WaterIntakeCard /> : null}
+      {!loading && !error && summary ? <SavedMealsCard onLogged={() => { onDayUpdated?.() }} /> : null}
 
       {!loading && summary ? (
         <section className="panel quick-add-trigger-card">
