@@ -434,6 +434,11 @@ ul {
 .today-summary {
   display: grid;
   gap: 18px;
+  min-width: 0;
+}
+
+.screen-section > * {
+  min-width: 0;
 }
 
 .tabs-body--dark {
@@ -2711,6 +2716,7 @@ ul {
 .meals-log-list {
   display: flex;
   flex-direction: column;
+  overflow: hidden;
 }
 
 .meal-log-row {

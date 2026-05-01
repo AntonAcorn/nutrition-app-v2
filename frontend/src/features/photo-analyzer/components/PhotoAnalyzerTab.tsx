@@ -359,9 +359,10 @@ export function PhotoAnalyzerTab({ onConfirmed }: PhotoAnalyzerTabProps) {
     setSaving(true)
     setError('')
     setSuccessMessage('')
-    const mealName = draft.items.length > 0
-      ? draft.items.slice(0, 3).map(i => i.name).join(', ')
+    const rawName = draft.items.length > 0
+      ? draft.items.slice(0, 2).map(i => i.name).join(', ')
       : 'Analyzed meal'
+    const mealName = rawName.length > 50 ? rawName.slice(0, 47) + '...' : rawName
     const payload = {
       caloriesKcal: recalculatedTotals.calories,
       proteinG: recalculatedTotals.protein,
