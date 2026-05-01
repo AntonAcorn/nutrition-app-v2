@@ -277,8 +277,6 @@ function LineChart({
   colorClass,
   gradColor,
   trendline,
-  expanded,
-  onExpand,
 }: {
   title: string
   unit: string
@@ -288,8 +286,6 @@ function LineChart({
   colorClass: string
   gradColor: string
   trendline?: Array<number | null>
-  expanded?: boolean
-  onExpand?: () => void
 }) {
   const values = points.map((point) => point[valueKey] ?? null)
   const targets = targetKey ? points.map((point) => point[targetKey] ?? null) : []
@@ -324,17 +320,8 @@ function LineChart({
     : null
 
   const chartContent = (
-    <div className={`line-chart line-chart--dark-card ${expanded ? 'line-chart--expanded' : ''}`}>
+    <div className="line-chart line-chart--dark-card">
       <div className="line-chart__canvas line-chart__canvas--dark">
-        <div className="line-chart__axis line-chart__axis--y">
-          {guideValues.slice().reverse().map((guide) => {
-            const v = Math.round(guide)
-            const label = unit === 'kcal'
-              ? (Math.abs(v) >= 1000 ? `${(v / 1000).toFixed(1)}k` : String(v))
-              : `${v}${unit}`
-            return <span key={`${title}-${guide}`}>{label}</span>
-          })}
-        </div>
         <div className="line-chart__plot">
           <div className={`line-chart__grid line-chart__grid--dark ${valueKey === 'weightKg' ? 'line-chart__grid--hidden' : ''}`}>
             {guideValues.map((guide) => (
@@ -388,46 +375,20 @@ function LineChart({
   )
 
   return (
-    <>
-      <section
-        className={`panel statistics-panel statistics-panel--dark ${onExpand ? 'statistics-panel--interactive' : ''}`}
-      >
-        <div className="statistics-panel__header">
-          <div>
-            <p className="screen-header__eyebrow">Metric</p>
-            <h3>{title}</h3>
-          </div>
-          <div className="statistics-panel__header-right">
-            {formattedLatest != null && (
-              <span className="chart-latest-value">
-                {formattedLatest}<span className="chart-latest-unit"> {unit}</span>
-              </span>
-            )}
-            {onExpand ? (
-              <button
-                type="button"
-                className="chart-expand-button"
-                onClick={(event) => { event.stopPropagation(); onExpand() }}
-                aria-label={`Expand ${title} chart`}
-              >
-                ⤢
-              </button>
-            ) : null}
-          </div>
+    <section className="panel statistics-panel statistics-panel--dark">
+      <div className="statistics-panel__header">
+        <div>
+          <p className="screen-header__eyebrow">Metric</p>
+          <h3>{title}</h3>
         </div>
-
-        {chartContent}
-      </section>
-
-      {expanded && onExpand ? (
-        <ChartModal title={title} onClose={onExpand}>
-          <div className="statistics-panel__actions statistics-panel__actions--modal">
-            <p className="subtle-text">{unit}</p>
-          </div>
-          {chartContent}
-        </ChartModal>
-      ) : null}
-    </>
+        {formattedLatest != null && (
+          <span className="chart-latest-value">
+            {formattedLatest}<span className="chart-latest-unit"> {unit}</span>
+          </span>
+        )}
+      </div>
+      {chartContent}
+    </section>
   )
 }
 
@@ -482,7 +443,6 @@ export function StatisticsTab({ refreshToken = 0 }: StatisticsTabProps) {
   const [data, setData] = useState<NutritionStatisticsResponse | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
-  const [expandedChart, setExpandedChart] = useState<string | null>(null)
 
   useEffect(() => {
     let cancelled = false
@@ -595,8 +555,6 @@ export function StatisticsTab({ refreshToken = 0 }: StatisticsTabProps) {
             colorClass="line-chart__path--weight"
             gradColor="#7b61ff"
             trendline={weightTrendline}
-            expanded={expandedChart === 'Weight'}
-            onExpand={() => setExpandedChart((current) => (current === 'Weight' ? null : 'Weight'))}
           />
 
           <section className="panel statistics-panel statistics-panel--dark">
@@ -617,8 +575,6 @@ export function StatisticsTab({ refreshToken = 0 }: StatisticsTabProps) {
             targetKey="calorieTarget"
             colorClass="line-chart__path--calories"
             gradColor="#f08a4b"
-            expanded={expandedChart === 'Calories'}
-            onExpand={() => setExpandedChart((current) => (current === 'Calories' ? null : 'Calories'))}
           />
           <LineChart
             title="Protein"
@@ -627,8 +583,6 @@ export function StatisticsTab({ refreshToken = 0 }: StatisticsTabProps) {
             valueKey="proteinGrams"
             colorClass="line-chart__path--protein"
             gradColor="#3a86ff"
-            expanded={expandedChart === 'Protein'}
-            onExpand={() => setExpandedChart((current) => (current === 'Protein' ? null : 'Protein'))}
           />
           <LineChart
             title="Fat"
@@ -637,8 +591,6 @@ export function StatisticsTab({ refreshToken = 0 }: StatisticsTabProps) {
             valueKey="fatGrams"
             colorClass="line-chart__path--fat"
             gradColor="#d65a8d"
-            expanded={expandedChart === 'Fat'}
-            onExpand={() => setExpandedChart((current) => (current === 'Fat' ? null : 'Fat'))}
           />
           <LineChart
             title="Carbs"
@@ -647,8 +599,6 @@ export function StatisticsTab({ refreshToken = 0 }: StatisticsTabProps) {
             valueKey="carbsGrams"
             colorClass="line-chart__path--carbs"
             gradColor="#f6ad55"
-            expanded={expandedChart === 'Carbs'}
-            onExpand={() => setExpandedChart((current) => (current === 'Carbs' ? null : 'Carbs'))}
           />
           <LineChart
             title="Fiber"
@@ -657,8 +607,6 @@ export function StatisticsTab({ refreshToken = 0 }: StatisticsTabProps) {
             valueKey="fiberGrams"
             colorClass="line-chart__path--fiber"
             gradColor="#38a169"
-            expanded={expandedChart === 'Fiber'}
-            onExpand={() => setExpandedChart((current) => (current === 'Fiber' ? null : 'Fiber'))}
           />
           <StatisticsTable points={points} />
         </>

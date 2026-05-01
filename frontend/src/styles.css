@@ -2083,10 +2083,8 @@ ul {
 }
 
 .line-chart__canvas--dark {
-  display: grid;
-  grid-template-columns: 40px minmax(0, 1fr);
-  gap: 8px;
-  min-height: 240px;
+  display: block;
+  min-height: 200px;
 }
 
 .line-chart__plot {
