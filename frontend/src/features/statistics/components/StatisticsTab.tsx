@@ -60,7 +60,7 @@ function getChartBounds({
 }: {
   values: Array<number | null>
   targets: Array<number | null>
-  valueKey: 'weightKg' | 'consumedCalories' | 'proteinGrams' | 'fatGrams' | 'fiberGrams'
+  valueKey: 'weightKg' | 'consumedCalories' | 'proteinGrams' | 'fatGrams' | 'fiberGrams' | 'carbsGrams'
 }) {
   const numericValues = values.filter((value): value is number => value != null)
   const numericTargets = targets.filter((value): value is number => value != null)
@@ -167,7 +167,7 @@ function LineChart({
   title: string
   unit: string
   points: NutritionStatisticsPoint[]
-  valueKey: 'weightKg' | 'consumedCalories' | 'proteinGrams' | 'fatGrams' | 'fiberGrams'
+  valueKey: 'weightKg' | 'consumedCalories' | 'proteinGrams' | 'fatGrams' | 'fiberGrams' | 'carbsGrams'
   targetKey?: 'calorieTarget'
   colorClass: string
   expanded?: boolean
@@ -287,6 +287,7 @@ function StatisticsTable({ points }: { points: NutritionStatisticsPoint[] }) {
           <span>Protein</span>
           <span>Fat</span>
           <span>Fiber</span>
+          <span>Carbs</span>
         </div>
         {orderedPoints.map((point) => (
           <div className="statistics-table__row" key={point.entryDate}>
@@ -298,6 +299,7 @@ function StatisticsTable({ points }: { points: NutritionStatisticsPoint[] }) {
             <span>{formatMetricValue(point.proteinGrams)}</span>
             <span>{formatMetricValue(point.fatGrams)}</span>
             <span>{formatMetricValue(point.fiberGrams)}</span>
+            <span>{formatMetricValue(point.carbsGrams)}</span>
           </div>
         ))}
       </div>
@@ -454,6 +456,15 @@ export function StatisticsTab({ refreshToken = 0 }: StatisticsTabProps) {
               colorClass="line-chart__path--fiber"
               expanded={expandedChart === 'Fiber'}
               onExpand={() => setExpandedChart((current) => (current === 'Fiber' ? null : 'Fiber'))}
+            />
+            <LineChart
+              title="Carbs"
+              unit="g"
+              points={points}
+              valueKey="carbsGrams"
+              colorClass="line-chart__path--carbs"
+              expanded={expandedChart === 'Carbs'}
+              onExpand={() => setExpandedChart((current) => (current === 'Carbs' ? null : 'Carbs'))}
             />
           </div>
           <StatisticsTable points={points} />

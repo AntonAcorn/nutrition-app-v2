@@ -57,7 +57,7 @@ public class PhotoAnalysisDraftController {
                                               @RequestBody(required = false) ConfirmPhotoAnalysisDraftRequest request,
                                               HttpSession session) {
         ConfirmPhotoAnalysisDraftRequest safeRequest = request == null
-                ? new ConfirmPhotoAnalysisDraftRequest(null, null, null, null, null)
+                ? new ConfirmPhotoAnalysisDraftRequest(null, null, null, null, null, null)
                 : request;
         return draftService.confirm(draftId, currentNutritionUserResolver.resolve(session, null), safeRequest);
     }

@@ -88,6 +88,7 @@ public class MealTemplateService {
                 entity.getTotalProtein(),
                 entity.getTotalFat(),
                 entity.getTotalFiber(),
+                entity.getTotalCarbs(),
                 "From library: " + entity.getName()
         ));
         log.info("meal-template logged userId={} templateId={} entryDate={} calories={}",
@@ -105,7 +106,8 @@ public class MealTemplateService {
                 entity.getTotalCalories(),
                 entity.getTotalProtein(),
                 entity.getTotalFat(),
-                entity.getTotalFiber()
+                entity.getTotalFiber(),
+                entity.getTotalCarbs()
         ));
         log.info("meal-template unlogged userId={} templateId={} entryDate={}", userId, templateId, entryDate);
     }
@@ -118,16 +120,19 @@ public class MealTemplateService {
         BigDecimal protein = BigDecimal.ZERO;
         BigDecimal fat = BigDecimal.ZERO;
         BigDecimal fiber = BigDecimal.ZERO;
+        BigDecimal carbs = BigDecimal.ZERO;
         for (MealTemplateItem item : request.items()) {
             calories = calories.add(safe(item.calories()));
             protein = protein.add(safe(item.protein()));
             fat = fat.add(safe(item.fat()));
             fiber = fiber.add(safe(item.fiber()));
+            carbs = carbs.add(safe(item.carbs()));
         }
         entity.setTotalCalories(calories);
         entity.setTotalProtein(protein);
         entity.setTotalFat(fat);
         entity.setTotalFiber(fiber);
+        entity.setTotalCarbs(carbs);
     }
 
     private MealTemplateResponse toResponse(MealTemplateEntity entity) {
@@ -139,6 +144,7 @@ public class MealTemplateService {
                 entity.getTotalProtein(),
                 entity.getTotalFat(),
                 entity.getTotalFiber(),
+                entity.getTotalCarbs(),
                 entity.getCreatedAt(),
                 entity.getUpdatedAt()
         );

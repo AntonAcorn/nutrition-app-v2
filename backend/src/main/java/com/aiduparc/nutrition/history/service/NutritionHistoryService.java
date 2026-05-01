@@ -71,7 +71,8 @@ public class NutritionHistoryService {
             remainingCalories,
             defaultBigDecimal(snapshot.proteinGrams()),
             defaultBigDecimal(snapshot.fatGrams()),
-            defaultBigDecimal(snapshot.fiberGrams())
+            defaultBigDecimal(snapshot.fiberGrams()),
+            defaultBigDecimal(snapshot.carbsGrams())
         );
 
         log.info(
@@ -100,7 +101,8 @@ public class NutritionHistoryService {
                 defaultBigDecimal(snapshot.caloriesConsumedKcal()).subtract(defaultTarget(snapshot.calorieTargetKcal(), userId)),
                 defaultBigDecimal(snapshot.proteinGrams()),
                 defaultBigDecimal(snapshot.fatGrams()),
-                defaultBigDecimal(snapshot.fiberGrams())
+                defaultBigDecimal(snapshot.fiberGrams()),
+                defaultBigDecimal(snapshot.carbsGrams())
             ))
             .toList();
 
@@ -140,6 +142,7 @@ public class NutritionHistoryService {
             current.proteinGrams(),
             current.fatGrams(),
             current.fiberGrams(),
+            current.carbsGrams(),
             current.notes()
         ));
         telegramNotificationService.notifyActivity(userId, "weight update");
@@ -153,7 +156,8 @@ public class NutritionHistoryService {
             BigDecimal caloriesConsumedKcal,
             BigDecimal proteinGrams,
             BigDecimal fatGrams,
-            BigDecimal fiberGrams
+            BigDecimal fiberGrams,
+            BigDecimal carbsGrams
     ) {
         DailyNutritionEntrySnapshot current = getOrCreateEmptySnapshot(userId, entryDate);
 
@@ -166,6 +170,7 @@ public class NutritionHistoryService {
             proteinGrams,
             fatGrams,
             fiberGrams,
+            carbsGrams,
             current.notes()
         ));
         telegramNotificationService.notifyActivity(userId, "nutrition totals update");
@@ -185,6 +190,7 @@ public class NutritionHistoryService {
             defaultBigDecimal(current.proteinGrams()).subtract(defaultBigDecimal(command.proteinGrams())).max(BigDecimal.ZERO),
             defaultBigDecimal(current.fatGrams()).subtract(defaultBigDecimal(command.fatGrams())).max(BigDecimal.ZERO),
             defaultBigDecimal(current.fiberGrams()).subtract(defaultBigDecimal(command.fiberGrams())).max(BigDecimal.ZERO),
+            defaultBigDecimal(current.carbsGrams()).subtract(defaultBigDecimal(command.carbsGrams())).max(BigDecimal.ZERO),
             current.notes()
         ));
     }
@@ -195,7 +201,8 @@ public class NutritionHistoryService {
         @NotNull BigDecimal caloriesConsumedKcal,
         BigDecimal proteinGrams,
         BigDecimal fatGrams,
-        BigDecimal fiberGrams
+        BigDecimal fiberGrams,
+        BigDecimal carbsGrams
     ) {}
 
     @Transactional
@@ -211,6 +218,7 @@ public class NutritionHistoryService {
             defaultBigDecimal(current.proteinGrams()).add(defaultBigDecimal(command.proteinGrams())),
             defaultBigDecimal(current.fatGrams()).add(defaultBigDecimal(command.fatGrams())),
             defaultBigDecimal(current.fiberGrams()).add(defaultBigDecimal(command.fiberGrams())),
+            defaultBigDecimal(current.carbsGrams()).add(defaultBigDecimal(command.carbsGrams())),
             mergeNotes(current.notes(), command.notes())
         ));
 
@@ -241,6 +249,7 @@ public class NutritionHistoryService {
         entity.setProteinGrams(command.proteinGrams());
         entity.setFatGrams(command.fatGrams());
         entity.setFiberGrams(command.fiberGrams());
+        entity.setCarbsGrams(command.carbsGrams());
         entity.setNotes(command.notes());
 
         DailyNutritionEntryEntity saved = repository.save(entity);
@@ -256,6 +265,7 @@ public class NutritionHistoryService {
         BigDecimal proteinGrams,
         BigDecimal fatGrams,
         BigDecimal fiberGrams,
+        BigDecimal carbsGrams,
         String notes
     ) {
     }
@@ -267,10 +277,10 @@ public class NutritionHistoryService {
         BigDecimal proteinGrams,
         BigDecimal fatGrams,
         BigDecimal fiberGrams,
+        BigDecimal carbsGrams,
         String notes
     ) {
     }
-
     private DailyNutritionEntrySnapshot getOrCreateEmptySnapshot(UUID userId, LocalDate entryDate) {
         return findByUserAndDate(userId, entryDate)
             .orElseGet(() -> new DailyNutritionEntrySnapshot(
@@ -278,6 +288,7 @@ public class NutritionHistoryService {
                 userId,
                 entryDate,
                 null,
+                BigDecimal.ZERO,
                 BigDecimal.ZERO,
                 BigDecimal.ZERO,
                 BigDecimal.ZERO,
@@ -325,18 +336,8 @@ public class NutritionHistoryService {
             }
 
             completed.add(new DailyNutritionEntrySnapshot(
-                null,
-                userId,
-                cursor,
-                null,
-                null,
-                null,
-                null,
-                null,
-                null,
-                null,
-                null,
-                null
+                null, userId, cursor,
+                null, null, null, null, null, null, null, null, null, null
             ));
         }
 

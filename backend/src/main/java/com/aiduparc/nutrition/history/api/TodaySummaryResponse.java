@@ -13,6 +13,7 @@ public record TodaySummaryResponse(
         BigDecimal remainingCalories,
         BigDecimal proteinGrams,
         BigDecimal fatGrams,
-        BigDecimal fiberGrams
+        BigDecimal fiberGrams,
+        BigDecimal carbsGrams
 ) {
 }

@@ -757,6 +757,10 @@ ul {
   background: linear-gradient(90deg, #ec4899 0%, #a855f7 100%);
 }
 
+.macro-meter-card__fill--teal {
+  background: linear-gradient(90deg, #0d9488 0%, #06b6d4 100%);
+}
+
 .today-insight-card {
   margin-top: 14px;
   border-radius: 24px;
@@ -1395,6 +1399,10 @@ ul {
 
 .line-chart__path--fiber {
   stroke: #38a169;
+}
+
+.line-chart__path--carbs {
+  stroke: #f6ad55;
 }
 
 .line-chart__path--weight {

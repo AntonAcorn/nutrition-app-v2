@@ -8,6 +8,7 @@ public record UpdateNutritionTotalsRequest(
     @NotNull @DecimalMin(value = "0.0", inclusive = true) BigDecimal caloriesConsumedKcal,
     @NotNull @DecimalMin(value = "0.0", inclusive = true) BigDecimal proteinGrams,
     @NotNull @DecimalMin(value = "0.0", inclusive = true) BigDecimal fatGrams,
-    @NotNull @DecimalMin(value = "0.0", inclusive = true) BigDecimal fiberGrams
+    @NotNull @DecimalMin(value = "0.0", inclusive = true) BigDecimal fiberGrams,
+    @DecimalMin(value = "0.0", inclusive = true) BigDecimal carbsGrams
 ) {
 }

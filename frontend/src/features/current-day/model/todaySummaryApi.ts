@@ -11,6 +11,7 @@ interface TodaySummaryApiResponse {
   proteinGrams: number
   fatGrams: number
   fiberGrams: number
+  carbsGrams: number
 }
 
 function currentEntryDate(): string {
@@ -46,5 +47,6 @@ export async function fetchTodaySummary(): Promise<TodaySummary> {
     proteinGrams: payload.proteinGrams,
     fatGrams: payload.fatGrams,
     fiberGrams: payload.fiberGrams,
+    carbsGrams: payload.carbsGrams,
   }
 }

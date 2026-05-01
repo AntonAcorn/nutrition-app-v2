@@ -149,6 +149,7 @@ class NutritionHistoryServiceTest {
             new BigDecimal("30.00"),
             new BigDecimal("17.00"),
             new BigDecimal("8.00"),
+            null,
             "lunch"
         ));
 
@@ -180,6 +181,7 @@ class NutritionHistoryServiceTest {
             new BigDecimal("165.00"),
             null,
             new BigDecimal("27.00"),
+            null,
             "imported from sheet"
         );
 
@@ -276,6 +278,7 @@ class NutritionHistoryServiceTest {
             new BigDecimal("140.00"),
             null,
             new BigDecimal("24.00"),
+            null,
             "corrected"
         );
 
@@ -310,7 +313,8 @@ class NutritionHistoryServiceTest {
             new BigDecimal("1200.00"),
             new BigDecimal("90.00"),
             new BigDecimal("40.00"),
-            new BigDecimal("18.00")
+            new BigDecimal("18.00"),
+            null
         );
 
         assertThat(saved.caloriesConsumedKcal()).isEqualByComparingTo("1200.00");
@@ -338,7 +342,8 @@ class NutritionHistoryServiceTest {
             new BigDecimal("900.00"),
             new BigDecimal("70.00"),
             new BigDecimal("30.00"),
-            new BigDecimal("12.00")
+            new BigDecimal("12.00"),
+            null
         );
 
         assertThat(saved.caloriesConsumedKcal()).isEqualByComparingTo("900.00");

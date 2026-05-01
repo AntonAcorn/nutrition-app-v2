@@ -15,7 +15,7 @@ interface MacroCardProps {
   value: number
   unit: string
   progress: number
-  tone: 'purple' | 'orange' | 'pink'
+  tone: 'purple' | 'orange' | 'pink' | 'teal'
 }
 
 function MacroCard({ label, value, unit, progress, tone }: MacroCardProps) {
@@ -98,6 +98,7 @@ export function TodaySummaryBlock({ summary }: TodaySummaryBlockProps) {
           <MacroCard label="Protein" value={summary.proteinGrams} unit="g" progress={Math.min(100, Math.round((summary.proteinGrams / 180) * 100))} tone="purple" />
           <MacroCard label="Fat" value={summary.fatGrams} unit="g" progress={Math.min(100, Math.round((summary.fatGrams / 90) * 100))} tone="orange" />
           <MacroCard label="Fiber" value={summary.fiberGrams} unit="g" progress={Math.min(100, Math.round((summary.fiberGrams / 35) * 100))} tone="pink" />
+          <MacroCard label="Carbs" value={summary.carbsGrams} unit="g" progress={Math.min(100, Math.round((summary.carbsGrams / 250) * 100))} tone="teal" />
         </div>
 
         <div className="today-insight-card">

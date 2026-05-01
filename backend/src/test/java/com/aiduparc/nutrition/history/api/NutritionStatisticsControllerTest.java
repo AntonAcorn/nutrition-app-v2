@@ -69,7 +69,8 @@ class NutritionStatisticsControllerTest {
                     new BigDecimal("-160.00"),
                     new BigDecimal("120.00"),
                     new BigDecimal("65.00"),
-                    new BigDecimal("25.00")
+                    new BigDecimal("25.00"),
+                    null
                 ))
             ));
 

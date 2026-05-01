@@ -127,6 +127,7 @@ class DefaultPhotoAnalysisDraftServiceTest {
                 BigDecimal.valueOf(6),
                 null,
                 null,
+                null,
                 null
         ));
 
@@ -135,6 +136,7 @@ class DefaultPhotoAnalysisDraftServiceTest {
                 BigDecimal.valueOf(40),
                 BigDecimal.valueOf(25),
                 BigDecimal.valueOf(8),
+                null,
                 "Dinner"
         ));
 
@@ -155,7 +157,7 @@ class DefaultPhotoAnalysisDraftServiceTest {
 
         when(repository.findByIdAndUserId(draftId, userId)).thenReturn(Optional.of(entity));
 
-        assertThatThrownBy(() -> service.confirm(draftId, userId, new ConfirmPhotoAnalysisDraftRequest(null, null, null, null, null)))
+        assertThatThrownBy(() -> service.confirm(draftId, userId, new ConfirmPhotoAnalysisDraftRequest(null, null, null, null, null, null)))
                 .isInstanceOf(ResponseStatusException.class)
                 .hasMessageContaining("Draft already confirmed");
     }

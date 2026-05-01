@@ -11,6 +11,7 @@ public record NutritionStatisticsPointResponse(
     BigDecimal calorieBalance,
     BigDecimal proteinGrams,
     BigDecimal fatGrams,
-    BigDecimal fiberGrams
+    BigDecimal fiberGrams,
+    BigDecimal carbsGrams
 ) {
 }

@@ -39,6 +39,9 @@ public class MealTemplateEntity {
     @Column(name = "total_fiber", nullable = false, precision = 10, scale = 2)
     private BigDecimal totalFiber;
 
+    @Column(name = "total_carbs", nullable = false, precision = 10, scale = 2)
+    private BigDecimal totalCarbs;
+
     @Column(name = "created_at", nullable = false)
     private OffsetDateTime createdAt;
 
@@ -73,6 +76,8 @@ public class MealTemplateEntity {
     public void setTotalFat(BigDecimal totalFat) { this.totalFat = totalFat; }
     public BigDecimal getTotalFiber() { return totalFiber; }
     public void setTotalFiber(BigDecimal totalFiber) { this.totalFiber = totalFiber; }
+    public BigDecimal getTotalCarbs() { return totalCarbs; }
+    public void setTotalCarbs(BigDecimal totalCarbs) { this.totalCarbs = totalCarbs; }
     public OffsetDateTime getCreatedAt() { return createdAt; }
     public OffsetDateTime getUpdatedAt() { return updatedAt; }
 }

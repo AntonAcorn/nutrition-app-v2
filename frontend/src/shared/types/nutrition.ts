@@ -7,6 +7,7 @@ export interface TodaySummary {
   proteinGrams: number
   fatGrams: number
   fiberGrams: number
+  carbsGrams: number
 }
 
 export interface DraftItem {
@@ -55,6 +56,7 @@ export interface MealTemplate {
   totalProtein: number
   totalFat: number
   totalFiber: number
+  totalCarbs: number
   createdAt: string
   updatedAt: string
 }
@@ -68,6 +70,7 @@ export interface NutritionStatisticsPoint {
   proteinGrams: number
   fatGrams: number
   fiberGrams: number
+  carbsGrams: number
 }
 
 export interface NutritionBalanceSummary {

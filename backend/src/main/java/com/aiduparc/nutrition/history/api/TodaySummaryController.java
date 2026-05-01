@@ -74,7 +74,7 @@ public class TodaySummaryController {
         nutritionHistoryService.addToDailyTotals(new NutritionHistoryService.AddToDailyTotalsCommand(
             resolvedUserId, safeDate,
             request.caloriesConsumedKcal(), request.proteinGrams(), request.fatGrams(), request.fiberGrams(),
-            null
+            request.carbsGrams(), null
         ));
         return nutritionHistoryService.getTodaySummary(resolvedUserId, safeDate);
     }
@@ -90,7 +90,7 @@ public class TodaySummaryController {
         nutritionHistoryService.updateNutritionTotals(
             resolvedUserId, safeDate,
             java.math.BigDecimal.ZERO, java.math.BigDecimal.ZERO,
-            java.math.BigDecimal.ZERO, java.math.BigDecimal.ZERO
+            java.math.BigDecimal.ZERO, java.math.BigDecimal.ZERO, java.math.BigDecimal.ZERO
         );
         return nutritionHistoryService.getTodaySummary(resolvedUserId, safeDate);
     }
@@ -109,7 +109,8 @@ public class TodaySummaryController {
             request.caloriesConsumedKcal(), request.proteinGrams(), request.fatGrams(), request.fiberGrams());
         nutritionHistoryService.updateNutritionTotals(
             resolvedUserId, safeDate,
-            request.caloriesConsumedKcal(), request.proteinGrams(), request.fatGrams(), request.fiberGrams());
+            request.caloriesConsumedKcal(), request.proteinGrams(), request.fatGrams(),
+            request.fiberGrams(), request.carbsGrams());
         return nutritionHistoryService.getTodaySummary(resolvedUserId, safeDate);
     }
 }

@@ -48,6 +48,9 @@ public class DailyNutritionEntryEntity {
     @Column(name = "fiber_g", precision = 10, scale = 2)
     private BigDecimal fiberGrams;
 
+    @Column(name = "carbs_g", precision = 10, scale = 2)
+    private BigDecimal carbsGrams;
+
     @Column(name = "notes")
     private String notes;
 
@@ -127,6 +130,14 @@ public class DailyNutritionEntryEntity {
 
     public void setFiberGrams(BigDecimal fiberGrams) {
         this.fiberGrams = fiberGrams;
+    }
+
+    public BigDecimal getCarbsGrams() {
+        return carbsGrams;
+    }
+
+    public void setCarbsGrams(BigDecimal carbsGrams) {
+        this.carbsGrams = carbsGrams;
     }
 
     public String getNotes() {

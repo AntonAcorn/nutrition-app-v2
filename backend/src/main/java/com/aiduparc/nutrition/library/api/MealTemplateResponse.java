@@ -13,6 +13,7 @@ public record MealTemplateResponse(
         BigDecimal totalProtein,
         BigDecimal totalFat,
         BigDecimal totalFiber,
+        BigDecimal totalCarbs,
         OffsetDateTime createdAt,
         OffsetDateTime updatedAt
 ) {}

@@ -53,7 +53,8 @@ class TodaySummaryControllerTest {
                         new BigDecimal("460.00"),
                         new BigDecimal("108.00"),
                         new BigDecimal("52.00"),
-                        new BigDecimal("24.00")
+                        new BigDecimal("24.00"),
+                        null
                 )
         );
 
@@ -85,7 +86,8 @@ class TodaySummaryControllerTest {
                 new BigDecimal("800.00"),
                 new BigDecimal("90.00"),
                 new BigDecimal("40.00"),
-                new BigDecimal("18.00")
+                new BigDecimal("18.00"),
+                null
             )
         );
 
@@ -99,7 +101,7 @@ class TodaySummaryControllerTest {
 
         verify(nutritionHistoryService).updateNutritionTotals(
             eq(userId), eq(entryDate),
-            any(), any(), any(), any()
+            any(), any(), any(), any(), any()
         );
     }
 

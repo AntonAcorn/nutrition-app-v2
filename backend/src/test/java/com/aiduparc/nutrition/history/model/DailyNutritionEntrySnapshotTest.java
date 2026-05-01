@@ -23,6 +23,7 @@ class DailyNutritionEntrySnapshotTest {
             new BigDecimal("150.00"),
             new BigDecimal("70.00"),
             new BigDecimal("28.00"),
+            new BigDecimal("120.00"),
             "training day",
             OffsetDateTime.now(ZoneOffset.UTC),
             OffsetDateTime.now(ZoneOffset.UTC)
@@ -39,6 +40,7 @@ class DailyNutritionEntrySnapshotTest {
             LocalDate.of(2026, 4, 5),
             null,
             new BigDecimal("2100.00"),
+            null,
             null,
             null,
             null,
