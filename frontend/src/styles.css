@@ -2501,9 +2501,10 @@ ul {
   width: 100%;
   background: #1c1c1e;
   border-radius: 24px 24px 0 0;
-  padding: 20px 20px 36px;
-  display: grid;
-  gap: 18px;
+  padding: 16px 16px env(safe-area-inset-bottom, 24px);
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
   animation: qs-slide-up 0.22s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
@@ -2520,15 +2521,15 @@ ul {
 }
 
 .qs-title {
-  font-size: 1.05rem;
+  font-size: 1rem;
   font-weight: 700;
   color: #ffffff;
 }
 
 .qs-subtitle {
-  font-size: 0.8rem;
+  font-size: 0.78rem;
   color: rgba(255, 255, 255, 0.35);
-  margin-top: 3px;
+  margin-top: 2px;
 }
 
 .qs-close {
@@ -2536,9 +2537,9 @@ ul {
   background: rgba(255, 255, 255, 0.1);
   color: rgba(255, 255, 255, 0.6);
   border-radius: 50%;
-  width: 30px;
-  height: 30px;
-  font-size: 0.8rem;
+  width: 28px;
+  height: 28px;
+  font-size: 0.75rem;
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -2551,56 +2552,78 @@ ul {
   background: rgba(255, 255, 255, 0.16);
 }
 
-.qs-calories-row {
+/* Input section */
+.qs-fields {
   display: flex;
-  align-items: baseline;
-  gap: 8px;
+  flex-direction: column;
+  gap: 10px;
 }
 
-.qs-calories-input {
-  flex: 1;
-  min-width: 0;
-  background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 16px;
+.qs-field {
+  display: grid;
+  gap: 4px;
+  cursor: text;
+}
+
+.qs-field__label {
+  font-size: 0.7rem;
+  color: rgba(255, 255, 255, 0.4);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.qs-field__wrap {
+  position: relative;
+  display: grid;
+}
+
+.qs-field__wrap input {
+  width: 100%;
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  background: rgba(255, 255, 255, 0.05);
   color: #ffffff;
-  font-size: 2rem;
+  border-radius: 14px;
+  padding: 10px 48px 10px 14px;
+  font-size: 1.25rem;
   font-weight: 700;
-  padding: 14px 18px;
-  text-align: center;
   transition: border-color 0.15s, background 0.15s;
 }
 
-.qs-calories-input:focus {
+.qs-field__wrap input:focus {
   outline: none;
   border-color: rgba(59, 125, 255, 0.55);
   background: rgba(59, 125, 255, 0.07);
 }
 
-.qs-calories-unit {
-  font-size: 0.95rem;
-  color: rgba(255, 255, 255, 0.4);
+.qs-field__unit {
+  position: absolute;
+  right: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 0.8rem;
+  color: rgba(255, 255, 255, 0.35);
+  pointer-events: none;
   font-weight: 600;
 }
 
-.qs-macros-grid {
+.qs-macros-row {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 10px;
+  grid-template-columns: 1fr 1fr 1fr 1fr;
+  gap: 8px;
 }
 
 .qs-macro-field {
   display: grid;
-  gap: 5px;
+  gap: 4px;
   cursor: text;
   min-width: 0;
 }
 
 .qs-macro-label {
-  font-size: 0.72rem;
+  font-size: 0.65rem;
   color: rgba(255, 255, 255, 0.4);
   text-transform: uppercase;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.05em;
 }
 
 .qs-macro-input-wrap {
@@ -2613,9 +2636,9 @@ ul {
   border: 1px solid rgba(255, 255, 255, 0.09);
   background: rgba(255, 255, 255, 0.05);
   color: #ffffff;
-  border-radius: 14px;
-  padding: 11px 32px 11px 13px;
-  font-size: 1rem;
+  border-radius: 12px;
+  padding: 8px 22px 8px 8px;
+  font-size: 0.9rem;
   font-weight: 600;
   transition: border-color 0.15s, background 0.15s;
 }
@@ -2628,10 +2651,10 @@ ul {
 
 .qs-macro-unit {
   position: absolute;
-  right: 11px;
+  right: 7px;
   top: 50%;
   transform: translateY(-50%);
-  font-size: 0.72rem;
+  font-size: 0.65rem;
   color: rgba(255, 255, 255, 0.3);
   pointer-events: none;
 }
