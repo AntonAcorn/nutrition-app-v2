@@ -91,6 +91,19 @@ public class TodaySummaryController {
         return nutritionHistoryService.getTodaySummary(resolvedUserId, safeDate);
     }
 
+    @PutMapping("/water")
+    @ResponseStatus(HttpStatus.OK)
+    public TodaySummaryResponse updateWater(
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate entryDate,
+            @Valid @RequestBody UpdateWaterRequest request,
+            HttpSession session
+    ) {
+        LocalDate safeDate = entryDate != null ? entryDate : LocalDate.now();
+        UUID resolvedUserId = currentNutritionUserResolver.resolve(session, null);
+        nutritionHistoryService.updateWater(resolvedUserId, safeDate, request.glasses());
+        return nutritionHistoryService.getTodaySummary(resolvedUserId, safeDate);
+    }
+
     @PutMapping("/nutrition-totals")
     @ResponseStatus(HttpStatus.OK)
     public TodaySummaryResponse updateNutritionTotals(

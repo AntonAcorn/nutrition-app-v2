@@ -1,47 +1,42 @@
 import { useMemo, useState } from 'react'
+import { setWaterGlasses } from '../model/waterApi'
 
 const MAX_GLASSES = 4
 const glassLabels = ['0 / 4', '1 / 4', '2 / 4', '3 / 4', '4 / 4']
 const moodText = ['Dry start', 'Nice', 'Better', 'Great', 'Hydrated!']
 const mascotByGlasses = ['/mascot/sad.png', '/mascot/happy.png', '/mascot/cheer.png', '/mascot/water.png', '/mascot/joy.png']
 
-const STORAGE_KEY = 'water_intake'
-
-function todayString() {
-  return new Date().toISOString().slice(0, 10)
+interface Props {
+  waterGlasses: number
+  onUpdate: () => void
 }
 
-function loadGlasses(): number {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY)
-    if (!raw) return 0
-    const parsed = JSON.parse(raw)
-    return parsed.date === todayString() ? (parsed.glasses ?? 0) : 0
-  } catch {
-    return 0
-  }
-}
-
-function saveGlasses(glasses: number) {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify({ date: todayString(), glasses }))
-}
-
-export function WaterIntakeCard() {
-  const [glasses, setGlasses] = useState(loadGlasses)
+export function WaterIntakeCard({ waterGlasses, onUpdate }: Props) {
+  const [glasses, setGlasses] = useState(Math.min(waterGlasses, MAX_GLASSES))
+  const [saving, setSaving] = useState(false)
 
   const progress = useMemo(() => (glasses / MAX_GLASSES) * 100, [glasses])
 
+  async function applyGlasses(next: number) {
+    setGlasses(next)
+    setSaving(true)
+    try {
+      await setWaterGlasses(next)
+      onUpdate()
+    } catch {
+      // optimistic — keep local state even if API fails
+    } finally {
+      setSaving(false)
+    }
+  }
+
   function handleAddGlass() {
-    setGlasses((current) => {
-      const next = Math.min(MAX_GLASSES, current + 1)
-      saveGlasses(next)
-      return next
-    })
+    const next = Math.min(MAX_GLASSES, glasses + 1)
+    applyGlasses(next)
   }
 
   function handleReset() {
-    saveGlasses(0)
-    setGlasses(0)
+    applyGlasses(0)
   }
 
   return (
@@ -68,10 +63,10 @@ export function WaterIntakeCard() {
       </div>
 
       <div className="water-card__actions">
-        <button type="button" className="water-card__button water-card__button--secondary" onClick={handleReset} disabled={glasses === 0}>
+        <button type="button" className="water-card__button water-card__button--secondary" onClick={handleReset} disabled={glasses === 0 || saving}>
           Reset
         </button>
-        <button type="button" className="water-card__button" onClick={handleAddGlass} disabled={glasses >= MAX_GLASSES}>
+        <button type="button" className="water-card__button" onClick={handleAddGlass} disabled={glasses >= MAX_GLASSES || saving}>
           {glasses >= MAX_GLASSES ? 'Done for now' : '+1 glass'}
         </button>
       </div>

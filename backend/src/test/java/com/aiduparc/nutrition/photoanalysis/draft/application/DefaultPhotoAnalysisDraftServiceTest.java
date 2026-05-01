@@ -126,6 +126,7 @@ class DefaultPhotoAnalysisDraftServiceTest {
                 BigDecimal.valueOf(20),
                 BigDecimal.valueOf(6),
                 null,
+                0,
                 null,
                 null,
                 null

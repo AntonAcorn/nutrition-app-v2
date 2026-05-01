@@ -17,6 +17,7 @@ public record DailyNutritionEntrySnapshot(
     BigDecimal fatGrams,
     BigDecimal fiberGrams,
     BigDecimal carbsGrams,
+    int waterGlasses,
     String notes,
     OffsetDateTime createdAt,
     OffsetDateTime updatedAt
@@ -34,6 +35,7 @@ public record DailyNutritionEntrySnapshot(
             entity.getFatGrams(),
             entity.getFiberGrams(),
             entity.getCarbsGrams(),
+            entity.getWaterGlasses(),
             entity.getNotes(),
             entity.getCreatedAt(),
             entity.getUpdatedAt()

@@ -51,6 +51,9 @@ public class DailyNutritionEntryEntity {
     @Column(name = "carbs_g", precision = 10, scale = 2)
     private BigDecimal carbsGrams;
 
+    @Column(name = "water_glasses", nullable = false)
+    private Integer waterGlasses = 0;
+
     @Column(name = "notes")
     private String notes;
 
@@ -138,6 +141,14 @@ public class DailyNutritionEntryEntity {
 
     public void setCarbsGrams(BigDecimal carbsGrams) {
         this.carbsGrams = carbsGrams;
+    }
+
+    public Integer getWaterGlasses() {
+        return waterGlasses == null ? 0 : waterGlasses;
+    }
+
+    public void setWaterGlasses(Integer waterGlasses) {
+        this.waterGlasses = waterGlasses == null ? 0 : waterGlasses;
     }
 
     public String getNotes() {

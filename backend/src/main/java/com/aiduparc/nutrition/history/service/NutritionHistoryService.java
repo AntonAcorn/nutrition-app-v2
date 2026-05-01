@@ -85,7 +85,8 @@ public class NutritionHistoryService {
             macroTargets.proteinG(),
             macroTargets.fatG(),
             macroTargets.carbsG(),
-            macroTargets.fiberG()
+            macroTargets.fiberG(),
+            snapshot.waterGlasses()
         );
 
         log.info(
@@ -147,16 +148,11 @@ public class NutritionHistoryService {
         DailyNutritionEntrySnapshot current = getOrCreateEmptySnapshot(userId, entryDate);
 
         DailyNutritionEntrySnapshot result = upsert(new UpsertDailyNutritionEntryCommand(
-            userId,
-            entryDate,
+            userId, entryDate,
             defaultBigDecimal(current.caloriesConsumedKcal()),
-            current.calorieTargetKcal(),
-            weightKg,
-            current.proteinGrams(),
-            current.fatGrams(),
-            current.fiberGrams(),
-            current.carbsGrams(),
-            current.notes()
+            current.calorieTargetKcal(), weightKg,
+            current.proteinGrams(), current.fatGrams(), current.fiberGrams(), current.carbsGrams(),
+            current.notes(), current.waterGlasses()
         ));
         telegramNotificationService.notifyActivity(userId, "weight update");
         return result;
@@ -175,16 +171,10 @@ public class NutritionHistoryService {
         DailyNutritionEntrySnapshot current = getOrCreateEmptySnapshot(userId, entryDate);
 
         DailyNutritionEntrySnapshot result = upsert(new UpsertDailyNutritionEntryCommand(
-            userId,
-            entryDate,
-            caloriesConsumedKcal,
-            current.calorieTargetKcal(),
-            current.weightKg(),
-            proteinGrams,
-            fatGrams,
-            fiberGrams,
-            carbsGrams,
-            current.notes()
+            userId, entryDate, caloriesConsumedKcal,
+            current.calorieTargetKcal(), current.weightKg(),
+            proteinGrams, fatGrams, fiberGrams, carbsGrams,
+            current.notes(), current.waterGlasses()
         ));
         telegramNotificationService.notifyActivity(userId, "nutrition totals update");
         return result;
@@ -195,16 +185,14 @@ public class NutritionHistoryService {
         DailyNutritionEntrySnapshot current = getOrCreateEmptySnapshot(command.userId(), command.entryDate());
 
         upsert(new UpsertDailyNutritionEntryCommand(
-            command.userId(),
-            command.entryDate(),
+            command.userId(), command.entryDate(),
             defaultBigDecimal(current.caloriesConsumedKcal()).subtract(defaultBigDecimal(command.caloriesConsumedKcal())).max(BigDecimal.ZERO),
-            current.calorieTargetKcal(),
-            current.weightKg(),
+            current.calorieTargetKcal(), current.weightKg(),
             defaultBigDecimal(current.proteinGrams()).subtract(defaultBigDecimal(command.proteinGrams())).max(BigDecimal.ZERO),
             defaultBigDecimal(current.fatGrams()).subtract(defaultBigDecimal(command.fatGrams())).max(BigDecimal.ZERO),
             defaultBigDecimal(current.fiberGrams()).subtract(defaultBigDecimal(command.fiberGrams())).max(BigDecimal.ZERO),
             defaultBigDecimal(current.carbsGrams()).subtract(defaultBigDecimal(command.carbsGrams())).max(BigDecimal.ZERO),
-            current.notes()
+            current.notes(), current.waterGlasses()
         ));
     }
 
@@ -223,16 +211,14 @@ public class NutritionHistoryService {
         DailyNutritionEntrySnapshot current = getOrCreateEmptySnapshot(command.userId(), command.entryDate());
 
         DailyNutritionEntrySnapshot result = upsert(new UpsertDailyNutritionEntryCommand(
-            command.userId(),
-            command.entryDate(),
+            command.userId(), command.entryDate(),
             defaultBigDecimal(current.caloriesConsumedKcal()).add(defaultBigDecimal(command.caloriesConsumedKcal())),
-            current.calorieTargetKcal(),
-            current.weightKg(),
+            current.calorieTargetKcal(), current.weightKg(),
             defaultBigDecimal(current.proteinGrams()).add(defaultBigDecimal(command.proteinGrams())),
             defaultBigDecimal(current.fatGrams()).add(defaultBigDecimal(command.fatGrams())),
             defaultBigDecimal(current.fiberGrams()).add(defaultBigDecimal(command.fiberGrams())),
             defaultBigDecimal(current.carbsGrams()).add(defaultBigDecimal(command.carbsGrams())),
-            mergeNotes(current.notes(), command.notes())
+            mergeNotes(current.notes(), command.notes()), current.waterGlasses()
         ));
 
         saveMealLogEntry(command);
@@ -330,6 +316,7 @@ public class NutritionHistoryService {
         entity.setFatGrams(command.fatGrams());
         entity.setFiberGrams(command.fiberGrams());
         entity.setCarbsGrams(command.carbsGrams());
+        entity.setWaterGlasses(command.waterGlasses());
         entity.setNotes(command.notes());
 
         DailyNutritionEntryEntity saved = repository.save(entity);
@@ -346,8 +333,18 @@ public class NutritionHistoryService {
         BigDecimal fatGrams,
         BigDecimal fiberGrams,
         BigDecimal carbsGrams,
-        String notes
+        String notes,
+        int waterGlasses
     ) {
+        public UpsertDailyNutritionEntryCommand(
+            UUID userId, LocalDate entryDate, BigDecimal caloriesConsumedKcal,
+            BigDecimal calorieTargetKcal, BigDecimal weightKg,
+            BigDecimal proteinGrams, BigDecimal fatGrams, BigDecimal fiberGrams,
+            BigDecimal carbsGrams, String notes
+        ) {
+            this(userId, entryDate, caloriesConsumedKcal, calorieTargetKcal, weightKg,
+                proteinGrams, fatGrams, fiberGrams, carbsGrams, notes, 0);
+        }
     }
 
     public record AddToDailyTotalsCommand(
@@ -370,22 +367,25 @@ public class NutritionHistoryService {
             this(userId, entryDate, caloriesConsumedKcal, proteinGrams, fatGrams, fiberGrams, carbsGrams, notes, null, null);
         }
     }
+    @Transactional
+    public void updateWater(UUID userId, LocalDate entryDate, int glasses) {
+        DailyNutritionEntrySnapshot current = getOrCreateEmptySnapshot(userId, entryDate);
+        upsert(new UpsertDailyNutritionEntryCommand(
+            userId, entryDate,
+            defaultBigDecimal(current.caloriesConsumedKcal()),
+            current.calorieTargetKcal(), current.weightKg(),
+            current.proteinGrams(), current.fatGrams(), current.fiberGrams(), current.carbsGrams(),
+            current.notes(), Math.max(0, Math.min(glasses, 10))
+        ));
+    }
+
     private DailyNutritionEntrySnapshot getOrCreateEmptySnapshot(UUID userId, LocalDate entryDate) {
         return findByUserAndDate(userId, entryDate)
             .orElseGet(() -> new DailyNutritionEntrySnapshot(
-                null,
-                userId,
-                entryDate,
-                null,
-                BigDecimal.ZERO,
-                BigDecimal.ZERO,
-                BigDecimal.ZERO,
-                BigDecimal.ZERO,
-                BigDecimal.ZERO,
-                BigDecimal.ZERO,
-                null,
-                null,
-                null
+                null, userId, entryDate,
+                null, BigDecimal.ZERO, BigDecimal.ZERO,
+                BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO,
+                0, null, null, null
             ));
     }
 
@@ -426,7 +426,7 @@ public class NutritionHistoryService {
 
             completed.add(new DailyNutritionEntrySnapshot(
                 null, userId, cursor,
-                null, null, null, null, null, null, null, null, null, null
+                null, null, null, null, null, null, null, 0, null, null, null
             ));
         }
 

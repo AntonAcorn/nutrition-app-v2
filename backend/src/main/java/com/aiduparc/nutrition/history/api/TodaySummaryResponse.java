@@ -18,6 +18,7 @@ public record TodaySummaryResponse(
         BigDecimal proteinTargetGrams,
         BigDecimal fatTargetGrams,
         BigDecimal carbsTargetGrams,
-        BigDecimal fiberTargetGrams
+        BigDecimal fiberTargetGrams,
+        int waterGlasses
 ) {
 }
