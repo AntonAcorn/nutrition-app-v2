@@ -1987,10 +1987,13 @@ ul {
     max-height: 180px;
   }
 
-  .line-chart__labels,
-  .line-chart__axis--x {
+  .line-chart__labels {
     grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: 3px;
+    font-size: 0.64rem;
+  }
+
+  .line-chart__axis--x span {
     font-size: 0.64rem;
   }
 
@@ -2112,15 +2115,14 @@ ul {
   left: 0;
   right: 0;
   bottom: 0;
-  display: grid;
-  grid-template-columns: repeat(var(--label-count, 7), minmax(0, 1fr));
-  gap: 6px;
-  text-align: center;
+  display: flex;
+  justify-content: space-between;
+  padding: 0 2px;
 }
 
 .line-chart__axis--x span {
-  overflow: hidden;
   white-space: nowrap;
+  font-size: 0.78rem;
 }
 
 .line-chart--expanded .line-chart__axis--x {
