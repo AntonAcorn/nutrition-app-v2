@@ -158,47 +158,67 @@ function RangeSelector({ value, onChange }: { value: RangeDays; onChange: (value
 }
 
 function CalorieBarChart({ points }: { points: NutritionStatisticsPoint[] }) {
-  const W = 760, H = 140
-  const midY = H / 2
+  const W = 600, H = 220
+  const padT = 32, padB = 36
+  const chartH = H - padT - padB
+  const midY = padT + chartH / 2
   const maxAbs = Math.max(200, ...points.map(p => Math.abs(p.calorieBalance)))
   const gap = W / Math.max(points.length, 1)
-  const barW = Math.max(2, gap * 0.65)
+  const barW = Math.max(5, gap * 0.6)
+
+  const dateLabels = [0, Math.floor((points.length - 1) / 2), points.length - 1]
 
   return (
-    <div className="line-chart line-chart--dark-card">
-      <div className="line-chart__canvas line-chart__canvas--dark">
-        <div className="line-chart__plot">
-          <svg viewBox={`0 0 ${W} ${H}`} className="line-chart__svg" role="img" aria-label="Calorie balance">
-            <line x1="0" y1={midY} x2={W} y2={midY} stroke="rgba(255,255,255,0.15)" strokeWidth="1" strokeDasharray="4 4" />
-            {points.map((p, i) => {
-              const x = points.length === 1 ? W / 2 : (i / (points.length - 1)) * W
-              const barH = Math.max(1, (Math.abs(p.calorieBalance) / maxAbs) * (midY - 6))
-              const isOver = p.calorieBalance >= 0
-              return (
-                <rect
-                  key={p.entryDate}
-                  x={x - barW / 2}
-                  y={isOver ? midY - barH : midY}
-                  width={barW}
-                  height={barH}
-                  className={isOver ? 'calorie-bar--over' : 'calorie-bar--under'}
-                  rx="2"
-                />
-              )
-            })}
-          </svg>
-          <div className="line-chart__axis line-chart__axis--x" style={{ ['--label-count' as string]: String(points.length) }}>
-            {points.map((point, index) => {
-              const show = index === 0 || index === Math.floor((points.length - 1) / 2) || index === points.length - 1
-              return (
-                <span key={point.entryDate} className={show ? '' : 'line-chart__label--ghost'}>
-                  {show ? formatShortDate(point.entryDate) : ''}
-                </span>
-              )
-            })}
-          </div>
-        </div>
-      </div>
+    <div className="cal-bar-chart">
+      <svg viewBox={`0 0 ${W} ${H}`} className="cal-bar-chart__svg">
+        {/* guide lines at 50% and 100% */}
+        {[1, 0.5].map(pct => {
+          const yT = midY - pct * (chartH / 2 - 2)
+          const yB = midY + pct * (chartH / 2 - 2)
+          return (
+            <g key={pct}>
+              <line x1={0} y1={yT} x2={W} y2={yT} stroke="rgba(255,255,255,0.06)" strokeWidth="1" />
+              <line x1={0} y1={yB} x2={W} y2={yB} stroke="rgba(255,255,255,0.06)" strokeWidth="1" />
+            </g>
+          )
+        })}
+        {/* zero line */}
+        <line x1={0} y1={midY} x2={W} y2={midY} stroke="rgba(255,255,255,0.22)" strokeWidth="1.5" />
+
+        {/* bars */}
+        {points.map((p, i) => {
+          const x = points.length === 1 ? W / 2 : (i / (points.length - 1)) * W
+          const barH = Math.max(2, (Math.abs(p.calorieBalance) / maxAbs) * (chartH / 2 - 6))
+          const isOver = p.calorieBalance >= 0
+          return (
+            <rect key={p.entryDate}
+              x={x - barW / 2} y={isOver ? midY - barH : midY}
+              width={barW} height={barH}
+              className={isOver ? 'calorie-bar--over' : 'calorie-bar--under'}
+              rx="3"
+            />
+          )
+        })}
+
+        {/* corner labels */}
+        <text x={6} y={padT - 8} fontSize="22" fill="rgba(239,68,68,0.55)">surplus ↑</text>
+        <text x={6} y={H - 6} fontSize="22" fill="rgba(34,197,94,0.55)">deficit ↓</text>
+        <text x={W - 4} y={padT - 8} fontSize="22" fill="rgba(255,255,255,0.2)" textAnchor="end">
+          ±{Math.round(maxAbs)} kcal
+        </text>
+
+        {/* x-axis date labels */}
+        {points.map((p, i) => {
+          if (!dateLabels.includes(i)) return null
+          const x = points.length === 1 ? W / 2 : (i / (points.length - 1)) * W
+          const anchor = i === 0 ? 'start' : i === points.length - 1 ? 'end' : 'middle'
+          return (
+            <text key={p.entryDate} x={x} y={H - 2} fontSize="22" fill="rgba(255,255,255,0.3)" textAnchor={anchor}>
+              {formatShortDate(p.entryDate)}
+            </text>
+          )
+        })}
+      </svg>
     </div>
   )
 }
@@ -306,6 +326,18 @@ function LineChart({
           </div>
         </div>
       </div>
+      {trendline && trendline.some(v => v != null) && (
+        <div className="chart-legend">
+          <span className="chart-legend__item">
+            <span className="chart-legend__line chart-legend__line--solid" style={{ background: '#7b61ff' }} />
+            Weight
+          </span>
+          <span className="chart-legend__item">
+            <span className="chart-legend__line chart-legend__line--dashed" />
+            5-day trend
+          </span>
+        </div>
+      )}
     </div>
   )
 
