@@ -538,31 +538,6 @@ export function StatisticsTab({ refreshToken = 0 }: StatisticsTabProps) {
             />
           </section>
 
-          {(data.weeklySummary || data.monthlySummary) && (
-            <section className="stats-period-row panel">
-              {data.weeklySummary && (
-                <div className="stats-period-card">
-                  <p className="stats-period-card__label">7-day avg</p>
-                  <p className="stats-period-card__value">{Math.round(data.weeklySummary.consumedCalories / 7)}</p>
-                  <p className="stats-period-card__unit">kcal / day</p>
-                  <p className={`stats-period-card__balance ${data.weeklySummary.calorieBalance <= 0 ? 'stats-period-card__balance--good' : 'stats-period-card__balance--bad'}`}>
-                    {formatSigned(Math.round(data.weeklySummary.calorieBalance / 7))} vs target
-                  </p>
-                </div>
-              )}
-              {data.monthlySummary && (
-                <div className="stats-period-card">
-                  <p className="stats-period-card__label">30-day avg</p>
-                  <p className="stats-period-card__value">{Math.round(data.monthlySummary.consumedCalories / 30)}</p>
-                  <p className="stats-period-card__unit">kcal / day</p>
-                  <p className={`stats-period-card__balance ${data.monthlySummary.calorieBalance <= 0 ? 'stats-period-card__balance--good' : 'stats-period-card__balance--bad'}`}>
-                    {formatSigned(Math.round(data.monthlySummary.calorieBalance / 30))} vs target
-                  </p>
-                </div>
-              )}
-            </section>
-          )}
-
           <LineChart
             title="Weight"
             unit="kg"
