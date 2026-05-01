@@ -1970,10 +1970,11 @@ ul {
     min-width: 0;
   }
 
-  .line-chart__canvas,
+  .line-chart__canvas {
+    min-height: 180px;
+  }
+
   .line-chart__canvas--dark {
-    grid-template-columns: 24px minmax(0, 1fr);
-    gap: 6px;
     min-height: 180px;
   }
 

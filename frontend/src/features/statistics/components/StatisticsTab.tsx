@@ -305,7 +305,7 @@ function LineChart({
     points.length > 2 ? Math.floor((points.length - 1) / 2) : 0,
     Math.max(0, points.length - 1),
   ])
-  const expandedLabelStep = points.length > 14 ? 4 : points.length > 7 ? 2 : 1
+  const labelStep = points.length > 14 ? 4 : points.length > 7 ? 2 : 1
 
   // latest non-null value + dot position
   let lastNonNullIdx = -1
@@ -346,13 +346,13 @@ function LineChart({
           </svg>
           <div className="line-chart__axis line-chart__axis--x" style={{ ['--label-count' as string]: String(points.length) }}>
             {points.map((point, index) => {
-              const visible = expanded ? (index % expandedLabelStep === 0 || index === points.length - 1) : compactLabelIndexes.has(index)
+              const visible = index % labelStep === 0 || compactLabelIndexes.has(index)
               return (
                 <span
                   key={`${title}-${point.entryDate}`}
                   className={visible ? '' : 'line-chart__label--ghost'}
                 >
-                  {visible ? (expanded ? formatExpandedDate(point.entryDate) : formatShortDate(point.entryDate)) : ''}
+                  {visible ? formatShortDate(point.entryDate) : ''}
                 </span>
               )
             })}
