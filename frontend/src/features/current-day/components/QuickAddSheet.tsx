@@ -1,4 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
+import { listTemplates } from '../../food-library/model/mealTemplateApi'
+import type { MealTemplate } from '../../../shared/types/nutrition'
 
 interface Props {
   onAdd: (calories: number, protein: number, fat: number, fiber: number, carbs: number) => Promise<void>
@@ -38,7 +40,12 @@ export function QuickAddSheet({ onAdd, onClose }: Props) {
   const [fiber, setFiber]       = useState('')
   const [saving, setSaving]     = useState(false)
   const [error, setError]       = useState('')
+  const [templates, setTemplates] = useState<MealTemplate[]>([])
   const backdropRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    listTemplates().then(list => setTemplates(list.slice(0, 4))).catch(() => {})
+  }, [])
 
   useEffect(() => {
     const vv = window.visualViewport
@@ -57,6 +64,15 @@ export function QuickAddSheet({ onAdd, onClose }: Props) {
       vv.removeEventListener('scroll', update)
     }
   }, [])
+
+  function fillFromTemplate(t: MealTemplate) {
+    setCalories(String(Math.round(t.totalCalories)))
+    setProtein(String(Math.round(t.totalProtein)))
+    setFat(String(Math.round(t.totalFat)))
+    setCarbs(String(Math.round(t.totalCarbs)))
+    setFiber(String(Math.round(t.totalFiber)))
+    setError('')
+  }
 
   async function handleSubmit() {
     const kcal = Number(calories) || 0
@@ -85,6 +101,25 @@ export function QuickAddSheet({ onAdd, onClose }: Props) {
           </div>
           <button type="button" className="qs-close" onClick={onClose}>✕</button>
         </div>
+
+        {templates.length > 0 ? (
+          <div className="qs-templates">
+            <p className="qs-templates__label">Saved meals</p>
+            <div className="qs-templates__list">
+              {templates.map(t => (
+                <button
+                  key={t.id}
+                  type="button"
+                  className="qs-template-btn"
+                  onClick={() => fillFromTemplate(t)}
+                >
+                  <span className="qs-template-btn__name">{t.name}</span>
+                  <span className="qs-template-btn__kcal">{Math.round(t.totalCalories)} kcal</span>
+                </button>
+              ))}
+            </div>
+          </div>
+        ) : null}
 
         <label className={`barcode-macro-chip barcode-macro-chip--calories qs-chip qs-chip--calories`}>
           <span className="barcode-macro-chip__value">{Number(calories) || 0}</span>

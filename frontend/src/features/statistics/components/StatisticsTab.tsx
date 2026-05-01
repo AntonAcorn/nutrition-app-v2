@@ -66,22 +66,33 @@ function formatMetricValue(value: number | null | undefined, digits = 2): string
   return value.toFixed(digits)
 }
 
+function localDateString(d: Date): string {
+  const y = d.getFullYear()
+  const mo = String(d.getMonth() + 1).padStart(2, '0')
+  const da = String(d.getDate()).padStart(2, '0')
+  return `${y}-${mo}-${da}`
+}
+
+function prevDay(dateStr: string): string {
+  const d = new Date(dateStr + 'T12:00:00')
+  d.setDate(d.getDate() - 1)
+  return localDateString(d)
+}
+
 function computeStreak(points: NutritionStatisticsPoint[]): number {
   const sorted = [...points].sort((a, b) => a.entryDate.localeCompare(b.entryDate))
   const logged = sorted.filter(p => p.consumedCalories > 0)
   if (logged.length === 0) return 0
   const last = logged[logged.length - 1]
-  const today = new Date().toISOString().split('T')[0]
-  const yesterday = new Date(Date.now() - 86400000).toISOString().split('T')[0]
+  const today = localDateString(new Date())
+  const yesterday = prevDay(today)
   if (last.entryDate !== today && last.entryDate !== yesterday) return 0
   let streak = 0
   let expected = last.entryDate
   for (let i = logged.length - 1; i >= 0; i--) {
     if (logged[i].entryDate === expected) {
       streak++
-      const d = new Date(expected)
-      d.setDate(d.getDate() - 1)
-      expected = d.toISOString().split('T')[0]
+      expected = prevDay(expected)
     } else {
       break
     }
@@ -512,6 +523,11 @@ export function StatisticsTab({ refreshToken = 0 }: StatisticsTabProps) {
           <p className="statistics-empty-state__emoji">📊</p>
           <p className="statistics-empty-state__title">No data for this period</p>
           <p className="statistics-empty-state__hint">Log meals on the Today tab — your charts and stats will appear here.</p>
+        </section>
+      ) : null}
+      {!loading && !error && data && loggedPoints.length > 0 && loggedPoints.length < 3 ? (
+        <section className="panel statistics-empty-state" style={{ paddingTop: '0.75rem', paddingBottom: '0.75rem' }}>
+          <p className="statistics-empty-state__hint" style={{ margin: 0 }}>Only {loggedPoints.length} day{loggedPoints.length > 1 ? 's' : ''} logged — charts will be more useful with 3+ days of data.</p>
         </section>
       ) : null}
       {!loading && !error && data && loggedPoints.length > 0 ? (

@@ -97,8 +97,8 @@ export function CurrentDayTab({ refreshToken = 0, successMessage = '', onDayUpda
     const normalizedWeightInput = weightInput.trim().replace(',', '.')
     const parsedWeight = Number(normalizedWeightInput)
 
-    if (!Number.isFinite(parsedWeight) || parsedWeight <= 0) {
-      setError('Enter a valid weight in kilograms')
+    if (!Number.isFinite(parsedWeight) || parsedWeight <= 0 || parsedWeight > 200) {
+      setError('Enter a valid weight between 1 and 200 kg')
       return
     }
 

@@ -896,6 +896,30 @@ ul {
   cursor: default;
 }
 
+.water-card__manual {
+  margin-top: 10px;
+}
+
+.water-card__manual-input {
+  width: 100%;
+  padding: 8px 12px;
+  background: rgba(255, 255, 255, 0.07);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 8px;
+  color: #fff;
+  font-size: 0.875rem;
+  box-sizing: border-box;
+}
+
+.water-card__manual-input::placeholder {
+  color: rgba(255, 255, 255, 0.35);
+}
+
+.water-card__manual-input:focus {
+  outline: none;
+  border-color: rgba(255, 255, 255, 0.35);
+}
+
 .weight-mascot-card {
   display: flex;
   align-items: center;
@@ -2452,6 +2476,33 @@ ul {
   box-shadow: none;
 }
 
+.analyzer-error-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.analyzer-error-row .error-text {
+  flex: 1;
+  margin: 0;
+}
+
+.analyzer-retry-btn {
+  flex-shrink: 0;
+  padding: 6px 14px;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 8px;
+  color: #fff;
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+
+.analyzer-retry-btn:hover {
+  background: rgba(255, 255, 255, 0.16);
+}
+
 /* ── Photo upload hero (centered layout) ───────────────────────────────── */
 .photo-upload-hero {
   display: flex;
@@ -2879,6 +2930,54 @@ ul {
   display: flex;
   flex-direction: column;
   gap: 10px;
+}
+
+.qs-templates {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.qs-templates__label {
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.4);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.qs-templates__list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.qs-template-btn {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 12px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  color: #fff;
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.15s;
+}
+
+.qs-template-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.qs-template-btn__name {
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.qs-template-btn__kcal {
+  font-size: 0.8rem;
+  color: rgba(255, 255, 255, 0.45);
+  flex-shrink: 0;
 }
 
 .qs-field {

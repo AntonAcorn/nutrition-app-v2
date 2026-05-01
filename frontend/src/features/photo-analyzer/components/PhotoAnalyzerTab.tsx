@@ -585,7 +585,21 @@ export function PhotoAnalyzerTab({ onConfirmed }: PhotoAnalyzerTabProps) {
           </div>
         ) : null}
 
-        {error ? <p className="error-text">{error}</p> : null}
+        {error ? (
+          <div className="analyzer-error-row">
+            <p className="error-text">{error}</p>
+            {mode === 'photo' && selectedFile && !uploading ? (
+              <button type="button" className="analyzer-retry-btn" onClick={startPhotoAnalysis}>
+                Try again
+              </button>
+            ) : null}
+            {mode === 'voice' && transcript.trim() && !analyzing ? (
+              <button type="button" className="analyzer-retry-btn" onClick={startVoiceAnalysis}>
+                Try again
+              </button>
+            ) : null}
+          </div>
+        ) : null}
         {successMessage ? <p className="success-text">{successMessage}</p> : null}
 
         {/* Draft review (shared for both modes) */}

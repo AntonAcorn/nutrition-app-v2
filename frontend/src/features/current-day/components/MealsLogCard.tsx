@@ -11,6 +11,7 @@ interface Props {
 export function MealsLogCard({ refreshToken = 0, onDeleted }: Props) {
   const [meals, setMeals] = useState<MealLogEntry[]>([])
   const [deletingId, setDeletingId] = useState<string | null>(null)
+  const [deleteError, setDeleteError] = useState('')
 
   useEffect(() => {
     listMealLog(getTodayLocalDateInputValue()).then(setMeals).catch(() => {})
@@ -20,12 +21,13 @@ export function MealsLogCard({ refreshToken = 0, onDeleted }: Props) {
 
   async function handleDelete(id: string) {
     setDeletingId(id)
+    setDeleteError('')
     try {
       await deleteMealLogEntry(id)
       setMeals(prev => prev.filter(m => m.id !== id))
       onDeleted()
     } catch {
-      // silent — meal stays in list
+      setDeleteError('Failed to delete. Please try again.')
     } finally {
       setDeletingId(null)
     }
@@ -34,6 +36,7 @@ export function MealsLogCard({ refreshToken = 0, onDeleted }: Props) {
   return (
     <section className="panel meals-log-card">
       <p className="meals-log-card__title">Today's meals</p>
+      {deleteError ? <p className="error-text" style={{ marginBottom: '0.5rem' }}>{deleteError}</p> : null}
       <div className="meals-log-list">
         {meals.map(m => (
           <div key={m.id} className="meal-log-row">
