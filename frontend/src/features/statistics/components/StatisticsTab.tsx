@@ -327,8 +327,12 @@ function LineChart({
   const dotY = latestValue != null ? height - ((latestValue - min) / range) * height : null
   const gradId = `grad-${title.toLowerCase().replace(/\s+/g, '-')}`
 
-  const formattedLatest = latestValue != null
-    ? (valueKey === 'weightKg' ? latestValue.toFixed(1) : Math.round(latestValue).toString())
+  const numericValues = values.filter((v): v is number => v != null)
+  const avgValue = numericValues.length > 0
+    ? numericValues.reduce((a, b) => a + b, 0) / numericValues.length
+    : null
+  const formattedAvg = avgValue != null
+    ? (valueKey === 'weightKg' ? avgValue.toFixed(1) : Math.round(avgValue).toString())
     : null
 
   const chartContent = (
@@ -385,9 +389,9 @@ function LineChart({
           <p className="screen-header__eyebrow">Metric</p>
           <h3>{title}</h3>
         </div>
-        {formattedLatest != null && (
+        {formattedAvg != null && (
           <span className="chart-latest-value">
-            {formattedLatest}<span className="chart-latest-unit"> {unit}</span>
+            <span className="chart-latest-unit">avg </span>{formattedAvg}<span className="chart-latest-unit"> {unit}</span>
           </span>
         )}
       </div>
