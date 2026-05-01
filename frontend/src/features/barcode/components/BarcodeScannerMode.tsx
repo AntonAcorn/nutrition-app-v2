@@ -34,8 +34,17 @@ export function BarcodeScannerMode({ onAdded, onCancel }: Props) {
       try {
         const { BrowserMultiFormatReader } = await import('@zxing/browser')
         const reader = new BrowserMultiFormatReader()
-        const controls = await reader.decodeFromVideoDevice(
-          undefined,
+        const controls = await reader.decodeFromConstraints(
+          {
+            video: {
+              facingMode: 'environment',
+              width: { ideal: 1280 },
+              height: { ideal: 720 },
+              // @ts-expect-error — non-standard but supported on most mobile browsers
+              focusMode: 'continuous',
+              advanced: [{ focusMode: 'continuous' }],
+            },
+          },
           videoRef.current,
           async (result, _err, ctrl) => {
             if (!result || stopped) return
