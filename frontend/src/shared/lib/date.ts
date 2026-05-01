@@ -1,4 +1,4 @@
-export const APP_TIME_ZONE = 'America/Toronto'
+export const APP_TIME_ZONE = Intl.DateTimeFormat().resolvedOptions().timeZone
 
 function getTimeZoneParts(date: Date, timeZone: string = APP_TIME_ZONE) {
   const formatter = new Intl.DateTimeFormat('en-US', {
