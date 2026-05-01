@@ -449,15 +449,6 @@ export function StatisticsTab({ refreshToken = 0 }: StatisticsTabProps) {
               onExpand={() => setExpandedChart((current) => (current === 'Fat' ? null : 'Fat'))}
             />
             <LineChart
-              title="Fiber"
-              unit="g"
-              points={points}
-              valueKey="fiberGrams"
-              colorClass="line-chart__path--fiber"
-              expanded={expandedChart === 'Fiber'}
-              onExpand={() => setExpandedChart((current) => (current === 'Fiber' ? null : 'Fiber'))}
-            />
-            <LineChart
               title="Carbs"
               unit="g"
               points={points}
@@ -465,6 +456,15 @@ export function StatisticsTab({ refreshToken = 0 }: StatisticsTabProps) {
               colorClass="line-chart__path--carbs"
               expanded={expandedChart === 'Carbs'}
               onExpand={() => setExpandedChart((current) => (current === 'Carbs' ? null : 'Carbs'))}
+            />
+            <LineChart
+              title="Fiber"
+              unit="g"
+              points={points}
+              valueKey="fiberGrams"
+              colorClass="line-chart__path--fiber"
+              expanded={expandedChart === 'Fiber'}
+              onExpand={() => setExpandedChart((current) => (current === 'Fiber' ? null : 'Fiber'))}
             />
           </div>
           <StatisticsTable points={points} />
