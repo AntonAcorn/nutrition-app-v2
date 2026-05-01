@@ -46,6 +46,9 @@ public class UserProfileService {
         entity.setFatTargetG(macros.fatG());
         entity.setCarbsTargetG(macros.carbsG());
         entity.setFiberTargetG(macros.fiberG());
+        if (command.waterGoalGlasses() != null) {
+            entity.setWaterGoalGlasses(command.waterGoalGlasses());
+        }
 
         return repository.save(entity);
     }
@@ -88,8 +91,17 @@ public class UserProfileService {
         entity.setFatTargetG(macros.fatG());
         entity.setCarbsTargetG(macros.carbsG());
         entity.setFiberTargetG(macros.fiberG());
+        if (command.waterGoalGlasses() != null) {
+            entity.setWaterGoalGlasses(command.waterGoalGlasses());
+        }
 
         return repository.save(entity);
+    }
+
+    public int getWaterGoal(UUID userId) {
+        return findByNutritionUserId(userId)
+            .map(UserProfileEntity::getWaterGoalGlasses)
+            .orElse(4);
     }
 
     public MacroTargets getMacroTargets(UUID userId) {
@@ -137,7 +149,8 @@ public class UserProfileService {
         BigDecimal startingWeightKg,
         String activityLevel,
         String goal,
-        String weightLossStrategy
+        String weightLossStrategy,
+        Integer waterGoalGlasses
     ) {}
 
     public record UpdateUserProfileCommand(
@@ -152,6 +165,7 @@ public class UserProfileService {
         BigDecimal proteinTargetG,
         BigDecimal fatTargetG,
         BigDecimal carbsTargetG,
-        BigDecimal fiberTargetG
+        BigDecimal fiberTargetG,
+        Integer waterGoalGlasses
     ) {}
 }

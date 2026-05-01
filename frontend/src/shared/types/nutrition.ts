@@ -13,6 +13,7 @@ export interface TodaySummary {
   carbsTargetGrams: number
   fiberTargetGrams: number
   waterGlasses: number
+  waterGoalGlasses: number
 }
 
 export interface DraftItem {

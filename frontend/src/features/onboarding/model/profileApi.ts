@@ -12,6 +12,7 @@ export interface OnboardingPayload {
   fatTargetG?: number
   carbsTargetG?: number
   fiberTargetG?: number
+  waterGoalGlasses?: number
 }
 
 export async function submitProfile(payload: OnboardingPayload): Promise<void> {

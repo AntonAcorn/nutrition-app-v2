@@ -50,7 +50,8 @@ public class UserProfileController {
             request.startingWeightKg(),
             request.activityLevel(),
             request.goal(),
-            request.weightLossStrategy()
+            request.weightLossStrategy(),
+            request.waterGoalGlasses()
         ));
 
         return ResponseEntity.status(HttpStatus.CREATED).body(UserProfileResponse.from(entity));
@@ -75,7 +76,8 @@ public class UserProfileController {
             request.proteinTargetG(),
             request.fatTargetG(),
             request.carbsTargetG(),
-            request.fiberTargetG()
+            request.fiberTargetG(),
+            request.waterGoalGlasses()
         ));
 
         return UserProfileResponse.from(entity);

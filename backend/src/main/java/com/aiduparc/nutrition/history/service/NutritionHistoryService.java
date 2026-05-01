@@ -71,6 +71,8 @@ public class NutritionHistoryService {
         BigDecimal remainingCalories = dailyTargetCalories.subtract(consumedCalories).max(BigDecimal.ZERO);
         UserProfileService.MacroTargets macroTargets = userProfileService.getMacroTargets(userId);
 
+        int waterGoalGlasses = userProfileService.getWaterGoal(userId);
+
         TodaySummaryResponse response = new TodaySummaryResponse(
             userId,
             entryDate,
@@ -86,7 +88,8 @@ public class NutritionHistoryService {
             macroTargets.fatG(),
             macroTargets.carbsG(),
             macroTargets.fiberG(),
-            snapshot.waterGlasses()
+            snapshot.waterGlasses(),
+            waterGoalGlasses
         );
 
         log.info(

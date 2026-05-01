@@ -1,7 +1,6 @@
 import { useState } from 'react'
 import { setWaterGlasses } from '../model/waterApi'
 
-const DISPLAY_MAX = 8
 const mascotByLevel = ['/mascot/sad.png', '/mascot/happy.png', '/mascot/cheer.png', '/mascot/water.png', '/mascot/joy.png']
 const moodByLevel = ['Dry start', 'Nice', 'Better', 'Great', 'Hydrated!']
 
@@ -15,14 +14,16 @@ function mascotIndex(glasses: number): number {
 
 interface Props {
   waterGlasses: number
+  waterGoalGlasses: number
   onUpdate: () => void
 }
 
-export function WaterIntakeCard({ waterGlasses, onUpdate }: Props) {
+export function WaterIntakeCard({ waterGlasses, waterGoalGlasses, onUpdate }: Props) {
   const [glasses, setGlasses] = useState(waterGlasses)
   const [saving, setSaving] = useState(false)
 
-  const progress = Math.min((glasses / DISPLAY_MAX) * 100, 100)
+  const displayMax = Math.max(waterGoalGlasses, 1)
+  const progress = Math.min((glasses / displayMax) * 100, 100)
   const idx = mascotIndex(glasses)
 
   async function applyGlasses(next: number) {
@@ -53,10 +54,10 @@ export function WaterIntakeCard({ waterGlasses, onUpdate }: Props) {
       <div className="water-card__slider" aria-hidden="true">
         <span className="water-card__slider-fill" style={{ width: `${progress}%` }} />
         <div className="water-card__ticks">
-          {Array.from({ length: DISPLAY_MAX + 1 }).map((_, index) => (
+          {Array.from({ length: displayMax + 1 }).map((_, index) => (
             <span
               key={index}
-              className={`water-card__tick ${index <= Math.min(glasses, DISPLAY_MAX) ? 'water-card__tick--active' : ''}`}
+              className={`water-card__tick ${index <= Math.min(glasses, displayMax) ? 'water-card__tick--active' : ''}`}
             />
           ))}
         </div>

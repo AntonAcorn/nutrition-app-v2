@@ -17,6 +17,7 @@ interface TodaySummaryApiResponse {
   carbsTargetGrams: number
   fiberTargetGrams: number
   waterGlasses: number
+  waterGoalGlasses: number
 }
 
 function currentEntryDate(): string {
@@ -58,5 +59,6 @@ export async function fetchTodaySummary(): Promise<TodaySummary> {
     carbsTargetGrams: payload.carbsTargetGrams ?? 200,
     fiberTargetGrams: payload.fiberTargetGrams ?? 25,
     waterGlasses: payload.waterGlasses ?? 0,
+    waterGoalGlasses: payload.waterGoalGlasses ?? 4,
   }
 }

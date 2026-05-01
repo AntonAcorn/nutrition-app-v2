@@ -17,5 +17,6 @@ public record CreateProfileRequest(
     BigDecimal proteinTargetG,
     BigDecimal fatTargetG,
     BigDecimal carbsTargetG,
-    BigDecimal fiberTargetG
+    BigDecimal fiberTargetG,
+    Integer waterGoalGlasses
 ) {}

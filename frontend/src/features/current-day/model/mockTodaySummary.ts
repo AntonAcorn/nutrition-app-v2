@@ -9,6 +9,12 @@ const todaySummaryMock = {
   fatGrams: 60,
   fiberGrams: 24,
   carbsGrams: 180,
+  proteinTargetGrams: 150,
+  fatTargetGrams: 60,
+  carbsTargetGrams: 200,
+  fiberTargetGrams: 25,
+  waterGlasses: 0,
+  waterGoalGlasses: 4,
 }
 
 function normalizeSummary(summary: Omit<TodaySummary, 'remainingCalories'>): TodaySummary {

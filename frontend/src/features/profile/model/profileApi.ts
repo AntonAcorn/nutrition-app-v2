@@ -14,6 +14,7 @@ export interface UserProfile {
   fatTargetG: number
   carbsTargetG: number
   fiberTargetG: number
+  waterGoalGlasses: number
 }
 
 export async function fetchProfile(): Promise<UserProfile> {

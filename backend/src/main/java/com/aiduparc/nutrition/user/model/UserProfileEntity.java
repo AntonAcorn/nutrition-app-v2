@@ -57,6 +57,9 @@ public class UserProfileEntity {
     @Column(name = "fiber_target_g", precision = 8, scale = 1)
     private BigDecimal fiberTargetG;
 
+    @Column(name = "water_goal_glasses", nullable = false)
+    private Integer waterGoalGlasses = 4;
+
     @Column(name = "created_at", nullable = false, updatable = false)
     private OffsetDateTime createdAt;
 
@@ -104,6 +107,9 @@ public class UserProfileEntity {
 
     public BigDecimal getFiberTargetG() { return fiberTargetG; }
     public void setFiberTargetG(BigDecimal fiberTargetG) { this.fiberTargetG = fiberTargetG; }
+
+    public Integer getWaterGoalGlasses() { return waterGoalGlasses != null ? waterGoalGlasses : 4; }
+    public void setWaterGoalGlasses(Integer waterGoalGlasses) { this.waterGoalGlasses = waterGoalGlasses != null ? waterGoalGlasses : 4; }
 
     public OffsetDateTime getCreatedAt() { return createdAt; }
     public OffsetDateTime getUpdatedAt() { return updatedAt; }

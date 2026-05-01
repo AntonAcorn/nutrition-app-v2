@@ -51,6 +51,7 @@ export function ProfileTab({ displayName, email, onLogout }: Props) {
   const [fatTargetG, setFatTargetG] = useState('')
   const [carbsTargetG, setCarbsTargetG] = useState('')
   const [fiberTargetG, setFiberTargetG] = useState('')
+  const [waterGoalGlasses, setWaterGoalGlasses] = useState('')
   const [saving, setSaving] = useState(false)
   const [saveError, setSaveError] = useState('')
 
@@ -74,6 +75,7 @@ export function ProfileTab({ displayName, email, onLogout }: Props) {
     setFatTargetG(String(Math.round(Number(profile.fatTargetG))))
     setCarbsTargetG(String(Math.round(Number(profile.carbsTargetG))))
     setFiberTargetG(String(Math.round(Number(profile.fiberTargetG))))
+    setWaterGoalGlasses(String(profile.waterGoalGlasses ?? 4))
     setSaveError('')
     setEditing(true)
   }
@@ -96,6 +98,7 @@ export function ProfileTab({ displayName, email, onLogout }: Props) {
         fatTargetG: Number(fatTargetG) || undefined,
         carbsTargetG: Number(carbsTargetG) || undefined,
         fiberTargetG: Number(fiberTargetG) || undefined,
+        waterGoalGlasses: Number(waterGoalGlasses) || undefined,
       })
       setProfile(updated)
       setEditing(false)
@@ -233,6 +236,11 @@ export function ProfileTab({ displayName, email, onLogout }: Props) {
               </div>
             </div>
 
+            <label>
+              Water goal (glasses/day)
+              <input type="number" min={1} max={20} value={waterGoalGlasses} onChange={(e) => setWaterGoalGlasses(e.target.value)} />
+            </label>
+
             {saveError ? <p className="error-text">{saveError}</p> : null}
           </div>
 
@@ -327,6 +335,16 @@ export function ProfileTab({ displayName, email, onLogout }: Props) {
           <div className="profile-stat">
             <span className="profile-stat__label">Fiber</span>
             <span className="profile-stat__value">{Math.round(Number(profile.fiberTargetG))} g</span>
+          </div>
+        </div>
+      </div>
+
+      <div className="panel">
+        <p className="profile-section-title">Hydration goal</p>
+        <div className="profile-stats-grid">
+          <div className="profile-stat">
+            <span className="profile-stat__label">Water goal</span>
+            <span className="profile-stat__value">{profile.waterGoalGlasses ?? 4} glasses / day</span>
           </div>
         </div>
       </div>
