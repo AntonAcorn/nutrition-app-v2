@@ -46,6 +46,7 @@ class NutritionHistoryServiceTest {
     @BeforeEach
     void stubNoProfile() {
         lenient().when(userProfileService.findByNutritionUserId(any())).thenReturn(Optional.empty());
+        lenient().when(userProfileService.getMacroTargets(any())).thenReturn(UserProfileService.MacroTargets.DEFAULT);
     }
 
     @Test

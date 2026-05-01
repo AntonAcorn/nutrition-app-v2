@@ -61,6 +61,7 @@ public class NutritionHistoryService {
         BigDecimal consumedCalories = defaultBigDecimal(snapshot.caloriesConsumedKcal());
         BigDecimal dailyTargetCalories = defaultTarget(snapshot.calorieTargetKcal(), userId);
         BigDecimal remainingCalories = dailyTargetCalories.subtract(consumedCalories).max(BigDecimal.ZERO);
+        UserProfileService.MacroTargets macroTargets = userProfileService.getMacroTargets(userId);
 
         TodaySummaryResponse response = new TodaySummaryResponse(
             userId,
@@ -72,7 +73,11 @@ public class NutritionHistoryService {
             defaultBigDecimal(snapshot.proteinGrams()),
             defaultBigDecimal(snapshot.fatGrams()),
             defaultBigDecimal(snapshot.fiberGrams()),
-            defaultBigDecimal(snapshot.carbsGrams())
+            defaultBigDecimal(snapshot.carbsGrams()),
+            macroTargets.proteinG(),
+            macroTargets.fatG(),
+            macroTargets.carbsG(),
+            macroTargets.fiberG()
         );
 
         log.info(

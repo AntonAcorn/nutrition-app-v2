@@ -13,18 +13,20 @@ function getCaptionText(consumed: number, target: number, remaining: number): st
 interface MacroCardProps {
   label: string
   value: number
+  target: number
   unit: string
   progress: number
   tone: 'purple' | 'orange' | 'pink' | 'teal'
 }
 
-function MacroCard({ label, value, unit, progress, tone }: MacroCardProps) {
+function MacroCard({ label, value, target, unit, progress, tone }: MacroCardProps) {
   return (
     <article className="macro-meter-card">
       <div className="macro-meter-card__header">
         <span>{label}</span>
         <strong>
           {Math.round(value)}
+          <span style={{ opacity: 0.45, fontWeight: 400 }}>/{Math.round(target)}</span>
           <span>{unit}</span>
         </strong>
       </div>
@@ -95,10 +97,10 @@ export function TodaySummaryBlock({ summary }: TodaySummaryBlockProps) {
         <p className="today-ring__caption">{getCaptionText(consumed, target, remaining)}</p>
 
         <div className="macro-meter-grid">
-          <MacroCard label="Protein" value={summary.proteinGrams} unit="g" progress={Math.min(100, Math.round((summary.proteinGrams / 180) * 100))} tone="purple" />
-          <MacroCard label="Fat" value={summary.fatGrams} unit="g" progress={Math.min(100, Math.round((summary.fatGrams / 90) * 100))} tone="orange" />
-          <MacroCard label="Carbs" value={summary.carbsGrams} unit="g" progress={Math.min(100, Math.round((summary.carbsGrams / 250) * 100))} tone="teal" />
-          <MacroCard label="Fiber" value={summary.fiberGrams} unit="g" progress={Math.min(100, Math.round((summary.fiberGrams / 35) * 100))} tone="pink" />
+          <MacroCard label="Protein" value={summary.proteinGrams} target={summary.proteinTargetGrams} unit="g" progress={Math.min(100, Math.round((summary.proteinGrams / Math.max(1, summary.proteinTargetGrams)) * 100))} tone="purple" />
+          <MacroCard label="Fat"     value={summary.fatGrams}     target={summary.fatTargetGrams}     unit="g" progress={Math.min(100, Math.round((summary.fatGrams     / Math.max(1, summary.fatTargetGrams))     * 100))} tone="orange" />
+          <MacroCard label="Carbs"   value={summary.carbsGrams}   target={summary.carbsTargetGrams}   unit="g" progress={Math.min(100, Math.round((summary.carbsGrams   / Math.max(1, summary.carbsTargetGrams))   * 100))} tone="teal" />
+          <MacroCard label="Fiber"   value={summary.fiberGrams}   target={summary.fiberTargetGrams}   unit="g" progress={Math.min(100, Math.round((summary.fiberGrams   / Math.max(1, summary.fiberTargetGrams))   * 100))} tone="pink" />
         </div>
 
         <div className="today-insight-card">

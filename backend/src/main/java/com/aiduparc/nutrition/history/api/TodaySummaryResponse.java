@@ -14,6 +14,10 @@ public record TodaySummaryResponse(
         BigDecimal proteinGrams,
         BigDecimal fatGrams,
         BigDecimal fiberGrams,
-        BigDecimal carbsGrams
+        BigDecimal carbsGrams,
+        BigDecimal proteinTargetGrams,
+        BigDecimal fatTargetGrams,
+        BigDecimal carbsTargetGrams,
+        BigDecimal fiberTargetGrams
 ) {
 }

@@ -45,6 +45,18 @@ public class UserProfileEntity {
     @Column(name = "daily_calorie_target_kcal", precision = 10, scale = 2, nullable = false)
     private BigDecimal dailyCalorieTargetKcal;
 
+    @Column(name = "protein_target_g", precision = 8, scale = 1)
+    private BigDecimal proteinTargetG;
+
+    @Column(name = "fat_target_g", precision = 8, scale = 1)
+    private BigDecimal fatTargetG;
+
+    @Column(name = "carbs_target_g", precision = 8, scale = 1)
+    private BigDecimal carbsTargetG;
+
+    @Column(name = "fiber_target_g", precision = 8, scale = 1)
+    private BigDecimal fiberTargetG;
+
     @Column(name = "created_at", nullable = false, updatable = false)
     private OffsetDateTime createdAt;
 
@@ -80,6 +92,18 @@ public class UserProfileEntity {
 
     public BigDecimal getDailyCalorieTargetKcal() { return dailyCalorieTargetKcal; }
     public void setDailyCalorieTargetKcal(BigDecimal dailyCalorieTargetKcal) { this.dailyCalorieTargetKcal = dailyCalorieTargetKcal; }
+
+    public BigDecimal getProteinTargetG() { return proteinTargetG; }
+    public void setProteinTargetG(BigDecimal proteinTargetG) { this.proteinTargetG = proteinTargetG; }
+
+    public BigDecimal getFatTargetG() { return fatTargetG; }
+    public void setFatTargetG(BigDecimal fatTargetG) { this.fatTargetG = fatTargetG; }
+
+    public BigDecimal getCarbsTargetG() { return carbsTargetG; }
+    public void setCarbsTargetG(BigDecimal carbsTargetG) { this.carbsTargetG = carbsTargetG; }
+
+    public BigDecimal getFiberTargetG() { return fiberTargetG; }
+    public void setFiberTargetG(BigDecimal fiberTargetG) { this.fiberTargetG = fiberTargetG; }
 
     public OffsetDateTime getCreatedAt() { return createdAt; }
     public OffsetDateTime getUpdatedAt() { return updatedAt; }

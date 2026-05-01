@@ -275,6 +275,28 @@ export function ProfileTab({ displayName, email, onLogout }: Props) {
         </div>
       </div>
 
+      <div className="panel">
+        <p className="profile-section-title">Daily macro targets</p>
+        <div className="profile-stats-grid">
+          <div className="profile-stat">
+            <span className="profile-stat__label">Protein</span>
+            <span className="profile-stat__value">{Math.round(Number(profile.proteinTargetG))} g</span>
+          </div>
+          <div className="profile-stat">
+            <span className="profile-stat__label">Fat</span>
+            <span className="profile-stat__value">{Math.round(Number(profile.fatTargetG))} g</span>
+          </div>
+          <div className="profile-stat">
+            <span className="profile-stat__label">Carbs</span>
+            <span className="profile-stat__value">{Math.round(Number(profile.carbsTargetG))} g</span>
+          </div>
+          <div className="profile-stat">
+            <span className="profile-stat__label">Fiber</span>
+            <span className="profile-stat__value">{Math.round(Number(profile.fiberTargetG))} g</span>
+          </div>
+        </div>
+      </div>
+
       <div className="panel profile-actions">
         <button type="button" className="profile-edit-btn" onClick={startEditing}>Edit profile</button>
         <button type="button" className="profile-logout-btn" onClick={onLogout}>Log out</button>

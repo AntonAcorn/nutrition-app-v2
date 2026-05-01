@@ -10,6 +10,10 @@ export interface UserProfile {
   goal: string
   weightLossStrategy: string | null
   dailyCalorieTargetKcal: number
+  proteinTargetG: number
+  fatTargetG: number
+  carbsTargetG: number
+  fiberTargetG: number
 }
 
 export async function fetchProfile(): Promise<UserProfile> {

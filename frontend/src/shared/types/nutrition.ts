@@ -8,6 +8,10 @@ export interface TodaySummary {
   fatGrams: number
   fiberGrams: number
   carbsGrams: number
+  proteinTargetGrams: number
+  fatTargetGrams: number
+  carbsTargetGrams: number
+  fiberTargetGrams: number
 }
 
 export interface DraftItem {
