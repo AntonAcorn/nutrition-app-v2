@@ -6,6 +6,7 @@ export interface MealPayload {
   proteinGrams: number
   fatGrams: number
   fiberGrams: number
+  carbsGrams?: number
 }
 
 export async function addMealManually(payload: MealPayload): Promise<void> {

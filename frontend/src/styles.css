@@ -3002,3 +3002,85 @@ ul {
   padding: 0;
   flex-shrink: 0;
 }
+
+/* ── Barcode scanner ──────────────────────────────────────── */
+
+.barcode-scanner-wrapper {
+  width: 100%;
+}
+
+.barcode-camera-view {
+  position: relative;
+  width: 100%;
+  border-radius: 12px;
+  overflow: hidden;
+  background: #000;
+}
+
+.barcode-camera-video {
+  width: 100%;
+  display: block;
+  max-height: 60vh;
+  object-fit: cover;
+}
+
+.barcode-camera-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  pointer-events: none;
+}
+
+.barcode-viewfinder {
+  width: 220px;
+  height: 110px;
+  border: 2px solid rgba(255, 255, 255, 0.8);
+  border-radius: 8px;
+  box-shadow: 0 0 0 2000px rgba(0, 0, 0, 0.45);
+}
+
+.barcode-hint {
+  color: rgba(255, 255, 255, 0.85);
+  font-size: 0.85rem;
+  background: rgba(0, 0, 0, 0.45);
+  padding: 4px 12px;
+  border-radius: 20px;
+}
+
+.barcode-cancel-btn {
+  position: absolute;
+  bottom: 1rem;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #fff;
+  padding: 0.5rem 1.5rem;
+  border-radius: 20px;
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+
+.barcode-state-card {
+  padding: 2rem 0;
+  text-align: center;
+}
+
+.barcode-product-card {
+  margin-top: 0.5rem;
+}
+
+.barcode-totals-row {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  padding: 0.75rem;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 8px;
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.75);
+}

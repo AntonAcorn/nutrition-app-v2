@@ -8,6 +8,7 @@ import { TotalsRow } from './TotalsRow'
 import { calculateTotals, normalizeDraft } from '../model/photoAnalysis'
 import { analyzeVoice } from '../model/voiceAnalysisApi'
 import { FoodLibraryTab } from '../../food-library/components/FoodLibraryTab'
+import { BarcodeScannerMode } from '../../barcode/components/BarcodeScannerMode'
 
 // Capacitor Camera is loaded dynamically to avoid breaking web builds
 async function pickPhotoNative(): Promise<File | null> {
@@ -52,7 +53,7 @@ function getConfidenceMessage(confidence: number) {
   return 'Low confidence, review carefully before saving.'
 }
 
-type AnalyzerMode = 'photo' | 'voice' | 'library'
+type AnalyzerMode = 'photo' | 'voice' | 'library' | 'barcode'
 
 // Web Speech API types (web fallback)
 declare global {
@@ -412,6 +413,13 @@ export function PhotoAnalyzerTab({ onConfirmed }: PhotoAnalyzerTabProps) {
             >
               Library
             </button>
+            <button
+              type="button"
+              className={`analyzer-mode-btn ${mode === 'barcode' ? 'analyzer-mode-btn--active' : ''}`}
+              onClick={() => switchMode('barcode')}
+            >
+              Scan
+            </button>
           </div>
         ) : null}
 
@@ -650,6 +658,19 @@ export function PhotoAnalyzerTab({ onConfirmed }: PhotoAnalyzerTabProps) {
             }}
             initialSave={pendingLibrarySave}
             onInitialSaveDone={() => setPendingLibrarySave(null)}
+          />
+        ) : null}
+
+        {/* Barcode mode */}
+        {mode === 'barcode' && !draft ? (
+          <BarcodeScannerMode
+            onAdded={() => {
+              setSuccessMessage('Added to today')
+              setTimeout(() => setSuccessMessage(''), 2500)
+              switchMode('photo')
+              onConfirmed?.()
+            }}
+            onCancel={() => switchMode('photo')}
           />
         ) : null}
 
