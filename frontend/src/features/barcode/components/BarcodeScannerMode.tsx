@@ -33,7 +33,9 @@ export function BarcodeScannerMode({ onAdded, onCancel }: Props) {
       if (!videoRef.current) return
       try {
         const { BrowserMultiFormatReader } = await import('@zxing/browser')
-        const reader = new BrowserMultiFormatReader()
+        // 3 = DecodeHintType.TRY_HARDER — tries harder on blurry/partial barcodes
+        const hints = new Map([[3, true]])
+        const reader = new BrowserMultiFormatReader(hints, 150)
         const controls = await reader.decodeFromConstraints(
           {
             video: {
@@ -151,8 +153,10 @@ export function BarcodeScannerMode({ onAdded, onCancel }: Props) {
           onTouchStart={handleTapToFocus}
         />
         <div className="barcode-camera-overlay" style={{ pointerEvents: 'none' }}>
-          <div className="barcode-viewfinder" />
-          <p className="barcode-hint">Tap to focus · point at barcode</p>
+          <div className="barcode-viewfinder">
+            <span className="barcode-viewfinder__line" />
+          </div>
+          <p className="barcode-hint">Tap to focus · align barcode with box</p>
         </div>
         <button type="button" className="barcode-cancel-btn" onClick={onCancel}>
           Cancel

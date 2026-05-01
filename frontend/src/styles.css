@@ -3084,3 +3084,23 @@ ul {
   font-size: 0.85rem;
   color: rgba(255, 255, 255, 0.75);
 }
+
+.barcode-viewfinder {
+  position: relative;
+  overflow: hidden;
+}
+
+.barcode-viewfinder__line {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: rgba(96, 165, 250, 0.8);
+  animation: barcode-scan 1.8s ease-in-out infinite;
+}
+
+@keyframes barcode-scan {
+  0%   { top: 10%; }
+  50%  { top: 85%; }
+  100% { top: 10%; }
+}
