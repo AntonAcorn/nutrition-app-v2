@@ -204,53 +204,87 @@ export function BarcodeScannerMode({ onAdded, onCancel }: Props) {
 
       {status === 'found' && product && (
         <div className="barcode-product-card panel">
-          <p className="profile-section-title">{product.name}</p>
+          <div className="barcode-product-header">
+            <p className="barcode-product-name">{product.name}</p>
+            <p className="barcode-product-per100">
+              {Math.round(product.caloriesPer100g ?? 0)} kcal per 100 g
+            </p>
+          </div>
 
-          <p className="subtle-text" style={{ fontSize: '0.8rem' }}>
-            per 100 g: {Math.round(product.caloriesPer100g ?? 0)} kcal ·{' '}
-            P {round1(product.proteinPer100g ?? 0)} g ·{' '}
-            F {round1(product.fatPer100g ?? 0)} g ·{' '}
-            C {round1(product.carbsPer100g ?? 0)} g
-          </p>
-
-          <label style={{ display: 'block' }}>
-            <span style={{ display: 'block', marginBottom: '6px', color: 'rgba(255,255,255,0.6)', fontSize: '0.85rem' }}>
-              Portion (g)
-            </span>
-            <input
-              type="number"
-              min={1}
-              max={2000}
-              value={portionGrams}
-              onChange={(e) => setPortionGrams(e.target.value)}
-            />
-          </label>
+          <div className="barcode-portion-section">
+            <p className="barcode-portion-label">How much did you eat?</p>
+            <div className="barcode-portion-row">
+              <button
+                type="button"
+                className="barcode-portion-btn"
+                onClick={() => setPortionGrams(String(Math.max(25, (Number(portionGrams) || 100) - 25)))}
+              >−</button>
+              <div className="barcode-portion-input-wrap">
+                <input
+                  type="number"
+                  min={1}
+                  max={2000}
+                  value={portionGrams}
+                  onChange={(e) => setPortionGrams(e.target.value)}
+                  className="barcode-portion-input"
+                />
+                <span className="barcode-portion-unit">g</span>
+              </div>
+              <button
+                type="button"
+                className="barcode-portion-btn"
+                onClick={() => setPortionGrams(String((Number(portionGrams) || 100) + 25))}
+              >+</button>
+            </div>
+            <div className="barcode-quick-portions">
+              {[50, 100, 150, 200, 250].map((g) => (
+                <button
+                  key={g}
+                  type="button"
+                  className={`barcode-quick-btn${Number(portionGrams) === g ? ' barcode-quick-btn--active' : ''}`}
+                  onClick={() => setPortionGrams(String(g))}
+                >
+                  {g}g
+                </button>
+              ))}
+            </div>
+          </div>
 
           {grams > 0 && (
-            <div className="barcode-totals-row">
-              <span>{Math.round((product.caloriesPer100g ?? 0) * f)} kcal</span>
-              <span>P {round1((product.proteinPer100g ?? 0) * f)}g</span>
-              <span>F {round1((product.fatPer100g ?? 0) * f)}g</span>
-              <span>C {round1((product.carbsPer100g ?? 0) * f)}g</span>
+            <div className="barcode-macros-grid">
+              <div className="barcode-macro-chip barcode-macro-chip--calories">
+                <span className="barcode-macro-chip__value">{Math.round((product.caloriesPer100g ?? 0) * f)}</span>
+                <span className="barcode-macro-chip__label">kcal</span>
+              </div>
+              <div className="barcode-macro-chip barcode-macro-chip--protein">
+                <span className="barcode-macro-chip__value">{round1((product.proteinPer100g ?? 0) * f)}</span>
+                <span className="barcode-macro-chip__label">protein</span>
+              </div>
+              <div className="barcode-macro-chip barcode-macro-chip--fat">
+                <span className="barcode-macro-chip__value">{round1((product.fatPer100g ?? 0) * f)}</span>
+                <span className="barcode-macro-chip__label">fat</span>
+              </div>
+              <div className="barcode-macro-chip barcode-macro-chip--carbs">
+                <span className="barcode-macro-chip__value">{round1((product.carbsPer100g ?? 0) * f)}</span>
+                <span className="barcode-macro-chip__label">carbs</span>
+              </div>
             </div>
           )}
 
           {addError && <p className="error-text">{addError}</p>}
 
-          <div style={{ display: 'flex', gap: '0.5rem' }}>
-            <button type="button" className="profile-logout-btn" onClick={scanAgain}>
-              Scan again
-            </button>
-            <button
-              type="button"
-              className="profile-edit-btn"
-              style={{ flex: 1 }}
-              disabled={adding || grams <= 0}
-              onClick={handleAdd}
-            >
-              {adding ? 'Adding…' : 'Add to today'}
-            </button>
-          </div>
+          <button
+            type="button"
+            className="profile-edit-btn"
+            disabled={adding || grams <= 0}
+            onClick={handleAdd}
+          >
+            {adding ? 'Adding…' : 'Add to today'}
+          </button>
+
+          <button type="button" className="barcode-rescan-link" onClick={scanAgain}>
+            Scan a different product
+          </button>
         </div>
       )}
     </div>
