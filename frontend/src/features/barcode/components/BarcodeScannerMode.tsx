@@ -62,14 +62,24 @@ export function BarcodeScannerMode({ onAdded, onCancel }: Props) {
         )
         controlsRef.current = controls
 
-        // Apply continuous autofocus to the track after stream starts
+        // Apply autofocus to the track after stream starts
         const stream = videoRef.current.srcObject as MediaStream | null
         const track = stream?.getVideoTracks()[0]
         if (track) {
           const cap = track.getCapabilities() as Record<string, unknown>
           const modes = cap['focusMode'] as string[] | undefined
+          // Kick a single-shot focus on center first, then switch to continuous
+          if (modes?.includes('single-shot') && cap['pointOfInterest']) {
+            await track.applyConstraints({
+              advanced: [{ focusMode: 'single-shot', pointOfInterest: { x: 0.5, y: 0.5 } } as MediaTrackConstraintSet],
+            }).catch(() => {})
+          }
           if (modes?.includes('continuous')) {
-            await track.applyConstraints({ advanced: [{ focusMode: 'continuous' } as MediaTrackConstraintSet] })
+            setTimeout(() => {
+              track.applyConstraints({
+                advanced: [{ focusMode: 'continuous' } as MediaTrackConstraintSet],
+              }).catch(() => {})
+            }, 600)
           }
         }
       } catch {
