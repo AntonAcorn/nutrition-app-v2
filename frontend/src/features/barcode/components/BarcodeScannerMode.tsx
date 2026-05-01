@@ -38,11 +38,8 @@ export function BarcodeScannerMode({ onAdded, onCancel }: Props) {
           {
             video: {
               facingMode: 'environment',
-              width: { ideal: 1280 },
-              height: { ideal: 720 },
-              // @ts-expect-error — non-standard but supported on most mobile browsers
-              focusMode: 'continuous',
-              advanced: [{ focusMode: 'continuous' }],
+              width: { ideal: 1920 },
+              height: { ideal: 1080 },
             },
           },
           videoRef.current,
@@ -62,6 +59,17 @@ export function BarcodeScannerMode({ onAdded, onCancel }: Props) {
           },
         )
         controlsRef.current = controls
+
+        // Apply continuous autofocus to the track after stream starts
+        const stream = videoRef.current.srcObject as MediaStream | null
+        const track = stream?.getVideoTracks()[0]
+        if (track) {
+          const cap = track.getCapabilities() as Record<string, unknown>
+          const modes = cap['focusMode'] as string[] | undefined
+          if (modes?.includes('continuous')) {
+            await track.applyConstraints({ advanced: [{ focusMode: 'continuous' } as MediaTrackConstraintSet] })
+          }
+        }
       } catch {
         if (!stopped) setStatus('camera_error')
       }
@@ -78,6 +86,26 @@ export function BarcodeScannerMode({ onAdded, onCancel }: Props) {
 
   function scanAgain() {
     setScanKey((k) => k + 1)
+  }
+
+  function handleTapToFocus(e: React.MouseEvent | React.TouchEvent) {
+    const video = videoRef.current
+    if (!video) return
+    const stream = video.srcObject as MediaStream | null
+    const track = stream?.getVideoTracks()[0]
+    if (!track) return
+    const cap = track.getCapabilities() as Record<string, unknown>
+    const rect = video.getBoundingClientRect()
+    const clientX = 'touches' in e ? e.touches[0].clientX : e.clientX
+    const clientY = 'touches' in e ? e.touches[0].clientY : e.clientY
+    const x = Math.max(0, Math.min(1, (clientX - rect.left) / rect.width))
+    const y = Math.max(0, Math.min(1, (clientY - rect.top) / rect.height))
+    const poi = cap['pointOfInterest'] as { x?: unknown } | undefined
+    if (poi) {
+      track.applyConstraints({
+        advanced: [{ focusMode: 'single-shot', pointOfInterest: { x, y } } as MediaTrackConstraintSet],
+      }).catch(() => {})
+    }
   }
 
   async function handleAdd() {
@@ -113,10 +141,18 @@ export function BarcodeScannerMode({ onAdded, onCancel }: Props) {
         className="barcode-camera-view"
         style={{ display: status === 'scanning' ? 'block' : 'none' }}
       >
-        <video ref={videoRef} className="barcode-camera-video" autoPlay muted playsInline />
-        <div className="barcode-camera-overlay">
+        <video
+          ref={videoRef}
+          className="barcode-camera-video"
+          autoPlay
+          muted
+          playsInline
+          onClick={handleTapToFocus}
+          onTouchStart={handleTapToFocus}
+        />
+        <div className="barcode-camera-overlay" style={{ pointerEvents: 'none' }}>
           <div className="barcode-viewfinder" />
-          <p className="barcode-hint">Point camera at barcode</p>
+          <p className="barcode-hint">Tap to focus · point at barcode</p>
         </div>
         <button type="button" className="barcode-cancel-btn" onClick={onCancel}>
           Cancel
