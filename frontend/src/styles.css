@@ -1267,6 +1267,26 @@ ul {
   gap: 12px;
 }
 
+.statistics-panel__header-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+.chart-latest-value {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: #ffffff;
+  line-height: 1;
+}
+
+.chart-latest-unit {
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.45);
+}
+
 .statistics-panel__actions {
   display: flex;
   align-items: center;
@@ -1345,7 +1365,7 @@ ul {
 }
 
 .statistics-panel--dark .line-chart__grid span {
-  border-top-color: rgba(255, 255, 255, 0.04);
+  border-top-color: rgba(255, 255, 255, 0.09);
 }
 
 .statistics-panel--dark .line-chart__grid--hidden span {

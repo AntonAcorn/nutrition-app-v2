@@ -46,6 +46,19 @@ function buildLinePath(values: Array<number | null>, width: number, height: numb
     .join(' ')
 }
 
+function buildFillPath(values: Array<number | null>, width: number, height: number, min: number, max: number): string {
+  const linePath = buildLinePath(values, width, height, min, max)
+  if (!linePath) return ''
+  let firstIdx = -1, lastIdx = -1
+  for (let i = 0; i < values.length; i++) {
+    if (values[i] != null) { if (firstIdx === -1) firstIdx = i; lastIdx = i }
+  }
+  if (firstIdx === -1) return ''
+  const firstX = values.length === 1 ? width / 2 : (firstIdx / (values.length - 1)) * width
+  const lastX  = values.length === 1 ? width / 2 : (lastIdx  / (values.length - 1)) * width
+  return `${linePath} L ${lastX.toFixed(1)} ${height} L ${firstX.toFixed(1)} ${height} Z`
+}
+
 function formatMetricValue(value: number | null | undefined, digits = 2): string {
   if (value == null) {
     return '—'
@@ -262,6 +275,7 @@ function LineChart({
   valueKey,
   targetKey,
   colorClass,
+  gradColor,
   trendline,
   expanded,
   onExpand,
@@ -272,6 +286,7 @@ function LineChart({
   valueKey: 'weightKg' | 'consumedCalories' | 'proteinGrams' | 'fatGrams' | 'fiberGrams' | 'carbsGrams'
   targetKey?: 'calorieTarget'
   colorClass: string
+  gradColor: string
   trendline?: Array<number | null>
   expanded?: boolean
   onExpand?: () => void
@@ -281,9 +296,13 @@ function LineChart({
   const width = 760
   const height = 180
   const { min, max } = getChartBounds({ values, targets, trendline, valueKey })
-  const valuePath = buildLinePath(values, width, height, min, max)
-  const targetPath = targets.length > 0 ? buildLinePath(targets, width, height, min, max) : ''
+  const range = Math.max(1, max - min)
+
+  const valuePath    = buildLinePath(values, width, height, min, max)
+  const fillPath     = buildFillPath(values, width, height, min, max)
+  const targetPath   = targets.length > 0 ? buildLinePath(targets, width, height, min, max) : ''
   const trendlinePath = trendline ? buildLinePath(trendline, width, height, min, max) : ''
+
   const guideValues = [min, (min + max) / 2, max]
   const compactLabelIndexes = new Set<number>([
     0,
@@ -291,6 +310,18 @@ function LineChart({
     Math.max(0, points.length - 1),
   ])
   const expandedLabelStep = points.length > 14 ? 4 : points.length > 7 ? 2 : 1
+
+  // latest non-null value + dot position
+  let lastNonNullIdx = -1
+  for (let i = values.length - 1; i >= 0; i--) { if (values[i] != null) { lastNonNullIdx = i; break } }
+  const latestValue = lastNonNullIdx >= 0 ? values[lastNonNullIdx] : null
+  const dotX = lastNonNullIdx >= 0 ? (values.length === 1 ? width / 2 : (lastNonNullIdx / (values.length - 1)) * width) : null
+  const dotY = latestValue != null ? height - ((latestValue - min) / range) * height : null
+  const gradId = `grad-${title.toLowerCase().replace(/\s+/g, '-')}`
+
+  const formattedLatest = latestValue != null
+    ? (valueKey === 'weightKg' ? latestValue.toFixed(1) : Math.round(latestValue).toString())
+    : null
 
   const chartContent = (
     <div className={`line-chart line-chart--dark-card ${expanded ? 'line-chart--expanded' : ''}`}>
@@ -307,9 +338,20 @@ function LineChart({
             ))}
           </div>
           <svg viewBox={`0 0 ${width} ${height}`} className="line-chart__svg" role="img" aria-label={title}>
+            <defs>
+              <linearGradient id={gradId} x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%"   stopColor={gradColor} stopOpacity="0.32" />
+                <stop offset="80%"  stopColor={gradColor} stopOpacity="0.04" />
+                <stop offset="100%" stopColor={gradColor} stopOpacity="0"    />
+              </linearGradient>
+            </defs>
+            {fillPath ? <path d={fillPath} fill={`url(#${gradId})`} stroke="none" /> : null}
             <path d={valuePath} className={`line-chart__path ${colorClass} line-chart__path--glow`} />
             {targetPath ? <path d={targetPath} className="line-chart__path line-chart__path--target" /> : null}
             {trendlinePath ? <path d={trendlinePath} className="line-chart__path line-chart__path--trendline" /> : null}
+            {dotX != null && dotY != null ? (
+              <circle cx={dotX.toFixed(1)} cy={dotY.toFixed(1)} r="7" fill={gradColor} stroke="#1c1c1e" strokeWidth="2.5" />
+            ) : null}
           </svg>
           <div className="line-chart__axis line-chart__axis--x" style={{ ['--label-count' as string]: String(points.length) }}>
             {points.map((point, index) => {
@@ -329,7 +371,7 @@ function LineChart({
       {trendline && trendline.some(v => v != null) && (
         <div className="chart-legend">
           <span className="chart-legend__item">
-            <span className="chart-legend__line chart-legend__line--solid" style={{ background: '#7b61ff' }} />
+            <span className="chart-legend__line chart-legend__line--solid" style={{ background: gradColor }} />
             Weight
           </span>
           <span className="chart-legend__item">
@@ -351,20 +393,23 @@ function LineChart({
             <p className="screen-header__eyebrow">Metric</p>
             <h3>{title}</h3>
           </div>
-          {onExpand ? (
-            <button
-              type="button"
-              className="chart-expand-button"
-              onClick={(event) => {
-                event.stopPropagation()
-                onExpand()
-              }}
-              aria-label={`Expand ${title} chart`}
-              title={`Expand ${title} chart`}
-            >
-              ⤢
-            </button>
-          ) : null}
+          <div className="statistics-panel__header-right">
+            {formattedLatest != null && (
+              <span className="chart-latest-value">
+                {formattedLatest}<span className="chart-latest-unit"> {unit}</span>
+              </span>
+            )}
+            {onExpand ? (
+              <button
+                type="button"
+                className="chart-expand-button"
+                onClick={(event) => { event.stopPropagation(); onExpand() }}
+                aria-label={`Expand ${title} chart`}
+              >
+                ⤢
+              </button>
+            ) : null}
+          </div>
         </div>
 
         {chartContent}
@@ -544,6 +589,7 @@ export function StatisticsTab({ refreshToken = 0 }: StatisticsTabProps) {
             points={points}
             valueKey="weightKg"
             colorClass="line-chart__path--weight"
+            gradColor="#7b61ff"
             trendline={weightTrendline}
             expanded={expandedChart === 'Weight'}
             onExpand={() => setExpandedChart((current) => (current === 'Weight' ? null : 'Weight'))}
@@ -566,47 +612,50 @@ export function StatisticsTab({ refreshToken = 0 }: StatisticsTabProps) {
             valueKey="consumedCalories"
             targetKey="calorieTarget"
             colorClass="line-chart__path--calories"
+            gradColor="#f08a4b"
             expanded={expandedChart === 'Calories'}
             onExpand={() => setExpandedChart((current) => (current === 'Calories' ? null : 'Calories'))}
           />
-          <div className="statistics-grid">
-            <LineChart
-              title="Protein"
-              unit="g"
-              points={points}
-              valueKey="proteinGrams"
-              colorClass="line-chart__path--protein"
-              expanded={expandedChart === 'Protein'}
-              onExpand={() => setExpandedChart((current) => (current === 'Protein' ? null : 'Protein'))}
-            />
-            <LineChart
-              title="Fat"
-              unit="g"
-              points={points}
-              valueKey="fatGrams"
-              colorClass="line-chart__path--fat"
-              expanded={expandedChart === 'Fat'}
-              onExpand={() => setExpandedChart((current) => (current === 'Fat' ? null : 'Fat'))}
-            />
-            <LineChart
-              title="Carbs"
-              unit="g"
-              points={points}
-              valueKey="carbsGrams"
-              colorClass="line-chart__path--carbs"
-              expanded={expandedChart === 'Carbs'}
-              onExpand={() => setExpandedChart((current) => (current === 'Carbs' ? null : 'Carbs'))}
-            />
-            <LineChart
-              title="Fiber"
-              unit="g"
-              points={points}
-              valueKey="fiberGrams"
-              colorClass="line-chart__path--fiber"
-              expanded={expandedChart === 'Fiber'}
-              onExpand={() => setExpandedChart((current) => (current === 'Fiber' ? null : 'Fiber'))}
-            />
-          </div>
+          <LineChart
+            title="Protein"
+            unit="g"
+            points={points}
+            valueKey="proteinGrams"
+            colorClass="line-chart__path--protein"
+            gradColor="#3a86ff"
+            expanded={expandedChart === 'Protein'}
+            onExpand={() => setExpandedChart((current) => (current === 'Protein' ? null : 'Protein'))}
+          />
+          <LineChart
+            title="Fat"
+            unit="g"
+            points={points}
+            valueKey="fatGrams"
+            colorClass="line-chart__path--fat"
+            gradColor="#d65a8d"
+            expanded={expandedChart === 'Fat'}
+            onExpand={() => setExpandedChart((current) => (current === 'Fat' ? null : 'Fat'))}
+          />
+          <LineChart
+            title="Carbs"
+            unit="g"
+            points={points}
+            valueKey="carbsGrams"
+            colorClass="line-chart__path--carbs"
+            gradColor="#f6ad55"
+            expanded={expandedChart === 'Carbs'}
+            onExpand={() => setExpandedChart((current) => (current === 'Carbs' ? null : 'Carbs'))}
+          />
+          <LineChart
+            title="Fiber"
+            unit="g"
+            points={points}
+            valueKey="fiberGrams"
+            colorClass="line-chart__path--fiber"
+            gradColor="#38a169"
+            expanded={expandedChart === 'Fiber'}
+            onExpand={() => setExpandedChart((current) => (current === 'Fiber' ? null : 'Fiber'))}
+          />
           <StatisticsTable points={points} />
         </>
       ) : null}
