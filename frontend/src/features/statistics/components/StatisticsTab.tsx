@@ -176,7 +176,8 @@ function CalorieBarChart({ points }: { points: NutritionStatisticsPoint[] }) {
   const labelH = 28, chartH = 160, dateH = 28
   const H = labelH + chartH + dateH
   const midY = labelH + chartH / 2
-  const maxAbs = Math.max(200, ...points.map(p => Math.abs(p.calorieBalance)))
+  const logged = points.filter(p => p.consumedCalories > 0)
+  const maxAbs = Math.max(200, ...logged.map(p => Math.abs(p.calorieBalance)))
   const gap = W / Math.max(points.length, 1)
   const barW = Math.max(5, gap * 0.6)
   const dateLabels = [0, Math.floor((points.length - 1) / 2), points.length - 1]
@@ -202,8 +203,9 @@ function CalorieBarChart({ points }: { points: NutritionStatisticsPoint[] }) {
         {/* zero line */}
         <line x1={0} y1={midY} x2={W} y2={midY} stroke="rgba(255,255,255,0.22)" strokeWidth="1.5" />
 
-        {/* bars */}
+        {/* bars — only for days with logged calories */}
         {points.map((p, i) => {
+          if (p.consumedCalories === 0) return null
           const x = points.length === 1 ? W / 2 : (i / (points.length - 1)) * W
           const barH = Math.max(2, (Math.abs(p.calorieBalance) / maxAbs) * (chartH / 2 - 6))
           const isOver = p.calorieBalance >= 0
@@ -466,12 +468,13 @@ export function StatisticsTab({ refreshToken = 0 }: StatisticsTabProps) {
 
   const points = useMemo(() => data?.points ?? [], [data])
   const selectedTitle = rangeDays === 7 ? 'last week' : rangeDays === 30 ? 'last month' : 'last 3 months'
+  const loggedPoints = useMemo(() => points.filter(p => p.consumedCalories > 0), [points])
 
   const avgCalorieBalance = useMemo(() => {
-    if (points.length === 0) return null
-    const total = points.reduce((sum, point) => sum + point.calorieBalance, 0)
-    return Math.round(total / points.length)
-  }, [points])
+    if (loggedPoints.length === 0) return null
+    const total = loggedPoints.reduce((sum, p) => sum + p.calorieBalance, 0)
+    return Math.round(total / loggedPoints.length)
+  }, [loggedPoints])
 
   const weightChange = useMemo(() => {
     const weightPoints = points.filter((point) => point.weightKg != null)
@@ -483,9 +486,8 @@ export function StatisticsTab({ refreshToken = 0 }: StatisticsTabProps) {
   }, [points])
 
   const onTargetDays = useMemo(() => {
-    if (points.length === 0) return 0
-    return points.filter((point) => point.calorieBalance <= 0).length
-  }, [points])
+    return loggedPoints.filter(p => p.calorieBalance <= 0).length
+  }, [loggedPoints])
 
   const streak = useMemo(() => computeStreak(points), [points])
   const weightTrendline = useMemo(() => movingAvg(points), [points])
@@ -505,7 +507,14 @@ export function StatisticsTab({ refreshToken = 0 }: StatisticsTabProps) {
 
       {loading ? <section className="panel detail-panel"><p>Loading statistics...</p></section> : null}
       {!loading && error ? <section className="panel detail-panel"><p className="error-text">{error}</p></section> : null}
-      {!loading && !error && data ? (
+      {!loading && !error && data && loggedPoints.length === 0 ? (
+        <section className="panel statistics-empty-state">
+          <p className="statistics-empty-state__emoji">📊</p>
+          <p className="statistics-empty-state__title">No data for this period</p>
+          <p className="statistics-empty-state__hint">Log meals on the Today tab — your charts and stats will appear here.</p>
+        </section>
+      ) : null}
+      {!loading && !error && data && loggedPoints.length > 0 ? (
         <>
           <section className="stats-metric-grid">
             <MetricCard
@@ -524,10 +533,10 @@ export function StatisticsTab({ refreshToken = 0 }: StatisticsTabProps) {
             />
             <MetricCard
               title="On-target days"
-              value={`${onTargetDays} / ${points.length}`}
-              detail="Days at or under calorie target"
-              tone={points.length === 0 ? 'neutral' : onTargetDays / points.length >= 0.7 ? 'good' : onTargetDays / points.length >= 0.4 ? 'neutral' : 'bad'}
-              emoji={points.length === 0 ? '🎯' : onTargetDays / points.length >= 0.7 ? '🎯' : onTargetDays / points.length >= 0.4 ? '👀' : '⚠️'}
+              value={loggedPoints.length === 0 ? '—' : `${onTargetDays} / ${loggedPoints.length}`}
+              detail={loggedPoints.length === 0 ? 'No logged days in this range' : 'Logged days at or under target'}
+              tone={loggedPoints.length === 0 ? 'neutral' : onTargetDays / loggedPoints.length >= 0.7 ? 'good' : onTargetDays / loggedPoints.length >= 0.4 ? 'neutral' : 'bad'}
+              emoji={loggedPoints.length === 0 ? '🎯' : onTargetDays / loggedPoints.length >= 0.7 ? '🎯' : onTargetDays / loggedPoints.length >= 0.4 ? '👀' : '⚠️'}
             />
             <MetricCard
               title="Streak"

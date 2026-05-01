@@ -1113,6 +1113,32 @@ ul {
   gap: 18px;
 }
 
+.statistics-empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 40px 24px;
+  text-align: center;
+}
+
+.statistics-empty-state__emoji {
+  font-size: 2.4rem;
+  line-height: 1;
+}
+
+.statistics-empty-state__title {
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.statistics-empty-state__hint {
+  font-size: 0.88rem;
+  color: rgba(255, 255, 255, 0.4);
+  max-width: 260px;
+}
+
 .stats-metric-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
