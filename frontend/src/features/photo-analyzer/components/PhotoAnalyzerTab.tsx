@@ -424,7 +424,7 @@ export function PhotoAnalyzerTab({ onConfirmed }: PhotoAnalyzerTabProps) {
               className={`analyzer-mode-btn ${mode === 'barcode' ? 'analyzer-mode-btn--active' : ''}`}
               onClick={() => switchMode('barcode')}
             >
-              Scan
+              Barcode
             </button>
           </div>
         ) : null}
