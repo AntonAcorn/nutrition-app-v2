@@ -183,11 +183,6 @@ export function CurrentDayTab({ refreshToken = 0, successMessage = '', onDayUpda
         </section>
       ) : null}
 
-      {!loading && summary ? (
-        <button type="button" className="reset-day-link" onClick={handleResetDay} disabled={resettingDay}>
-          {resettingDay ? 'Resetting...' : 'Reset today\'s data'}
-        </button>
-      ) : null}
     </section>
   )
 }
