@@ -204,17 +204,16 @@ export function BarcodeScannerMode({ onAdded, onCancel }: Props) {
 
       {status === 'found' && product && (
         <div className="barcode-product-card panel">
-          <p className="profile-section-title" style={{ marginBottom: '0.25rem' }}>
-            {product.name}
-          </p>
-          <p className="subtle-text" style={{ fontSize: '0.75rem', marginBottom: '1.25rem' }}>
+          <p className="profile-section-title">{product.name}</p>
+
+          <p className="subtle-text" style={{ fontSize: '0.8rem' }}>
             per 100 g: {Math.round(product.caloriesPer100g ?? 0)} kcal ·{' '}
             P {round1(product.proteinPer100g ?? 0)} g ·{' '}
             F {round1(product.fatPer100g ?? 0)} g ·{' '}
             C {round1(product.carbsPer100g ?? 0)} g
           </p>
 
-          <label style={{ display: 'block', marginBottom: '1rem' }}>
+          <label style={{ display: 'block' }}>
             <span style={{ display: 'block', marginBottom: '6px', color: 'rgba(255,255,255,0.6)', fontSize: '0.85rem' }}>
               Portion (g)
             </span>
@@ -236,9 +235,9 @@ export function BarcodeScannerMode({ onAdded, onCancel }: Props) {
             </div>
           )}
 
-          {addError && <p className="error-text" style={{ marginTop: '0.5rem' }}>{addError}</p>}
+          {addError && <p className="error-text">{addError}</p>}
 
-          <div style={{ display: 'flex', gap: '0.5rem', marginTop: '1.25rem' }}>
+          <div style={{ display: 'flex', gap: '0.5rem' }}>
             <button type="button" className="profile-logout-btn" onClick={scanAgain}>
               Scan again
             </button>

@@ -3036,8 +3036,8 @@ ul {
 }
 
 .barcode-viewfinder {
-  width: 75vw;
-  height: calc(75vw * 0.42);
+  width: 52vw;
+  height: calc(52vw * 0.42);
   border: 2px solid rgba(255, 255, 255, 0.8);
   border-radius: 8px;
   box-shadow: 0 0 0 2000px rgba(0, 0, 0, 0.45);
@@ -3071,7 +3071,10 @@ ul {
 }
 
 .barcode-product-card {
-  margin-top: 0.5rem;
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
 }
 
 .barcode-totals-row {
