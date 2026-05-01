@@ -11,6 +11,7 @@ interface Props {
 export function MealsLogCard({ refreshToken = 0, onDeleted }: Props) {
   const [meals, setMeals] = useState<MealLogEntry[]>([])
   const [deletingId, setDeletingId] = useState<string | null>(null)
+  const [confirmId, setConfirmId] = useState<string | null>(null)
   const [deleteError, setDeleteError] = useState('')
 
   useEffect(() => {
@@ -21,6 +22,7 @@ export function MealsLogCard({ refreshToken = 0, onDeleted }: Props) {
 
   async function handleDelete(id: string) {
     setDeletingId(id)
+    setConfirmId(null)
     setDeleteError('')
     try {
       await deleteMealLogEntry(id)
@@ -44,15 +46,34 @@ export function MealsLogCard({ refreshToken = 0, onDeleted }: Props) {
               <p className="meal-log-row__name">{m.name}</p>
               <p className="meal-log-row__meta">{Math.round(m.caloriesKcal)} kcal</p>
             </div>
-            <button
-              type="button"
-              className="meal-log-row__delete"
-              onClick={() => handleDelete(m.id)}
-              disabled={deletingId === m.id}
-              aria-label={`Delete ${m.name}`}
-            >
-              {deletingId === m.id ? '…' : '✕'}
-            </button>
+            {confirmId === m.id ? (
+              <div className="meal-log-row__confirm">
+                <button
+                  type="button"
+                  className="meal-log-row__confirm-yes"
+                  onClick={() => handleDelete(m.id)}
+                  disabled={deletingId === m.id}
+                >
+                  {deletingId === m.id ? '…' : 'Delete'}
+                </button>
+                <button
+                  type="button"
+                  className="meal-log-row__confirm-no"
+                  onClick={() => setConfirmId(null)}
+                >
+                  Cancel
+                </button>
+              </div>
+            ) : (
+              <button
+                type="button"
+                className="meal-log-row__delete"
+                onClick={() => setConfirmId(m.id)}
+                aria-label={`Delete ${m.name}`}
+              >
+                ✕
+              </button>
+            )}
           </div>
         ))}
       </div>

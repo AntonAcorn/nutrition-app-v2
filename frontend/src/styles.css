@@ -2733,8 +2733,8 @@ ul {
 
 .meal-log-row__info {
   display: flex;
-  align-items: baseline;
-  gap: 8px;
+  flex-direction: column;
+  gap: 2px;
   min-width: 0;
   flex: 1;
   overflow: hidden;
@@ -2750,10 +2750,43 @@ ul {
 }
 
 .meal-log-row__meta {
-  font-size: 0.78rem;
+  font-size: 0.75rem;
   color: rgba(255, 255, 255, 0.35);
   white-space: nowrap;
+}
+
+.meal-log-row__confirm {
+  display: flex;
+  gap: 6px;
   flex-shrink: 0;
+}
+
+.meal-log-row__confirm-yes {
+  padding: 4px 10px;
+  background: rgba(239, 68, 68, 0.2);
+  border: 1px solid rgba(239, 68, 68, 0.4);
+  border-radius: 8px;
+  color: #ef4444;
+  font-size: 0.78rem;
+  cursor: pointer;
+}
+
+.meal-log-row__confirm-yes:hover {
+  background: rgba(239, 68, 68, 0.32);
+}
+
+.meal-log-row__confirm-no {
+  padding: 4px 10px;
+  background: rgba(255, 255, 255, 0.07);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 0.78rem;
+  cursor: pointer;
+}
+
+.meal-log-row__confirm-no:hover {
+  background: rgba(255, 255, 255, 0.12);
 }
 
 .meal-log-row__delete {
