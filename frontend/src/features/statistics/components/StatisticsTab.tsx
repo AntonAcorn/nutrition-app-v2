@@ -291,7 +291,7 @@ function StatisticsTable({ points }: { points: NutritionStatisticsPoint[] }) {
         </div>
         {orderedPoints.map((point) => (
           <div className="statistics-table__row" key={point.entryDate}>
-            <span>{point.entryDate}</span>
+            <span>{formatExpandedDate(point.entryDate)}</span>
             <span>{point.weightKg == null ? '—' : point.weightKg.toFixed(1)}</span>
             <strong>{formatMetricValue(point.consumedCalories)}</strong>
             <span>{formatMetricValue(point.calorieTarget)}</span>

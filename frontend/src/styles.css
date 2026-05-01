@@ -1449,7 +1449,7 @@ ul {
 .statistics-table__head,
 .statistics-table__row {
   display: grid;
-  grid-template-columns: minmax(120px, 1.1fr) repeat(7, minmax(84px, 1fr));
+  grid-template-columns: minmax(60px, 0.8fr) repeat(8, minmax(72px, 1fr));
   gap: 12px;
   align-items: center;
 }
