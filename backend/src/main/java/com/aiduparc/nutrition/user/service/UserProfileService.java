@@ -72,7 +72,9 @@ public class UserProfileService {
             command.goal(),
             command.weightLossStrategy()
         );
-        MacroTargets macros = calculateMacroTargets(target, command.goal(), command.gender());
+        MacroTargets macros = command.proteinTargetG() != null
+            ? new MacroTargets(command.proteinTargetG(), command.fatTargetG(), command.carbsTargetG(), command.fiberTargetG())
+            : calculateMacroTargets(target, command.goal(), command.gender());
 
         entity.setAgeYears(command.ageYears());
         entity.setGender(command.gender());
@@ -146,6 +148,10 @@ public class UserProfileService {
         BigDecimal startingWeightKg,
         String activityLevel,
         String goal,
-        String weightLossStrategy
+        String weightLossStrategy,
+        BigDecimal proteinTargetG,
+        BigDecimal fatTargetG,
+        BigDecimal carbsTargetG,
+        BigDecimal fiberTargetG
     ) {}
 }

@@ -47,6 +47,10 @@ export function ProfileTab({ displayName, email, onLogout }: Props) {
   const [activityLevel, setActivityLevel] = useState<OnboardingPayload['activityLevel'] | ''>('')
   const [goal, setGoal] = useState<OnboardingPayload['goal'] | ''>('')
   const [weightLossStrategy, setWeightLossStrategy] = useState<OnboardingPayload['weightLossStrategy'] | ''>('')
+  const [proteinTargetG, setProteinTargetG] = useState('')
+  const [fatTargetG, setFatTargetG] = useState('')
+  const [carbsTargetG, setCarbsTargetG] = useState('')
+  const [fiberTargetG, setFiberTargetG] = useState('')
   const [saving, setSaving] = useState(false)
   const [saveError, setSaveError] = useState('')
 
@@ -66,6 +70,10 @@ export function ProfileTab({ displayName, email, onLogout }: Props) {
     setActivityLevel(profile.activityLevel as OnboardingPayload['activityLevel'])
     setGoal(profile.goal as OnboardingPayload['goal'])
     setWeightLossStrategy((profile.weightLossStrategy ?? '') as OnboardingPayload['weightLossStrategy'])
+    setProteinTargetG(String(Math.round(Number(profile.proteinTargetG))))
+    setFatTargetG(String(Math.round(Number(profile.fatTargetG))))
+    setCarbsTargetG(String(Math.round(Number(profile.carbsTargetG))))
+    setFiberTargetG(String(Math.round(Number(profile.fiberTargetG))))
     setSaveError('')
     setEditing(true)
   }
@@ -84,6 +92,10 @@ export function ProfileTab({ displayName, email, onLogout }: Props) {
         activityLevel,
         goal,
         weightLossStrategy: goal === 'lose' ? weightLossStrategy || undefined : undefined,
+        proteinTargetG: Number(proteinTargetG) || undefined,
+        fatTargetG: Number(fatTargetG) || undefined,
+        carbsTargetG: Number(carbsTargetG) || undefined,
+        fiberTargetG: Number(fiberTargetG) || undefined,
       })
       setProfile(updated)
       setEditing(false)
@@ -198,6 +210,28 @@ export function ProfileTab({ displayName, email, onLogout }: Props) {
                 </div>
               </div>
             )}
+
+            <div>
+              <label style={{ display: 'block', marginBottom: '6px' }}>Macro targets (g/day)</label>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem' }}>
+                <label>
+                  Protein
+                  <input type="number" min={10} max={500} value={proteinTargetG} onChange={(e) => setProteinTargetG(e.target.value)} />
+                </label>
+                <label>
+                  Fat
+                  <input type="number" min={10} max={300} value={fatTargetG} onChange={(e) => setFatTargetG(e.target.value)} />
+                </label>
+                <label>
+                  Carbs
+                  <input type="number" min={10} max={600} value={carbsTargetG} onChange={(e) => setCarbsTargetG(e.target.value)} />
+                </label>
+                <label>
+                  Fiber
+                  <input type="number" min={5} max={100} value={fiberTargetG} onChange={(e) => setFiberTargetG(e.target.value)} />
+                </label>
+              </div>
+            </div>
 
             {saveError ? <p className="error-text">{saveError}</p> : null}
           </div>

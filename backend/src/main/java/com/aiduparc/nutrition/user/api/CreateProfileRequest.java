@@ -13,5 +13,9 @@ public record CreateProfileRequest(
     @NotNull BigDecimal startingWeightKg,
     @NotBlank String activityLevel,
     @NotBlank String goal,
-    String weightLossStrategy
+    String weightLossStrategy,
+    BigDecimal proteinTargetG,
+    BigDecimal fatTargetG,
+    BigDecimal carbsTargetG,
+    BigDecimal fiberTargetG
 ) {}

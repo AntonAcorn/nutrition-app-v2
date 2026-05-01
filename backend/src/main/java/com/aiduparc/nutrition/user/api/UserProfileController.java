@@ -71,7 +71,11 @@ public class UserProfileController {
             request.startingWeightKg(),
             request.activityLevel(),
             request.goal(),
-            request.weightLossStrategy()
+            request.weightLossStrategy(),
+            request.proteinTargetG(),
+            request.fatTargetG(),
+            request.carbsTargetG(),
+            request.fiberTargetG()
         ));
 
         return UserProfileResponse.from(entity);
