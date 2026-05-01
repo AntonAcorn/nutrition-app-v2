@@ -7,6 +7,8 @@ import { MealsLogCard } from './MealsLogCard'
 import { fetchTodaySummary } from '../model/todaySummaryApi'
 import { updateTodayWeight } from '../model/weightApi'
 import { addMealManually, resetToday } from '../model/nutritionTotalsApi'
+import { logTemplate } from '../../food-library/model/mealTemplateApi'
+import { getTodayLocalDateInputValue } from '../../../shared/lib/date'
 import type { TodaySummary } from '../../../shared/types/nutrition'
 
 function getGreeting(): string {
@@ -63,6 +65,14 @@ export function CurrentDayTab({ refreshToken = 0, successMessage = '', onDayUpda
       cancelled = true
     }
   }, [refreshToken])
+
+  async function handleTemplateLog(templateId: string) {
+    await logTemplate(templateId, getTodayLocalDateInputValue())
+    const nextSummary = await fetchTodaySummary()
+    setSummary(nextSummary)
+    setShowQuickAdd(false)
+    onDayUpdated?.()
+  }
 
   async function handleMealAdd(kcal: number, protein: number, fat: number, fiber: number, carbs: number) {
     setSavingNutrition(true)
@@ -152,6 +162,7 @@ export function CurrentDayTab({ refreshToken = 0, successMessage = '', onDayUpda
       {showQuickAdd && (
         <QuickAddSheet
           onAdd={handleMealAdd}
+          onLogTemplate={handleTemplateLog}
           onClose={() => setShowQuickAdd(false)}
         />
       )}

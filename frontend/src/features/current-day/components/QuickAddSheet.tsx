@@ -4,6 +4,7 @@ import type { MealTemplate } from '../../../shared/types/nutrition'
 
 interface Props {
   onAdd: (calories: number, protein: number, fat: number, fiber: number, carbs: number) => Promise<void>
+  onLogTemplate: (templateId: string) => Promise<void>
   onClose: () => void
 }
 
@@ -32,7 +33,8 @@ function ChipInput({ label, value, onChange, colorClass, unit }: ChipProps) {
   )
 }
 
-export function QuickAddSheet({ onAdd, onClose }: Props) {
+export function QuickAddSheet({ onAdd, onLogTemplate, onClose }: Props) {
+  const [mode, setMode] = useState<'library' | 'manual'>('library')
   const [calories, setCalories] = useState('')
   const [protein, setProtein]   = useState('')
   const [fat, setFat]           = useState('')
@@ -41,10 +43,16 @@ export function QuickAddSheet({ onAdd, onClose }: Props) {
   const [saving, setSaving]     = useState(false)
   const [error, setError]       = useState('')
   const [templates, setTemplates] = useState<MealTemplate[]>([])
+  const [loadingLib, setLoadingLib] = useState(true)
+  const [loggingId, setLoggingId] = useState<string | null>(null)
+  const [libError, setLibError] = useState('')
   const backdropRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
-    listTemplates().then(list => setTemplates(list.slice(0, 4))).catch(() => {})
+    listTemplates()
+      .then(list => setTemplates(list))
+      .catch(() => {})
+      .finally(() => setLoadingLib(false))
   }, [])
 
   useEffect(() => {
@@ -65,13 +73,15 @@ export function QuickAddSheet({ onAdd, onClose }: Props) {
     }
   }, [])
 
-  function fillFromTemplate(t: MealTemplate) {
-    setCalories(String(Math.round(t.totalCalories)))
-    setProtein(String(Math.round(t.totalProtein)))
-    setFat(String(Math.round(t.totalFat)))
-    setCarbs(String(Math.round(t.totalCarbs)))
-    setFiber(String(Math.round(t.totalFiber)))
-    setError('')
+  async function handleLogTemplate(id: string) {
+    setLoggingId(id)
+    setLibError('')
+    try {
+      await onLogTemplate(id)
+    } catch {
+      setLoggingId(null)
+      setLibError('Failed to log meal')
+    }
   }
 
   async function handleSubmit() {
@@ -97,59 +107,89 @@ export function QuickAddSheet({ onAdd, onClose }: Props) {
         <div className="qs-header">
           <div>
             <p className="qs-title">Quick add</p>
-            <p className="qs-subtitle">Tap a chip to enter value.</p>
+            <p className="qs-subtitle">
+              {mode === 'library' ? 'Tap Log to add a saved meal.' : 'Tap a chip to enter value.'}
+            </p>
           </div>
           <button type="button" className="qs-close" onClick={onClose}>✕</button>
         </div>
 
-        {templates.length > 0 ? (
-          <div className="qs-templates">
-            <p className="qs-templates__label">Saved meals</p>
-            <div className="qs-templates__list">
-              {templates.map(t => (
-                <button
-                  key={t.id}
-                  type="button"
-                  className="qs-template-btn"
-                  onClick={() => fillFromTemplate(t)}
-                >
-                  <span className="qs-template-btn__name">{t.name}</span>
-                  <span className="qs-template-btn__kcal">{Math.round(t.totalCalories)} kcal</span>
-                </button>
-              ))}
-            </div>
-          </div>
-        ) : null}
-
-        <label className={`barcode-macro-chip barcode-macro-chip--calories qs-chip qs-chip--calories`}>
-          <span className="barcode-macro-chip__value">{Number(calories) || 0}</span>
-          <span className="barcode-macro-chip__label">kcal</span>
-          <input
-            className="qs-chip__input"
-            type="number"
-            inputMode="decimal"
-            value={calories}
-            onChange={(e) => setCalories(e.target.value)}
-          />
-        </label>
-
-        <div className="barcode-macros-grid">
-          <ChipInput label="protein" value={protein} onChange={setProtein} colorClass="barcode-macro-chip--protein" unit="g" />
-          <ChipInput label="fat"     value={fat}     onChange={setFat}     colorClass="barcode-macro-chip--fat"     unit="g" />
-          <ChipInput label="carbs"   value={carbs}   onChange={setCarbs}   colorClass="barcode-macro-chip--carbs"   unit="g" />
-          <ChipInput label="fiber"   value={fiber}   onChange={setFiber}   colorClass="barcode-macro-chip--carbs"   unit="g" />
+        <div className="qs-mode-toggle">
+          <button
+            type="button"
+            className={`qs-mode-btn${mode === 'library' ? ' qs-mode-btn--active' : ''}`}
+            onClick={() => setMode('library')}
+          >
+            Library
+          </button>
+          <button
+            type="button"
+            className={`qs-mode-btn${mode === 'manual' ? ' qs-mode-btn--active' : ''}`}
+            onClick={() => setMode('manual')}
+          >
+            Manual
+          </button>
         </div>
 
-        {error && <p className="error-text">{error}</p>}
+        {mode === 'library' ? (
+          loadingLib ? (
+            <p className="qs-library-empty">Loading...</p>
+          ) : templates.length === 0 ? (
+            <p className="qs-library-empty">No saved meals yet. Add some in the Food Library tab.</p>
+          ) : (
+            <>
+              {libError && <p className="error-text">{libError}</p>}
+              <div className="qs-library-list">
+                {templates.map(t => (
+                  <div key={t.id} className="qs-library-item">
+                    <span className="qs-library-item__name">{t.name}</span>
+                    <span className="qs-library-item__kcal">{Math.round(t.totalCalories)} kcal</span>
+                    <button
+                      type="button"
+                      className="qs-library-item__log-btn"
+                      onClick={() => handleLogTemplate(t.id)}
+                      disabled={loggingId !== null}
+                    >
+                      {loggingId === t.id ? '...' : 'Log'}
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </>
+          )
+        ) : (
+          <>
+            <label className="barcode-macro-chip barcode-macro-chip--calories qs-chip qs-chip--calories">
+              <span className="barcode-macro-chip__value">{Number(calories) || 0}</span>
+              <span className="barcode-macro-chip__label">kcal</span>
+              <input
+                className="qs-chip__input"
+                type="number"
+                inputMode="decimal"
+                value={calories}
+                onChange={(e) => setCalories(e.target.value)}
+              />
+            </label>
 
-        <button
-          type="button"
-          className="profile-edit-btn"
-          onClick={handleSubmit}
-          disabled={saving}
-        >
-          {saving ? 'Adding…' : 'Add to today'}
-        </button>
+            <div className="barcode-macros-grid">
+              <ChipInput label="protein" value={protein} onChange={setProtein} colorClass="barcode-macro-chip--protein" unit="g" />
+              <ChipInput label="fat"     value={fat}     onChange={setFat}     colorClass="barcode-macro-chip--fat"     unit="g" />
+              <ChipInput label="carbs"   value={carbs}   onChange={setCarbs}   colorClass="barcode-macro-chip--carbs"   unit="g" />
+              <ChipInput label="fiber"   value={fiber}   onChange={setFiber}   colorClass="barcode-macro-chip--carbs"   unit="g" />
+            </div>
+
+            {error && <p className="error-text">{error}</p>}
+
+            <button
+              type="button"
+              className="profile-edit-btn"
+              onClick={handleSubmit}
+              disabled={saving}
+            >
+              {saving ? 'Adding…' : 'Add to today'}
+            </button>
+          </>
+        )}
       </div>
     </div>
   )
