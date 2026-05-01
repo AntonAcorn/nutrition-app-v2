@@ -359,12 +359,17 @@ export function PhotoAnalyzerTab({ onConfirmed }: PhotoAnalyzerTabProps) {
     setSaving(true)
     setError('')
     setSuccessMessage('')
+    const mealName = draft.items.length > 0
+      ? draft.items.slice(0, 3).map(i => i.name).join(', ')
+      : 'Analyzed meal'
     const payload = {
       caloriesKcal: recalculatedTotals.calories,
       proteinG: recalculatedTotals.protein,
       fatG: recalculatedTotals.fat,
       fiberG: recalculatedTotals.fiber,
+      carbsG: recalculatedTotals.carbs,
       notes: draft.notes.join('\n'),
+      mealName,
     }
     try {
       const response = await fetch(`${API_BASE}/api/photo-analysis/drafts/${draft.id}/confirm`, {

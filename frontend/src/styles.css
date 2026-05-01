@@ -2696,7 +2696,7 @@ ul {
   display: flex;
   flex-direction: column;
   gap: 0;
-  overflow: hidden;
+  padding: 16px 18px;
 }
 
 .meals-log-card__title {

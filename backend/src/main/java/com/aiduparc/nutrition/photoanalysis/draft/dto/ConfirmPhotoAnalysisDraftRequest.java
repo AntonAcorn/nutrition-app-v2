@@ -8,7 +8,7 @@ public record ConfirmPhotoAnalysisDraftRequest(
         BigDecimal fatG,
         BigDecimal fiberG,
         BigDecimal carbsG,
-        String notes
+        String notes,
+        String mealName
 ) {
 }
-

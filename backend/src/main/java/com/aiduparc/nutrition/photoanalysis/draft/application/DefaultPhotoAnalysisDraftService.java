@@ -80,7 +80,7 @@ public class DefaultPhotoAnalysisDraftService implements PhotoAnalysisDraftServi
         BigDecimal fiber = firstNonNull(request.fiberG(), entity.getEstimatedFiberG());
         BigDecimal carbs = firstNonNull(request.carbsG(), analysis.totals().carbs());
 
-        String mealName = (request.notes() != null && !request.notes().isBlank()) ? request.notes() : "Analyzed meal";
+        String mealName = (request.mealName() != null && !request.mealName().isBlank()) ? request.mealName() : "Analyzed meal";
         var savedEntry = nutritionHistoryService.addToDailyTotals(new NutritionHistoryService.AddToDailyTotalsCommand(
                 entity.getUserId(),
                 entity.getEntryDate(),
