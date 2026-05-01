@@ -53,25 +53,60 @@ function formatMetricValue(value: number | null | undefined, digits = 2): string
   return value.toFixed(digits)
 }
 
+function computeStreak(points: NutritionStatisticsPoint[]): number {
+  const sorted = [...points].sort((a, b) => a.entryDate.localeCompare(b.entryDate))
+  const logged = sorted.filter(p => p.consumedCalories > 0)
+  if (logged.length === 0) return 0
+  const last = logged[logged.length - 1]
+  const today = new Date().toISOString().split('T')[0]
+  const yesterday = new Date(Date.now() - 86400000).toISOString().split('T')[0]
+  if (last.entryDate !== today && last.entryDate !== yesterday) return 0
+  let streak = 0
+  let expected = last.entryDate
+  for (let i = logged.length - 1; i >= 0; i--) {
+    if (logged[i].entryDate === expected) {
+      streak++
+      const d = new Date(expected)
+      d.setDate(d.getDate() - 1)
+      expected = d.toISOString().split('T')[0]
+    } else {
+      break
+    }
+  }
+  return streak
+}
+
+function movingAvg(points: NutritionStatisticsPoint[], window = 5): Array<number | null> {
+  return points.map((_, i) => {
+    const slice = points.slice(Math.max(0, i - window + 1), i + 1)
+    const weights = slice.map(p => p.weightKg).filter((w): w is number => w != null)
+    return weights.length >= 3 ? weights.reduce((a, b) => a + b, 0) / weights.length : null
+  })
+}
+
 function getChartBounds({
   values,
   targets,
+  trendline,
   valueKey,
 }: {
   values: Array<number | null>
   targets: Array<number | null>
+  trendline?: Array<number | null>
   valueKey: 'weightKg' | 'consumedCalories' | 'proteinGrams' | 'fatGrams' | 'fiberGrams' | 'carbsGrams'
 }) {
   const numericValues = values.filter((value): value is number => value != null)
   const numericTargets = targets.filter((value): value is number => value != null)
+  const numericTrend = (trendline ?? []).filter((v): v is number => v != null)
 
   if (numericValues.length === 0 && numericTargets.length === 0) {
     return { min: 0, max: 1 }
   }
 
   if (valueKey === 'weightKg' && numericValues.length > 0) {
-    const rawMin = Math.min(...numericValues)
-    const rawMax = Math.max(...numericValues)
+    const allW = [...numericValues, ...numericTrend]
+    const rawMin = Math.min(...allW)
+    const rawMax = Math.max(...allW)
     const spread = rawMax - rawMin
     const visualRange = Math.max(spread, 1.5)
     const center = (rawMin + rawMax) / 2
@@ -122,6 +157,52 @@ function RangeSelector({ value, onChange }: { value: RangeDays; onChange: (value
   )
 }
 
+function CalorieBarChart({ points }: { points: NutritionStatisticsPoint[] }) {
+  const W = 760, H = 140
+  const midY = H / 2
+  const maxAbs = Math.max(200, ...points.map(p => Math.abs(p.calorieBalance)))
+  const gap = W / Math.max(points.length, 1)
+  const barW = Math.max(2, gap * 0.65)
+
+  return (
+    <div className="line-chart line-chart--dark-card">
+      <div className="line-chart__canvas line-chart__canvas--dark">
+        <div className="line-chart__plot">
+          <svg viewBox={`0 0 ${W} ${H}`} className="line-chart__svg" role="img" aria-label="Calorie balance">
+            <line x1="0" y1={midY} x2={W} y2={midY} stroke="rgba(255,255,255,0.15)" strokeWidth="1" strokeDasharray="4 4" />
+            {points.map((p, i) => {
+              const x = points.length === 1 ? W / 2 : (i / (points.length - 1)) * W
+              const barH = Math.max(1, (Math.abs(p.calorieBalance) / maxAbs) * (midY - 6))
+              const isOver = p.calorieBalance >= 0
+              return (
+                <rect
+                  key={p.entryDate}
+                  x={x - barW / 2}
+                  y={isOver ? midY - barH : midY}
+                  width={barW}
+                  height={barH}
+                  className={isOver ? 'calorie-bar--over' : 'calorie-bar--under'}
+                  rx="2"
+                />
+              )
+            })}
+          </svg>
+          <div className="line-chart__axis line-chart__axis--x" style={{ ['--label-count' as string]: String(points.length) }}>
+            {points.map((point, index) => {
+              const show = index === 0 || index === Math.floor((points.length - 1) / 2) || index === points.length - 1
+              return (
+                <span key={point.entryDate} className={show ? '' : 'line-chart__label--ghost'}>
+                  {show ? formatShortDate(point.entryDate) : ''}
+                </span>
+              )
+            })}
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 function ChartModal({ title, children, onClose }: { title: string; children: ReactNode; onClose: () => void }) {
   useEffect(() => {
     function handleKeyDown(event: KeyboardEvent) {
@@ -161,6 +242,7 @@ function LineChart({
   valueKey,
   targetKey,
   colorClass,
+  trendline,
   expanded,
   onExpand,
 }: {
@@ -170,6 +252,7 @@ function LineChart({
   valueKey: 'weightKg' | 'consumedCalories' | 'proteinGrams' | 'fatGrams' | 'fiberGrams' | 'carbsGrams'
   targetKey?: 'calorieTarget'
   colorClass: string
+  trendline?: Array<number | null>
   expanded?: boolean
   onExpand?: () => void
 }) {
@@ -177,9 +260,10 @@ function LineChart({
   const targets = targetKey ? points.map((point) => point[targetKey] ?? null) : []
   const width = 760
   const height = 180
-  const { min, max } = getChartBounds({ values, targets, valueKey })
+  const { min, max } = getChartBounds({ values, targets, trendline, valueKey })
   const valuePath = buildLinePath(values, width, height, min, max)
   const targetPath = targets.length > 0 ? buildLinePath(targets, width, height, min, max) : ''
+  const trendlinePath = trendline ? buildLinePath(trendline, width, height, min, max) : ''
   const guideValues = [min, (min + max) / 2, max]
   const compactLabelIndexes = new Set<number>([
     0,
@@ -205,6 +289,7 @@ function LineChart({
           <svg viewBox={`0 0 ${width} ${height}`} className="line-chart__svg" role="img" aria-label={title}>
             <path d={valuePath} className={`line-chart__path ${colorClass} line-chart__path--glow`} />
             {targetPath ? <path d={targetPath} className="line-chart__path line-chart__path--target" /> : null}
+            {trendlinePath ? <path d={trendlinePath} className="line-chart__path line-chart__path--trendline" /> : null}
           </svg>
           <div className="line-chart__axis line-chart__axis--x" style={{ ['--label-count' as string]: String(points.length) }}>
             {points.map((point, index) => {
@@ -370,6 +455,9 @@ export function StatisticsTab({ refreshToken = 0 }: StatisticsTabProps) {
     return points.filter((point) => point.calorieBalance <= 0).length
   }, [points])
 
+  const streak = useMemo(() => computeStreak(points), [points])
+  const weightTrendline = useMemo(() => movingAvg(points), [points])
+
   return (
     <section className="screen-section screen-section--statistics-dark">
       <header className="screen-header screen-header--statistics-dark">
@@ -409,16 +497,61 @@ export function StatisticsTab({ refreshToken = 0 }: StatisticsTabProps) {
               tone={points.length === 0 ? 'neutral' : onTargetDays / points.length >= 0.7 ? 'good' : onTargetDays / points.length >= 0.4 ? 'neutral' : 'bad'}
               emoji={points.length === 0 ? '🎯' : onTargetDays / points.length >= 0.7 ? '🎯' : onTargetDays / points.length >= 0.4 ? '👀' : '⚠️'}
             />
+            <MetricCard
+              title="Streak"
+              value={streak === 0 ? '—' : `${streak} day${streak === 1 ? '' : 's'}`}
+              detail={streak === 0 ? 'Log today to start a streak' : streak >= 7 ? 'Keep it up!' : 'Days logged in a row'}
+              tone={streak === 0 ? 'neutral' : streak >= 7 ? 'good' : 'neutral'}
+              emoji={streak === 0 ? '💤' : streak >= 14 ? '🔥' : streak >= 7 ? '⚡' : '📅'}
+            />
           </section>
+
+          {(data.weeklySummary || data.monthlySummary) && (
+            <section className="stats-period-row panel">
+              {data.weeklySummary && (
+                <div className="stats-period-card">
+                  <p className="stats-period-card__label">7-day avg</p>
+                  <p className="stats-period-card__value">{Math.round(data.weeklySummary.consumedCalories / 7)}</p>
+                  <p className="stats-period-card__unit">kcal / day</p>
+                  <p className={`stats-period-card__balance ${data.weeklySummary.calorieBalance <= 0 ? 'stats-period-card__balance--good' : 'stats-period-card__balance--bad'}`}>
+                    {formatSigned(Math.round(data.weeklySummary.calorieBalance / 7))} vs target
+                  </p>
+                </div>
+              )}
+              {data.monthlySummary && (
+                <div className="stats-period-card">
+                  <p className="stats-period-card__label">30-day avg</p>
+                  <p className="stats-period-card__value">{Math.round(data.monthlySummary.consumedCalories / 30)}</p>
+                  <p className="stats-period-card__unit">kcal / day</p>
+                  <p className={`stats-period-card__balance ${data.monthlySummary.calorieBalance <= 0 ? 'stats-period-card__balance--good' : 'stats-period-card__balance--bad'}`}>
+                    {formatSigned(Math.round(data.monthlySummary.calorieBalance / 30))} vs target
+                  </p>
+                </div>
+              )}
+            </section>
+          )}
+
           <LineChart
             title="Weight"
             unit="kg"
             points={points}
             valueKey="weightKg"
             colorClass="line-chart__path--weight"
+            trendline={weightTrendline}
             expanded={expandedChart === 'Weight'}
             onExpand={() => setExpandedChart((current) => (current === 'Weight' ? null : 'Weight'))}
           />
+
+          <section className="panel statistics-panel statistics-panel--dark">
+            <div className="statistics-panel__header">
+              <div>
+                <p className="screen-header__eyebrow">Metric</p>
+                <h3>Calorie balance</h3>
+              </div>
+            </div>
+            <CalorieBarChart points={points} />
+          </section>
+
           <LineChart
             title="Calories"
             unit="kcal"
