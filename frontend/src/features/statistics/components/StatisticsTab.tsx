@@ -158,20 +158,24 @@ function RangeSelector({ value, onChange }: { value: RangeDays; onChange: (value
 }
 
 function CalorieBarChart({ points }: { points: NutritionStatisticsPoint[] }) {
-  const W = 600, H = 220
-  const padT = 32, padB = 36
-  const chartH = H - padT - padB
-  const midY = padT + chartH / 2
+  const W = 600
+  // Layout: [label row 28px] [chart 160px] [dates row 28px] = 216
+  const labelH = 28, chartH = 160, dateH = 28
+  const H = labelH + chartH + dateH
+  const midY = labelH + chartH / 2
   const maxAbs = Math.max(200, ...points.map(p => Math.abs(p.calorieBalance)))
   const gap = W / Math.max(points.length, 1)
   const barW = Math.max(5, gap * 0.6)
-
   const dateLabels = [0, Math.floor((points.length - 1) / 2), points.length - 1]
 
   return (
     <div className="cal-bar-chart">
       <svg viewBox={`0 0 ${W} ${H}`} className="cal-bar-chart__svg">
-        {/* guide lines at 50% and 100% */}
+        {/* top label row: "surplus ↑" left, "±N kcal" right */}
+        <text x={4} y={20} fontSize="22" fill="rgba(239,68,68,0.6)">surplus ↑</text>
+        <text x={W - 4} y={20} fontSize="22" fill="rgba(255,255,255,0.22)" textAnchor="end">±{Math.round(maxAbs)} kcal</text>
+
+        {/* guide lines */}
         {[1, 0.5].map(pct => {
           const yT = midY - pct * (chartH / 2 - 2)
           const yB = midY + pct * (chartH / 2 - 2)
@@ -200,20 +204,16 @@ function CalorieBarChart({ points }: { points: NutritionStatisticsPoint[] }) {
           )
         })}
 
-        {/* corner labels */}
-        <text x={6} y={padT - 8} fontSize="22" fill="rgba(239,68,68,0.55)">surplus ↑</text>
-        <text x={6} y={H - 6} fontSize="22" fill="rgba(34,197,94,0.55)">deficit ↓</text>
-        <text x={W - 4} y={padT - 8} fontSize="22" fill="rgba(255,255,255,0.2)" textAnchor="end">
-          ±{Math.round(maxAbs)} kcal
-        </text>
-
-        {/* x-axis date labels */}
+        {/* bottom label row: "deficit ↓" left, dates right-aligned */}
+        <text x={4} y={labelH + chartH + 22} fontSize="22" fill="rgba(34,197,94,0.6)">deficit ↓</text>
         {points.map((p, i) => {
           if (!dateLabels.includes(i)) return null
           const x = points.length === 1 ? W / 2 : (i / (points.length - 1)) * W
-          const anchor = i === 0 ? 'start' : i === points.length - 1 ? 'end' : 'middle'
+          const anchor = i === 0 ? 'middle' : i === points.length - 1 ? 'end' : 'middle'
+          // skip first date label — it would overlap "deficit ↓"
+          if (i === 0) return null
           return (
-            <text key={p.entryDate} x={x} y={H - 2} fontSize="22" fill="rgba(255,255,255,0.3)" textAnchor={anchor}>
+            <text key={p.entryDate} x={x} y={labelH + chartH + 22} fontSize="22" fill="rgba(255,255,255,0.3)" textAnchor={anchor}>
               {formatShortDate(p.entryDate)}
             </text>
           )
