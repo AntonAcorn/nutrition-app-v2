@@ -2640,6 +2640,94 @@ ul {
   font-size: 0.9rem;
 }
 
+/* ── Meals Log Card ──────────────────────────────────────────────────────── */
+.meals-log-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.meals-log-card__title {
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.4);
+  margin-bottom: 8px;
+}
+
+.meals-log-list {
+  display: flex;
+  flex-direction: column;
+}
+
+.meal-log-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.meal-log-row:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.meal-log-row:first-child {
+  padding-top: 0;
+}
+
+.meal-log-row__info {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  min-width: 0;
+}
+
+.meal-log-row__name {
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.85);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.meal-log-row__meta {
+  font-size: 0.78rem;
+  color: rgba(255, 255, 255, 0.35);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.meal-log-row__delete {
+  flex-shrink: 0;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: transparent;
+  color: rgba(255, 255, 255, 0.35);
+  font-size: 0.7rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s, color 0.15s;
+}
+
+.meal-log-row__delete:hover {
+  background: rgba(239, 68, 68, 0.15);
+  border-color: rgba(239, 68, 68, 0.4);
+  color: #ef4444;
+}
+
+.meal-log-row__delete:active {
+  transform: scale(0.9);
+}
+
 /* ── Quick Add Trigger Card ──────────────────────────────────────────────── */
 .quick-add-trigger-card {
   padding: 16px 20px;

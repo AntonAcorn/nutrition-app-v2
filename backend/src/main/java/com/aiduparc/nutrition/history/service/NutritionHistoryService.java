@@ -1,12 +1,15 @@
 package com.aiduparc.nutrition.history.service;
 
+import com.aiduparc.nutrition.history.api.MealLogEntryResponse;
 import com.aiduparc.nutrition.history.api.NutritionBalanceSummaryResponse;
 import com.aiduparc.nutrition.history.api.NutritionStatisticsPointResponse;
 import com.aiduparc.nutrition.history.api.NutritionStatisticsResponse;
 import com.aiduparc.nutrition.history.api.TodaySummaryResponse;
 import com.aiduparc.nutrition.history.model.DailyNutritionEntryEntity;
 import com.aiduparc.nutrition.history.model.DailyNutritionEntrySnapshot;
+import com.aiduparc.nutrition.history.model.MealLogEntryEntity;
 import com.aiduparc.nutrition.history.repository.DailyNutritionEntryRepository;
+import com.aiduparc.nutrition.history.repository.MealLogEntryRepository;
 import com.aiduparc.nutrition.notifications.TelegramNotificationService;
 import com.aiduparc.nutrition.user.service.UserProfileService;
 import jakarta.validation.constraints.NotNull;
@@ -19,8 +22,10 @@ import java.util.Optional;
 import java.util.UUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
 
 @Service
 @Transactional(readOnly = true)
@@ -30,15 +35,18 @@ public class NutritionHistoryService {
     private static final BigDecimal DEFAULT_DAILY_TARGET_KCAL = BigDecimal.valueOf(2000);
 
     private final DailyNutritionEntryRepository repository;
+    private final MealLogEntryRepository mealLogRepository;
     private final UserProfileService userProfileService;
     private final TelegramNotificationService telegramNotificationService;
 
     public NutritionHistoryService(
             DailyNutritionEntryRepository repository,
+            MealLogEntryRepository mealLogRepository,
             UserProfileService userProfileService,
             TelegramNotificationService telegramNotificationService
     ) {
         this.repository = repository;
+        this.mealLogRepository = mealLogRepository;
         this.userProfileService = userProfileService;
         this.telegramNotificationService = telegramNotificationService;
     }
@@ -227,6 +235,8 @@ public class NutritionHistoryService {
             mergeNotes(current.notes(), command.notes())
         ));
 
+        saveMealLogEntry(command);
+
         log.info(
             "daily-totals updated userId={} entryDate={} calories={} protein={} fat={} fiber={}",
             result.userId(),
@@ -238,6 +248,71 @@ public class NutritionHistoryService {
         );
         telegramNotificationService.notifyActivity(command.userId(), "added calories");
         return result;
+    }
+
+    public List<MealLogEntryResponse> getMealLog(UUID userId, LocalDate date) {
+        return mealLogRepository.findByUserIdAndEntryDateOrderByCreatedAtAsc(userId, date)
+            .stream()
+            .map(e -> new MealLogEntryResponse(
+                e.getId(), e.getName(), e.getCaloriesKcal(),
+                e.getProteinG(), e.getFatG(), e.getCarbsG(), e.getFiberG(),
+                e.getSource(), e.getCreatedAt()
+            ))
+            .toList();
+    }
+
+    @Transactional
+    public void deleteMealLogEntry(UUID userId, UUID entryId) {
+        MealLogEntryEntity entry = mealLogRepository.findByIdAndUserId(entryId, userId)
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Meal not found"));
+
+        LocalDate entryDate = entry.getEntryDate();
+        mealLogRepository.delete(entry);
+        mealLogRepository.flush();
+
+        recomputeDailyTotalsFromLog(userId, entryDate);
+        log.info("meal-log entry deleted userId={} entryId={} entryDate={}", userId, entryId, entryDate);
+    }
+
+    @Transactional
+    public void deleteLatestMealLogEntryByName(UUID userId, LocalDate entryDate, String name) {
+        mealLogRepository.findTopByUserIdAndEntryDateAndNameOrderByCreatedAtDesc(userId, entryDate, name)
+            .ifPresentOrElse(entry -> {
+                mealLogRepository.delete(entry);
+                mealLogRepository.flush();
+                recomputeDailyTotalsFromLog(userId, entryDate);
+            }, () -> log.warn("meal-log entry not found for undo userId={} date={} name={}", userId, entryDate, name));
+    }
+
+    @Transactional
+    public void resetDayNutrition(UUID userId, LocalDate date) {
+        mealLogRepository.deleteByUserIdAndEntryDate(userId, date);
+        updateNutritionTotals(userId, date,
+            BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO);
+    }
+
+    private void recomputeDailyTotalsFromLog(UUID userId, LocalDate date) {
+        List<MealLogEntryEntity> remaining = mealLogRepository.findByUserIdAndEntryDateOrderByCreatedAtAsc(userId, date);
+        BigDecimal calories = remaining.stream().map(MealLogEntryEntity::getCaloriesKcal).reduce(BigDecimal.ZERO, BigDecimal::add);
+        BigDecimal protein  = remaining.stream().map(MealLogEntryEntity::getProteinG).reduce(BigDecimal.ZERO, BigDecimal::add);
+        BigDecimal fat      = remaining.stream().map(MealLogEntryEntity::getFatG).reduce(BigDecimal.ZERO, BigDecimal::add);
+        BigDecimal fiber    = remaining.stream().map(MealLogEntryEntity::getFiberG).reduce(BigDecimal.ZERO, BigDecimal::add);
+        BigDecimal carbs    = remaining.stream().map(MealLogEntryEntity::getCarbsG).reduce(BigDecimal.ZERO, BigDecimal::add);
+        updateNutritionTotals(userId, date, calories, protein, fat, fiber, carbs);
+    }
+
+    private void saveMealLogEntry(AddToDailyTotalsCommand command) {
+        var entry = new MealLogEntryEntity();
+        entry.setUserId(command.userId());
+        entry.setEntryDate(command.entryDate());
+        entry.setName(command.mealName() != null && !command.mealName().isBlank() ? command.mealName() : "Manual entry");
+        entry.setCaloriesKcal(defaultBigDecimal(command.caloriesConsumedKcal()));
+        entry.setProteinG(defaultBigDecimal(command.proteinGrams()));
+        entry.setFatG(defaultBigDecimal(command.fatGrams()));
+        entry.setCarbsG(defaultBigDecimal(command.carbsGrams()));
+        entry.setFiberG(defaultBigDecimal(command.fiberGrams()));
+        entry.setSource(command.source());
+        mealLogRepository.save(entry);
     }
 
     @Transactional
@@ -283,8 +358,17 @@ public class NutritionHistoryService {
         BigDecimal fatGrams,
         BigDecimal fiberGrams,
         BigDecimal carbsGrams,
-        String notes
+        String notes,
+        String mealName,
+        String source
     ) {
+        public AddToDailyTotalsCommand(
+            UUID userId, LocalDate entryDate, BigDecimal caloriesConsumedKcal,
+            BigDecimal proteinGrams, BigDecimal fatGrams, BigDecimal fiberGrams,
+            BigDecimal carbsGrams, String notes
+        ) {
+            this(userId, entryDate, caloriesConsumedKcal, proteinGrams, fatGrams, fiberGrams, carbsGrams, notes, null, null);
+        }
     }
     private DailyNutritionEntrySnapshot getOrCreateEmptySnapshot(UUID userId, LocalDate entryDate) {
         return findByUserAndDate(userId, entryDate)

@@ -74,7 +74,7 @@ public class TodaySummaryController {
         nutritionHistoryService.addToDailyTotals(new NutritionHistoryService.AddToDailyTotalsCommand(
             resolvedUserId, safeDate,
             request.caloriesConsumedKcal(), request.proteinGrams(), request.fatGrams(), request.fiberGrams(),
-            request.carbsGrams(), null
+            request.carbsGrams(), null, "Manual entry", "manual"
         ));
         return nutritionHistoryService.getTodaySummary(resolvedUserId, safeDate);
     }
@@ -87,11 +87,7 @@ public class TodaySummaryController {
     ) {
         LocalDate safeDate = entryDate != null ? entryDate : LocalDate.now();
         UUID resolvedUserId = currentNutritionUserResolver.resolve(session, null);
-        nutritionHistoryService.updateNutritionTotals(
-            resolvedUserId, safeDate,
-            java.math.BigDecimal.ZERO, java.math.BigDecimal.ZERO,
-            java.math.BigDecimal.ZERO, java.math.BigDecimal.ZERO, java.math.BigDecimal.ZERO
-        );
+        nutritionHistoryService.resetDayNutrition(resolvedUserId, safeDate);
         return nutritionHistoryService.getTodaySummary(resolvedUserId, safeDate);
     }
 

@@ -89,7 +89,9 @@ public class MealTemplateService {
                 entity.getTotalFat(),
                 entity.getTotalFiber(),
                 entity.getTotalCarbs(),
-                "From library: " + entity.getName()
+                null,
+                entity.getName(),
+                "template"
         ));
         log.info("meal-template logged userId={} templateId={} entryDate={} calories={}",
                 userId, templateId, entryDate, entity.getTotalCalories());
@@ -100,15 +102,7 @@ public class MealTemplateService {
         var entity = repository.findByIdAndNutritionUserId(templateId, userId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Template not found"));
 
-        nutritionHistoryService.subtractFromDailyTotals(new NutritionHistoryService.SubtractFromDailyTotalsCommand(
-                userId,
-                entryDate,
-                entity.getTotalCalories(),
-                entity.getTotalProtein(),
-                entity.getTotalFat(),
-                entity.getTotalFiber(),
-                entity.getTotalCarbs()
-        ));
+        nutritionHistoryService.deleteLatestMealLogEntryByName(userId, entryDate, entity.getName());
         log.info("meal-template unlogged userId={} templateId={} entryDate={}", userId, templateId, entryDate);
     }
 
