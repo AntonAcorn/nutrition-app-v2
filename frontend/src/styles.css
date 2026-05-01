@@ -2084,8 +2084,8 @@ ul {
 
 .line-chart__canvas--dark {
   display: grid;
-  grid-template-columns: 32px minmax(0, 1fr);
-  gap: 10px;
+  grid-template-columns: 40px minmax(0, 1fr);
+  gap: 8px;
   min-height: 240px;
 }
 

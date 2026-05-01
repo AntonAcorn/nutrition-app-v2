@@ -327,9 +327,13 @@ function LineChart({
     <div className={`line-chart line-chart--dark-card ${expanded ? 'line-chart--expanded' : ''}`}>
       <div className="line-chart__canvas line-chart__canvas--dark">
         <div className="line-chart__axis line-chart__axis--y">
-          {guideValues.slice().reverse().map((guide) => (
-            <span key={`${title}-${guide}`}>{Math.round(guide)}</span>
-          ))}
+          {guideValues.slice().reverse().map((guide) => {
+            const v = Math.round(guide)
+            const label = unit === 'kcal'
+              ? (Math.abs(v) >= 1000 ? `${(v / 1000).toFixed(1)}k` : String(v))
+              : `${v}${unit}`
+            return <span key={`${title}-${guide}`}>{label}</span>
+          })}
         </div>
         <div className="line-chart__plot">
           <div className={`line-chart__grid line-chart__grid--dark ${valueKey === 'weightKg' ? 'line-chart__grid--hidden' : ''}`}>
