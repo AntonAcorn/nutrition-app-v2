@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 
 interface Props {
   onAdd: (calories: number, protein: number, fat: number, fiber: number, carbs: number) => Promise<void>
@@ -38,6 +38,25 @@ export function QuickAddSheet({ onAdd, onClose }: Props) {
   const [fiber, setFiber]       = useState('')
   const [saving, setSaving]     = useState(false)
   const [error, setError]       = useState('')
+  const backdropRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    const vv = window.visualViewport
+    if (!vv) return
+    function update() {
+      const el = backdropRef.current
+      if (!el) return
+      el.style.height = `${vv!.height}px`
+      el.style.top    = `${vv!.offsetTop}px`
+    }
+    update()
+    vv.addEventListener('resize', update)
+    vv.addEventListener('scroll', update)
+    return () => {
+      vv.removeEventListener('resize', update)
+      vv.removeEventListener('scroll', update)
+    }
+  }, [])
 
   async function handleSubmit() {
     const kcal = Number(calories) || 0
@@ -57,7 +76,7 @@ export function QuickAddSheet({ onAdd, onClose }: Props) {
   }
 
   return (
-    <div className="qs-backdrop" onClick={handleBackdropClick}>
+    <div ref={backdropRef} className="qs-backdrop" onClick={handleBackdropClick}>
       <div className="qs-sheet">
         <div className="qs-header">
           <div>

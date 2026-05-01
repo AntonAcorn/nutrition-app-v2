@@ -2484,7 +2484,10 @@ ul {
 /* ── Quick Add Sheet (bottom sheet modal) ────────────────────────────────── */
 .qs-backdrop {
   position: fixed;
-  inset: 0;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 100dvh;
   background: rgba(0, 0, 0, 0.55);
   z-index: 200;
   display: flex;
