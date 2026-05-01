@@ -20,7 +20,6 @@ interface Props {
 
 export function WaterIntakeCard({ waterGlasses, onUpdate }: Props) {
   const [glasses, setGlasses] = useState(waterGlasses)
-  const [input, setInput] = useState('')
   const [saving, setSaving] = useState(false)
 
   const progress = Math.min((glasses / DISPLAY_MAX) * 100, 100)
@@ -38,27 +37,6 @@ export function WaterIntakeCard({ waterGlasses, onUpdate }: Props) {
     } finally {
       setSaving(false)
     }
-  }
-
-  function handleAddGlass() {
-    applyGlasses(glasses + 1)
-  }
-
-  function handleReset() {
-    setInput('')
-    applyGlasses(0)
-  }
-
-  function handleInputCommit() {
-    const parsed = parseInt(input, 10)
-    if (!Number.isNaN(parsed) && parsed >= 0 && parsed <= 99) {
-      applyGlasses(parsed)
-      setInput('')
-    }
-  }
-
-  function handleInputKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
-    if (e.key === 'Enter') handleInputCommit()
   }
 
   return (
@@ -85,27 +63,12 @@ export function WaterIntakeCard({ waterGlasses, onUpdate }: Props) {
       </div>
 
       <div className="water-card__actions">
-        <button type="button" className="water-card__button water-card__button--secondary" onClick={handleReset} disabled={glasses === 0 || saving}>
+        <button type="button" className="water-card__button water-card__button--secondary" onClick={() => applyGlasses(0)} disabled={glasses === 0 || saving}>
           Reset
         </button>
-        <button type="button" className="water-card__button" onClick={handleAddGlass} disabled={saving}>
+        <button type="button" className="water-card__button" onClick={() => applyGlasses(glasses + 1)} disabled={saving}>
           +1 glass
         </button>
-      </div>
-
-      <div className="water-card__manual">
-        <input
-          type="number"
-          inputMode="numeric"
-          min={0}
-          max={99}
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          onBlur={handleInputCommit}
-          onKeyDown={handleInputKeyDown}
-          placeholder="Set exact amount"
-          className="water-card__manual-input"
-        />
       </div>
     </section>
   )
