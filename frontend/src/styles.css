@@ -2697,6 +2697,8 @@ ul {
   position: absolute;
   inset: 0;
   opacity: 0;
+  color: transparent;
+  caret-color: transparent;
   width: 100%;
   height: 100%;
   cursor: pointer;
