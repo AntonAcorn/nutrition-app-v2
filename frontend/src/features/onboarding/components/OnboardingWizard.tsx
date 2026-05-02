@@ -279,6 +279,13 @@ export function OnboardingWizard({ onComplete }: Props) {
               </div>
             </div>
             <div className="onboarding-feature-card">
+              <span className="onboarding-feature-card__icon">🔍</span>
+              <div>
+                <p className="onboarding-feature-card__title">Scan a barcode</p>
+                <p className="onboarding-feature-card__desc">Point your camera at any packaged food — calories and macros fill in instantly.</p>
+              </div>
+            </div>
+            <div className="onboarding-feature-card">
               <span className="onboarding-feature-card__icon">⚖️</span>
               <div>
                 <p className="onboarding-feature-card__title">Log your weight daily</p>
