@@ -30,8 +30,23 @@ export function OnboardingWizard({ onComplete }: Props) {
     return ageYears && gender && heightCm
   }
 
+  function missingStep1() {
+    const missing = []
+    if (!ageYears) missing.push('age')
+    if (!gender) missing.push('gender')
+    if (!heightCm) missing.push('height')
+    return missing
+  }
+
   function canAdvanceStep2() {
     return startingWeightKg && activityLevel
+  }
+
+  function missingStep2() {
+    const missing = []
+    if (!startingWeightKg) missing.push('weight')
+    if (!activityLevel) missing.push('activity level')
+    return missing
   }
 
   function canFinish() {
@@ -79,7 +94,7 @@ export function OnboardingWizard({ onComplete }: Props) {
               max={120}
               value={ageYears}
               onChange={(e) => setAgeYears(e.target.value)}
-              placeholder="30"
+              placeholder="e.g. 30"
             />
           </label>
 
@@ -111,7 +126,7 @@ export function OnboardingWizard({ onComplete }: Props) {
               max={250}
               value={heightCm}
               onChange={(e) => setHeightCm(e.target.value)}
-              placeholder="175"
+              placeholder="e.g. 175"
             />
           </label>
 
@@ -122,6 +137,11 @@ export function OnboardingWizard({ onComplete }: Props) {
           >
             Next
           </button>
+          {!canAdvanceStep1() && (
+            <p className="onboarding-hint">
+              Still need: {missingStep1().join(', ')}
+            </p>
+          )}
         </div>
       )}
 
@@ -136,7 +156,7 @@ export function OnboardingWizard({ onComplete }: Props) {
               step="0.1"
               value={startingWeightKg}
               onChange={(e) => setStartingWeightKg(e.target.value)}
-              placeholder="75"
+              placeholder="e.g. 75"
             />
           </label>
 
@@ -175,6 +195,11 @@ export function OnboardingWizard({ onComplete }: Props) {
               Next
             </button>
           </div>
+          {!canAdvanceStep2() && (
+            <p className="onboarding-hint">
+              Still need: {missingStep2().join(', ')}
+            </p>
+          )}
         </div>
       )}
 
@@ -251,8 +276,8 @@ export function OnboardingWizard({ onComplete }: Props) {
       {step === 4 && (
         <div className="auth-form-grid">
           <img src="/mascot/camera.png" alt="" style={{ width: 80, margin: '0 auto 0.25rem' }} />
-          <h2 style={{ textAlign: 'center', fontSize: '1.2rem', margin: '0 0 0.25rem' }}>You're all set!</h2>
-          <p style={{ textAlign: 'center', color: 'rgba(255,255,255,0.55)', fontSize: '0.85rem', margin: '0 0 1rem' }}>
+          <h2 style={{ textAlign: 'center', fontSize: '1.35rem', fontWeight: 700, color: '#ffffff', margin: '0 0 0.25rem' }}>You're all set!</h2>
+          <p style={{ textAlign: 'center', color: 'rgba(255,255,255,0.7)', fontSize: '0.875rem', margin: '0 0 1rem' }}>
             Here's how to log your meals
           </p>
 
