@@ -75,6 +75,5 @@ nutrition:
       timeout-ms: ${OPENAI_TIMEOUT_MS:25000}
 
 sentry:
-  dsn: ${SENTRY_DSN:}
+  dsn: ${SENTRY_DSN:#{null}}
   environment: ${SENTRY_ENVIRONMENT:production}
-  traces-sample-rate: 0.1
