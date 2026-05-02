@@ -59,7 +59,6 @@ export default function App() {
   const [activeTab, setActiveTab] = useState<TabKey>(tabs.currentDay)
   const [summaryRefreshToken, setSummaryRefreshToken] = useState(0)
   const [statisticsRefreshToken, setStatisticsRefreshToken] = useState(0)
-  const [pendingDraftCount, setPendingDraftCount] = useState(0)
   const [daySuccessMessage, setDaySuccessMessage] = useState('')
   const [authUser, setAuthUser] = useState<AuthUser | null>(null)
   const [authLoading, setAuthLoading] = useState(true)
@@ -456,9 +455,6 @@ export default function App() {
             onClick={() => setActiveTab(tabs.photoAnalyzer)}
           >
             Log
-            {pendingDraftCount > 0 && activeTab !== tabs.photoAnalyzer && (
-              <span className="tab-badge">{pendingDraftCount}</span>
-            )}
           </button>
           <button
             type="button"
@@ -481,7 +477,7 @@ export default function App() {
             />
           ) : null}
           {activeTab === tabs.statistics ? <StatisticsTab refreshToken={statisticsRefreshToken} /> : null}
-          {activeTab === tabs.photoAnalyzer ? <PhotoAnalyzerTab onConfirmed={handleDraftConfirmed} onPendingDraftsChange={setPendingDraftCount} /> : null}
+          {activeTab === tabs.photoAnalyzer ? <PhotoAnalyzerTab onConfirmed={handleDraftConfirmed} /> : null}
           {activeTab === tabs.profile ? (
             <ProfileTab
               displayName={authUser.displayName}
