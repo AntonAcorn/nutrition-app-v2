@@ -1,8 +1,10 @@
 package com.aiduparc.nutrition.notifications.push;
 
+import java.security.Security;
 import nl.martijndwars.webpush.Notification;
 import nl.martijndwars.webpush.PushService;
 import nl.martijndwars.webpush.Subscription;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -21,6 +23,9 @@ public class PushNotificationService {
             @Value("${nutrition.push.vapid-private-key:}") String vapidPrivateKey,
             @Value("${nutrition.push.vapid-subject:mailto:admin@puzometr.org}") String vapidSubject
     ) throws Exception {
+        if (Security.getProvider("BC") == null) {
+            Security.addProvider(new BouncyCastleProvider());
+        }
         if (StringUtils.hasText(vapidPublicKey) && StringUtils.hasText(vapidPrivateKey)) {
             this.pushService = new PushService(vapidPublicKey, vapidPrivateKey, vapidSubject);
         } else {
