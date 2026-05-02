@@ -13,6 +13,7 @@ import jakarta.validation.Valid;
 import java.io.IOException;
 import java.util.Map;
 import java.util.UUID;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -35,19 +36,22 @@ public class AuthController {
     private final AuthProperties authProperties;
     private final AccountDeletionService accountDeletionService;
     private final CurrentNutritionUserResolver currentNutritionUserResolver;
+    private final String appBaseUrl;
 
     public AuthController(
             AuthFacade authFacade,
             GoogleOAuthService googleOAuthService,
             AuthProperties authProperties,
             AccountDeletionService accountDeletionService,
-            CurrentNutritionUserResolver currentNutritionUserResolver
+            CurrentNutritionUserResolver currentNutritionUserResolver,
+            @Value("${nutrition.app.base-url}") String appBaseUrl
     ) {
         this.authFacade = authFacade;
         this.googleOAuthService = googleOAuthService;
         this.authProperties = authProperties;
         this.accountDeletionService = accountDeletionService;
         this.currentNutritionUserResolver = currentNutritionUserResolver;
+        this.appBaseUrl = appBaseUrl;
     }
 
     @PostMapping("/register")
@@ -69,6 +73,15 @@ public class AuthController {
         authFacade.logout();
         session.invalidate();
         return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/resend-verification")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void resendVerification(@RequestBody Map<String, String> body) {
+        String email = body.get("email");
+        if (email != null && !email.isBlank()) {
+            authFacade.resendVerification(email.trim());
+        }
     }
 
     @PostMapping("/delete-account")
@@ -139,11 +152,14 @@ public class AuthController {
     }
 
     @GetMapping("/verify")
-    public ResponseEntity<String> verifyEmail(@RequestParam String token) {
+    public ResponseEntity<Void> verifyEmail(@RequestParam String token) {
         boolean ok = authFacade.verifyEmail(token);
-        if (ok) {
-            return ResponseEntity.ok("Email verified. You can close this page.");
-        }
-        return ResponseEntity.badRequest().body("Invalid or expired verification link.");
+        String redirect = appBaseUrl + (ok ? "/email-verified/" : "/email-verify-failed/");
+        return ResponseEntity.status(302).header("Location", redirect).build();
+    }
+
+    @GetMapping("/sentry-test")
+    public void sentryTest() {
+        throw new RuntimeException("Sentry test exception — can be deleted");
     }
 }
