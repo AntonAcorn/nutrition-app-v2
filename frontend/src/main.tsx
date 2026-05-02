@@ -2,6 +2,9 @@ import React from 'react'
 import ReactDOM from 'react-dom/client'
 import App from './app/App'
 import './styles.css'
+import { initAnalytics } from './shared/lib/analytics'
+
+initAnalytics()
 
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {

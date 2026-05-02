@@ -10,6 +10,7 @@ import { analyzeVoice } from '../model/voiceAnalysisApi'
 import { BarcodeScannerMode } from '../../barcode/components/BarcodeScannerMode'
 import { PhotoDraftCard } from './PhotoDraftCard'
 import type { DraftEntry } from './PhotoDraftCard'
+import { track } from '../../../shared/lib/analytics'
 
 async function pickPhotoNative(): Promise<File | null> {
   try {
@@ -178,6 +179,7 @@ export function PhotoAnalyzerTab({ onConfirmed, onSaveToLibrary }: PhotoAnalyzer
       }
       const payload = await response.json()
       const draft = normalizeDraft(payload.draft)
+      track('photo_analyzed', { item_count: draft.items.length, confidence: draft.confidence })
       setPhotoDrafts(prev => prev.map(e =>
         e.localId === localId ? { ...e, status: 'idle', draft } : e,
       ))
@@ -244,6 +246,7 @@ export function PhotoAnalyzerTab({ onConfirmed, onSaveToLibrary }: PhotoAnalyzer
       })
       if (!response.ok) throw new Error(`Save failed (${response.status})`)
 
+      track('draft_confirmed', { method: 'photo' })
       setPhotoDrafts(prev => prev.map(e =>
         e.localId === localId ? { ...e, status: 'saved' } : e,
       ))
@@ -281,6 +284,7 @@ export function PhotoAnalyzerTab({ onConfirmed, onSaveToLibrary }: PhotoAnalyzer
   }
 
   function discardPhotoDraft(localId: string) {
+    track('draft_discarded', { method: 'photo' })
     setPhotoDrafts(prev => {
       const e = prev.find(x => x.localId === localId)
       if (e?.thumbnail) URL.revokeObjectURL(e.thumbnail)
@@ -448,6 +452,7 @@ export function PhotoAnalyzerTab({ onConfirmed, onSaveToLibrary }: PhotoAnalyzer
     setVoiceSuccess('')
     try {
       const result = await analyzeVoice(transcript.trim(), navigator.language?.slice(0, 2) || 'en', currentEntryDate())
+      track('voice_analyzed', { item_count: result.items.length, confidence: result.confidence })
       setVoiceDraft(result)
     } catch (err) {
       setVoiceError(err instanceof Error ? err.message : 'Voice analysis failed')
@@ -508,6 +513,7 @@ export function PhotoAnalyzerTab({ onConfirmed, onSaveToLibrary }: PhotoAnalyzer
       })
       if (!response.ok) throw new Error(`Failed to save (${response.status})`)
       await response.json()
+      track('draft_confirmed', { method: 'voice' })
       setVoiceDraft(current => (current ? { ...current, needsUserConfirmation: false } : current))
       setVoiceSuccess('Saved. Daily summary updated.')
       onConfirmed?.()
@@ -805,7 +811,7 @@ export function PhotoAnalyzerTab({ onConfirmed, onSaveToLibrary }: PhotoAnalyzer
               <button
                 type="button"
                 className="voice-discard-btn"
-                onClick={() => { setVoiceDraft(null); setTranscript('') }}
+                onClick={() => { track('draft_discarded', { method: 'voice' }); setVoiceDraft(null); setTranscript('') }}
               >
                 Discard
               </button>
@@ -817,6 +823,7 @@ export function PhotoAnalyzerTab({ onConfirmed, onSaveToLibrary }: PhotoAnalyzer
         {mode === 'barcode' && !voiceDraft ? (
           <BarcodeScannerMode
             onAdded={() => {
+              track('barcode_scanned')
               setVoiceSuccess('Added to today')
               setTimeout(() => setVoiceSuccess(''), 2500)
               switchMode('photo')

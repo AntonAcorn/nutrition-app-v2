@@ -39,6 +39,7 @@ import { OnboardingWizard } from '../features/onboarding/components/OnboardingWi
 import { ProfileTab } from '../features/profile/components/ProfileTab'
 import { FoodLibraryTab } from '../features/food-library/components/FoodLibraryTab'
 import type { MealTemplateItem } from '../shared/types/nutrition'
+import { identifyUser, resetAnalyticsUser, track } from '../shared/lib/analytics'
 
 function getGreeting(): string {
   const hour = new Date().getHours()
@@ -105,6 +106,9 @@ export default function App() {
         const me = await fetchMe()
         if (!cancelled) {
           setAuthUser(me)
+          if (me.authenticated && me.nutritionUserId) {
+            identifyUser(me.nutritionUserId, { email: me.email ?? undefined, name: me.displayName ?? undefined })
+          }
         }
       } catch {
         if (!cancelled) {
@@ -143,6 +147,10 @@ export default function App() {
         : await register({ email: authEmail, password: authPassword, displayName: authDisplayName })
 
       setAuthUser(nextUser)
+      if (nextUser.nutritionUserId) {
+        identifyUser(nextUser.nutritionUserId, { email: nextUser.email ?? undefined, name: nextUser.displayName ?? undefined })
+        track(authMode === 'register' ? 'user_registered' : 'user_logged_in')
+      }
       setAuthPassword('')
       setAuthConfirmPassword('')
     } catch (error) {
@@ -190,11 +198,13 @@ export default function App() {
 
   async function handleLogout() {
     await logout()
+    resetAnalyticsUser()
     setAuthUser({ accountId: null, email: null, displayName: null, nutritionUserId: null, authenticated: false, hasProfile: false })
     setAuthPassword('')
   }
 
   async function handleOnboardingComplete() {
+    track('onboarding_completed')
     try {
       const me = await fetchMe()
       setAuthUser(me)
