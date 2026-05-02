@@ -524,7 +524,23 @@ export function PhotoAnalyzerTab({ onConfirmed, onSaveToLibrary }: PhotoAnalyzer
     }
   }
 
-  const idleCount = photoDrafts.filter(e => e.status === 'idle').length
+  const idleDrafts = photoDrafts.filter(e => e.status === 'idle' && e.draft)
+  const idleCount = idleDrafts.length
+
+  const allDraftsTotals = useMemo(() => {
+    return idleDrafts.reduce(
+      (acc, e) => {
+        const t = calculateTotals(e.draft!.items)
+        acc.calories += t.calories
+        acc.protein += t.protein
+        acc.fat += t.fat
+        acc.carbs += t.carbs
+        acc.fiber += t.fiber
+        return acc
+      },
+      { calories: 0, protein: 0, fat: 0, carbs: 0, fiber: 0 },
+    )
+  }, [photoDrafts])
 
   return (
     <section className="screen-section screen-section--photo-dark">
@@ -667,13 +683,24 @@ export function PhotoAnalyzerTab({ onConfirmed, onSaveToLibrary }: PhotoAnalyzer
                 ))}
 
                 {idleCount >= 2 && (
-                  <button
-                    type="button"
-                    className="photo-draft-save-all-btn"
-                    onClick={saveAllPhotoDrafts}
-                  >
-                    Save all {idleCount} meals
-                  </button>
+                  <>
+                    <div className="photo-draft-totals-summary">
+                      <p className="photo-draft-totals-summary__label">{idleCount} photos total</p>
+                      <p className="photo-draft-totals-summary__macros">
+                        {Math.round(allDraftsTotals.calories)} kcal
+                        <span className="photo-draft-card__sep">·</span>P {Math.round(allDraftsTotals.protein)}g
+                        <span className="photo-draft-card__sep">·</span>F {Math.round(allDraftsTotals.fat)}g
+                        <span className="photo-draft-card__sep">·</span>C {Math.round(allDraftsTotals.carbs)}g
+                      </p>
+                    </div>
+                    <button
+                      type="button"
+                      className="photo-draft-save-all-btn"
+                      onClick={saveAllPhotoDrafts}
+                    >
+                      Save all {idleCount} meals
+                    </button>
+                  </>
                 )}
               </div>
             )}

@@ -19,7 +19,7 @@ export function normalizeDraft(payload: DraftPayload): PhotoAnalysisDraft {
   const source = payload?.analysis ?? {}
   const items = Array.isArray(source.items)
     ? source.items.map((item, index) => ({
-        id: item.id ?? `item-${index}`,
+        id: item.id ?? crypto.randomUUID(),
         name: item.name ?? '',
         estimatedPortion:
           typeof item.estimatedPortion === 'string' && item.estimatedPortion.trim().length > 0
