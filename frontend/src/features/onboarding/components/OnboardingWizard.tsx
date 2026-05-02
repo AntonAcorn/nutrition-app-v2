@@ -269,6 +269,12 @@ export function OnboardingWizard({ onComplete }: Props) {
             </button>
           </div>
 
+          {!canFinish() && (
+            <p className="onboarding-hint">
+              {!goal ? 'Select your goal' : 'Select a weight loss pace'}
+            </p>
+          )}
+
           {error ? <p className="error-text">{error}</p> : null}
         </form>
       )}
@@ -276,8 +282,8 @@ export function OnboardingWizard({ onComplete }: Props) {
       {step === 4 && (
         <div className="auth-form-grid">
           <img src="/mascot/camera.png" alt="" style={{ width: 80, margin: '0 auto 0.25rem' }} />
-          <h2 style={{ textAlign: 'center', fontSize: '1.35rem', fontWeight: 700, color: '#ffffff', margin: '0 0 0.25rem' }}>You're all set!</h2>
-          <p style={{ textAlign: 'center', color: 'rgba(255,255,255,0.7)', fontSize: '0.875rem', margin: '0 0 1rem' }}>
+          <p style={{ textAlign: 'center', fontSize: '1.5rem', fontWeight: 700, color: '#ffffff', margin: '0 0 0.2rem', lineHeight: 1.2 }}>You're all set!</p>
+          <p style={{ textAlign: 'center', color: 'rgba(255,255,255,0.65)', fontSize: '0.875rem', margin: '0 0 1rem' }}>
             Here's how to log your meals
           </p>
 
