@@ -5,7 +5,7 @@ interface Props {
   onComplete: () => void
 }
 
-type Step = 1 | 2 | 3
+type Step = 1 | 2 | 3 | 4
 
 const optionStyle = (selected: boolean): CSSProperties => ({
   border: selected ? '1.5px solid rgba(255,255,255,0.75)' : '1px solid rgba(255,255,255,0.12)',
@@ -55,7 +55,7 @@ export function OnboardingWizard({ onComplete }: Props) {
         goal: goal as OnboardingPayload['goal'],
         weightLossStrategy: goal === 'lose' ? weightLossStrategy as OnboardingPayload['weightLossStrategy'] : undefined,
       })
-      onComplete()
+      setStep(4)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Something went wrong')
     } finally {
@@ -66,7 +66,7 @@ export function OnboardingWizard({ onComplete }: Props) {
   return (
     <section className="auth-panel auth-panel--dark">
       <p className="app-header__eyebrow" style={{ marginBottom: '0.5rem' }}>
-        Step {step} of 3
+        {step < 4 ? `Step ${step} of 3` : 'How it works'}
       </p>
 
       {step === 1 && (
@@ -246,6 +246,51 @@ export function OnboardingWizard({ onComplete }: Props) {
 
           {error ? <p className="error-text">{error}</p> : null}
         </form>
+      )}
+
+      {step === 4 && (
+        <div className="auth-form-grid">
+          <img src="/mascot/camera.png" alt="" style={{ width: 80, margin: '0 auto 0.25rem' }} />
+          <h2 style={{ textAlign: 'center', fontSize: '1.2rem', margin: '0 0 0.25rem' }}>You're all set!</h2>
+          <p style={{ textAlign: 'center', color: 'rgba(255,255,255,0.55)', fontSize: '0.85rem', margin: '0 0 1rem' }}>
+            Here's how to log your meals
+          </p>
+
+          <div className="onboarding-feature-cards">
+            <div className="onboarding-feature-card">
+              <span className="onboarding-feature-card__icon">📸</span>
+              <div>
+                <p className="onboarding-feature-card__title">Take a photo</p>
+                <p className="onboarding-feature-card__desc">Snap your meal — AI recognises ingredients and estimates calories automatically.</p>
+              </div>
+            </div>
+            <div className="onboarding-feature-card">
+              <span className="onboarding-feature-card__icon">🎤</span>
+              <div>
+                <p className="onboarding-feature-card__title">Describe it</p>
+                <p className="onboarding-feature-card__desc">Say or type what you ate. "Chicken rice and salad" is enough.</p>
+              </div>
+            </div>
+            <div className="onboarding-feature-card">
+              <span className="onboarding-feature-card__icon">✏️</span>
+              <div>
+                <p className="onboarding-feature-card__title">Review before saving</p>
+                <p className="onboarding-feature-card__desc">AI makes mistakes. Always glance at the numbers and fix anything off before saving.</p>
+              </div>
+            </div>
+            <div className="onboarding-feature-card">
+              <span className="onboarding-feature-card__icon">⚖️</span>
+              <div>
+                <p className="onboarding-feature-card__title">Log your weight daily</p>
+                <p className="onboarding-feature-card__desc">Even one reading a day builds a trend you can actually act on.</p>
+              </div>
+            </div>
+          </div>
+
+          <button type="button" style={{ marginTop: '0.5rem' }} onClick={onComplete}>
+            Let's go
+          </button>
+        </div>
       )}
     </section>
   )
