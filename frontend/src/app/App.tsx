@@ -32,7 +32,7 @@ function EyeOffIcon() {
   )
 }
 import { CurrentDayTab } from '../features/current-day/components/CurrentDayTab'
-import { login, logout, register, fetchMe, requestPasswordReset, resetPassword, type AuthUser } from '../features/auth/model/authApi'
+import { login, logout, register, fetchMe, requestPasswordReset, resetPassword, deleteAccount, type AuthUser } from '../features/auth/model/authApi'
 import { PhotoAnalyzerTab } from '../features/photo-analyzer/components/PhotoAnalyzerTab'
 import { StatisticsTab } from '../features/statistics/components/StatisticsTab'
 import { OnboardingWizard } from '../features/onboarding/components/OnboardingWizard'
@@ -201,6 +201,12 @@ export default function App() {
     resetAnalyticsUser()
     setAuthUser({ accountId: null, email: null, displayName: null, nutritionUserId: null, authenticated: false, hasProfile: false })
     setAuthPassword('')
+  }
+
+  async function handleDeleteAccount() {
+    await deleteAccount()
+    resetAnalyticsUser()
+    setAuthUser({ accountId: null, email: null, displayName: null, nutritionUserId: null, authenticated: false, hasProfile: false })
   }
 
   async function handleOnboardingComplete() {
@@ -518,6 +524,7 @@ export default function App() {
               displayName={authUser.displayName}
               email={authUser.email}
               onLogout={handleLogout}
+              onDeleteAccount={handleDeleteAccount}
             />
           ) : null}
         </div>

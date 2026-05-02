@@ -1,8 +1,10 @@
 package com.aiduparc.nutrition.security.api;
 
 import com.aiduparc.nutrition.security.AuthProperties;
+import com.aiduparc.nutrition.security.service.AccountDeletionService;
 import com.aiduparc.nutrition.security.service.AuthFacade;
 import com.aiduparc.nutrition.security.service.AuthenticatedSession;
+import com.aiduparc.nutrition.security.service.CurrentNutritionUserResolver;
 import com.aiduparc.nutrition.security.service.GoogleOAuthService;
 import com.aiduparc.nutrition.security.service.GoogleUserInfo;
 import jakarta.servlet.http.HttpServletResponse;
@@ -31,11 +33,21 @@ public class AuthController {
     private final AuthFacade authFacade;
     private final GoogleOAuthService googleOAuthService;
     private final AuthProperties authProperties;
+    private final AccountDeletionService accountDeletionService;
+    private final CurrentNutritionUserResolver currentNutritionUserResolver;
 
-    public AuthController(AuthFacade authFacade, GoogleOAuthService googleOAuthService, AuthProperties authProperties) {
+    public AuthController(
+            AuthFacade authFacade,
+            GoogleOAuthService googleOAuthService,
+            AuthProperties authProperties,
+            AccountDeletionService accountDeletionService,
+            CurrentNutritionUserResolver currentNutritionUserResolver
+    ) {
         this.authFacade = authFacade;
         this.googleOAuthService = googleOAuthService;
         this.authProperties = authProperties;
+        this.accountDeletionService = accountDeletionService;
+        this.currentNutritionUserResolver = currentNutritionUserResolver;
     }
 
     @PostMapping("/register")
@@ -57,6 +69,13 @@ public class AuthController {
         authFacade.logout();
         session.invalidate();
         return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/delete-account")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deleteAccount(HttpSession session) {
+        UUID userId = currentNutritionUserResolver.resolve(session, null);
+        accountDeletionService.deleteAccount(userId, session);
     }
 
     @GetMapping("/me")

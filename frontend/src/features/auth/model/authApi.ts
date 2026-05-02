@@ -95,3 +95,14 @@ export async function logout(): Promise<void> {
     throw new Error(`Logout failed (${response.status})`)
   }
 }
+
+export async function deleteAccount(): Promise<void> {
+  const response = await fetch(`${API_BASE}/api/auth/delete-account`, {
+    method: 'POST',
+    credentials: 'include',
+  })
+
+  if (!response.ok && response.status !== 204) {
+    throw new Error(`Account deletion failed (${response.status})`)
+  }
+}

@@ -11,4 +11,6 @@ public interface MealTemplateRepository extends JpaRepository<MealTemplateEntity
     List<MealTemplateEntity> findByNutritionUserIdOrderByCreatedAtDesc(UUID nutritionUserId);
 
     Optional<MealTemplateEntity> findByIdAndNutritionUserId(UUID id, UUID nutritionUserId);
+
+    void deleteByNutritionUserId(UUID nutritionUserId);
 }

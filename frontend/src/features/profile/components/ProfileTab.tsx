@@ -33,9 +33,10 @@ interface Props {
   displayName: string | null
   email: string | null
   onLogout: () => void
+  onDeleteAccount: () => void
 }
 
-export function ProfileTab({ displayName, email, onLogout }: Props) {
+export function ProfileTab({ displayName, email, onLogout, onDeleteAccount }: Props) {
   const [profile, setProfile] = useState<UserProfile | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
@@ -357,6 +358,17 @@ export function ProfileTab({ displayName, email, onLogout }: Props) {
       <div className="panel profile-actions">
         <button type="button" className="profile-edit-btn" onClick={startEditing}>Edit profile</button>
         <button type="button" className="profile-logout-btn" onClick={onLogout}>Log out</button>
+        <button
+          type="button"
+          className="profile-delete-btn"
+          onClick={() => {
+            if (window.confirm('Delete your account? This will permanently erase all your data and cannot be undone.')) {
+              onDeleteAccount()
+            }
+          }}
+        >
+          Delete account
+        </button>
       </div>
     </section>
   )
