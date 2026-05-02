@@ -56,10 +56,7 @@ export async function login(payload: LoginPayload): Promise<AuthUser> {
   })
 
   if (response.status === 403) {
-    const body = await response.json().catch(() => ({}))
-    if ((body as { message?: string }).message === 'EMAIL_NOT_VERIFIED') {
-      throw new EmailNotVerifiedError(payload.email)
-    }
+    throw new EmailNotVerifiedError(payload.email)
   }
 
   return parseAuthResponse(response)
