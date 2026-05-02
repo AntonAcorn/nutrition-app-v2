@@ -411,6 +411,14 @@ export default function App() {
 
               {authError ? <p className="error-text">{authError}</p> : null}
 
+              {authMode === 'register' ? (
+                <p style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.35)', textAlign: 'center', margin: '0' }}>
+                  By creating an account you agree to our{' '}
+                  <a href="/privacy/" target="_blank" rel="noopener noreferrer" style={{ color: 'rgba(120,180,255,0.7)' }}>
+                    Privacy Policy
+                  </a>
+                </p>
+              ) : null}
               <button type="submit" className="auth-btn-primary" disabled={authSubmitting}>
                 {authSubmitting ? 'Please wait...' : authMode === 'login' ? 'Log in' : 'Create account'}
               </button>
