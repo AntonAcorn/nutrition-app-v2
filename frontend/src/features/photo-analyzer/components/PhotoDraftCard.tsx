@@ -22,9 +22,10 @@ interface Props {
   onToggleExpand: (localId: string) => void
   onUpdateItem: (localId: string, itemId: string, field: keyof DraftItem, value: string) => void
   onUpdateNotes: (localId: string, value: string) => void
+  onSaveToLibrary?: (localId: string) => void
 }
 
-export function PhotoDraftCard({ entry, onSave, onDiscard, onToggleExpand, onUpdateItem, onUpdateNotes }: Props) {
+export function PhotoDraftCard({ entry, onSave, onDiscard, onToggleExpand, onUpdateItem, onUpdateNotes, onSaveToLibrary }: Props) {
   const totals = useMemo(
     () => (entry.draft ? calculateTotals(entry.draft.items) : calculateTotals([])),
     [entry.draft],
@@ -160,6 +161,15 @@ export function PhotoDraftCard({ entry, onSave, onDiscard, onToggleExpand, onUpd
               />
             </label>
           </div>
+          {onSaveToLibrary && (
+            <button
+              type="button"
+              className="photo-draft-save-to-library-btn"
+              onClick={() => onSaveToLibrary(entry.localId)}
+            >
+              Save to library →
+            </button>
+          )}
         </div>
       )}
     </div>

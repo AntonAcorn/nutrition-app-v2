@@ -3,7 +3,7 @@ import { listTemplates } from '../../food-library/model/mealTemplateApi'
 import type { MealTemplate } from '../../../shared/types/nutrition'
 
 interface Props {
-  onAdd: (calories: number, protein: number, fat: number, fiber: number, carbs: number) => Promise<void>
+  onAdd: (calories: number, protein: number, fat: number, fiber: number, carbs: number, name?: string) => Promise<void>
   onLogTemplate: (templateId: string) => Promise<void>
   onClose: () => void
 }
@@ -35,6 +35,7 @@ function ChipInput({ label, value, onChange, colorClass, unit }: ChipProps) {
 
 export function QuickAddSheet({ onAdd, onLogTemplate, onClose }: Props) {
   const [mode, setMode] = useState<'library' | 'manual'>('library')
+  const [mealName, setMealName] = useState('')
   const [calories, setCalories] = useState('')
   const [protein, setProtein]   = useState('')
   const [fat, setFat]           = useState('')
@@ -90,7 +91,7 @@ export function QuickAddSheet({ onAdd, onLogTemplate, onClose }: Props) {
     setSaving(true)
     setError('')
     try {
-      await onAdd(kcal, Number(protein) || 0, Number(fat) || 0, Number(fiber) || 0, Number(carbs) || 0)
+      await onAdd(kcal, Number(protein) || 0, Number(fat) || 0, Number(fiber) || 0, Number(carbs) || 0, mealName.trim() || undefined)
     } catch {
       setError('Failed to add')
       setSaving(false)
@@ -159,6 +160,13 @@ export function QuickAddSheet({ onAdd, onLogTemplate, onClose }: Props) {
           )
         ) : (
           <>
+            <input
+              className="qs-name-input"
+              type="text"
+              placeholder="Meal name (optional)"
+              value={mealName}
+              onChange={e => setMealName(e.target.value)}
+            />
             <label className="barcode-macro-chip barcode-macro-chip--calories qs-chip qs-chip--calories">
               <span className="barcode-macro-chip__value">{Number(calories) || 0}</span>
               <span className="barcode-macro-chip__label">kcal</span>

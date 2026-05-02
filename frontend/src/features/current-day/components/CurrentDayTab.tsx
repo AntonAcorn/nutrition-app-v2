@@ -74,10 +74,10 @@ export function CurrentDayTab({ refreshToken = 0, successMessage = '', onDayUpda
     onDayUpdated?.()
   }
 
-  async function handleMealAdd(kcal: number, protein: number, fat: number, fiber: number, carbs: number) {
+  async function handleMealAdd(kcal: number, protein: number, fat: number, fiber: number, carbs: number, name?: string) {
     setSavingNutrition(true)
     try {
-      await addMealManually({ caloriesConsumedKcal: kcal, proteinGrams: protein, fatGrams: fat, fiberGrams: fiber, carbsGrams: carbs })
+      await addMealManually({ caloriesConsumedKcal: kcal, proteinGrams: protein, fatGrams: fat, fiberGrams: fiber, carbsGrams: carbs, mealName: name })
       const nextSummary = await fetchTodaySummary()
       setSummary(nextSummary)
       setShowQuickAdd(false)

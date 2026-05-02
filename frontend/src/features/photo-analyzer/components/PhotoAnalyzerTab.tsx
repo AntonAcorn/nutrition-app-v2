@@ -261,6 +261,18 @@ export function PhotoAnalyzerTab({ onConfirmed, onSaveToLibrary }: PhotoAnalyzer
     photoDrafts.filter(e => e.status === 'idle').forEach(e => savePhotoDraft(e.localId))
   }
 
+  function savePhotoDraftToLibrary(localId: string) {
+    const entry = photoDrafts.find(e => e.localId === localId)
+    if (!entry?.draft) return
+    const items = entry.draft.items.map(({ name, estimatedPortion, calories, protein, fat, carbs, fiber }) =>
+      ({ name, estimatedPortion, calories, protein, fat, carbs, fiber })
+    )
+    const rawName = entry.draft.items.length > 0
+      ? entry.draft.items.slice(0, 2).map(i => i.name).join(', ')
+      : ''
+    onSaveToLibrary?.({ name: rawName.length > 50 ? rawName.slice(0, 47) + '...' : rawName, items })
+  }
+
   function discardPhotoDraft(localId: string) {
     setPhotoDrafts(prev => {
       const e = prev.find(x => x.localId === localId)
@@ -637,6 +649,7 @@ export function PhotoAnalyzerTab({ onConfirmed, onSaveToLibrary }: PhotoAnalyzer
                     onToggleExpand={toggleExpand}
                     onUpdateItem={updatePhotoDraftItem}
                     onUpdateNotes={updatePhotoDraftNotes}
+                    onSaveToLibrary={onSaveToLibrary ? savePhotoDraftToLibrary : undefined}
                   />
                 ))}
 

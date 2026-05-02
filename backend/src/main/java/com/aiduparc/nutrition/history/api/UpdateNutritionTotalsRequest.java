@@ -9,6 +9,7 @@ public record UpdateNutritionTotalsRequest(
     @NotNull @DecimalMin(value = "0.0", inclusive = true) BigDecimal proteinGrams,
     @NotNull @DecimalMin(value = "0.0", inclusive = true) BigDecimal fatGrams,
     @NotNull @DecimalMin(value = "0.0", inclusive = true) BigDecimal fiberGrams,
-    @DecimalMin(value = "0.0", inclusive = true) BigDecimal carbsGrams
+    @DecimalMin(value = "0.0", inclusive = true) BigDecimal carbsGrams,
+    String mealName
 ) {
 }

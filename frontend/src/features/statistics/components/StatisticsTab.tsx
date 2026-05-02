@@ -451,6 +451,7 @@ export function StatisticsTab({ refreshToken = 0 }: StatisticsTabProps) {
   const [data, setData] = useState<NutritionStatisticsResponse | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
+  const [showAllCharts, setShowAllCharts] = useState(false)
 
   useEffect(() => {
     let cancelled = false
@@ -596,39 +597,51 @@ export function StatisticsTab({ refreshToken = 0 }: StatisticsTabProps) {
             colorClass="line-chart__path--calories"
             gradColor="#f08a4b"
           />
-          <LineChart
-            title="Protein"
-            unit="g"
-            points={points}
-            valueKey="proteinGrams"
-            colorClass="line-chart__path--protein"
-            gradColor="#3a86ff"
-          />
-          <LineChart
-            title="Fat"
-            unit="g"
-            points={points}
-            valueKey="fatGrams"
-            colorClass="line-chart__path--fat"
-            gradColor="#d65a8d"
-          />
-          <LineChart
-            title="Carbs"
-            unit="g"
-            points={points}
-            valueKey="carbsGrams"
-            colorClass="line-chart__path--carbs"
-            gradColor="#f6ad55"
-          />
-          <LineChart
-            title="Fiber"
-            unit="g"
-            points={points}
-            valueKey="fiberGrams"
-            colorClass="line-chart__path--fiber"
-            gradColor="#38a169"
-          />
-          <StatisticsTable points={points} />
+          <button
+            type="button"
+            className="stats-show-more-btn"
+            onClick={() => setShowAllCharts(v => !v)}
+          >
+            {showAllCharts ? 'Show less ▲' : 'Show macros & table ▼'}
+          </button>
+
+          {showAllCharts && (
+            <>
+              <LineChart
+                title="Protein"
+                unit="g"
+                points={points}
+                valueKey="proteinGrams"
+                colorClass="line-chart__path--protein"
+                gradColor="#3a86ff"
+              />
+              <LineChart
+                title="Fat"
+                unit="g"
+                points={points}
+                valueKey="fatGrams"
+                colorClass="line-chart__path--fat"
+                gradColor="#d65a8d"
+              />
+              <LineChart
+                title="Carbs"
+                unit="g"
+                points={points}
+                valueKey="carbsGrams"
+                colorClass="line-chart__path--carbs"
+                gradColor="#f6ad55"
+              />
+              <LineChart
+                title="Fiber"
+                unit="g"
+                points={points}
+                valueKey="fiberGrams"
+                colorClass="line-chart__path--fiber"
+                gradColor="#38a169"
+              />
+              <StatisticsTable points={points} />
+            </>
+          )}
         </>
       ) : null}
     </section>
