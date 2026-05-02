@@ -1,5 +1,6 @@
 package com.aiduparc.nutrition.photoanalysis.api;
 
+import com.aiduparc.nutrition.photoanalysis.application.AiAnalysisRateLimitService;
 import com.aiduparc.nutrition.photoanalysis.application.PhotoAnalysisService;
 import com.aiduparc.nutrition.photoanalysis.application.PhotoUploadAnalysisService;
 import com.aiduparc.nutrition.photoanalysis.application.dto.PhotoAnalysisRequest;
@@ -31,15 +32,18 @@ public class PhotoAnalysisController {
     private final PhotoAnalysisService photoAnalysisService;
     private final PhotoUploadAnalysisService photoUploadAnalysisService;
     private final CurrentNutritionUserResolver currentNutritionUserResolver;
+    private final AiAnalysisRateLimitService rateLimitService;
 
     public PhotoAnalysisController(
             PhotoAnalysisService photoAnalysisService,
             PhotoUploadAnalysisService photoUploadAnalysisService,
-            CurrentNutritionUserResolver currentNutritionUserResolver
+            CurrentNutritionUserResolver currentNutritionUserResolver,
+            AiAnalysisRateLimitService rateLimitService
     ) {
         this.photoAnalysisService = photoAnalysisService;
         this.photoUploadAnalysisService = photoUploadAnalysisService;
         this.currentNutritionUserResolver = currentNutritionUserResolver;
+        this.rateLimitService = rateLimitService;
     }
 
     @PostMapping
@@ -62,6 +66,7 @@ public class PhotoAnalysisController {
         try {
             LocalDate safeEntryDate = StringUtils.hasText(entryDate) ? LocalDate.parse(entryDate) : LocalDate.now();
             UUID resolvedUserId = currentNutritionUserResolver.resolve(session, null);
+            rateLimitService.checkLimit(resolvedUserId);
             return new PhotoUploadAnalysisResponse(photoUploadAnalysisService.analyzeAndCreateDraft(
                     new PhotoUploadAnalysisRequest(
                             resolvedUserId,

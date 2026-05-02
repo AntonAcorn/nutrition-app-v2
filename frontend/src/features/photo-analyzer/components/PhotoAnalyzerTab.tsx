@@ -168,7 +168,14 @@ export function PhotoAnalyzerTab({ onConfirmed, onSaveToLibrary }: PhotoAnalyzer
         credentials: 'include',
         body: formData,
       })
-      if (!response.ok) throw new Error(`Analysis failed (${response.status})`)
+      if (!response.ok) {
+        let message = `Analysis failed (${response.status})`
+        try {
+          const body = await response.json()
+          if (body.message) message = body.message
+        } catch {}
+        throw new Error(message)
+      }
       const payload = await response.json()
       const draft = normalizeDraft(payload.draft)
       setPhotoDrafts(prev => prev.map(e =>

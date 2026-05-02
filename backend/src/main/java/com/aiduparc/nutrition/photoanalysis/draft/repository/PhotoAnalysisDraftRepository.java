@@ -1,6 +1,7 @@
 package com.aiduparc.nutrition.photoanalysis.draft.repository;
 
 import com.aiduparc.nutrition.photoanalysis.draft.model.PhotoAnalysisDraftEntity;
+import java.time.OffsetDateTime;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -11,5 +12,6 @@ public interface PhotoAnalysisDraftRepository extends JpaRepository<PhotoAnalysi
     Optional<PhotoAnalysisDraftEntity> findById(UUID id);
     Optional<PhotoAnalysisDraftEntity> findByIdAndUserId(UUID id, UUID userId);
     Optional<PhotoAnalysisDraftEntity> findTopByUserIdAndStatusOrderByCreatedAtDesc(UUID userId, PhotoAnalysisDraftStatus status);
+    long countByUserIdAndCreatedAtAfter(UUID userId, OffsetDateTime since);
 }
 

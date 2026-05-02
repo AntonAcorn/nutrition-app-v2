@@ -1,5 +1,6 @@
 package com.aiduparc.nutrition.photoanalysis.api;
 
+import com.aiduparc.nutrition.photoanalysis.application.AiAnalysisRateLimitService;
 import com.aiduparc.nutrition.photoanalysis.application.DefaultVoiceAnalysisService;
 import com.aiduparc.nutrition.photoanalysis.draft.dto.PhotoAnalysisDraftResponse;
 import com.aiduparc.nutrition.security.service.CurrentNutritionUserResolver;
@@ -23,13 +24,16 @@ public class VoiceAnalysisController {
 
     private final DefaultVoiceAnalysisService voiceAnalysisService;
     private final CurrentNutritionUserResolver currentNutritionUserResolver;
+    private final AiAnalysisRateLimitService rateLimitService;
 
     public VoiceAnalysisController(
             DefaultVoiceAnalysisService voiceAnalysisService,
-            CurrentNutritionUserResolver currentNutritionUserResolver
+            CurrentNutritionUserResolver currentNutritionUserResolver,
+            AiAnalysisRateLimitService rateLimitService
     ) {
         this.voiceAnalysisService = voiceAnalysisService;
         this.currentNutritionUserResolver = currentNutritionUserResolver;
+        this.rateLimitService = rateLimitService;
     }
 
     @PostMapping
@@ -39,6 +43,7 @@ public class VoiceAnalysisController {
             HttpSession session
     ) {
         UUID userId = currentNutritionUserResolver.resolve(session, null);
+        rateLimitService.checkLimit(userId);
         LocalDate entryDate = StringUtils.hasText(request.entryDate())
                 ? LocalDate.parse(request.entryDate())
                 : LocalDate.now();
