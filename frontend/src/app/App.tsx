@@ -32,7 +32,7 @@ function EyeOffIcon() {
   )
 }
 import { CurrentDayTab } from '../features/current-day/components/CurrentDayTab'
-import { login, logout, register, fetchMe, requestPasswordReset, resetPassword, deleteAccount, type AuthUser } from '../features/auth/model/authApi'
+import { login, logout, register, fetchMe, requestPasswordReset, resetPassword, deleteAccount, resendVerification, EmailNotVerifiedError, type AuthUser } from '../features/auth/model/authApi'
 import { PhotoAnalyzerTab } from '../features/photo-analyzer/components/PhotoAnalyzerTab'
 import { StatisticsTab } from '../features/statistics/components/StatisticsTab'
 import { OnboardingWizard } from '../features/onboarding/components/OnboardingWizard'
@@ -40,6 +40,7 @@ import { ProfileTab } from '../features/profile/components/ProfileTab'
 import { FoodLibraryTab } from '../features/food-library/components/FoodLibraryTab'
 import type { MealTemplateItem } from '../shared/types/nutrition'
 import { identifyUser, resetAnalyticsUser, track } from '../shared/lib/analytics'
+import * as Sentry from '@sentry/react'
 
 function getGreeting(): string {
   const hour = new Date().getHours()
@@ -67,7 +68,9 @@ export default function App() {
   const [daySuccessMessage, setDaySuccessMessage] = useState('')
   const [authUser, setAuthUser] = useState<AuthUser | null>(null)
   const [authLoading, setAuthLoading] = useState(true)
-  const [authMode, setAuthMode] = useState<'login' | 'register' | 'forgot-password' | 'reset-password'>('login')
+  const [authMode, setAuthMode] = useState<'login' | 'register' | 'forgot-password' | 'reset-password' | 'check-email'>('login')
+  const [resendLoading, setResendLoading] = useState(false)
+  const [resendSuccess, setResendSuccess] = useState(false)
   const [authEmail, setAuthEmail] = useState('')
   const [authPassword, setAuthPassword] = useState('')
   const [authDisplayName, setAuthDisplayName] = useState('')
@@ -108,11 +111,16 @@ export default function App() {
           setAuthUser(me)
           if (me.authenticated && me.nutritionUserId) {
             identifyUser(me.nutritionUserId, { email: me.email ?? undefined, name: me.displayName ?? undefined })
+            Sentry.setUser({ id: me.nutritionUserId, email: me.email ?? undefined })
+          }
+          if (me.authenticated && !me.emailVerified) {
+            setAuthEmail(me.email ?? '')
+            setAuthMode('check-email')
           }
         }
       } catch {
         if (!cancelled) {
-          setAuthUser({ accountId: null, email: null, displayName: null, nutritionUserId: null, authenticated: false, hasProfile: false })
+          setAuthUser({ accountId: null, email: null, displayName: null, nutritionUserId: null, authenticated: false, hasProfile: false, emailVerified: false })
         }
       } finally {
         if (!cancelled) {
@@ -142,19 +150,31 @@ export default function App() {
     setAuthError('')
 
     try {
-      const nextUser = authMode === 'login'
-        ? await login({ email: authEmail, password: authPassword })
-        : await register({ email: authEmail, password: authPassword, displayName: authDisplayName })
-
-      setAuthUser(nextUser)
-      if (nextUser.nutritionUserId) {
-        identifyUser(nextUser.nutritionUserId, { email: nextUser.email ?? undefined, name: nextUser.displayName ?? undefined })
-        track(authMode === 'register' ? 'user_registered' : 'user_logged_in')
+      if (authMode === 'login') {
+        const nextUser = await login({ email: authEmail, password: authPassword })
+        setAuthUser(nextUser)
+        if (nextUser.nutritionUserId) {
+          identifyUser(nextUser.nutritionUserId, { email: nextUser.email ?? undefined, name: nextUser.displayName ?? undefined })
+          Sentry.setUser({ id: nextUser.nutritionUserId, email: nextUser.email ?? undefined })
+          track('user_logged_in')
+        }
+        setAuthPassword('')
+        setAuthConfirmPassword('')
+      } else {
+        const nextUser = await register({ email: authEmail, password: authPassword, displayName: authDisplayName })
+        setAuthUser(nextUser)
+        setAuthMode('check-email')
+        setResendSuccess(false)
+        setAuthPassword('')
+        setAuthConfirmPassword('')
       }
-      setAuthPassword('')
-      setAuthConfirmPassword('')
     } catch (error) {
-      setAuthError(error instanceof Error ? error.message : 'Auth failed')
+      if (error instanceof EmailNotVerifiedError) {
+        setAuthMode('check-email')
+        setResendSuccess(false)
+      } else {
+        setAuthError(error instanceof Error ? error.message : 'Auth failed')
+      }
     } finally {
       setAuthSubmitting(false)
     }
@@ -199,14 +219,31 @@ export default function App() {
   async function handleLogout() {
     await logout()
     resetAnalyticsUser()
-    setAuthUser({ accountId: null, email: null, displayName: null, nutritionUserId: null, authenticated: false, hasProfile: false })
+    Sentry.setUser(null)
+    setAuthUser({ accountId: null, email: null, displayName: null, nutritionUserId: null, authenticated: false, hasProfile: false, emailVerified: false })
+    setAuthMode('login')
     setAuthPassword('')
   }
 
   async function handleDeleteAccount() {
     await deleteAccount()
     resetAnalyticsUser()
-    setAuthUser({ accountId: null, email: null, displayName: null, nutritionUserId: null, authenticated: false, hasProfile: false })
+    Sentry.setUser(null)
+    setAuthUser({ accountId: null, email: null, displayName: null, nutritionUserId: null, authenticated: false, hasProfile: false, emailVerified: false })
+    setAuthMode('login')
+  }
+
+  async function handleResendVerification() {
+    setResendLoading(true)
+    setResendSuccess(false)
+    try {
+      await resendVerification(authEmail || authUser?.email || '')
+      setResendSuccess(true)
+    } catch {
+      // silent — backend never reveals whether email is registered
+    } finally {
+      setResendLoading(false)
+    }
   }
 
   async function handleOnboardingComplete() {
@@ -235,6 +272,51 @@ export default function App() {
       <main className="app-shell">
         <section className="panel detail-panel">
           <p>Loading session...</p>
+        </section>
+      </main>
+    )
+  }
+
+  const showCheckEmail = authMode === 'check-email' || (authUser?.authenticated && !authUser.emailVerified)
+
+  if (showCheckEmail) {
+    const verifyEmail = authEmail || authUser?.email || ''
+    return (
+      <main className="app-shell app-shell--auth">
+        <div className="auth-hero">
+          <img src="/mascot/happy.png" alt="" className="auth-hero__mascot" />
+          <div>
+            <p className="auth-hero__eyebrow">Daily nutrition</p>
+            <h1 className="auth-hero__title">Check your email</h1>
+          </div>
+        </div>
+        <section className="auth-card">
+          <div className="auth-form">
+            <p style={{ fontSize: '0.9rem', color: 'rgba(255,255,255,0.6)', textAlign: 'center', lineHeight: 1.6 }}>
+              We sent a verification link to<br />
+              <strong style={{ color: 'rgba(255,255,255,0.85)' }}>{verifyEmail}</strong>
+            </p>
+            <p style={{ fontSize: '0.85rem', color: 'rgba(255,255,255,0.4)', textAlign: 'center', lineHeight: 1.5 }}>
+              Click the link to activate your account. Check your spam folder if you don&apos;t see it.
+            </p>
+            {resendSuccess ? (
+              <p className="success-text">Verification email resent. Check your inbox.</p>
+            ) : null}
+            <button type="button" className="auth-btn-primary" disabled={resendLoading} onClick={handleResendVerification}>
+              {resendLoading ? 'Sending...' : 'Resend email'}
+            </button>
+            <button
+              type="button"
+              className="auth-switch-link"
+              onClick={() => {
+                setAuthUser(null)
+                setAuthMode('login')
+                setResendSuccess(false)
+              }}
+            >
+              ← Back to login
+            </button>
+          </div>
         </section>
       </main>
     )

@@ -73,3 +73,8 @@ nutrition:
       model: ${OPENAI_MODEL:gpt-4.1-mini}
       base-url: ${OPENAI_BASE_URL:https://api.openai.com/v1}
       timeout-ms: ${OPENAI_TIMEOUT_MS:25000}
+
+sentry:
+  dsn: ${SENTRY_DSN:}
+  environment: ${SENTRY_ENVIRONMENT:production}
+  traces-sample-rate: 0.1

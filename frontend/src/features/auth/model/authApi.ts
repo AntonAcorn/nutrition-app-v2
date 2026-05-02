@@ -7,6 +7,14 @@ export interface AuthUser {
   nutritionUserId: string | null
   authenticated: boolean
   hasProfile: boolean
+  emailVerified: boolean
+}
+
+export class EmailNotVerifiedError extends Error {
+  constructor(public readonly email: string) {
+    super('EMAIL_NOT_VERIFIED')
+    this.name = 'EmailNotVerifiedError'
+  }
 }
 
 export interface LoginPayload {
@@ -47,7 +55,23 @@ export async function login(payload: LoginPayload): Promise<AuthUser> {
     body: JSON.stringify(payload),
   })
 
+  if (response.status === 403) {
+    const body = await response.json().catch(() => ({}))
+    if ((body as { message?: string }).message === 'EMAIL_NOT_VERIFIED') {
+      throw new EmailNotVerifiedError(payload.email)
+    }
+  }
+
   return parseAuthResponse(response)
+}
+
+export async function resendVerification(email: string): Promise<void> {
+  await fetch(`${API_BASE}/api/auth/resend-verification`, {
+    method: 'POST',
+    credentials: 'include',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email }),
+  })
 }
 
 export async function register(payload: RegisterPayload): Promise<AuthUser> {

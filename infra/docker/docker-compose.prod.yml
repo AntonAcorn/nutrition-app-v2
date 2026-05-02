@@ -43,6 +43,7 @@ services:
       args:
         VITE_POSTHOG_KEY: ${VITE_POSTHOG_KEY:-}
         VITE_VAPID_PUBLIC_KEY: ${VITE_VAPID_PUBLIC_KEY:-}
+        VITE_SENTRY_DSN: ${VITE_SENTRY_DSN:-}
     restart: unless-stopped
     depends_on:
       - backend

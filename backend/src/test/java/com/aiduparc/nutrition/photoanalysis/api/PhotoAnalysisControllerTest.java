@@ -9,6 +9,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import com.aiduparc.nutrition.photoanalysis.application.AiAnalysisRateLimitService;
 import com.aiduparc.nutrition.photoanalysis.application.PhotoAnalysisService;
 import com.aiduparc.nutrition.security.SecurityConfig;
 import com.aiduparc.nutrition.security.service.CurrentNutritionUserResolver;
@@ -47,6 +48,9 @@ class PhotoAnalysisControllerTest {
 
     @MockBean
     private CurrentNutritionUserResolver currentNutritionUserResolver;
+
+    @MockBean
+    private AiAnalysisRateLimitService aiAnalysisRateLimitService;
 
     @Test
     void shouldReturnStructuredPhotoAnalysisResponse() throws Exception {

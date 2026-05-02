@@ -9,8 +9,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.aiduparc.nutrition.security.AuthProperties;
 import com.aiduparc.nutrition.security.SecurityConfig;
+import com.aiduparc.nutrition.security.service.AccountDeletionService;
 import com.aiduparc.nutrition.security.service.AuthFacade;
 import com.aiduparc.nutrition.security.service.AuthenticatedSession;
+import com.aiduparc.nutrition.security.service.CurrentNutritionUserResolver;
 import com.aiduparc.nutrition.security.service.GoogleOAuthService;
 import java.util.UUID;
 import org.junit.jupiter.api.Test;
@@ -37,6 +39,12 @@ class AuthControllerTest {
     @MockBean
     private AuthProperties authProperties;
 
+    @MockBean
+    private AccountDeletionService accountDeletionService;
+
+    @MockBean
+    private CurrentNutritionUserResolver currentNutritionUserResolver;
+
     @Test
     void registerShouldCreateAuthenticatedSession() throws Exception {
         AuthenticatedSession authenticatedSession = new AuthenticatedSession(
@@ -53,6 +61,7 @@ class AuthControllerTest {
                 authenticatedSession.displayName(),
                 authenticatedSession.nutritionUserId(),
                 true,
+                false,
                 false
         ));
 
