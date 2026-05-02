@@ -40,6 +40,9 @@ services:
   frontend:
     build:
       context: ../../frontend
+      args:
+        VITE_POSTHOG_KEY: ${VITE_POSTHOG_KEY:-}
+        VITE_VAPID_PUBLIC_KEY: ${VITE_VAPID_PUBLIC_KEY:-}
     restart: unless-stopped
     depends_on:
       - backend
