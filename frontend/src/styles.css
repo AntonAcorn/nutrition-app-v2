@@ -3537,6 +3537,107 @@ ul {
   padding: 18px 20px;
 }
 
+/* Notification settings */
+.notif-settings-section {
+  padding: 18px 20px 4px;
+}
+
+.notif-settings__unsupported {
+  font-size: 0.82rem;
+  color: rgba(255, 255, 255, 0.4);
+  margin: 6px 0 0;
+}
+
+.notif-settings-card {
+  margin-top: 10px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 14px;
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.notif-settings-card__row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.notif-settings-card__title {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #fff;
+  margin: 0 0 3px;
+}
+
+.notif-settings-card__desc {
+  font-size: 0.78rem;
+  color: rgba(255, 255, 255, 0.45);
+  margin: 0;
+}
+
+.notif-toggle {
+  flex-shrink: 0;
+  padding: 6px 16px;
+  border-radius: 20px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  background: rgba(255, 255, 255, 0.06);
+  color: rgba(255, 255, 255, 0.45);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.notif-toggle--on {
+  background: rgba(100, 200, 120, 0.18);
+  border-color: rgba(100, 200, 120, 0.4);
+  color: rgb(120, 220, 140);
+}
+
+.notif-settings-card__time {
+  display: flex;
+  align-items: flex-end;
+  gap: 0.75rem;
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.notif-settings-card__time-label {
+  flex: 1;
+  font-size: 0.78rem;
+  color: rgba(255, 255, 255, 0.5);
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.notif-settings-card__time-select {
+  background: rgba(255, 255, 255, 0.07);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 8px;
+  color: #fff;
+  padding: 7px 10px;
+  font-size: 0.85rem;
+  width: 100%;
+}
+
+.notif-settings-card__save-btn {
+  flex-shrink: 0;
+  padding: 7px 16px;
+  border-radius: 8px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: #fff;
+  cursor: pointer;
+}
+
 .profile-edit-btn {
   border: 0;
   border-radius: 18px;

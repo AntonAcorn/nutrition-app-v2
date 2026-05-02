@@ -1,6 +1,7 @@
 import { CSSProperties, FormEvent, useEffect, useState } from 'react'
 import { fetchProfile, updateProfile, type UserProfile } from '../model/profileApi'
 import type { OnboardingPayload } from '../../onboarding/model/profileApi'
+import { NotificationSettings } from '../../notifications/components/NotificationSettings'
 
 const ACTIVITY_LABELS: Record<string, string> = {
   sedentary: 'Sedentary',
@@ -347,6 +348,10 @@ export function ProfileTab({ displayName, email, onLogout }: Props) {
             <span className="profile-stat__value">{profile.waterGoalGlasses ?? 4} glasses / day</span>
           </div>
         </div>
+      </div>
+
+      <div className="panel">
+        <NotificationSettings />
       </div>
 
       <div className="panel profile-actions">
