@@ -3418,6 +3418,12 @@ ul {
   margin: 0;
 }
 
+.library-tab__actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
 .library-new-btn {
   padding: 7px 16px;
   border-radius: 20px;
@@ -3427,6 +3433,22 @@ ul {
   font-size: 0.82rem;
   font-weight: 600;
   cursor: pointer;
+}
+
+.library-photo-btn {
+  padding: 7px 16px;
+  border-radius: 20px;
+  border: 1px solid rgba(99, 179, 237, 0.35);
+  background: rgba(99, 179, 237, 0.12);
+  color: rgba(99, 179, 237, 0.9);
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.library-photo-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 .library-empty {

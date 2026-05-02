@@ -1,7 +1,9 @@
-import { useEffect, useRef, useState } from 'react'
+import { type ChangeEvent, useEffect, useRef, useState } from 'react'
 import { getTodayLocalDateInputValue } from '../../../shared/lib/date'
+import { API_BASE } from '../../../shared/lib/apiBase'
 import type { MealTemplate, MealTemplateItem } from '../../../shared/types/nutrition'
 import { listTemplates, createTemplate, updateTemplate, deleteTemplate, logTemplate, unlogTemplate } from '../model/mealTemplateApi'
+import { normalizeDraft } from '../../photo-analyzer/model/photoAnalysis'
 
 interface FoodLibraryTabProps {
   onLogged?: () => void
@@ -38,6 +40,8 @@ export function FoodLibraryTab({ onLogged, initialSave, onInitialSaveDone }: Foo
   const [editName, setEditName] = useState('')
   const [editItems, setEditItems] = useState<MealTemplateItem[]>([])
   const [saving, setSaving] = useState(false)
+  const [photoAnalyzing, setPhotoAnalyzing] = useState(false)
+  const photoFileInputRef = useRef<HTMLInputElement | null>(null)
   const [loggingId, setLoggingId] = useState<string | null>(null)
   const [confirmTarget, setConfirmTarget] = useState<MealTemplate | null>(null)
   const [loggedToast, setLoggedToast] = useState<LoggedToast | null>(null)
@@ -69,6 +73,45 @@ export function FoodLibraryTab({ onLogged, initialSave, onInitialSaveDone }: Foo
   function openCreate() {
     setCreating(true); setEditing(null)
     setEditName(''); setEditItems([EMPTY_ITEM()]); setError('')
+  }
+
+  async function handlePhotoFile(e: ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0]
+    if (!file) return
+    if (e.target) e.target.value = ''
+    setPhotoAnalyzing(true)
+    setError('')
+    try {
+      const formData = new FormData()
+      formData.append('file', file)
+      formData.append('entryDate', getTodayLocalDateInputValue())
+      formData.append('userNote', '')
+      formData.append('locale', 'en')
+      const response = await fetch(`${API_BASE}/api/photo-analysis/upload`, {
+        method: 'POST',
+        credentials: 'include',
+        body: formData,
+      })
+      if (!response.ok) throw new Error(`Analysis failed (${response.status})`)
+      const payload = await response.json()
+      const draft = normalizeDraft(payload.draft)
+      const items: MealTemplateItem[] = draft.items.map(
+        ({ name, estimatedPortion, calories, protein, fat, carbs, fiber }) =>
+          ({ name, estimatedPortion, calories, protein, fat, carbs, fiber }),
+      )
+      const rawName = draft.items.length > 0
+        ? draft.items.slice(0, 2).map(i => i.name).join(', ')
+        : 'Analyzed meal'
+      setCreating(true)
+      setEditing(null)
+      setEditName(rawName.length > 50 ? rawName.slice(0, 47) + '...' : rawName)
+      setEditItems(items.length ? items : [EMPTY_ITEM()])
+      setError('')
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Photo analysis failed')
+    } finally {
+      setPhotoAnalyzing(false)
+    }
   }
 
   function openEdit(t: MealTemplate) {
@@ -239,8 +282,25 @@ export function FoodLibraryTab({ onLogged, initialSave, onInitialSaveDone }: Foo
     <div className="library-tab">
       <div className="library-tab__header">
         <h3 className="library-tab__title">Food Library</h3>
-        <button type="button" className="library-new-btn" onClick={openCreate}>+ New</button>
+        <div className="library-tab__actions">
+          <button
+            type="button"
+            className="library-photo-btn"
+            onClick={() => photoFileInputRef.current?.click()}
+            disabled={photoAnalyzing}
+          >
+            {photoAnalyzing ? 'Analyzing...' : '+ From photo'}
+          </button>
+          <button type="button" className="library-new-btn" onClick={openCreate}>+ New</button>
+        </div>
       </div>
+      <input
+        ref={photoFileInputRef}
+        type="file"
+        accept="image/*"
+        style={{ display: 'none' }}
+        onChange={handlePhotoFile}
+      />
 
       {error && <p className="error-text">{error}</p>}
       {undoing && <p className="subtle-text" style={{ textAlign: 'center', fontSize: '0.85rem' }}>Removing...</p>}
