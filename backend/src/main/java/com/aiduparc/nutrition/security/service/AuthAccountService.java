@@ -22,6 +22,11 @@ public class AuthAccountService {
     }
 
     @Transactional(readOnly = true)
+    public Optional<AuthAccountEntity> findById(UUID id) {
+        return authAccountRepository.findById(id);
+    }
+
+    @Transactional(readOnly = true)
     public Optional<AuthAccountEntity> findByEmail(String email) {
         if (email == null || email.isBlank()) {
             return Optional.empty();

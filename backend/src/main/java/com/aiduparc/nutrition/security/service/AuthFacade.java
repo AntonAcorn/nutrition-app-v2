@@ -10,8 +10,10 @@ import com.aiduparc.nutrition.user.service.NutritionUserService;
 import com.aiduparc.nutrition.user.service.UserProfileService;
 import java.util.Optional;
 import java.util.UUID;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
 
 @Service
 public class AuthFacade {
@@ -67,6 +69,10 @@ public class AuthFacade {
             throw new IllegalArgumentException("Invalid email or password");
         }
 
+        if (!account.isEmailVerified()) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "EMAIL_NOT_VERIFIED");
+        }
+
         authAccountService.markLoginSuccess(account);
         return new AuthenticatedSession(
             account.getId(),
@@ -78,11 +84,16 @@ public class AuthFacade {
 
     public AuthResponse me(AuthenticatedSession session) {
         if (session == null) {
-            return new AuthResponse(null, null, null, null, false, false);
+            return new AuthResponse(null, null, null, null, false, false, false);
         }
 
         boolean hasProfile = session.nutritionUserId() != null
             && userProfileService.existsByNutritionUserId(session.nutritionUserId());
+
+        boolean emailVerified = session.accountId() != null
+            && authAccountService.findById(session.accountId())
+                .map(AuthAccountEntity::isEmailVerified)
+                .orElse(false);
 
         return new AuthResponse(
             session.accountId(),
@@ -90,12 +101,19 @@ public class AuthFacade {
             session.displayName(),
             session.nutritionUserId(),
             true,
-            hasProfile
+            hasProfile,
+            emailVerified
         );
     }
 
     public boolean verifyEmail(String token) {
         return emailVerificationService.verify(token);
+    }
+
+    public void resendVerification(String email) {
+        authAccountService.findByEmail(email)
+                .filter(a -> !a.isEmailVerified())
+                .ifPresent(emailVerificationService::sendVerificationEmail);
     }
 
     public void requestPasswordReset(String email) {
@@ -146,7 +164,8 @@ public class AuthFacade {
             account.getDisplayName(),
             nutritionUserId,
             authenticated,
-            hasProfile
+            hasProfile,
+            account.isEmailVerified()
         );
     }
 }
