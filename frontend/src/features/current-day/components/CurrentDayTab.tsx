@@ -143,29 +143,6 @@ export function CurrentDayTab({ refreshToken = 0, successMessage = '', onDayUpda
       {!loading && error ? <section className="panel detail-panel"><p className="error-text">{error}</p></section> : null}
 
       {!loading && !error && summary ? <TodaySummaryBlock summary={summary} /> : null}
-      {!loading && !error && summary ? <MealsLogCard refreshToken={refreshToken} onDeleted={() => { fetchTodaySummary().then(setSummary).catch(() => {}) }} /> : null}
-      {!loading && !error && summary ? <WaterIntakeCard waterGlasses={summary.waterGlasses} waterGoalGlasses={summary.waterGoalGlasses} onUpdate={() => { fetchTodaySummary().then(setSummary).catch(() => {}) }} /> : null}
-      {!loading && !error && summary ? <SavedMealsCard onLogged={() => { onDayUpdated?.() }} /> : null}
-
-      {!loading && summary ? (
-        <section className="panel quick-add-trigger-card">
-          <div className="quick-add-trigger-card__left">
-            <p className="quick-add-trigger-card__title">Quick add</p>
-            <p className="quick-add-trigger-card__subtitle">No photo? Log it manually.</p>
-          </div>
-          <button type="button" className="quick-add-trigger-card__btn" onClick={() => setShowQuickAdd(true)}>
-            +
-          </button>
-        </section>
-      ) : null}
-
-      {showQuickAdd && (
-        <QuickAddSheet
-          onAdd={handleMealAdd}
-          onLogTemplate={handleTemplateLog}
-          onClose={() => setShowQuickAdd(false)}
-        />
-      )}
 
       {!loading && summary ? (
         <section className="weight-mascot-card panel">
@@ -193,6 +170,30 @@ export function CurrentDayTab({ refreshToken = 0, successMessage = '', onDayUpda
           </div>
         </section>
       ) : null}
+
+      {!loading && !error && summary ? <MealsLogCard refreshToken={refreshToken} onDeleted={() => { fetchTodaySummary().then(setSummary).catch(() => {}) }} /> : null}
+      {!loading && !error && summary ? <WaterIntakeCard waterGlasses={summary.waterGlasses} waterGoalGlasses={summary.waterGoalGlasses} onUpdate={() => { fetchTodaySummary().then(setSummary).catch(() => {}) }} /> : null}
+      {!loading && !error && summary ? <SavedMealsCard onLogged={() => { onDayUpdated?.() }} /> : null}
+
+      {!loading && summary ? (
+        <section className="panel quick-add-trigger-card">
+          <div className="quick-add-trigger-card__left">
+            <p className="quick-add-trigger-card__title">Quick add</p>
+            <p className="quick-add-trigger-card__subtitle">No photo? Log it manually.</p>
+          </div>
+          <button type="button" className="quick-add-trigger-card__btn" onClick={() => setShowQuickAdd(true)}>
+            +
+          </button>
+        </section>
+      ) : null}
+
+      {showQuickAdd && (
+        <QuickAddSheet
+          onAdd={handleMealAdd}
+          onLogTemplate={handleTemplateLog}
+          onClose={() => setShowQuickAdd(false)}
+        />
+      )}
 
     </section>
   )

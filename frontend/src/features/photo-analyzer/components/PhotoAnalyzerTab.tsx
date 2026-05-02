@@ -41,6 +41,7 @@ async function isNativePlatform(): Promise<boolean> {
 
 interface PhotoAnalyzerTabProps {
   onConfirmed?: () => void
+  onPendingDraftsChange?: (count: number) => void
 }
 
 function currentEntryDate(): string {
@@ -79,7 +80,7 @@ async function nativeSpeechAvailable(): Promise<boolean> {
   }
 }
 
-export function PhotoAnalyzerTab({ onConfirmed }: PhotoAnalyzerTabProps) {
+export function PhotoAnalyzerTab({ onConfirmed, onPendingDraftsChange }: PhotoAnalyzerTabProps) {
   const [mode, setMode] = useState<AnalyzerMode>('photo')
   const [pendingLibrarySave, setPendingLibrarySave] = useState<{ name: string; items: MealTemplateItem[] } | null>(null)
 
@@ -501,6 +502,11 @@ export function PhotoAnalyzerTab({ onConfirmed }: PhotoAnalyzerTabProps) {
   }
 
   const idleCount = photoDrafts.filter(e => e.status === 'idle').length
+  const pendingCount = photoDrafts.filter(e => e.status !== 'saved').length
+
+  useEffect(() => {
+    onPendingDraftsChange?.(pendingCount)
+  }, [pendingCount])
 
   return (
     <section className="screen-section screen-section--photo-dark">

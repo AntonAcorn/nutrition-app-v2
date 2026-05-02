@@ -416,6 +416,25 @@ ul {
   flex: 1 1 0;
   color: rgba(255, 255, 255, 0.58);
   font-size: 0.875rem;
+  position: relative;
+}
+
+.tab-badge {
+  position: absolute;
+  top: 4px;
+  right: 8px;
+  min-width: 16px;
+  height: 16px;
+  border-radius: 8px;
+  background: #e74c3c;
+  color: #fff;
+  font-size: 0.6rem;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 4px;
+  pointer-events: none;
 }
 
 .tab-button--active {
@@ -4061,14 +4080,49 @@ ul {
   min-width: 0;
 }
 
+.photo-draft-card__name-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 3px;
+  min-width: 0;
+}
+
 .photo-draft-card__name {
   font-size: 0.88rem;
   font-weight: 600;
   color: #fff;
-  margin: 0 0 3px;
+  margin: 0;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  min-width: 0;
+  flex: 1;
+}
+
+.photo-draft-card__confidence {
+  flex-shrink: 0;
+  font-size: 0.65rem;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: 10px;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+}
+
+.photo-draft-card__confidence--high {
+  background: rgba(52, 199, 89, 0.18);
+  color: #34c759;
+}
+
+.photo-draft-card__confidence--medium {
+  background: rgba(255, 159, 10, 0.18);
+  color: #ff9f0a;
+}
+
+.photo-draft-card__confidence--low {
+  background: rgba(255, 69, 58, 0.18);
+  color: #ff453a;
 }
 
 .photo-draft-card__macros {

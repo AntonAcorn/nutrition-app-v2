@@ -35,6 +35,14 @@ export function PhotoDraftCard({ entry, onSave, onDiscard, onToggleExpand, onUpd
     return entry.draft.items.slice(0, 2).map(i => i.name).join(', ')
   }, [entry.draft])
 
+  const confidenceLevel = useMemo(() => {
+    if (!entry.draft) return null
+    const pct = entry.draft.confidence > 1 ? entry.draft.confidence : entry.draft.confidence * 100
+    if (pct >= 80) return 'high'
+    if (pct >= 55) return 'medium'
+    return 'low'
+  }, [entry.draft])
+
   if (entry.status === 'saved') {
     return (
       <div className="photo-draft-card photo-draft-card--saved">
@@ -81,7 +89,14 @@ export function PhotoDraftCard({ entry, onSave, onDiscard, onToggleExpand, onUpd
       <div className="photo-draft-card__top">
         <img src={entry.thumbnail} className="photo-draft-card__thumb" alt="" />
         <div className="photo-draft-card__summary">
-          <p className="photo-draft-card__name">{mealName}</p>
+          <div className="photo-draft-card__name-row">
+            <p className="photo-draft-card__name">{mealName}</p>
+            {confidenceLevel && (
+              <span className={`photo-draft-card__confidence photo-draft-card__confidence--${confidenceLevel}`}>
+                {confidenceLevel === 'high' ? 'Good match' : confidenceLevel === 'medium' ? 'Review' : 'Check carefully'}
+              </span>
+            )}
+          </div>
           <p className="photo-draft-card__macros">
             {Math.round(totals.calories)} kcal
             <span className="photo-draft-card__sep">·</span>P {totals.protein}g
@@ -105,7 +120,7 @@ export function PhotoDraftCard({ entry, onSave, onDiscard, onToggleExpand, onUpd
           className="photo-draft-card__edit-btn"
           onClick={() => onToggleExpand(entry.localId)}
         >
-          {entry.expanded ? 'Details ▲' : 'Edit ▼'}
+          {entry.expanded ? 'Details ▲' : 'Details ▼'}
         </button>
         <button
           type="button"
