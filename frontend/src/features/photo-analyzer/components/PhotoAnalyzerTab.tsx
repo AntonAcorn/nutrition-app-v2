@@ -1,4 +1,5 @@
 import { ChangeEvent, useEffect, useMemo, useRef, useState } from 'react'
+import { MascotCameraSvg } from '../../current-day/components/MascotCameraSvg'
 import { getTodayLocalDateInputValue } from '../../../shared/lib/date'
 import { API_BASE } from '../../../shared/lib/apiBase'
 import { toNumber } from '../../../shared/lib/number'
@@ -661,7 +662,7 @@ export function PhotoAnalyzerTab({ onConfirmed, onSaveToLibrary }: PhotoAnalyzer
             {/* Mascot hero — only when no drafts yet */}
             {photoDrafts.length === 0 && (
               <div className="photo-upload-hero">
-                <img src="/mascot/camera.png" alt="" className="photo-upload-hero__mascot" />
+                <MascotCameraSvg size={120} className="photo-upload-hero__mascot" />
                 <h2 className="photo-upload-hero__title">Take a photo of your meal</h2>
               </div>
             )}
