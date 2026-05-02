@@ -37,6 +37,8 @@ import { PhotoAnalyzerTab } from '../features/photo-analyzer/components/PhotoAna
 import { StatisticsTab } from '../features/statistics/components/StatisticsTab'
 import { OnboardingWizard } from '../features/onboarding/components/OnboardingWizard'
 import { ProfileTab } from '../features/profile/components/ProfileTab'
+import { FoodLibraryTab } from '../features/food-library/components/FoodLibraryTab'
+import type { MealTemplateItem } from '../shared/types/nutrition'
 
 function getGreeting(): string {
   const hour = new Date().getHours()
@@ -50,6 +52,7 @@ const tabs = {
   currentDay: 'current-day',
   statistics: 'statistics',
   photoAnalyzer: 'photo-analyzer',
+  library: 'library',
   profile: 'profile',
 } as const
 
@@ -59,6 +62,7 @@ export default function App() {
   const [activeTab, setActiveTab] = useState<TabKey>(tabs.currentDay)
   const [summaryRefreshToken, setSummaryRefreshToken] = useState(0)
   const [statisticsRefreshToken, setStatisticsRefreshToken] = useState(0)
+  const [pendingLibrarySave, setPendingLibrarySave] = useState<{ name: string; items: MealTemplateItem[] } | null>(null)
   const [daySuccessMessage, setDaySuccessMessage] = useState('')
   const [authUser, setAuthUser] = useState<AuthUser | null>(null)
   const [authLoading, setAuthLoading] = useState(true)
@@ -203,6 +207,11 @@ export default function App() {
     setActiveTab(tabs.currentDay)
     handleDayUpdated()
     setDaySuccessMessage('Analysis saved, daily summary is updating.')
+  }
+
+  function handleSaveToLibrary(data: { name: string; items: MealTemplateItem[] }) {
+    setPendingLibrarySave(data)
+    setActiveTab(tabs.library)
   }
 
   if (authLoading) {
@@ -459,12 +468,21 @@ export default function App() {
           <button
             type="button"
             role="tab"
+            className={`tab-button tab-button--dark ${activeTab === tabs.library ? 'tab-button--active' : ''}`}
+            aria-selected={activeTab === tabs.library}
+            onClick={() => setActiveTab(tabs.library)}
+          >
+            Library
+          </button>
+          <button
+            type="button"
+            role="tab"
             className={`tab-button tab-button--dark ${activeTab === tabs.profile ? 'tab-button--active' : ''}`}
             aria-selected={activeTab === tabs.profile}
             onClick={() => setActiveTab(tabs.profile)}
           >
             Me
-</button>
+          </button>
         </div>
 
         <div className="tabs-body tabs-body--dark">
@@ -477,7 +495,14 @@ export default function App() {
             />
           ) : null}
           {activeTab === tabs.statistics ? <StatisticsTab refreshToken={statisticsRefreshToken} /> : null}
-          {activeTab === tabs.photoAnalyzer ? <PhotoAnalyzerTab onConfirmed={handleDraftConfirmed} /> : null}
+          {activeTab === tabs.photoAnalyzer ? <PhotoAnalyzerTab onConfirmed={handleDraftConfirmed} onSaveToLibrary={handleSaveToLibrary} /> : null}
+          {activeTab === tabs.library ? (
+            <FoodLibraryTab
+              onLogged={handleDayUpdated}
+              initialSave={pendingLibrarySave}
+              onInitialSaveDone={() => setPendingLibrarySave(null)}
+            />
+          ) : null}
           {activeTab === tabs.profile ? (
             <ProfileTab
               displayName={authUser.displayName}

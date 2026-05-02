@@ -7,7 +7,6 @@ import { DraftItemEditor } from './DraftItemEditor'
 import { TotalsRow } from './TotalsRow'
 import { calculateTotals, normalizeDraft } from '../model/photoAnalysis'
 import { analyzeVoice } from '../model/voiceAnalysisApi'
-import { FoodLibraryTab } from '../../food-library/components/FoodLibraryTab'
 import { BarcodeScannerMode } from '../../barcode/components/BarcodeScannerMode'
 import { PhotoDraftCard } from './PhotoDraftCard'
 import type { DraftEntry } from './PhotoDraftCard'
@@ -41,6 +40,7 @@ async function isNativePlatform(): Promise<boolean> {
 
 interface PhotoAnalyzerTabProps {
   onConfirmed?: () => void
+  onSaveToLibrary?: (data: { name: string; items: MealTemplateItem[] }) => void
 }
 
 function currentEntryDate(): string {
@@ -54,7 +54,7 @@ function getConfidenceMessage(confidence: number) {
   return 'Low confidence, review carefully before saving.'
 }
 
-type AnalyzerMode = 'photo' | 'voice' | 'library' | 'barcode'
+type AnalyzerMode = 'photo' | 'voice' | 'barcode'
 
 declare global {
   interface Window {
@@ -79,9 +79,8 @@ async function nativeSpeechAvailable(): Promise<boolean> {
   }
 }
 
-export function PhotoAnalyzerTab({ onConfirmed }: PhotoAnalyzerTabProps) {
+export function PhotoAnalyzerTab({ onConfirmed, onSaveToLibrary }: PhotoAnalyzerTabProps) {
   const [mode, setMode] = useState<AnalyzerMode>('photo')
-  const [pendingLibrarySave, setPendingLibrarySave] = useState<{ name: string; items: MealTemplateItem[] } | null>(null)
 
   // Photo mode: multi-draft queue
   const [photoDrafts, setPhotoDrafts] = useState<DraftEntry[]>([])
@@ -525,13 +524,6 @@ export function PhotoAnalyzerTab({ onConfirmed }: PhotoAnalyzerTabProps) {
             </button>
             <button
               type="button"
-              className={`analyzer-mode-btn ${mode === 'library' ? 'analyzer-mode-btn--active' : ''}`}
-              onClick={() => switchMode('library')}
-            >
-              Library
-            </button>
-            <button
-              type="button"
               className={`analyzer-mode-btn ${mode === 'barcode' ? 'analyzer-mode-btn--active' : ''}`}
               onClick={() => switchMode('barcode')}
             >
@@ -780,17 +772,12 @@ export function PhotoAnalyzerTab({ onConfirmed }: PhotoAnalyzerTabProps) {
                 type="button"
                 className="library-save-from-draft-btn"
                 onClick={() => {
-                  const items = voiceDraft.items.map(item => ({
-                    name: item.name,
-                    estimatedPortion: item.estimatedPortion,
-                    calories: item.calories,
-                    protein: item.protein,
-                    carbs: item.carbs,
-                    fat: item.fat,
-                    fiber: item.fiber,
-                  }))
-                  setPendingLibrarySave({ name: '', items })
-                  switchMode('library')
+                  const items = voiceDraft.items.map(({ name, estimatedPortion, calories, protein, carbs, fat, fiber }) =>
+                    ({ name, estimatedPortion, calories, protein, carbs, fat, fiber })
+                  )
+                  onSaveToLibrary?.({ name: '', items })
+                  setVoiceDraft(null)
+                  setTranscript('')
                 }}
               >
                 Save to library
@@ -804,18 +791,6 @@ export function PhotoAnalyzerTab({ onConfirmed }: PhotoAnalyzerTabProps) {
               </button>
             </div>
           </>
-        ) : null}
-
-        {/* ── Library mode ── */}
-        {mode === 'library' && !voiceDraft ? (
-          <FoodLibraryTab
-            onLogged={() => {
-              setVoiceSuccess('Logged from library')
-              setTimeout(() => setVoiceSuccess(''), 2500)
-            }}
-            initialSave={pendingLibrarySave}
-            onInitialSaveDone={() => setPendingLibrarySave(null)}
-          />
         ) : null}
 
         {/* ── Barcode mode ── */}
