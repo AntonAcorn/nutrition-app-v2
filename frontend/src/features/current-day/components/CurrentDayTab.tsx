@@ -10,6 +10,8 @@ import { addMealManually, resetToday } from '../model/nutritionTotalsApi'
 import { logTemplate } from '../../food-library/model/mealTemplateApi'
 import { getTodayLocalDateInputValue } from '../../../shared/lib/date'
 import type { TodaySummary } from '../../../shared/types/nutrition'
+import { MascotSvg } from './MascotSvg'
+import { getMascotMood } from '../model/getMascotMood'
 
 function getGreeting(): string {
   const hour = new Date().getHours()
@@ -131,7 +133,7 @@ export function CurrentDayTab({ refreshToken = 0, successMessage = '', onDayUpda
   return (
     <section className="screen-section screen-section--home-dark">
       <div className="mascot-hero-card">
-        <img src="/mascot/hero.png" alt="Puzometr" className="mascot-hero-card__image" />
+        <MascotSvg mood={getMascotMood(summary)} size={100} className="mascot-hero-card__image" />
         <div className="mascot-hero-card__text">
           <p className="mascot-hero-card__greeting">{getGreeting()}</p>
           {displayName ? <p className="mascot-hero-card__name">{displayName}</p> : null}
