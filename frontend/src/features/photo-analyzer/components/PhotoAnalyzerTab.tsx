@@ -9,8 +9,9 @@ import { calculateTotals, normalizeDraft } from '../model/photoAnalysis'
 import { analyzeVoice } from '../model/voiceAnalysisApi'
 import { FoodLibraryTab } from '../../food-library/components/FoodLibraryTab'
 import { BarcodeScannerMode } from '../../barcode/components/BarcodeScannerMode'
+import { PhotoDraftCard } from './PhotoDraftCard'
+import type { DraftEntry } from './PhotoDraftCard'
 
-// Capacitor Camera is loaded dynamically to avoid breaking web builds
 async function pickPhotoNative(): Promise<File | null> {
   try {
     const { Camera, CameraResultType, CameraSource } = await import('@capacitor/camera')
@@ -55,7 +56,6 @@ function getConfidenceMessage(confidence: number) {
 
 type AnalyzerMode = 'photo' | 'voice' | 'library' | 'barcode'
 
-// Web Speech API types (web fallback)
 declare global {
   interface Window {
     SpeechRecognition: new () => SpeechRecognition
@@ -83,20 +83,17 @@ export function PhotoAnalyzerTab({ onConfirmed }: PhotoAnalyzerTabProps) {
   const [mode, setMode] = useState<AnalyzerMode>('photo')
   const [pendingLibrarySave, setPendingLibrarySave] = useState<{ name: string; items: MealTemplateItem[] } | null>(null)
 
-  // Shared draft state
-  const [draft, setDraft] = useState<PhotoAnalysisDraft | null>(null)
-  const [saving, setSaving] = useState(false)
-  const [error, setError] = useState('')
-  const [successMessage, setSuccessMessage] = useState('')
+  // Photo mode: multi-draft queue
+  const [photoDrafts, setPhotoDrafts] = useState<DraftEntry[]>([])
 
-  // Photo mode state
-  const [uploading, setUploading] = useState(false)
-  const [selectedFileName, setSelectedFileName] = useState('')
-  const [selectedFile, setSelectedFile] = useState<File | null>(null)
-  const [previewUrl, setPreviewUrl] = useState('')
+  // Voice mode: single draft (full review)
+  const [voiceDraft, setVoiceDraft] = useState<PhotoAnalysisDraft | null>(null)
+  const [voiceSaving, setVoiceSaving] = useState(false)
+  const [voiceError, setVoiceError] = useState('')
+  const [voiceSuccess, setVoiceSuccess] = useState('')
+
+  // Photo note input
   const [userNote, setUserNote] = useState('')
-  const fileInputRef = useRef<HTMLInputElement | null>(null)
-  const galleryInputRef = useRef<HTMLInputElement | null>(null)
 
   // Voice mode state
   const [transcript, setTranscript] = useState('')
@@ -105,16 +102,19 @@ export function PhotoAnalyzerTab({ onConfirmed }: PhotoAnalyzerTabProps) {
   const [speechSupported, setSpeechSupported] = useState(false)
   const [recognitionLang, setRecognitionLang] = useState('en-US')
   const recognitionRef = useRef<SpeechRecognition | null>(null)
-  // Cached at mount so startRecording() needs no await before recognition.start()
-  // (Safari loses the user gesture context on any await before getUserMedia/start)
   const isNativeRef = useRef<boolean>(false)
 
-  // Note voice input state
   const [noteRecording, setNoteRecording] = useState(false)
   const noteRecognitionRef = useRef<SpeechRecognition | null>(null)
   const noteBaseRef = useRef<string>('')
 
-  const recalculatedTotals = useMemo(() => (draft ? calculateTotals(draft.items) : calculateTotals([])), [draft])
+  const fileInputRef = useRef<HTMLInputElement | null>(null)
+  const galleryInputRef = useRef<HTMLInputElement | null>(null)
+
+  const voiceDraftTotals = useMemo(
+    () => (voiceDraft ? calculateTotals(voiceDraft.items) : calculateTotals([])),
+    [voiceDraft],
+  )
 
   useEffect(() => {
     async function checkSpeech() {
@@ -125,7 +125,6 @@ export function PhotoAnalyzerTab({ onConfirmed }: PhotoAnalyzerTabProps) {
       } else {
         const onNative = await isNativePlatform()
         isNativeRef.current = onNative
-        // On native platform, webkitSpeechRecognition exists but doesn't work in WKWebView
         setSpeechSupported(!onNative && getWebSpeechRecognition() !== null)
       }
     }
@@ -136,78 +135,189 @@ export function PhotoAnalyzerTab({ onConfirmed }: PhotoAnalyzerTabProps) {
   function switchMode(next: AnalyzerMode) {
     stopRecording()
     setMode(next)
-    setDraft(null)
-    setError('')
-    setSuccessMessage('')
+    setVoiceDraft(null)
+    setVoiceError('')
+    setVoiceSuccess('')
     setRecording(false)
+    // photoDrafts intentionally NOT cleared on mode switch
   }
 
   // ── Photo mode ──────────────────────────────────────────────────────────
 
-  function applyFile(file: File) {
-    setError('')
-    setSuccessMessage('')
-    setDraft(null)
-    setSelectedFile(file)
-    setSelectedFileName(file.name)
-    setPreviewUrl(URL.createObjectURL(file))
-  }
+  async function analyzePhoto(file: File, note: string) {
+    const thumbnail = URL.createObjectURL(file)
+    const localId = crypto.randomUUID()
 
-  function handleFileSelected(event: ChangeEvent<HTMLInputElement>) {
-    const file = event.target.files?.[0]
-    if (file) applyFile(file)
-  }
+    setPhotoDrafts(prev => [...prev, {
+      localId,
+      thumbnail,
+      status: 'analyzing',
+      draft: null,
+      saveError: '',
+      analyzeError: '',
+      expanded: false,
+    }])
 
-  async function handleTakePhoto() {
-    if (await isNativePlatform()) {
-      const file = await pickPhotoNative()
-      if (file) applyFile(file)
-    } else {
-      fileInputRef.current?.click()
-    }
-  }
-
-  async function startPhotoAnalysis() {
-    if (!selectedFile) { setError('Choose a photo first'); return }
-    setUploading(true)
-    setError('')
-    setSuccessMessage('')
     try {
       const formData = new FormData()
-      formData.append('file', selectedFile)
+      formData.append('file', file)
       formData.append('entryDate', currentEntryDate())
-      formData.append('userNote', userNote)
+      formData.append('userNote', note)
       formData.append('locale', 'en')
       const response = await fetch(`${API_BASE}/api/photo-analysis/upload`, {
         method: 'POST',
         credentials: 'include',
         body: formData,
       })
-      if (!response.ok) throw new Error(`Failed to analyze photo (${response.status})`)
+      if (!response.ok) throw new Error(`Analysis failed (${response.status})`)
       const payload = await response.json()
-      setDraft(normalizeDraft(payload.draft))
-      if (fileInputRef.current) fileInputRef.current.value = ''
+      const draft = normalizeDraft(payload.draft)
+      setPhotoDrafts(prev => prev.map(e =>
+        e.localId === localId ? { ...e, status: 'idle', draft } : e,
+      ))
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Photo upload failed')
-    } finally {
-      setUploading(false)
+      setPhotoDrafts(prev => prev.map(e =>
+        e.localId === localId
+          ? { ...e, status: 'error', analyzeError: err instanceof Error ? err.message : 'Analysis failed' }
+          : e,
+      ))
     }
+  }
+
+  async function handleTakePhoto() {
+    if (await isNativePlatform()) {
+      const file = await pickPhotoNative()
+      if (file) {
+        const note = userNote
+        setUserNote('')
+        analyzePhoto(file, note)
+      }
+    } else {
+      fileInputRef.current?.click()
+    }
+  }
+
+  function handleFilesSelected(event: ChangeEvent<HTMLInputElement>) {
+    const files = Array.from(event.target.files ?? [])
+    if (files.length === 0) return
+    const note = userNote
+    setUserNote('')
+    files.forEach(file => analyzePhoto(file, note))
+    if (event.target) event.target.value = ''
+  }
+
+  async function savePhotoDraft(localId: string) {
+    const entry = photoDrafts.find(e => e.localId === localId)
+    if (!entry?.draft) return
+
+    setPhotoDrafts(prev => prev.map(e =>
+      e.localId === localId ? { ...e, status: 'saving', saveError: '' } : e,
+    ))
+
+    const draft = entry.draft
+    const totals = calculateTotals(draft.items)
+    const rawName = draft.items.length > 0
+      ? draft.items.slice(0, 2).map(i => i.name).join(', ')
+      : 'Analyzed meal'
+    const mealName = rawName.length > 50 ? rawName.slice(0, 47) + '...' : rawName
+
+    try {
+      const response = await fetch(`${API_BASE}/api/photo-analysis/drafts/${draft.id}/confirm`, {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          caloriesKcal: totals.calories,
+          proteinG: totals.protein,
+          fatG: totals.fat,
+          fiberG: totals.fiber,
+          carbsG: totals.carbs,
+          notes: draft.notes.join('\n'),
+          mealName,
+        }),
+      })
+      if (!response.ok) throw new Error(`Save failed (${response.status})`)
+
+      setPhotoDrafts(prev => prev.map(e =>
+        e.localId === localId ? { ...e, status: 'saved' } : e,
+      ))
+      setTimeout(() => {
+        setPhotoDrafts(prev => {
+          const e = prev.find(x => x.localId === localId)
+          if (e?.thumbnail) URL.revokeObjectURL(e.thumbnail)
+          return prev.filter(x => x.localId !== localId)
+        })
+      }, 1200)
+      onConfirmed?.()
+    } catch (err) {
+      setPhotoDrafts(prev => prev.map(e =>
+        e.localId === localId
+          ? { ...e, status: 'idle', saveError: err instanceof Error ? err.message : 'Save failed' }
+          : e,
+      ))
+    }
+  }
+
+  function saveAllPhotoDrafts() {
+    photoDrafts.filter(e => e.status === 'idle').forEach(e => savePhotoDraft(e.localId))
+  }
+
+  function discardPhotoDraft(localId: string) {
+    setPhotoDrafts(prev => {
+      const e = prev.find(x => x.localId === localId)
+      if (e?.thumbnail) URL.revokeObjectURL(e.thumbnail)
+      return prev.filter(x => x.localId !== localId)
+    })
+  }
+
+  function toggleExpand(localId: string) {
+    setPhotoDrafts(prev => prev.map(e =>
+      e.localId === localId ? { ...e, expanded: !e.expanded } : e,
+    ))
+  }
+
+  function updatePhotoDraftItem(localId: string, itemId: string, field: keyof DraftItem, value: string) {
+    setPhotoDrafts(prev => prev.map(e => {
+      if (e.localId !== localId || !e.draft) return e
+      return {
+        ...e,
+        draft: {
+          ...e.draft,
+          items: e.draft.items.map(item => {
+            if (item.id !== itemId) return item
+            if (field === 'name' || field === 'estimatedPortion') return { ...item, [field]: value }
+            return { ...item, [field]: toNumber(value) }
+          }),
+        },
+      }
+    }))
+  }
+
+  function updatePhotoDraftNotes(localId: string, value: string) {
+    setPhotoDrafts(prev => prev.map(e => {
+      if (e.localId !== localId || !e.draft) return e
+      return {
+        ...e,
+        draft: {
+          ...e.draft,
+          notes: value.split('\n').map(line => line.trim()).filter(Boolean),
+        },
+      }
+    }))
   }
 
   // ── Voice mode ──────────────────────────────────────────────────────────
 
   async function startRecording() {
-    setError('')
+    setVoiceError('')
     try {
       if (isNativeRef.current) {
         await startNativeRecording()
       } else {
-        // Must be called without any preceding await so Safari preserves
-        // the user gesture context required for microphone access
         startWebRecording()
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Could not start recording')
+      setVoiceError(err instanceof Error ? err.message : 'Could not start recording')
     }
   }
 
@@ -216,7 +326,7 @@ export function PhotoAnalyzerTab({ onConfirmed }: PhotoAnalyzerTabProps) {
       const { SpeechRecognition } = await import('@capacitor-community/speech-recognition')
       const perm = await SpeechRecognition.requestPermissions()
       if (perm.speechRecognition !== 'granted' || perm.microphone !== 'granted') {
-        setError('Microphone permission is required')
+        setVoiceError('Microphone permission is required')
         return
       }
       await SpeechRecognition.start({
@@ -230,7 +340,7 @@ export function PhotoAnalyzerTab({ onConfirmed }: PhotoAnalyzerTabProps) {
       })
       setRecording(true)
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Could not start recording')
+      setVoiceError(err instanceof Error ? err.message : 'Could not start recording')
     }
   }
 
@@ -253,7 +363,7 @@ export function PhotoAnalyzerTab({ onConfirmed }: PhotoAnalyzerTabProps) {
     }
     recognition.onerror = (event: SpeechRecognitionErrorEvent) => {
       if (event.error && event.error !== 'no-speech' && event.error !== 'aborted') {
-        setError(`Microphone error: ${event.error}`)
+        setVoiceError(`Microphone error: ${event.error}`)
       }
       setRecording(false)
     }
@@ -298,7 +408,7 @@ export function PhotoAnalyzerTab({ onConfirmed }: PhotoAnalyzerTabProps) {
     }
     recognition.onerror = (event: SpeechRecognitionErrorEvent) => {
       if (event.error && event.error !== 'no-speech' && event.error !== 'aborted') {
-        setError(`Microphone error: ${event.error}`)
+        setVoiceError(`Microphone error: ${event.error}`)
       }
       setNoteRecording(false)
     }
@@ -314,28 +424,28 @@ export function PhotoAnalyzerTab({ onConfirmed }: PhotoAnalyzerTabProps) {
   }
 
   async function startVoiceAnalysis() {
-    if (!transcript.trim()) { setError('Dictate something first'); return }
+    if (!transcript.trim()) { setVoiceError('Dictate something first'); return }
     setAnalyzing(true)
-    setError('')
-    setSuccessMessage('')
+    setVoiceError('')
+    setVoiceSuccess('')
     try {
       const result = await analyzeVoice(transcript.trim(), navigator.language?.slice(0, 2) || 'en', currentEntryDate())
-      setDraft(result)
+      setVoiceDraft(result)
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Voice analysis failed')
+      setVoiceError(err instanceof Error ? err.message : 'Voice analysis failed')
     } finally {
       setAnalyzing(false)
     }
   }
 
-  // ── Draft editing (shared) ──────────────────────────────────────────────
+  // ── Voice draft editing ──────────────────────────────────────────────────
 
-  function updateItem(itemId: string, field: keyof DraftItem, value: string) {
-    setDraft((current) => {
+  function updateVoiceItem(itemId: string, field: keyof DraftItem, value: string) {
+    setVoiceDraft(current => {
       if (!current) return current
       return {
         ...current,
-        items: current.items.map((item) => {
+        items: current.items.map(item => {
           if (item.id !== itemId) return item
           if (field === 'name' || field === 'estimatedPortion') return { ...item, [field]: value }
           return { ...item, [field]: toNumber(value) }
@@ -344,59 +454,60 @@ export function PhotoAnalyzerTab({ onConfirmed }: PhotoAnalyzerTabProps) {
     })
   }
 
-  function updateNotes(value: string) {
-    setDraft((current) => {
+  function updateVoiceNotes(value: string) {
+    setVoiceDraft(current => {
       if (!current) return current
       return {
         ...current,
-        notes: value.split('\n').map((line) => line.trim()).filter(Boolean),
+        notes: value.split('\n').map(line => line.trim()).filter(Boolean),
       }
     })
   }
 
-  async function saveDraft() {
-    if (!draft) return
-    setSaving(true)
-    setError('')
-    setSuccessMessage('')
-    const rawName = draft.items.length > 0
-      ? draft.items.slice(0, 2).map(i => i.name).join(', ')
+  async function saveVoiceDraft() {
+    if (!voiceDraft) return
+    setVoiceSaving(true)
+    setVoiceError('')
+    setVoiceSuccess('')
+    const rawName = voiceDraft.items.length > 0
+      ? voiceDraft.items.slice(0, 2).map(i => i.name).join(', ')
       : 'Analyzed meal'
     const mealName = rawName.length > 50 ? rawName.slice(0, 47) + '...' : rawName
-    const payload = {
-      caloriesKcal: recalculatedTotals.calories,
-      proteinG: recalculatedTotals.protein,
-      fatG: recalculatedTotals.fat,
-      fiberG: recalculatedTotals.fiber,
-      carbsG: recalculatedTotals.carbs,
-      notes: draft.notes.join('\n'),
-      mealName,
-    }
     try {
-      const response = await fetch(`${API_BASE}/api/photo-analysis/drafts/${draft.id}/confirm`, {
+      const response = await fetch(`${API_BASE}/api/photo-analysis/drafts/${voiceDraft.id}/confirm`, {
         method: 'POST',
         credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
+        body: JSON.stringify({
+          caloriesKcal: voiceDraftTotals.calories,
+          proteinG: voiceDraftTotals.protein,
+          fatG: voiceDraftTotals.fat,
+          fiberG: voiceDraftTotals.fiber,
+          carbsG: voiceDraftTotals.carbs,
+          notes: voiceDraft.notes.join('\n'),
+          mealName,
+        }),
       })
       if (!response.ok) throw new Error(`Failed to save (${response.status})`)
       await response.json()
-      setDraft((current) => (current ? { ...current, needsUserConfirmation: false } : current))
-      setSuccessMessage('Saved. Daily summary updated.')
+      setVoiceDraft(current => (current ? { ...current, needsUserConfirmation: false } : current))
+      setVoiceSuccess('Saved. Daily summary updated.')
       onConfirmed?.()
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Save failed')
+      setVoiceError(err instanceof Error ? err.message : 'Save failed')
     } finally {
-      setSaving(false)
+      setVoiceSaving(false)
     }
   }
+
+  const idleCount = photoDrafts.filter(e => e.status === 'idle').length
 
   return (
     <section className="screen-section screen-section--photo-dark">
       <section className="panel analyzer-panel analyzer-panel--dark">
 
-        {/* Mode toggle */}
-        {!draft ? (
+        {/* Mode toggle — hidden when voice draft is active */}
+        {!voiceDraft ? (
           <div className="analyzer-mode-toggle">
             <button
               type="button"
@@ -429,15 +540,13 @@ export function PhotoAnalyzerTab({ onConfirmed }: PhotoAnalyzerTabProps) {
           </div>
         ) : null}
 
-        {/* Photo mode */}
-        {mode === 'photo' && !draft ? (
-          <div className="photo-upload-hero">
-            <img src="/mascot/camera.png" alt="" className="photo-upload-hero__mascot" />
-            <h2 className="photo-upload-hero__title">Take a photo of your meal</h2>
-
+        {/* ── Photo mode ── */}
+        {mode === 'photo' && !voiceDraft ? (
+          <>
+            {/* Note input */}
             <div className="upload-panel__note photo-upload-hero__note">
               <div className="note-label-row">
-                <span>Optional note</span>
+                <span>{photoDrafts.length > 0 ? 'Note for next photo' : 'Optional note'}</span>
                 {speechSupported && (
                   <div className="note-mic-controls">
                     <div className="voice-lang-picker">
@@ -482,36 +591,79 @@ export function PhotoAnalyzerTab({ onConfirmed }: PhotoAnalyzerTabProps) {
               </div>
               <textarea
                 value={userNote}
-                onChange={(event) => setUserNote(event.target.value)}
-                rows={2}
+                onChange={(e) => setUserNote(e.target.value)}
+                rows={photoDrafts.length > 0 ? 1 : 2}
                 placeholder="e.g. chicken, rice, salad"
                 className={noteRecording ? 'note-textarea--recording' : ''}
               />
             </div>
 
+            {/* Upload buttons */}
             <div className="upload-button-group">
               <button type="button" className="upload-button" onClick={handleTakePhoto}>
-                <span>Take photo</span>
+                <span>{photoDrafts.length > 0 ? 'Add another photo' : 'Take photo'}</span>
               </button>
               <label className="upload-button upload-button--secondary">
-                <input ref={galleryInputRef} type="file" accept="image/*" onChange={handleFileSelected} hidden />
+                <input
+                  ref={galleryInputRef}
+                  type="file"
+                  accept="image/*"
+                  multiple
+                  onChange={handleFilesSelected}
+                  hidden
+                />
                 <span>Choose from gallery</span>
               </label>
-              <input ref={fileInputRef} type="file" accept="image/*" capture="environment" onChange={handleFileSelected} hidden />
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                capture="environment"
+                multiple
+                onChange={handleFilesSelected}
+                hidden
+              />
             </div>
 
-            {selectedFileName ? <p className="subtle-text" style={{ textAlign: 'center', fontSize: '0.8rem' }}>📎 {selectedFileName}</p> : null}
+            {/* Mascot hero — only when no drafts yet */}
+            {photoDrafts.length === 0 && (
+              <div className="photo-upload-hero">
+                <img src="/mascot/camera.png" alt="" className="photo-upload-hero__mascot" />
+                <h2 className="photo-upload-hero__title">Take a photo of your meal</h2>
+              </div>
+            )}
 
-            {selectedFile ? (
-              <button type="button" className="photo-upload-hero__analyze-btn" onClick={startPhotoAnalysis} disabled={uploading}>
-                {uploading ? 'Analyzing...' : 'Start analysis'}
-              </button>
-            ) : null}
-          </div>
+            {/* Draft cards queue */}
+            {photoDrafts.length > 0 && (
+              <div className="photo-draft-queue">
+                {photoDrafts.map(entry => (
+                  <PhotoDraftCard
+                    key={entry.localId}
+                    entry={entry}
+                    onSave={savePhotoDraft}
+                    onDiscard={discardPhotoDraft}
+                    onToggleExpand={toggleExpand}
+                    onUpdateItem={updatePhotoDraftItem}
+                    onUpdateNotes={updatePhotoDraftNotes}
+                  />
+                ))}
+
+                {idleCount >= 2 && (
+                  <button
+                    type="button"
+                    className="photo-draft-save-all-btn"
+                    onClick={saveAllPhotoDrafts}
+                  >
+                    Save all {idleCount} meals
+                  </button>
+                )}
+              </div>
+            )}
+          </>
         ) : null}
 
-        {/* Voice / Text mode */}
-        {mode === 'voice' && !draft ? (
+        {/* ── Voice mode ── */}
+        {mode === 'voice' && !voiceDraft ? (
           <div className="voice-hero">
             <img src="/mascot/happy.png" alt="" className="voice-hero__mascot" />
             <h2 className="voice-hero__title">Describe your meal</h2>
@@ -581,35 +733,13 @@ export function PhotoAnalyzerTab({ onConfirmed }: PhotoAnalyzerTabProps) {
                 {analyzing ? 'Analyzing...' : 'Analyze'}
               </button>
             ) : null}
+
+            {voiceError && <p className="error-text">{voiceError}</p>}
           </div>
         ) : null}
 
-        {/* Photo preview */}
-        {mode === 'photo' && previewUrl && !draft ? (
-          <div className="image-preview">
-            <img src={previewUrl} alt="Uploaded meal preview" />
-          </div>
-        ) : null}
-
-        {error ? (
-          <div className="analyzer-error-row">
-            <p className="error-text">{error}</p>
-            {mode === 'photo' && selectedFile && !uploading ? (
-              <button type="button" className="analyzer-retry-btn" onClick={startPhotoAnalysis}>
-                Try again
-              </button>
-            ) : null}
-            {mode === 'voice' && transcript.trim() && !analyzing ? (
-              <button type="button" className="analyzer-retry-btn" onClick={startVoiceAnalysis}>
-                Try again
-              </button>
-            ) : null}
-          </div>
-        ) : null}
-        {successMessage ? <p className="success-text">{successMessage}</p> : null}
-
-        {/* Draft review (shared for both modes) */}
-        {draft ? (
+        {/* ── Voice draft review (full screen) ── */}
+        {voiceDraft ? (
           <>
             <div className="analyzer-panel__header">
               <div>
@@ -617,37 +747,40 @@ export function PhotoAnalyzerTab({ onConfirmed }: PhotoAnalyzerTabProps) {
                 <h3>Check it, fix anything, and save</h3>
               </div>
               <div className="status-badge">
-                <span className={`status-dot ${draft.needsUserConfirmation ? '' : 'status-dot--done'}`} />
-                <span>{draft.needsUserConfirmation ? 'Needs confirmation' : 'Confirmed'}</span>
+                <span className={`status-dot ${voiceDraft.needsUserConfirmation ? '' : 'status-dot--done'}`} />
+                <span>{voiceDraft.needsUserConfirmation ? 'Needs confirmation' : 'Confirmed'}</span>
               </div>
             </div>
 
-            <p className="subtle-text">{getConfidenceMessage(draft.confidence || 0)}</p>
+            <p className="subtle-text">{getConfidenceMessage(voiceDraft.confidence || 0)}</p>
 
-            <TotalsRow totals={recalculatedTotals} />
+            <TotalsRow totals={voiceDraftTotals} />
 
             <div className="draft-items-list">
-              {draft.items.map((item) => (
-                <DraftItemEditor key={item.id} item={item} onChange={updateItem} />
+              {voiceDraft.items.map(item => (
+                <DraftItemEditor key={item.id} item={item} onChange={updateVoiceItem} />
               ))}
             </div>
 
             <div className="notes-block">
               <label>
                 Notes
-                <textarea value={draft.notes.join('\n')} onChange={(event) => updateNotes(event.target.value)} rows={4} />
+                <textarea value={voiceDraft.notes.join('\n')} onChange={(e) => updateVoiceNotes(e.target.value)} rows={4} />
               </label>
             </div>
 
+            {voiceError && <p className="error-text">{voiceError}</p>}
+            {voiceSuccess && <p className="success-text">{voiceSuccess}</p>}
+
             <div className="primary-actions">
-              <button type="button" onClick={saveDraft} disabled={saving}>
-                {saving ? 'Saving...' : 'Save meal'}
+              <button type="button" onClick={saveVoiceDraft} disabled={voiceSaving}>
+                {voiceSaving ? 'Saving...' : 'Save meal'}
               </button>
               <button
                 type="button"
                 className="library-save-from-draft-btn"
                 onClick={() => {
-                  const items = draft.items.map(item => ({
+                  const items = voiceDraft.items.map(item => ({
                     name: item.name,
                     estimatedPortion: item.estimatedPortion,
                     calories: item.calories,
@@ -662,37 +795,46 @@ export function PhotoAnalyzerTab({ onConfirmed }: PhotoAnalyzerTabProps) {
               >
                 Save to library
               </button>
-              <button type="button" className="voice-discard-btn" onClick={() => { setDraft(null); setTranscript('') }}>
+              <button
+                type="button"
+                className="voice-discard-btn"
+                onClick={() => { setVoiceDraft(null); setTranscript('') }}
+              >
                 Discard
               </button>
             </div>
           </>
         ) : null}
 
-        {/* Library mode */}
-        {mode === 'library' && !draft ? (
+        {/* ── Library mode ── */}
+        {mode === 'library' && !voiceDraft ? (
           <FoodLibraryTab
             onLogged={() => {
-              setSuccessMessage('Logged from library')
-              setTimeout(() => setSuccessMessage(''), 2500)
+              setVoiceSuccess('Logged from library')
+              setTimeout(() => setVoiceSuccess(''), 2500)
             }}
             initialSave={pendingLibrarySave}
             onInitialSaveDone={() => setPendingLibrarySave(null)}
           />
         ) : null}
 
-        {/* Barcode mode */}
-        {mode === 'barcode' && !draft ? (
+        {/* ── Barcode mode ── */}
+        {mode === 'barcode' && !voiceDraft ? (
           <BarcodeScannerMode
             onAdded={() => {
-              setSuccessMessage('Added to today')
-              setTimeout(() => setSuccessMessage(''), 2500)
+              setVoiceSuccess('Added to today')
+              setTimeout(() => setVoiceSuccess(''), 2500)
               switchMode('photo')
               onConfirmed?.()
             }}
             onCancel={() => switchMode('photo')}
           />
         ) : null}
+
+        {/* General success message (barcode/library) */}
+        {voiceSuccess && mode !== 'voice' && !voiceDraft && (
+          <p className="success-text">{voiceSuccess}</p>
+        )}
 
       </section>
     </section>

@@ -2291,8 +2291,8 @@ ul {
   flex: 1;
   border: none;
   border-radius: 9px;
-  padding: 10px 14px;
-  font-size: 0.9rem;
+  padding: 10px 6px;
+  font-size: 0.85rem;
   font-weight: 600;
   cursor: pointer;
   background: transparent;
@@ -2300,6 +2300,7 @@ ul {
   box-shadow: none;
   transition: background 0.18s, color 0.18s, box-shadow 0.18s;
   letter-spacing: 0.01em;
+  white-space: nowrap;
 }
 
 .analyzer-mode-btn--active {
@@ -3976,4 +3977,168 @@ ul {
   0%   { top: 10%; }
   50%  { top: 85%; }
   100% { top: 10%; }
+}
+
+/* ── Photo draft queue ───────────────────────────────────────────────────── */
+.photo-draft-queue {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 8px;
+}
+
+.photo-draft-card {
+  background: rgba(255, 255, 255, 0.06);
+  border-radius: 12px;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.photo-draft-card--analyzing {
+  opacity: 0.75;
+}
+
+.photo-draft-card--saved {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 10px;
+  opacity: 0.5;
+}
+
+.photo-draft-card--error {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 10px;
+  background: rgba(239, 68, 68, 0.08);
+}
+
+.photo-draft-card__thumb {
+  width: 56px;
+  height: 56px;
+  object-fit: cover;
+  border-radius: 8px;
+  flex-shrink: 0;
+}
+
+.photo-draft-card__top {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.photo-draft-card__info {
+  flex: 1;
+}
+
+.photo-draft-card__summary {
+  flex: 1;
+  min-width: 0;
+}
+
+.photo-draft-card__name {
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: #fff;
+  margin: 0 0 3px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.photo-draft-card__macros {
+  font-size: 0.78rem;
+  color: rgba(255, 255, 255, 0.55);
+  margin: 0;
+}
+
+.photo-draft-card__sep {
+  margin: 0 4px;
+  opacity: 0.4;
+}
+
+.photo-draft-card__saved-label {
+  font-size: 0.85rem;
+  color: rgba(74, 222, 128, 0.8);
+  font-weight: 600;
+}
+
+.photo-draft-card__actions {
+  display: flex;
+  gap: 6px;
+}
+
+.photo-draft-card__save-btn {
+  flex: 1;
+  padding: 7px 10px;
+  border: none;
+  border-radius: 8px;
+  background: rgba(59, 130, 246, 0.75);
+  color: #fff;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.photo-draft-card__save-btn:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.photo-draft-card__save-btn:not(:disabled):hover {
+  background: rgba(59, 130, 246, 0.9);
+}
+
+.photo-draft-card__edit-btn {
+  padding: 7px 10px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 8px;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 0.82rem;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.photo-draft-card__discard-btn {
+  padding: 7px 10px;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.35);
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: color 0.15s;
+}
+
+.photo-draft-card__discard-btn:not(:disabled):hover {
+  color: rgba(239, 68, 68, 0.8);
+}
+
+.photo-draft-card__details {
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  padding-top: 10px;
+  margin-top: 2px;
+}
+
+.photo-draft-save-all-btn {
+  width: 100%;
+  padding: 11px;
+  border: none;
+  border-radius: 10px;
+  background: rgba(59, 130, 246, 0.2);
+  border: 1px solid rgba(59, 130, 246, 0.35);
+  color: rgba(147, 197, 253, 1);
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.photo-draft-save-all-btn:hover {
+  background: rgba(59, 130, 246, 0.3);
 }
