@@ -117,6 +117,17 @@ jobs:
           printf '%s\n' "$GITHUB_SHA" > .deploy-revision
           EOF
 
+      - name: Dump backend logs on failure
+        if: failure()
+        env:
+          SSH_HOST: ${{ secrets.SSH_HOST }}
+          SSH_USER: ${{ secrets.SSH_USER }}
+          SSH_PORT: ${{ env.SSH_PORT }}
+          DEPLOY_PATH: ${{ env.DEPLOY_PATH }}
+        run: |
+          ssh -p "$SSH_PORT" "$SSH_USER@$SSH_HOST" \
+            "docker logs --tail 100 docker-backend-1 2>&1 || true"
+
       - name: Wait for backend readiness on server
         env:
           SSH_HOST: ${{ secrets.SSH_HOST }}
