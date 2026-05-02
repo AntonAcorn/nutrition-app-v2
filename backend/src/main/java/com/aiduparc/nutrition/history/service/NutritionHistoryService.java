@@ -251,6 +251,30 @@ public class NutritionHistoryService {
     }
 
     @Transactional
+    public MealLogEntryResponse updateMealLogEntry(UUID userId, UUID entryId, com.aiduparc.nutrition.history.api.UpdateMealLogEntryRequest req) {
+        MealLogEntryEntity entry = mealLogRepository.findByIdAndUserId(entryId, userId)
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Meal not found"));
+
+        if (req.name() != null && !req.name().isBlank()) entry.setName(req.name().trim());
+        if (req.caloriesKcal() != null) entry.setCaloriesKcal(req.caloriesKcal());
+        if (req.proteinG() != null) entry.setProteinG(req.proteinG());
+        if (req.fatG() != null) entry.setFatG(req.fatG());
+        if (req.carbsG() != null) entry.setCarbsG(req.carbsG());
+        if (req.fiberG() != null) entry.setFiberG(req.fiberG());
+        mealLogRepository.save(entry);
+        mealLogRepository.flush();
+
+        recomputeDailyTotalsFromLog(userId, entry.getEntryDate());
+        log.info("meal-log entry updated userId={} entryId={}", userId, entryId);
+
+        return new MealLogEntryResponse(
+            entry.getId(), entry.getName(), entry.getCaloriesKcal(),
+            entry.getProteinG(), entry.getFatG(), entry.getCarbsG(), entry.getFiberG(),
+            entry.getSource(), entry.getCreatedAt()
+        );
+    }
+
+    @Transactional
     public void deleteMealLogEntry(UUID userId, UUID entryId) {
         MealLogEntryEntity entry = mealLogRepository.findByIdAndUserId(entryId, userId)
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Meal not found"));

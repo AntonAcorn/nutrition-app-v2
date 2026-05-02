@@ -171,7 +171,7 @@ export function CurrentDayTab({ refreshToken = 0, successMessage = '', onDayUpda
         </section>
       ) : null}
 
-      {!loading && !error && summary ? <MealsLogCard refreshToken={refreshToken} onDeleted={() => { fetchTodaySummary().then(setSummary).catch(() => {}) }} /> : null}
+      {!loading && !error && summary ? <MealsLogCard refreshToken={refreshToken} onDeleted={() => { fetchTodaySummary().then(setSummary).catch(() => {}) }} onUpdated={() => { fetchTodaySummary().then(setSummary).catch(() => {}); onDayUpdated?.() }} /> : null}
       {!loading && !error && summary ? <WaterIntakeCard waterGlasses={summary.waterGlasses} waterGoalGlasses={summary.waterGoalGlasses} onUpdate={() => { fetchTodaySummary().then(setSummary).catch(() => {}) }} /> : null}
       {!loading && !error && summary ? <SavedMealsCard onLogged={() => { onDayUpdated?.() }} /> : null}
 

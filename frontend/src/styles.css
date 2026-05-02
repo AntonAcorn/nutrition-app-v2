@@ -2822,6 +2822,118 @@ ul {
   transform: scale(0.9);
 }
 
+.meal-log-row__actions {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.meal-log-row__edit {
+  flex-shrink: 0;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: transparent;
+  color: rgba(255, 255, 255, 0.3);
+  font-size: 0.85rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s, color 0.15s;
+}
+
+.meal-log-row__edit:hover {
+  background: rgba(99, 179, 237, 0.12);
+  border-color: rgba(99, 179, 237, 0.35);
+  color: rgba(99, 179, 237, 0.9);
+}
+
+.meal-log-row--editing {
+  flex-direction: column;
+  align-items: stretch;
+  padding: 12px 0;
+}
+
+.meal-log-edit-form {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.meal-log-edit-name {
+  width: 100%;
+  padding: 8px 10px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  background: rgba(255, 255, 255, 0.06);
+  color: #fff;
+  font-size: 0.88rem;
+}
+
+.meal-log-edit-macros {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 6px;
+}
+
+.meal-log-edit-macro {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.meal-log-edit-macro span {
+  font-size: 0.65rem;
+  color: rgba(255, 255, 255, 0.4);
+  font-weight: 600;
+  letter-spacing: 0.03em;
+}
+
+.meal-log-edit-macro input {
+  padding: 6px 6px;
+  border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.06);
+  color: #fff;
+  font-size: 0.8rem;
+  text-align: center;
+  width: 100%;
+}
+
+.meal-log-edit-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.meal-log-edit-save {
+  padding: 7px 18px;
+  border-radius: 8px;
+  border: none;
+  background: rgba(59, 125, 255, 0.85);
+  color: #fff;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.meal-log-edit-save:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.meal-log-edit-cancel {
+  padding: 7px 14px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: transparent;
+  color: rgba(255, 255, 255, 0.45);
+  font-size: 0.82rem;
+  cursor: pointer;
+}
+
 /* ── Quick Add Trigger Card ──────────────────────────────────────────────── */
 .quick-add-trigger-card {
   padding: 16px 20px;
