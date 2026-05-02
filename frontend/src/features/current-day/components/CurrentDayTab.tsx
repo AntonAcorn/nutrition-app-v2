@@ -148,7 +148,7 @@ export function CurrentDayTab({ refreshToken = 0, successMessage = '', onDayUpda
 
       {!loading && summary ? (
         <section className="weight-mascot-card panel">
-          <img src="/mascot/cheer.png" alt="" className="weight-mascot-card__img" />
+          <MascotSvg mood="cheer" size={80} className="weight-mascot-card__img" />
           <div className="weight-mascot-card__body">
             <div>
               <p className="screen-header__meta">Weight</p>

@@ -1,4 +1,44 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
-  <rect width="512" height="512" rx="96" fill="#1a1a1a"/>
-  <text x="256" y="340" font-family="system-ui, sans-serif" font-size="300" font-weight="700" text-anchor="middle" fill="#f59e0b">N</text>
+  <defs>
+    <radialGradient id="bg" cx="40%" cy="35%" r="75%">
+      <stop offset="0%" stop-color="#1E3348"/>
+      <stop offset="100%" stop-color="#0C1620"/>
+    </radialGradient>
+    <radialGradient id="body" cx="34%" cy="28%" r="72%">
+      <stop offset="0%" stop-color="#E4F4FF"/>
+      <stop offset="40%" stop-color="#A8CFF4"/>
+      <stop offset="100%" stop-color="#6AAAE8"/>
+    </radialGradient>
+  </defs>
+
+  <!-- Background -->
+  <rect width="512" height="512" rx="100" fill="url(#bg)"/>
+
+  <!-- Feet (peeking at bottom) -->
+  <circle cx="218" cy="478" r="40" fill="#6AAAE8" opacity="0.55"/>
+  <circle cx="294" cy="478" r="40" fill="#6AAAE8" opacity="0.55"/>
+
+  <!-- Body -->
+  <circle cx="256" cy="275" r="196" fill="url(#body)"/>
+
+  <!-- Glossy highlights -->
+  <circle cx="206" cy="164" r="55" fill="rgba(255,255,255,0.72)"/>
+  <circle cx="241" cy="200" r="30" fill="rgba(255,255,255,0.50)"/>
+  <circle cx="296" cy="180" r="18" fill="rgba(255,255,255,0.38)"/>
+  <circle cx="332" cy="212" r="13" fill="rgba(255,255,255,0.28)"/>
+  <!-- Lower body texture dots -->
+  <circle cx="176" cy="356" r="13" fill="rgba(255,255,255,0.35)"/>
+  <circle cx="202" cy="378" r="9"  fill="rgba(255,255,255,0.27)"/>
+  <circle cx="322" cy="350" r="11" fill="rgba(255,255,255,0.28)"/>
+
+  <!-- Blush cheeks -->
+  <circle cx="154" cy="260" r="34" fill="#FFB0C0" opacity="0.30"/>
+  <circle cx="358" cy="260" r="34" fill="#FFB0C0" opacity="0.30"/>
+
+  <!-- Eyes: happy squint (^ ^) -->
+  <path d="M 155 220 Q 196 190 237 220" stroke="#0E1520" stroke-width="13" fill="none" stroke-linecap="round"/>
+  <path d="M 275 220 Q 316 190 357 220" stroke="#0E1520" stroke-width="13" fill="none" stroke-linecap="round"/>
+
+  <!-- Mouth: gentle closed smile -->
+  <path d="M 224 302 Q 256 322 288 302" stroke="#0E1520" stroke-width="9" fill="none" stroke-linecap="round"/>
 </svg>

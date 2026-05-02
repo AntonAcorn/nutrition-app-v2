@@ -1,7 +1,9 @@
 import { useState } from 'react'
 import { setWaterGlasses } from '../model/waterApi'
+import { MascotSvg } from './MascotSvg'
+import type { MascotMood } from './MascotSvg'
 
-const mascotByLevel = ['/mascot/sad.png', '/mascot/happy.png', '/mascot/cheer.png', '/mascot/water.png', '/mascot/joy.png']
+const mascotMoodByLevel: MascotMood[] = ['thirsty', 'neutral', 'happy', 'cheer', 'excited']
 const moodByLevel = ['Dry start', 'Nice', 'Better', 'Great', 'Hydrated!']
 
 function mascotIndex(glasses: number): number {
@@ -43,7 +45,7 @@ export function WaterIntakeCard({ waterGlasses, waterGoalGlasses, onUpdate }: Pr
   return (
     <section className="water-card panel" aria-label="Water intake tracker">
       <div className="water-card__header">
-        <img src={mascotByLevel[idx]} alt="Puzometr" className="water-card__mascot" aria-live="polite" />
+        <MascotSvg mood={mascotMoodByLevel[idx]} size={80} className="water-card__mascot" aria-live="polite" />
         <div className="water-card__header-info">
           <p className="screen-header__meta">Water</p>
           <h3>{glasses} {glasses === 1 ? 'glass' : 'glasses'}</h3>

@@ -1,5 +1,6 @@
 import { CSSProperties, FormEvent, useState } from 'react'
 import { submitProfile, type OnboardingPayload } from '../model/profileApi'
+import { MascotCameraSvg } from '../../current-day/components/MascotCameraSvg'
 
 interface Props {
   onComplete: () => void
@@ -281,7 +282,7 @@ export function OnboardingWizard({ onComplete }: Props) {
 
       {step === 4 && (
         <div className="auth-form-grid">
-          <img src="/mascot/camera.png" alt="" style={{ width: 80, margin: '0 auto 0.25rem' }} />
+          <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '0.25rem' }}><MascotCameraSvg size={80} /></div>
           <p style={{ textAlign: 'center', fontSize: '1.5rem', fontWeight: 700, color: '#ffffff', margin: '0 0 0.2rem', lineHeight: 1.2 }}>You're all set!</p>
           <p style={{ textAlign: 'center', color: 'rgba(255,255,255,0.65)', fontSize: '0.875rem', margin: '0 0 1rem' }}>
             Here's how to log your meals

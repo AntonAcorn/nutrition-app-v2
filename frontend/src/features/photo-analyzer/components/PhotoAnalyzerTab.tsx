@@ -1,5 +1,6 @@
 import { ChangeEvent, useEffect, useMemo, useRef, useState } from 'react'
 import { MascotCameraSvg } from '../../current-day/components/MascotCameraSvg'
+import { MascotSvg } from '../../current-day/components/MascotSvg'
 import { getTodayLocalDateInputValue } from '../../../shared/lib/date'
 import { API_BASE } from '../../../shared/lib/apiBase'
 import { toNumber } from '../../../shared/lib/number'
@@ -711,7 +712,7 @@ export function PhotoAnalyzerTab({ onConfirmed, onSaveToLibrary }: PhotoAnalyzer
         {/* ── Voice mode ── */}
         {mode === 'voice' && !voiceDraft ? (
           <div className="voice-hero">
-            <img src="/mascot/happy.png" alt="" className="voice-hero__mascot" />
+            <MascotSvg mood="happy" size={100} className="voice-hero__mascot" />
             <h2 className="voice-hero__title">Describe your meal</h2>
             <p className="voice-hero__hint">Speak or type what you ate</p>
 

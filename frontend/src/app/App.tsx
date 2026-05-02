@@ -1,5 +1,6 @@
 import { FormEvent, useEffect, useState } from 'react'
 import { API_BASE } from '../shared/lib/apiBase'
+import { MascotSvg } from '../features/current-day/components/MascotSvg'
 
 
 function GoogleIcon() {
@@ -284,7 +285,7 @@ export default function App() {
     return (
       <main className="app-shell app-shell--auth">
         <div className="auth-hero">
-          <img src="/mascot/happy.png" alt="" className="auth-hero__mascot" />
+          <MascotSvg mood="happy" size={100} className="auth-hero__mascot" />
           <div>
             <p className="auth-hero__eyebrow">Daily nutrition</p>
             <h1 className="auth-hero__title">Check your email</h1>
@@ -345,7 +346,7 @@ export default function App() {
     return (
       <main className="app-shell app-shell--auth">
         <div className="auth-hero">
-          <img src="/mascot/happy.png" alt="" className="auth-hero__mascot" />
+          <MascotSvg mood="happy" size={100} className="auth-hero__mascot" />
           <div>
             <p className="auth-hero__eyebrow">Daily nutrition</p>
             <h1 className="auth-hero__title">{headerTitle}</h1>
