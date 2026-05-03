@@ -4781,6 +4781,12 @@ ul {
   color: #6b5b4b;
 }
 
+/* Water card buttons */
+[data-theme="light"] .water-card__button--secondary {
+  background: rgba(20, 33, 61, 0.06);
+  color: #6b5b4b;
+}
+
 /* Water card */
 [data-theme="light"] .water-card {
   background: linear-gradient(180deg, rgba(235, 248, 255, 0.95) 0%, rgba(219, 240, 255, 0.9) 100%);
