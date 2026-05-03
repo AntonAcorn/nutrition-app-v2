@@ -5007,3 +5007,52 @@ ul {
 [data-theme="light"] .app-header__eyebrow {
   color: rgba(20, 33, 61, 0.45);
 }
+
+/* ── Weight input (dark override inside weight-mascot-card) ── */
+[data-theme="light"] .weight-mascot-card .weight-panel__form input {
+  background: rgba(255, 255, 255, 0.9);
+  border-color: #dfcfbd;
+  color: #14213d;
+}
+[data-theme="light"] .weight-mascot-card .weight-panel__form input::placeholder {
+  color: rgba(20, 33, 61, 0.35);
+}
+
+/* ── Statistics table ── */
+[data-theme="light"] .screen-section--statistics-dark .statistics-table__head,
+[data-theme="light"] .screen-section--statistics-dark .statistics-table__row {
+  color: #14213d;
+}
+[data-theme="light"] .screen-section--statistics-dark .statistics-table__row {
+  border-top-color: rgba(20, 33, 61, 0.08);
+}
+[data-theme="light"] .screen-section--statistics-dark .text-over { color: #dc2626; }
+[data-theme="light"] .screen-section--statistics-dark .text-under { color: #16a34a; }
+
+/* ── Photo analyzer — missing text overrides ── */
+[data-theme="light"] .screen-section--photo-dark .screen-header__meta,
+[data-theme="light"] .screen-section--photo-dark .subtle-text,
+[data-theme="light"] .screen-section--photo-dark h2,
+[data-theme="light"] .screen-section--photo-dark h3,
+[data-theme="light"] .screen-section--photo-dark label,
+[data-theme="light"] .screen-section--photo-dark p,
+[data-theme="light"] .screen-section--photo-dark .success-text {
+  color: #14213d;
+}
+[data-theme="light"] .screen-section--photo-dark .upload-button--secondary {
+  background: rgba(20, 33, 61, 0.06);
+  color: #6b5b4b;
+}
+[data-theme="light"] .screen-section--photo-dark .notes-block textarea,
+[data-theme="light"] .screen-section--photo-dark .upload-panel__note textarea {
+  background: rgba(255, 255, 255, 0.82);
+  border-color: rgba(203, 187, 167, 0.55);
+  color: #14213d;
+}
+
+/* ── Profile avatar ── */
+[data-theme="light"] .profile-avatar {
+  background: linear-gradient(135deg, #d5e3ff 0%, #bfd1f7 100%);
+  border-color: rgba(59, 125, 255, 0.25);
+  color: #1f2a44;
+}
