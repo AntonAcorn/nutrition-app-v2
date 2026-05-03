@@ -5015,6 +5015,73 @@ ul {
   color: rgba(20, 33, 61, 0.45);
 }
 
+/* ── Auth page ── */
+[data-theme="light"] .auth-hero__eyebrow {
+  color: rgba(20, 33, 61, 0.4);
+}
+[data-theme="light"] .auth-hero__title {
+  color: #14213d;
+}
+[data-theme="light"] .auth-card {
+  background: rgba(255, 252, 247, 0.95);
+  border-color: rgba(224, 211, 195, 0.9);
+  box-shadow: 0 20px 56px rgba(89, 72, 54, 0.1);
+}
+[data-theme="light"] .auth-label {
+  color: rgba(20, 33, 61, 0.55);
+}
+[data-theme="light"] .auth-label-text {
+  color: rgba(20, 33, 61, 0.55);
+}
+[data-theme="light"] .auth-input {
+  background: rgba(255, 255, 255, 0.85);
+  border-color: rgba(203, 187, 167, 0.6);
+  color: #14213d;
+}
+[data-theme="light"] .auth-input:focus {
+  border-color: rgba(59, 125, 255, 0.5);
+}
+[data-theme="light"] .auth-input::placeholder {
+  color: rgba(20, 33, 61, 0.3);
+}
+[data-theme="light"] .auth-forgot-link {
+  color: rgba(20, 33, 61, 0.4);
+}
+[data-theme="light"] .auth-forgot-link:hover {
+  color: #14213d;
+}
+[data-theme="light"] .auth-google-btn {
+  background: rgba(255, 255, 255, 0.7);
+  border-color: rgba(203, 187, 167, 0.6);
+  color: #14213d;
+}
+[data-theme="light"] .auth-google-btn:hover {
+  background: rgba(255, 255, 255, 0.95);
+  border-color: rgba(203, 187, 167, 0.9);
+}
+[data-theme="light"] .auth-switch-text {
+  color: rgba(20, 33, 61, 0.4);
+}
+[data-theme="light"] .auth-switch-link {
+  color: rgba(20, 33, 61, 0.7);
+}
+[data-theme="light"] .auth-switch-link:hover {
+  color: #14213d;
+}
+[data-theme="light"] .password-toggle {
+  color: rgba(20, 33, 61, 0.4);
+}
+[data-theme="light"] .password-toggle:hover {
+  color: #14213d;
+}
+[data-theme="light"] .auth-divider {
+  color: rgba(20, 33, 61, 0.3);
+}
+[data-theme="light"] .auth-divider::before,
+[data-theme="light"] .auth-divider::after {
+  background: rgba(20, 33, 61, 0.1);
+}
+
 /* ── Weight input (dark override inside weight-mascot-card) ── */
 [data-theme="light"] .weight-mascot-card .weight-panel__form input {
   background: rgba(255, 255, 255, 0.9);
