@@ -1571,6 +1571,12 @@ ul {
   display: block;
 }
 
+.cal-bar__label-kcal { fill: rgba(255,255,255,0.22); }
+.cal-bar__guideline  { stroke: rgba(255,255,255,0.06); }
+.cal-bar__zeroline   { stroke: rgba(255,255,255,0.22); }
+.cal-bar__date       { fill: rgba(255,255,255,0.3); }
+.line-chart__dot     { stroke: #1c1c1e; }
+
 /* Trendline legend */
 .chart-legend {
   display: flex;
@@ -4641,13 +4647,38 @@ ul {
 }
 
 /* ── Panels in dark screen sections ── */
-/* Statistics chart panels (statistics-panel--dark) intentionally stay dark */
 [data-theme="light"] .screen-section--home-dark .panel,
-[data-theme="light"] .screen-section--statistics-dark .panel:not(.statistics-panel--dark) {
+[data-theme="light"] .screen-section--statistics-dark .panel {
   background: rgba(255, 252, 247, 0.9);
   border: 1px solid rgba(224, 211, 195, 0.9);
   box-shadow: 0 22px 60px rgba(89, 72, 54, 0.08);
 }
+
+/* Statistics chart panels in light mode */
+[data-theme="light"] .statistics-panel--dark {
+  background: rgba(255, 252, 247, 0.9);
+  border-color: rgba(224, 211, 195, 0.9);
+}
+[data-theme="light"] .chart-latest-value { color: #14213d; }
+[data-theme="light"] .chart-latest-unit  { color: rgba(20, 33, 61, 0.45); }
+[data-theme="light"] .statistics-panel--dark .line-chart__grid--dark span {
+  border-top-color: rgba(20, 33, 61, 0.08);
+}
+[data-theme="light"] .statistics-panel--dark .line-chart__axis {
+  color: rgba(20, 33, 61, 0.55);
+}
+[data-theme="light"] .statistics-panel--dark .line-chart__path--target {
+  stroke: rgba(20, 33, 61, 0.35);
+}
+[data-theme="light"] .line-chart__dot { stroke: #fff9f2; }
+[data-theme="light"] .line-chart__path--glow {
+  filter: drop-shadow(0 0 6px rgba(20, 33, 61, 0.08));
+}
+[data-theme="light"] .chart-legend__item { color: rgba(20, 33, 61, 0.45); }
+[data-theme="light"] .cal-bar__label-kcal { fill: rgba(20, 33, 61, 0.4); }
+[data-theme="light"] .cal-bar__guideline  { stroke: rgba(20, 33, 61, 0.12); }
+[data-theme="light"] .cal-bar__zeroline   { stroke: rgba(20, 33, 61, 0.35); }
+[data-theme="light"] .cal-bar__date       { fill: rgba(20, 33, 61, 0.45); }
 
 /* Text in dark home section */
 [data-theme="light"] .screen-section--home-dark .screen-header__meta,

@@ -198,7 +198,7 @@ function CalorieBarChart({ points }: { points: NutritionStatisticsPoint[] }) {
       <svg viewBox={`0 0 ${W} ${H}`} className="cal-bar-chart__svg">
         {/* top label row: "surplus ↑" left, "±N kcal" right */}
         <text x={4} y={20} fontSize="22" fill="rgba(239,68,68,0.6)">surplus ↑</text>
-        <text x={W - 4} y={20} fontSize="22" fill="rgba(255,255,255,0.22)" textAnchor="end">±{Math.round(maxAbs)} kcal</text>
+        <text x={W - 4} y={20} fontSize="22" className="cal-bar__label-kcal" textAnchor="end">±{Math.round(maxAbs)} kcal</text>
 
         {/* guide lines */}
         {[1, 0.5].map(pct => {
@@ -206,13 +206,13 @@ function CalorieBarChart({ points }: { points: NutritionStatisticsPoint[] }) {
           const yB = midY + pct * (chartH / 2 - 2)
           return (
             <g key={pct}>
-              <line x1={0} y1={yT} x2={W} y2={yT} stroke="rgba(255,255,255,0.06)" strokeWidth="1" />
-              <line x1={0} y1={yB} x2={W} y2={yB} stroke="rgba(255,255,255,0.06)" strokeWidth="1" />
+              <line x1={0} y1={yT} x2={W} y2={yT} className="cal-bar__guideline" strokeWidth="1" />
+              <line x1={0} y1={yB} x2={W} y2={yB} className="cal-bar__guideline" strokeWidth="1" />
             </g>
           )
         })}
         {/* zero line */}
-        <line x1={0} y1={midY} x2={W} y2={midY} stroke="rgba(255,255,255,0.22)" strokeWidth="1.5" />
+        <line x1={0} y1={midY} x2={W} y2={midY} className="cal-bar__zeroline" strokeWidth="1.5" />
 
         {/* bars — only for days with logged calories */}
         {points.map((p, i) => {
@@ -239,7 +239,7 @@ function CalorieBarChart({ points }: { points: NutritionStatisticsPoint[] }) {
           // skip first date label — it would overlap "deficit ↓"
           if (i === 0) return null
           return (
-            <text key={p.entryDate} x={x} y={labelH + chartH + 22} fontSize="22" fill="rgba(255,255,255,0.3)" textAnchor={anchor}>
+            <text key={p.entryDate} x={x} y={labelH + chartH + 22} fontSize="22" className="cal-bar__date" textAnchor={anchor}>
               {formatShortDate(p.entryDate)}
             </text>
           )
@@ -357,7 +357,7 @@ function LineChart({
             {targetPath ? <path d={targetPath} className="line-chart__path line-chart__path--target" /> : null}
             {trendlinePath ? <path d={trendlinePath} className="line-chart__path line-chart__path--trendline" /> : null}
             {dotX != null && dotY != null ? (
-              <circle cx={dotX.toFixed(1)} cy={dotY.toFixed(1)} r="7" fill={gradColor} stroke="#1c1c1e" strokeWidth="2.5" />
+              <circle cx={dotX.toFixed(1)} cy={dotY.toFixed(1)} r="7" fill={gradColor} className="line-chart__dot" strokeWidth="2.5" />
             ) : null}
           </svg>
           <div className="line-chart__axis line-chart__axis--x">
