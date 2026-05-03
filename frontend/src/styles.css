@@ -4641,8 +4641,9 @@ ul {
 }
 
 /* ── Panels in dark screen sections ── */
+/* Statistics chart panels (statistics-panel--dark) intentionally stay dark */
 [data-theme="light"] .screen-section--home-dark .panel,
-[data-theme="light"] .screen-section--statistics-dark .panel {
+[data-theme="light"] .screen-section--statistics-dark .panel:not(.statistics-panel--dark) {
   background: rgba(255, 252, 247, 0.9);
   border: 1px solid rgba(224, 211, 195, 0.9);
   box-shadow: 0 22px 60px rgba(89, 72, 54, 0.08);
