@@ -5015,6 +5015,12 @@ ul {
   color: rgba(20, 33, 61, 0.45);
 }
 
+/* ── Auth theme toggle ── */
+.auth-theme-toggle {
+  margin-left: auto;
+  flex-shrink: 0;
+}
+
 /* ── Auth page ── */
 [data-theme="light"] .auth-hero__eyebrow {
   color: rgba(20, 33, 61, 0.4);

@@ -335,6 +335,9 @@ export default function App() {
             <p className="auth-hero__eyebrow">Daily nutrition</p>
             <h1 className="auth-hero__title">Check your email</h1>
           </div>
+          <button type="button" className="theme-toggle-btn auth-theme-toggle" onClick={toggleTheme} aria-label={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}>
+            {theme === 'dark' ? <SunIcon /> : <MoonIcon />}
+          </button>
         </div>
         <section className="auth-card">
           <div className="auth-form">
@@ -376,6 +379,9 @@ export default function App() {
             <p className="app-header__eyebrow">Daily nutrition</p>
             <h1>Set up your profile</h1>
           </div>
+          <button type="button" className="theme-toggle-btn" onClick={toggleTheme} aria-label={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}>
+            {theme === 'dark' ? <SunIcon /> : <MoonIcon />}
+          </button>
         </header>
         <OnboardingWizard onComplete={handleOnboardingComplete} />
       </main>
@@ -396,6 +402,9 @@ export default function App() {
             <p className="auth-hero__eyebrow">Daily nutrition</p>
             <h1 className="auth-hero__title">{headerTitle}</h1>
           </div>
+          <button type="button" className="theme-toggle-btn auth-theme-toggle" onClick={toggleTheme} aria-label={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}>
+            {theme === 'dark' ? <SunIcon /> : <MoonIcon />}
+          </button>
         </div>
 
         <section className="auth-card">
