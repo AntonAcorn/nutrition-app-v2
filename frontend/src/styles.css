@@ -5029,7 +5029,14 @@ ul {
 [data-theme="light"] .screen-section--statistics-dark .text-over { color: #dc2626; }
 [data-theme="light"] .screen-section--statistics-dark .text-under { color: #16a34a; }
 
-/* ── Photo analyzer — missing text overrides ── */
+/* ── Photo analyzer — main panel background ── */
+[data-theme="light"] .analyzer-panel--dark {
+  background: rgba(255, 252, 247, 0.9);
+  border-color: rgba(224, 211, 195, 0.9);
+  box-shadow: 0 22px 60px rgba(89, 72, 54, 0.08);
+}
+
+/* Context-based text overrides */
 [data-theme="light"] .screen-section--photo-dark .screen-header__meta,
 [data-theme="light"] .screen-section--photo-dark .subtle-text,
 [data-theme="light"] .screen-section--photo-dark h2,
@@ -5039,10 +5046,49 @@ ul {
 [data-theme="light"] .screen-section--photo-dark .success-text {
   color: #14213d;
 }
+
+/* Mode toggle (Photo / Describe / Barcode) */
+[data-theme="light"] .analyzer-mode-toggle {
+  background: rgba(20, 33, 61, 0.06);
+}
+[data-theme="light"] .analyzer-mode-btn {
+  color: rgba(20, 33, 61, 0.45);
+}
+[data-theme="light"] .analyzer-mode-btn--active {
+  background: rgba(255, 255, 255, 0.8);
+  color: #14213d;
+  box-shadow: 0 1px 4px rgba(20, 33, 61, 0.12);
+}
+
+/* Photo upload hero */
+[data-theme="light"] .photo-upload-hero__title { color: #14213d; }
+[data-theme="light"] .photo-upload-hero__note { color: #6b5b4b; }
+
+/* Voice hero */
+[data-theme="light"] .voice-hero__title { color: #14213d; }
+[data-theme="light"] .voice-hero__hint { color: rgba(20, 33, 61, 0.45); }
+
+/* Note mic button */
+[data-theme="light"] .note-mic-btn {
+  border-color: rgba(20, 33, 61, 0.3);
+  color: #6b5b4b;
+}
+
+/* Photo draft totals summary */
+[data-theme="light"] .photo-draft-totals-summary {
+  background: rgba(20, 33, 61, 0.04);
+  border-color: rgba(20, 33, 61, 0.1);
+}
+[data-theme="light"] .photo-draft-totals-summary__label { color: rgba(20, 33, 61, 0.45); }
+[data-theme="light"] .photo-draft-totals-summary__macros { color: #14213d; }
+
+/* Upload secondary button */
 [data-theme="light"] .screen-section--photo-dark .upload-button--secondary {
   background: rgba(20, 33, 61, 0.06);
   color: #6b5b4b;
 }
+
+/* Textareas */
 [data-theme="light"] .screen-section--photo-dark .notes-block textarea,
 [data-theme="light"] .screen-section--photo-dark .upload-panel__note textarea {
   background: rgba(255, 255, 255, 0.82);
