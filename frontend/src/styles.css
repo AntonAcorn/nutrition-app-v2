@@ -2974,6 +2974,84 @@ ul {
   color: rgba(99, 179, 237, 0.9);
 }
 
+.meal-log-row__move {
+  flex-shrink: 0;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: transparent;
+  color: rgba(255, 255, 255, 0.3);
+  font-size: 0.9rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s, color 0.15s;
+}
+
+.meal-log-row__move:hover {
+  background: rgba(99, 179, 237, 0.12);
+  border-color: rgba(99, 179, 237, 0.35);
+  color: rgba(99, 179, 237, 0.9);
+}
+
+.meal-log-move {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+  padding: 6px 0;
+  width: 100%;
+}
+
+.meal-log-move__label {
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.45);
+  white-space: nowrap;
+}
+
+.meal-log-move__slots {
+  display: flex;
+  gap: 5px;
+  flex-wrap: wrap;
+  flex: 1;
+}
+
+.meal-log-move__btn {
+  padding: 4px 10px;
+  border-radius: 12px;
+  border: 1px solid rgba(99, 179, 237, 0.4);
+  background: rgba(99, 179, 237, 0.08);
+  color: rgba(99, 179, 237, 0.9);
+  font-size: 0.72rem;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.meal-log-move__btn:hover {
+  background: rgba(99, 179, 237, 0.18);
+}
+
+.meal-log-move__btn:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.meal-log-move__cancel {
+  border: none;
+  background: none;
+  color: rgba(255, 255, 255, 0.3);
+  font-size: 0.72rem;
+  cursor: pointer;
+  white-space: nowrap;
+  padding: 4px 6px;
+}
+
+.meal-log-move__cancel:hover {
+  color: rgba(255, 255, 255, 0.6);
+}
+
 .meal-log-row--editing {
   flex-direction: column;
   align-items: stretch;
@@ -6017,3 +6095,23 @@ ul {
 [data-theme="light"] .qs-slot-row__label { color: rgba(20, 33, 61, 0.5); }
 [data-theme="light"] .qs-slot-row__label strong { color: #14213d; }
 [data-theme="light"] .qs-slot-row__change { color: #2060e8; }
+
+/* ── Meal log move between slots ── */
+[data-theme="light"] .meal-log-row__move {
+  border-color: rgba(20, 33, 61, 0.12);
+  color: rgba(20, 33, 61, 0.3);
+}
+[data-theme="light"] .meal-log-row__move:hover {
+  background: rgba(32, 96, 232, 0.08);
+  border-color: rgba(32, 96, 232, 0.35);
+  color: #2060e8;
+}
+[data-theme="light"] .meal-log-move__label { color: rgba(20, 33, 61, 0.45); }
+[data-theme="light"] .meal-log-move__btn {
+  border-color: rgba(32, 96, 232, 0.35);
+  background: rgba(32, 96, 232, 0.06);
+  color: #2060e8;
+}
+[data-theme="light"] .meal-log-move__btn:hover { background: rgba(32, 96, 232, 0.13); }
+[data-theme="light"] .meal-log-move__cancel { color: rgba(20, 33, 61, 0.3); }
+[data-theme="light"] .meal-log-move__cancel:hover { color: rgba(20, 33, 61, 0.6); }

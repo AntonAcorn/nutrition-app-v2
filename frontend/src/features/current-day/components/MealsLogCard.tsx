@@ -53,6 +53,8 @@ export function MealsLogCard({ refreshToken = 0, onAddToSlot, onDeleted, onUpdat
   const [editForm, setEditForm] = useState<EditForm | null>(null)
   const [savingId, setSavingId] = useState<string | null>(null)
   const [editError, setEditError] = useState('')
+  const [movingId, setMovingId] = useState<string | null>(null)
+  const [movingToId, setMovingToId] = useState<string | null>(null)
 
   useEffect(() => {
     listMealLog(getTodayLocalDateInputValue())
@@ -64,6 +66,7 @@ export function MealsLogCard({ refreshToken = 0, onAddToSlot, onDeleted, onUpdat
     setEditingId(m.id)
     setEditForm(toEditForm(m))
     setConfirmId(null)
+    setMovingId(null)
     setEditError('')
   }
 
@@ -119,6 +122,29 @@ export function MealsLogCard({ refreshToken = 0, onAddToSlot, onDeleted, onUpdat
       setDeleteError('Failed to delete. Please try again.')
     } finally {
       setDeletingId(null)
+    }
+  }
+
+  async function handleMove(id: string, targetSlot: MealSlot['slotType']) {
+    setMovingToId(id)
+    try {
+      await updateMealLogEntry(id, { slotType: targetSlot })
+      setSlots(prev => {
+        const entry = prev.flatMap(s => s.items).find(m => m.id === id)
+        if (!entry) return prev
+        const removed = prev.map(slot => ({ ...slot, items: slot.items.filter(m => m.id !== id) }))
+        return mergeWithDefaults(
+          removed.map(slot =>
+            slot.slotType === targetSlot ? { ...slot, items: [...slot.items, entry] } : slot
+          ).filter(slot => slot.items.length > 0)
+        )
+      })
+      setMovingId(null)
+      onUpdated?.()
+    } catch {
+      // silently fail — user can retry
+    } finally {
+      setMovingToId(null)
     }
   }
 
@@ -193,6 +219,30 @@ export function MealsLogCard({ refreshToken = 0, onAddToSlot, onDeleted, onUpdat
                           </button>
                         </div>
                       </div>
+                    ) : movingId === m.id ? (
+                      <div className="meal-log-move">
+                        <span className="meal-log-move__label">Move to:</span>
+                        <div className="meal-log-move__slots">
+                          {SLOT_ORDER.filter(s => s !== slot.slotType).map(target => (
+                            <button
+                              key={target}
+                              type="button"
+                              className="meal-log-move__btn"
+                              onClick={() => handleMove(m.id, target)}
+                              disabled={movingToId === m.id}
+                            >
+                              {SLOT_LABELS[target]}
+                            </button>
+                          ))}
+                        </div>
+                        <button
+                          type="button"
+                          className="meal-log-move__cancel"
+                          onClick={() => setMovingId(null)}
+                        >
+                          Cancel
+                        </button>
+                      </div>
                     ) : (
                       <>
                         <div className="meal-log-row__info">
@@ -200,6 +250,14 @@ export function MealsLogCard({ refreshToken = 0, onAddToSlot, onDeleted, onUpdat
                           <p className="meal-log-row__meta">{Math.round(m.caloriesKcal)} kcal</p>
                         </div>
                         <div className="meal-log-row__actions">
+                          <button
+                            type="button"
+                            className="meal-log-row__move"
+                            onClick={() => { setMovingId(m.id); setConfirmId(null) }}
+                            aria-label={`Move ${m.name}`}
+                          >
+                            ⇄
+                          </button>
                           <button
                             type="button"
                             className="meal-log-row__edit"
