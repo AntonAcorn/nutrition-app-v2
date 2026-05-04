@@ -4949,6 +4949,7 @@ ul {
 /* Library editor */
 [data-theme="light"] .library-editor__title { color: #14213d; }
 [data-theme="light"] .library-back-btn { color: #6b5b4b; }
+[data-theme="light"] .library-editor .draft-item-card__field-label { color: rgba(20, 33, 61, 0.5); }
 [data-theme="light"] .library-add-item-btn {
   border-color: rgba(203, 187, 167, 0.5);
   color: rgba(20, 33, 61, 0.4);
