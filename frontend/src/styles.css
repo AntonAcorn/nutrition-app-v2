@@ -3424,6 +3424,30 @@ ul {
   padding: 20px 0;
 }
 
+.qs-logged-confirm {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 28px 16px;
+  animation: qs-fade-in 0.2s ease;
+}
+
+.qs-logged-confirm__check {
+  font-size: 1.6rem;
+  color: #4cd964;
+}
+
+.qs-logged-confirm__text {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #fff;
+}
+
+[data-theme="light"] .qs-logged-confirm__text {
+  color: #14213d;
+}
+
 .qs-analyzer-row {
   display: flex;
   gap: 8px;

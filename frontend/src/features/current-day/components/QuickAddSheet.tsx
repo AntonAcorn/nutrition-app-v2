@@ -49,6 +49,7 @@ export function QuickAddSheet({ onAdd, onLogTemplate, onClose, onOpenAnalyzer }:
   const [loadingLib, setLoadingLib] = useState(true)
   const [loggingId, setLoggingId] = useState<string | null>(null)
   const [libError, setLibError] = useState('')
+  const [loggedName, setLoggedName] = useState<string | null>(null)
 
   // search
   const [searchQuery, setSearchQuery] = useState('')
@@ -144,22 +145,28 @@ export function QuickAddSheet({ onAdd, onLogTemplate, onClose, onOpenAnalyzer }:
     if (g <= 0) return
     setAddingSearch(true)
     try {
-      const kcal   = calcMacro(selectedProduct.caloriesPer100g)
-      const prot   = calcMacro(selectedProduct.proteinPer100g)
-      const fat    = calcMacro(selectedProduct.fatPer100g)
-      const fib    = calcMacro(selectedProduct.fiberPer100g)
-      const carbs  = calcMacro(selectedProduct.carbsPer100g)
+      const kcal  = calcMacro(selectedProduct.caloriesPer100g)
+      const prot  = calcMacro(selectedProduct.proteinPer100g)
+      const fat   = calcMacro(selectedProduct.fatPer100g)
+      const fib   = calcMacro(selectedProduct.fiberPer100g)
+      const carbs = calcMacro(selectedProduct.carbsPer100g)
       await onAdd(kcal, prot, fat, fib, carbs, selectedProduct.name)
+      setLoggedName(`${selectedProduct.name} · ${kcal} kcal`)
+      setTimeout(() => onClose(), 1400)
     } catch {
       setAddingSearch(false)
     }
   }
 
   async function handleLogTemplate(id: string) {
+    const t = templates.find(t => t.id === id)
     setLoggingId(id)
     setLibError('')
     try {
       await onLogTemplate(id)
+      setLoggedName(t ? `${t.name} · ${Math.round(t.totalCalories)} kcal` : 'Meal logged')
+      setLoggingId(null)
+      setTimeout(() => onClose(), 1400)
     } catch {
       setLoggingId(null)
       setLibError('Failed to log meal')
@@ -173,6 +180,9 @@ export function QuickAddSheet({ onAdd, onLogTemplate, onClose, onOpenAnalyzer }:
     setError('')
     try {
       await onAdd(kcal, Number(protein) || 0, Number(fat) || 0, Number(fiber) || 0, Number(carbs) || 0, mealName.trim() || undefined)
+      const label = mealName.trim() ? `${mealName.trim()} · ${kcal} kcal` : `${kcal} kcal`
+      setLoggedName(label)
+      setTimeout(() => onClose(), 1400)
     } catch {
       setError('Failed to add')
       setSaving(false)
@@ -198,7 +208,14 @@ export function QuickAddSheet({ onAdd, onLogTemplate, onClose, onOpenAnalyzer }:
           <button type="button" className="qs-close" onClick={onClose}>✕</button>
         </div>
 
-        {onOpenAnalyzer && (
+        {loggedName && (
+          <div className="qs-logged-confirm">
+            <span className="qs-logged-confirm__check">✓</span>
+            <span className="qs-logged-confirm__text">{loggedName}</span>
+          </div>
+        )}
+
+        {!loggedName && onOpenAnalyzer && (
           <div className="qs-analyzer-row">
             <button type="button" className="qs-analyzer-btn" onClick={() => { onClose(); onOpenAnalyzer('photo') }}>
               <span className="qs-analyzer-btn__icon">📷</span>
@@ -215,13 +232,15 @@ export function QuickAddSheet({ onAdd, onLogTemplate, onClose, onOpenAnalyzer }:
           </div>
         )}
 
-        <div className="qs-mode-toggle">
-          <button type="button" className={`qs-mode-btn${mode === 'library' ? ' qs-mode-btn--active' : ''}`} onClick={() => setMode('library')}>Library</button>
-          <button type="button" className={`qs-mode-btn${mode === 'search'  ? ' qs-mode-btn--active' : ''}`} onClick={() => setMode('search')}>Search</button>
-          <button type="button" className={`qs-mode-btn${mode === 'manual'  ? ' qs-mode-btn--active' : ''}`} onClick={() => setMode('manual')}>Manual</button>
-        </div>
+        {!loggedName && (
+          <div className="qs-mode-toggle">
+            <button type="button" className={`qs-mode-btn${mode === 'library' ? ' qs-mode-btn--active' : ''}`} onClick={() => setMode('library')}>Library</button>
+            <button type="button" className={`qs-mode-btn${mode === 'search'  ? ' qs-mode-btn--active' : ''}`} onClick={() => setMode('search')}>Search</button>
+            <button type="button" className={`qs-mode-btn${mode === 'manual'  ? ' qs-mode-btn--active' : ''}`} onClick={() => setMode('manual')}>Manual</button>
+          </div>
+        )}
 
-        {mode === 'library' && (
+        {!loggedName && mode === 'library' && (
           loadingLib ? (
             <p className="qs-library-empty">Loading...</p>
           ) : templates.length === 0 ? (
@@ -249,7 +268,7 @@ export function QuickAddSheet({ onAdd, onLogTemplate, onClose, onOpenAnalyzer }:
           )
         )}
 
-        {mode === 'search' && (
+        {!loggedName && mode === 'search' && (
           <div className="qs-search">
             {!selectedProduct ? (
               <>
@@ -332,7 +351,7 @@ export function QuickAddSheet({ onAdd, onLogTemplate, onClose, onOpenAnalyzer }:
           </div>
         )}
 
-        {mode === 'manual' && (
+        {!loggedName && mode === 'manual' && (
           <>
             <input
               className="qs-name-input"

@@ -73,7 +73,6 @@ export function CurrentDayTab({ refreshToken = 0, successMessage = '', onDayUpda
     await logTemplate(templateId, getTodayLocalDateInputValue())
     const nextSummary = await fetchTodaySummary()
     setSummary(nextSummary)
-    setShowQuickAdd(false)
     onDayUpdated?.()
   }
 
