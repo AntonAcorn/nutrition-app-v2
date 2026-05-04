@@ -199,9 +199,7 @@ export function FastingTab() {
                 </div>
                 <div className="fasting-history__right">
                   <span className="fasting-history__duration">{sess.endedAt ? formatDuration(sess.startedAt, sess.endedAt) : '—'}</span>
-                  <span className={`fasting-history__badge ${achieved ? 'fasting-history__badge--achieved' : 'fasting-history__badge--missed'}`}>
-                    {achieved ? '✓' : '✗'}
-                  </span>
+                  {achieved && <span className="fasting-history__badge fasting-history__badge--achieved">✓</span>}
                   <button type="button" className="fasting-history__delete" onClick={() => handleDelete(sess.id)} aria-label="Delete">×</button>
                 </div>
               </div>
