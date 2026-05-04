@@ -39,13 +39,16 @@ function MacroCard({ label, value, target, unit, progress, tone }: MacroCardProp
 
 interface TodaySummaryBlockProps {
   summary: TodaySummary
+  steps?: number
+  activeCalories?: number
 }
 
-export function TodaySummaryBlock({ summary }: TodaySummaryBlockProps) {
+export function TodaySummaryBlock({ summary, steps = 0, activeCalories = 0 }: TodaySummaryBlockProps) {
   const consumed = Math.round(summary.consumedCalories)
   const target = Math.max(1, Math.round(summary.dailyTargetCalories))
-  const remaining = Math.round(summary.remainingCalories)
-  const ratio = consumed / target
+  const adjustedRemaining = Math.round(summary.remainingCalories) + activeCalories
+  const remaining = adjustedRemaining
+  const ratio = consumed / (target + activeCalories || 1)
   const ringProgress = Math.min(100, Math.max(0, Math.round(ratio * 100)))
   const circumference = 2 * Math.PI * 64
   const dashOffset = circumference - (circumference * ringProgress) / 100
@@ -105,7 +108,26 @@ export function TodaySummaryBlock({ summary }: TodaySummaryBlockProps) {
           </div>
         </div>
 
-        <p className="today-ring__caption">{getCaptionText(consumed, target, remaining)}</p>
+        <p className="today-ring__caption">{getCaptionText(consumed, target + activeCalories, remaining)}</p>
+
+        {(steps > 0 || activeCalories > 0) && (
+          <div className="activity-row">
+            {steps > 0 && (
+              <div className="activity-chip">
+                <span className="activity-chip__icon">👟</span>
+                <span className="activity-chip__value">{steps.toLocaleString()}</span>
+                <span className="activity-chip__label">steps</span>
+              </div>
+            )}
+            {activeCalories > 0 && (
+              <div className="activity-chip activity-chip--earned">
+                <span className="activity-chip__icon">🔥</span>
+                <span className="activity-chip__value">+{activeCalories}</span>
+                <span className="activity-chip__label">earned kcal</span>
+              </div>
+            )}
+          </div>
+        )}
 
         <div className="macro-meter-grid">
           <MacroCard label="Protein" value={summary.proteinGrams} target={summary.proteinTargetGrams} unit="g" progress={Math.min(100, Math.round((summary.proteinGrams / Math.max(1, summary.proteinTargetGrams)) * 100))} tone="purple" />

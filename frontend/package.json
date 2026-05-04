@@ -15,6 +15,7 @@
     "@capacitor/core": "^8.3.1",
     "@capacitor/ios": "^8.3.1",
     "@capacitor/status-bar": "^8.0.2",
+    "@capgo/capacitor-health": "^8.4.9",
     "@sentry/react": "^10.51.0",
     "@zxing/browser": "^0.2.0",
     "posthog-js": "^1.372.6",

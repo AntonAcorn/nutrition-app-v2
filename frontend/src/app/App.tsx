@@ -42,6 +42,7 @@ import { FoodLibraryTab } from '../features/food-library/components/FoodLibraryT
 import { FastingTab } from '../features/fasting/components/FastingTab'
 import type { MealTemplateItem } from '../shared/types/nutrition'
 import { identifyUser, resetAnalyticsUser, track } from '../shared/lib/analytics'
+import { requestHealthPermissions } from '../shared/lib/healthKit'
 import * as Sentry from '@sentry/react'
 
 function getGreeting(): string {
@@ -161,6 +162,7 @@ export default function App() {
           if (me.authenticated && me.nutritionUserId) {
             identifyUser(me.nutritionUserId, { email: me.email ?? undefined, name: me.displayName ?? undefined })
             Sentry.setUser({ id: me.nutritionUserId, email: me.email ?? undefined })
+            requestHealthPermissions()
           }
           if (me.authenticated && !me.emailVerified) {
             setAuthEmail(me.email ?? '')

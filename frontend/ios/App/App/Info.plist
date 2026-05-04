@@ -62,5 +62,9 @@
 	<string>Describe your meal by voice for nutrition analysis</string>
 	<key>NSSpeechRecognitionUsageDescription</key>
 	<string>Transcribe your voice description of a meal for nutrition analysis</string>
+	<key>NSHealthShareUsageDescription</key>
+	<string>Read your steps and active calories to adjust your daily calorie budget</string>
+	<key>NSHealthUpdateUsageDescription</key>
+	<string>Save your weight to Apple Health so it stays in sync across apps</string>
 </dict>
 </plist>

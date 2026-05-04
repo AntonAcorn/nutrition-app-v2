@@ -12,6 +12,7 @@ import { getTodayLocalDateInputValue } from '../../../shared/lib/date'
 import type { TodaySummary } from '../../../shared/types/nutrition'
 import { MascotSvg } from './MascotSvg'
 import { getMascotMood } from '../model/getMascotMood'
+import { getTodaySteps, getTodayActiveCalories, isHealthKitSupported } from '../../../shared/lib/healthKit'
 
 function getGreeting(): string {
   const hour = new Date().getHours()
@@ -32,6 +33,8 @@ interface CurrentDayTabProps {
 export function CurrentDayTab({ refreshToken = 0, successMessage = '', onDayUpdated, displayName, onOpenAnalyzer }: CurrentDayTabProps) {
   const [summary, setSummary] = useState<TodaySummary | null>(null)
   const [loading, setLoading] = useState(true)
+  const [steps, setSteps] = useState(0)
+  const [activeCalories, setActiveCalories] = useState(0)
   const [savingWeight, setSavingWeight] = useState(false)
   const [weightInput, setWeightInput] = useState('')
   const [error, setError] = useState('')
@@ -65,6 +68,12 @@ export function CurrentDayTab({ refreshToken = 0, successMessage = '', onDayUpda
     }
 
     loadSummary()
+
+    if (isHealthKitSupported()) {
+      getTodaySteps().then(setSteps)
+      getTodayActiveCalories().then(setActiveCalories)
+    }
+
     return () => {
       cancelled = true
     }
@@ -150,7 +159,7 @@ export function CurrentDayTab({ refreshToken = 0, successMessage = '', onDayUpda
       {loading ? <section className="panel detail-panel"><p>Loading daily summary...</p></section> : null}
       {!loading && error ? <section className="panel detail-panel"><p className="error-text">{error}</p></section> : null}
 
-      {!loading && !error && summary ? <TodaySummaryBlock summary={summary} /> : null}
+      {!loading && !error && summary ? <TodaySummaryBlock summary={summary} steps={steps} activeCalories={activeCalories} /> : null}
 
       {!loading && !error && summary ? (
         <MealsLogCard
