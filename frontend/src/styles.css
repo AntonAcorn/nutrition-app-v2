@@ -6838,15 +6838,16 @@ ul {
 
 /* ── Bottom tab bar light mode ── */
 [data-theme="light"] .bottom-tab-bar {
-  background: rgba(255, 252, 248, 0.96);
-  border-top-color: rgba(20, 33, 61, 0.1);
+  background: rgba(252, 248, 242, 0.97);
+  border-top-color: rgba(20, 33, 61, 0.13);
+  box-shadow: 0 -4px 16px rgba(20, 33, 61, 0.06);
 }
 [data-theme="light"] .bottom-tab-item {
-  color: rgba(20, 33, 61, 0.3);
+  color: rgba(20, 33, 61, 0.38);
 }
 [data-theme="light"] .bottom-tab-item--active {
   color: #2060e8;
 }
 [data-theme="light"] .bottom-tab-item:hover:not(.bottom-tab-item--active) {
-  color: rgba(20, 33, 61, 0.55);
+  color: rgba(20, 33, 61, 0.6);
 }
