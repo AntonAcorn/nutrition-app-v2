@@ -104,7 +104,7 @@ export function PhotoAnalyzerTab({ onConfirmed, onSaveToLibrary, initialMode, on
   const [recording, setRecording] = useState(false)
   const [analyzing, setAnalyzing] = useState(false)
   const [speechSupported, setSpeechSupported] = useState(false)
-  const [recognitionLang] = useState(() => {
+  const [recognitionLang, setRecognitionLang] = useState(() => {
     const lang = typeof navigator !== 'undefined' ? (navigator.language?.slice(0, 2) ?? 'en') : 'en'
     const map: Record<string, string> = { en: 'en-US', ru: 'ru-RU', fr: 'fr-FR', es: 'es-ES' }
     return map[lang] ?? 'en-US'
@@ -694,25 +694,45 @@ export function PhotoAnalyzerTab({ onConfirmed, onSaveToLibrary, initialMode, on
               <div className="note-label-row">
                 <span>Your meal</span>
                 {speechSupported && (
-                  <button
-                    type="button"
-                    className={`note-mic-btn ${recording ? 'note-mic-btn--active' : ''}`}
-                    onClick={recording ? stopRecording : startRecording}
-                    aria-label={recording ? 'Stop recording' : 'Start recording'}
-                  >
-                    {recording ? (
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                        <rect x="4" y="4" width="16" height="16" rx="3"/>
-                      </svg>
-                    ) : (
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                        <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"/>
-                        <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
-                        <line x1="12" y1="19" x2="12" y2="23"/>
-                        <line x1="8" y1="23" x2="16" y2="23"/>
-                      </svg>
-                    )}
-                  </button>
+                  <div className="note-mic-controls">
+                    <div className="voice-lang-picker">
+                      {[
+                        { code: 'en-US', label: 'EN' },
+                        { code: 'ru-RU', label: 'RU' },
+                        { code: 'fr-FR', label: 'FR' },
+                        { code: 'es-ES', label: 'ES' },
+                      ].map(({ code, label }) => (
+                        <button
+                          key={code}
+                          type="button"
+                          className={`voice-lang-btn ${recognitionLang === code ? 'voice-lang-btn--active' : ''}`}
+                          onClick={() => setRecognitionLang(code)}
+                          disabled={recording}
+                        >
+                          {label}
+                        </button>
+                      ))}
+                    </div>
+                    <button
+                      type="button"
+                      className={`note-mic-btn ${recording ? 'note-mic-btn--active' : ''}`}
+                      onClick={recording ? stopRecording : startRecording}
+                      aria-label={recording ? 'Stop recording' : 'Start recording'}
+                    >
+                      {recording ? (
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                          <rect x="4" y="4" width="16" height="16" rx="3"/>
+                        </svg>
+                      ) : (
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                          <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"/>
+                          <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
+                          <line x1="12" y1="19" x2="12" y2="23"/>
+                          <line x1="8" y1="23" x2="16" y2="23"/>
+                        </svg>
+                      )}
+                    </button>
+                  </div>
                 )}
               </div>
               <textarea
