@@ -16,21 +16,26 @@ public class OpenFoodFactsService {
 
     private final RestClient restClient = RestClient.builder()
         .baseUrl("https://world.openfoodfacts.org")
-        .defaultHeader("User-Agent", "NutritionApp/1.0")
+        .defaultHeader("User-Agent", "NutritionApp/1.0 (contact@aiduparc.com)")
+        .build();
+
+    private final RestClient searchClient = RestClient.builder()
+        .baseUrl("https://search.openfoodfacts.org")
+        .defaultHeader("User-Agent", "NutritionApp/1.0 (contact@aiduparc.com)")
         .build();
 
     public List<FoodProductResponse> searchByName(String query, int pageSize) {
         try {
-            JsonNode root = restClient.get()
-                .uri("/cgi/search.pl?search_terms={q}&action=process&json=1&page_size={ps}&fields=product_name,product_name_en,brands,nutriments,code",
+            JsonNode root = searchClient.get()
+                .uri("/search?q={q}&fields=product_name,product_name_en,brands,nutriments,code&page_size={ps}",
                     query, pageSize)
                 .retrieve()
                 .body(JsonNode.class);
 
-            if (root == null || !root.has("products")) return List.of();
+            if (root == null || !root.has("hits")) return List.of();
 
             List<FoodProductResponse> results = new ArrayList<>();
-            for (JsonNode product : root.path("products")) {
+            for (JsonNode product : root.path("hits")) {
                 String name = product.path("product_name").asText("").trim();
                 if (name.isBlank()) name = product.path("product_name_en").asText("").trim();
                 if (name.isBlank()) continue;
