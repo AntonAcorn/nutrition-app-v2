@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { listTemplates } from '../../food-library/model/mealTemplateApi'
+import { searchFood } from '../../barcode/model/barcodeApi'
+import type { FoodProduct } from '../../barcode/model/barcodeApi'
 import type { MealTemplate } from '../../../shared/types/nutrition'
 
 interface Props {
@@ -33,8 +35,31 @@ function ChipInput({ label, value, onChange, colorClass, unit }: ChipProps) {
   )
 }
 
+function round1(v: number | null | undefined): number {
+  if (v == null) return 0
+  return Math.round(v * 10) / 10
+}
+
 export function QuickAddSheet({ onAdd, onLogTemplate, onClose }: Props) {
-  const [mode, setMode] = useState<'library' | 'manual'>('library')
+  const [mode, setMode] = useState<'library' | 'search' | 'manual'>('library')
+
+  // library
+  const [templates, setTemplates] = useState<MealTemplate[]>([])
+  const [loadingLib, setLoadingLib] = useState(true)
+  const [loggingId, setLoggingId] = useState<string | null>(null)
+  const [libError, setLibError] = useState('')
+
+  // search
+  const [searchQuery, setSearchQuery] = useState('')
+  const [searchResults, setSearchResults] = useState<FoodProduct[]>([])
+  const [searchLoading, setSearchLoading] = useState(false)
+  const [searchError, setSearchError] = useState('')
+  const [selectedProduct, setSelectedProduct] = useState<FoodProduct | null>(null)
+  const [grams, setGrams] = useState('100')
+  const [addingSearch, setAddingSearch] = useState(false)
+  const searchTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  // manual
   const [mealName, setMealName] = useState('')
   const [calories, setCalories] = useState('')
   const [protein, setProtein]   = useState('')
@@ -43,10 +68,7 @@ export function QuickAddSheet({ onAdd, onLogTemplate, onClose }: Props) {
   const [fiber, setFiber]       = useState('')
   const [saving, setSaving]     = useState(false)
   const [error, setError]       = useState('')
-  const [templates, setTemplates] = useState<MealTemplate[]>([])
-  const [loadingLib, setLoadingLib] = useState(true)
-  const [loggingId, setLoggingId] = useState<string | null>(null)
-  const [libError, setLibError] = useState('')
+
   const backdropRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -73,6 +95,64 @@ export function QuickAddSheet({ onAdd, onLogTemplate, onClose }: Props) {
       vv.removeEventListener('scroll', update)
     }
   }, [])
+
+  useEffect(() => {
+    if (searchTimerRef.current) clearTimeout(searchTimerRef.current)
+    if (!searchQuery.trim() || searchQuery.trim().length < 2) {
+      setSearchResults([])
+      setSearchError('')
+      return
+    }
+    setSearchLoading(true)
+    setSearchError('')
+    searchTimerRef.current = setTimeout(async () => {
+      try {
+        const results = await searchFood(searchQuery.trim())
+        setSearchResults(results)
+        if (results.length === 0) setSearchError('No results')
+      } catch {
+        setSearchError('Search failed')
+      } finally {
+        setSearchLoading(false)
+      }
+    }, 500)
+    return () => {
+      if (searchTimerRef.current) clearTimeout(searchTimerRef.current)
+    }
+  }, [searchQuery])
+
+  function selectProduct(p: FoodProduct) {
+    setSelectedProduct(p)
+    setGrams('100')
+    setSearchError('')
+  }
+
+  function clearSelection() {
+    setSelectedProduct(null)
+  }
+
+  function calcMacro(per100g: number | null | undefined): number {
+    const g = parseFloat(grams) || 0
+    if (per100g == null) return 0
+    return round1((per100g * g) / 100)
+  }
+
+  async function handleAddFromSearch() {
+    if (!selectedProduct) return
+    const g = parseFloat(grams) || 0
+    if (g <= 0) return
+    setAddingSearch(true)
+    try {
+      const kcal   = calcMacro(selectedProduct.caloriesPer100g)
+      const prot   = calcMacro(selectedProduct.proteinPer100g)
+      const fat    = calcMacro(selectedProduct.fatPer100g)
+      const fib    = calcMacro(selectedProduct.fiberPer100g)
+      const carbs  = calcMacro(selectedProduct.carbsPer100g)
+      await onAdd(kcal, prot, fat, fib, carbs, selectedProduct.name)
+    } catch {
+      setAddingSearch(false)
+    }
+  }
 
   async function handleLogTemplate(id: string) {
     setLoggingId(id)
@@ -102,6 +182,8 @@ export function QuickAddSheet({ onAdd, onLogTemplate, onClose }: Props) {
     if (e.target === e.currentTarget) onClose()
   }
 
+  const gramsNum = parseFloat(grams) || 0
+
   return (
     <div ref={backdropRef} className="qs-backdrop" onClick={handleBackdropClick}>
       <div className="qs-sheet">
@@ -109,30 +191,19 @@ export function QuickAddSheet({ onAdd, onLogTemplate, onClose }: Props) {
           <div>
             <p className="qs-title">Quick add</p>
             <p className="qs-subtitle">
-              {mode === 'library' ? 'Tap Log to add a saved meal.' : 'Tap a chip to enter value.'}
+              {mode === 'library' ? 'Tap Log to add a saved meal.' : mode === 'search' ? 'Search 3M+ products.' : 'Tap a chip to enter value.'}
             </p>
           </div>
           <button type="button" className="qs-close" onClick={onClose}>✕</button>
         </div>
 
         <div className="qs-mode-toggle">
-          <button
-            type="button"
-            className={`qs-mode-btn${mode === 'library' ? ' qs-mode-btn--active' : ''}`}
-            onClick={() => setMode('library')}
-          >
-            Library
-          </button>
-          <button
-            type="button"
-            className={`qs-mode-btn${mode === 'manual' ? ' qs-mode-btn--active' : ''}`}
-            onClick={() => setMode('manual')}
-          >
-            Manual
-          </button>
+          <button type="button" className={`qs-mode-btn${mode === 'library' ? ' qs-mode-btn--active' : ''}`} onClick={() => setMode('library')}>Library</button>
+          <button type="button" className={`qs-mode-btn${mode === 'search'  ? ' qs-mode-btn--active' : ''}`} onClick={() => setMode('search')}>Search</button>
+          <button type="button" className={`qs-mode-btn${mode === 'manual'  ? ' qs-mode-btn--active' : ''}`} onClick={() => setMode('manual')}>Manual</button>
         </div>
 
-        {mode === 'library' ? (
+        {mode === 'library' && (
           loadingLib ? (
             <p className="qs-library-empty">Loading...</p>
           ) : templates.length === 0 ? (
@@ -158,7 +229,92 @@ export function QuickAddSheet({ onAdd, onLogTemplate, onClose }: Props) {
               </div>
             </>
           )
-        ) : (
+        )}
+
+        {mode === 'search' && (
+          <div className="qs-search">
+            {!selectedProduct ? (
+              <>
+                <input
+                  className="qs-search__input"
+                  type="text"
+                  placeholder="e.g. Greek yogurt, oatmeal..."
+                  value={searchQuery}
+                  onChange={e => setSearchQuery(e.target.value)}
+                  autoFocus
+                />
+                {searchLoading && <p className="qs-library-empty">Searching...</p>}
+                {!searchLoading && searchError && <p className="qs-library-empty">{searchError}</p>}
+                {!searchLoading && searchResults.length > 0 && (
+                  <div className="qs-search-results">
+                    {searchResults.map((p, i) => (
+                      <button
+                        key={i}
+                        type="button"
+                        className="qs-search-result"
+                        onClick={() => selectProduct(p)}
+                      >
+                        <span className="qs-search-result__name">{p.name}</span>
+                        <span className="qs-search-result__kcal">
+                          {p.caloriesPer100g != null ? `${Math.round(p.caloriesPer100g)} kcal/100g` : '—'}
+                        </span>
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </>
+            ) : (
+              <div className="qs-search-detail">
+                <div className="qs-search-detail__header">
+                  <button type="button" className="qs-search-back" onClick={clearSelection}>← Back</button>
+                  <p className="qs-search-detail__name">{selectedProduct.name}</p>
+                </div>
+
+                <div className="qs-search-detail__grams-row">
+                  <label className="qs-search-detail__grams-label">Portion (g)</label>
+                  <input
+                    className="qs-search-detail__grams-input"
+                    type="number"
+                    inputMode="decimal"
+                    min="1"
+                    value={grams}
+                    onChange={e => setGrams(e.target.value)}
+                  />
+                </div>
+
+                <div className="qs-search-detail__macros">
+                  <div className="qs-search-detail__macro qs-search-detail__macro--cal">
+                    <span className="qs-search-detail__macro-val">{calcMacro(selectedProduct.caloriesPer100g)}</span>
+                    <span className="qs-search-detail__macro-lbl">kcal</span>
+                  </div>
+                  <div className="qs-search-detail__macro">
+                    <span className="qs-search-detail__macro-val">{calcMacro(selectedProduct.proteinPer100g)}g</span>
+                    <span className="qs-search-detail__macro-lbl">protein</span>
+                  </div>
+                  <div className="qs-search-detail__macro">
+                    <span className="qs-search-detail__macro-val">{calcMacro(selectedProduct.fatPer100g)}g</span>
+                    <span className="qs-search-detail__macro-lbl">fat</span>
+                  </div>
+                  <div className="qs-search-detail__macro">
+                    <span className="qs-search-detail__macro-val">{calcMacro(selectedProduct.carbsPer100g)}g</span>
+                    <span className="qs-search-detail__macro-lbl">carbs</span>
+                  </div>
+                </div>
+
+                <button
+                  type="button"
+                  className="profile-edit-btn"
+                  onClick={handleAddFromSearch}
+                  disabled={addingSearch || gramsNum <= 0}
+                >
+                  {addingSearch ? 'Adding…' : 'Add to today'}
+                </button>
+              </div>
+            )}
+          </div>
+        )}
+
+        {mode === 'manual' && (
           <>
             <input
               className="qs-name-input"

@@ -18,3 +18,12 @@ export async function lookupBarcode(barcode: string): Promise<FoodProduct | null
   if (!res.ok) throw new Error(`Barcode lookup failed (${res.status})`)
   return res.json() as Promise<FoodProduct>
 }
+
+export async function searchFood(query: string): Promise<FoodProduct[]> {
+  if (!query || query.trim().length < 2) return []
+  const res = await fetch(`${API_BASE}/api/food-lookup/search?q=${encodeURIComponent(query.trim())}`, {
+    credentials: 'include',
+  })
+  if (!res.ok) throw new Error(`Food search failed (${res.status})`)
+  return res.json() as Promise<FoodProduct[]>
+}
