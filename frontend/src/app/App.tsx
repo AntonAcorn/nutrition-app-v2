@@ -39,6 +39,7 @@ import { StatisticsTab } from '../features/statistics/components/StatisticsTab'
 import { OnboardingWizard } from '../features/onboarding/components/OnboardingWizard'
 import { ProfileTab } from '../features/profile/components/ProfileTab'
 import { FoodLibraryTab } from '../features/food-library/components/FoodLibraryTab'
+import { FastingTab } from '../features/fasting/components/FastingTab'
 import type { MealTemplateItem } from '../shared/types/nutrition'
 import { identifyUser, resetAnalyticsUser, track } from '../shared/lib/analytics'
 import * as Sentry from '@sentry/react'
@@ -55,6 +56,7 @@ const tabs = {
   currentDay: 'current-day',
   statistics: 'statistics',
   photoAnalyzer: 'photo-analyzer',
+  fasting: 'fasting',
   library: 'library',
   profile: 'profile',
 } as const
@@ -637,6 +639,15 @@ export default function App() {
           <button
             type="button"
             role="tab"
+            className={`tab-button tab-button--dark ${activeTab === tabs.fasting ? 'tab-button--active' : ''}`}
+            aria-selected={activeTab === tabs.fasting}
+            onClick={() => setActiveTab(tabs.fasting)}
+          >
+            Fast
+          </button>
+          <button
+            type="button"
+            role="tab"
             className={`tab-button tab-button--dark ${activeTab === tabs.library ? 'tab-button--active' : ''}`}
             aria-selected={activeTab === tabs.library}
             onClick={() => setActiveTab(tabs.library)}
@@ -665,6 +676,7 @@ export default function App() {
           ) : null}
           {activeTab === tabs.statistics ? <StatisticsTab refreshToken={statisticsRefreshToken} /> : null}
           {activeTab === tabs.photoAnalyzer ? <PhotoAnalyzerTab onConfirmed={handleDraftConfirmed} onSaveToLibrary={handleSaveToLibrary} /> : null}
+          {activeTab === tabs.fasting ? <FastingTab /> : null}
           {activeTab === tabs.library ? (
             <FoodLibraryTab
               onLogged={handleDayUpdated}
