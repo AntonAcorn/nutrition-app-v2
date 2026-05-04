@@ -2790,6 +2790,24 @@ ul {
   outline: none;
 }
 
+.add-note-btn {
+  align-self: flex-start;
+  background: none;
+  border: none;
+  color: rgba(255, 255, 255, 0.4);
+  font-size: 0.82rem;
+  cursor: pointer;
+  padding: 2px 0;
+  letter-spacing: 0.01em;
+  transition: color 0.15s;
+}
+.add-note-btn:hover { color: rgba(255, 255, 255, 0.7); }
+.add-note-btn--dismiss {
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.3);
+}
+.add-note-btn--dismiss:hover { color: rgba(255, 255, 255, 0.6); }
+
 .photo-upload-hero__buttons {
   display: flex;
   gap: 10px;

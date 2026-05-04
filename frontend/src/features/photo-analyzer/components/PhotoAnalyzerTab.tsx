@@ -104,10 +104,15 @@ export function PhotoAnalyzerTab({ onConfirmed, onSaveToLibrary, initialMode, on
   const [recording, setRecording] = useState(false)
   const [analyzing, setAnalyzing] = useState(false)
   const [speechSupported, setSpeechSupported] = useState(false)
-  const [recognitionLang, setRecognitionLang] = useState('en-US')
+  const [recognitionLang] = useState(() => {
+    const lang = typeof navigator !== 'undefined' ? (navigator.language?.slice(0, 2) ?? 'en') : 'en'
+    const map: Record<string, string> = { en: 'en-US', ru: 'ru-RU', fr: 'fr-FR', es: 'es-ES' }
+    return map[lang] ?? 'en-US'
+  })
   const recognitionRef = useRef<SpeechRecognition | null>(null)
   const isNativeRef = useRef<boolean>(false)
 
+  const [noteExpanded, setNoteExpanded] = useState(false)
   const [noteRecording, setNoteRecording] = useState(false)
   const noteRecognitionRef = useRef<SpeechRecognition | null>(null)
   const noteBaseRef = useRef<string>('')
@@ -553,90 +558,54 @@ export function PhotoAnalyzerTab({ onConfirmed, onSaveToLibrary, initialMode, on
       )}
       <section className="panel analyzer-panel analyzer-panel--dark">
 
-        {/* Mode toggle — hidden when voice draft is active */}
-        {!voiceDraft ? (
-          <div className="analyzer-mode-toggle">
-            <button
-              type="button"
-              className={`analyzer-mode-btn ${mode === 'photo' ? 'analyzer-mode-btn--active' : ''}`}
-              onClick={() => switchMode('photo')}
-            >
-              Photo
-            </button>
-            <button
-              type="button"
-              className={`analyzer-mode-btn ${mode === 'voice' ? 'analyzer-mode-btn--active' : ''}`}
-              onClick={() => switchMode('voice')}
-            >
-              Describe
-            </button>
-            <button
-              type="button"
-              className={`analyzer-mode-btn ${mode === 'barcode' ? 'analyzer-mode-btn--active' : ''}`}
-              onClick={() => switchMode('barcode')}
-            >
-              Barcode
-            </button>
-          </div>
-        ) : null}
 
         {/* ── Photo mode ── */}
         {mode === 'photo' && !voiceDraft ? (
           <>
-            {/* Note input */}
-            <div className="upload-panel__note photo-upload-hero__note">
-              <div className="note-label-row">
-                <span>{photoDrafts.length > 0 ? 'Note for next photo' : 'Optional note'}</span>
-                {speechSupported && (
+            {/* Note input — collapsed by default */}
+            {!noteExpanded ? (
+              <button type="button" className="add-note-btn" onClick={() => setNoteExpanded(true)}>
+                + Add note
+              </button>
+            ) : (
+              <div className="upload-panel__note photo-upload-hero__note">
+                <div className="note-label-row">
+                  <span>{photoDrafts.length > 0 ? 'Note for next photo' : 'Note'}</span>
                   <div className="note-mic-controls">
-                    <div className="voice-lang-picker">
-                      {[
-                        { code: 'en-US', label: 'EN' },
-                        { code: 'ru-RU', label: 'RU' },
-                        { code: 'fr-FR', label: 'FR' },
-                        { code: 'es-ES', label: 'ES' },
-                      ].map(({ code, label }) => (
-                        <button
-                          key={code}
-                          type="button"
-                          className={`voice-lang-btn ${recognitionLang === code ? 'voice-lang-btn--active' : ''}`}
-                          onClick={() => setRecognitionLang(code)}
-                          disabled={noteRecording}
-                        >
-                          {label}
-                        </button>
-                      ))}
-                    </div>
-                    <button
-                      type="button"
-                      className={`note-mic-btn ${noteRecording ? 'note-mic-btn--active' : ''}`}
-                      onClick={noteRecording ? stopNoteRecording : startNoteRecording}
-                      aria-label={noteRecording ? 'Stop dictation' : 'Dictate note'}
-                    >
-                      {noteRecording ? (
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                          <rect x="4" y="4" width="16" height="16" rx="3"/>
-                        </svg>
-                      ) : (
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                          <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"/>
-                          <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
-                          <line x1="12" y1="19" x2="12" y2="23"/>
-                          <line x1="8" y1="23" x2="16" y2="23"/>
-                        </svg>
-                      )}
-                    </button>
+                    {speechSupported && (
+                      <button
+                        type="button"
+                        className={`note-mic-btn ${noteRecording ? 'note-mic-btn--active' : ''}`}
+                        onClick={noteRecording ? stopNoteRecording : startNoteRecording}
+                        aria-label={noteRecording ? 'Stop dictation' : 'Dictate note'}
+                      >
+                        {noteRecording ? (
+                          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                            <rect x="4" y="4" width="16" height="16" rx="3"/>
+                          </svg>
+                        ) : (
+                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                            <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"/>
+                            <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
+                            <line x1="12" y1="19" x2="12" y2="23"/>
+                            <line x1="8" y1="23" x2="16" y2="23"/>
+                          </svg>
+                        )}
+                      </button>
+                    )}
+                    <button type="button" className="add-note-btn add-note-btn--dismiss" onClick={() => { setNoteExpanded(false); setUserNote('') }}>✕</button>
                   </div>
-                )}
+                </div>
+                <textarea
+                  value={userNote}
+                  onChange={(e) => setUserNote(e.target.value)}
+                  rows={2}
+                  placeholder="e.g. chicken, rice, salad"
+                  className={noteRecording ? 'note-textarea--recording' : ''}
+                  autoFocus
+                />
               </div>
-              <textarea
-                value={userNote}
-                onChange={(e) => setUserNote(e.target.value)}
-                rows={photoDrafts.length > 0 ? 1 : 2}
-                placeholder="e.g. chicken, rice, salad"
-                className={noteRecording ? 'note-textarea--recording' : ''}
-              />
-            </div>
+            )}
 
             {/* Upload buttons */}
             <div className="upload-button-group">
@@ -725,45 +694,25 @@ export function PhotoAnalyzerTab({ onConfirmed, onSaveToLibrary, initialMode, on
               <div className="note-label-row">
                 <span>Your meal</span>
                 {speechSupported && (
-                  <div className="note-mic-controls">
-                    <div className="voice-lang-picker">
-                      {[
-                        { code: 'en-US', label: 'EN' },
-                        { code: 'ru-RU', label: 'RU' },
-                        { code: 'fr-FR', label: 'FR' },
-                        { code: 'es-ES', label: 'ES' },
-                      ].map(({ code, label }) => (
-                        <button
-                          key={code}
-                          type="button"
-                          className={`voice-lang-btn ${recognitionLang === code ? 'voice-lang-btn--active' : ''}`}
-                          onClick={() => setRecognitionLang(code)}
-                          disabled={recording}
-                        >
-                          {label}
-                        </button>
-                      ))}
-                    </div>
-                    <button
-                      type="button"
-                      className={`note-mic-btn ${recording ? 'note-mic-btn--active' : ''}`}
-                      onClick={recording ? stopRecording : startRecording}
-                      aria-label={recording ? 'Stop recording' : 'Start recording'}
-                    >
-                      {recording ? (
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                          <rect x="4" y="4" width="16" height="16" rx="3"/>
-                        </svg>
-                      ) : (
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                          <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"/>
-                          <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
-                          <line x1="12" y1="19" x2="12" y2="23"/>
-                          <line x1="8" y1="23" x2="16" y2="23"/>
-                        </svg>
-                      )}
-                    </button>
-                  </div>
+                  <button
+                    type="button"
+                    className={`note-mic-btn ${recording ? 'note-mic-btn--active' : ''}`}
+                    onClick={recording ? stopRecording : startRecording}
+                    aria-label={recording ? 'Stop recording' : 'Start recording'}
+                  >
+                    {recording ? (
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                        <rect x="4" y="4" width="16" height="16" rx="3"/>
+                      </svg>
+                    ) : (
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                        <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"/>
+                        <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
+                        <line x1="12" y1="19" x2="12" y2="23"/>
+                        <line x1="8" y1="23" x2="16" y2="23"/>
+                      </svg>
+                    )}
+                  </button>
                 )}
               </div>
               <textarea
