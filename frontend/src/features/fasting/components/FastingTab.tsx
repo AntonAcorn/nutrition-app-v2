@@ -2,10 +2,10 @@ import { useEffect, useRef, useState } from 'react'
 import { getActiveSession, startFast, stopFast, getFastingHistory, deleteFastingSession, type FastingSession } from '../model/fastingApi'
 
 const PROTOCOLS = [
-  { hours: 16, label: '16h', hint: '8h eating' },
-  { hours: 18, label: '18h', hint: '6h eating' },
-  { hours: 20, label: '20h', hint: '4h eating' },
-  { hours: 23, label: 'OMAD', hint: '1h eating' },
+  { hours: 16, label: '16 hours' },
+  { hours: 18, label: '18 hours' },
+  { hours: 20, label: '20 hours' },
+  { hours: 23, label: '23 hours' },
 ]
 
 const CIRCUMFERENCE = 2 * Math.PI * 54
@@ -136,8 +136,7 @@ export function FastingTab() {
                   className={`fasting-protocol-btn ${!showCustom && selected === p.hours ? 'fasting-protocol-btn--active' : ''}`}
                   onClick={() => { setSelected(p.hours); setShowCustom(false) }}
                 >
-                  <span className="fasting-protocol-btn__hours">{p.label}</span>
-                  <span className="fasting-protocol-btn__hint">{p.hint}</span>
+                  {p.label}
                 </button>
               ))}
               <button
@@ -145,8 +144,7 @@ export function FastingTab() {
                 className={`fasting-protocol-btn ${showCustom ? 'fasting-protocol-btn--active' : ''}`}
                 onClick={() => setShowCustom(true)}
               >
-                <span className="fasting-protocol-btn__hours">Custom</span>
-                <span className="fasting-protocol-btn__hint">any hours</span>
+                Custom
               </button>
             </div>
 
@@ -181,7 +179,7 @@ export function FastingTab() {
           </button>
         ) : (
           <button type="button" className="fasting-action-btn" onClick={handleStart} disabled={acting}>
-            {acting ? 'Starting...' : `Start ${showCustom ? ((customHours || '?') + 'h') : (PROTOCOLS.find(p => p.hours === selected)?.label ?? selected + 'h')} fast`}
+            {acting ? 'Starting...' : `Start ${showCustom ? ((customHours || '?') + 'h') : selected + 'h'} fast`}
           </button>
         )}
       </div>
