@@ -55,6 +55,7 @@ export function MealsLogCard({ refreshToken = 0, onAddToSlot, onDeleted, onUpdat
   const [editError, setEditError] = useState('')
   const [movingId, setMovingId] = useState<string | null>(null)
   const [movingToId, setMovingToId] = useState<string | null>(null)
+  const [moveError, setMoveError] = useState('')
 
   useEffect(() => {
     listMealLog(getTodayLocalDateInputValue())
@@ -127,22 +128,15 @@ export function MealsLogCard({ refreshToken = 0, onAddToSlot, onDeleted, onUpdat
 
   async function handleMove(id: string, targetSlot: MealSlot['slotType']) {
     setMovingToId(id)
+    setMoveError('')
     try {
       await updateMealLogEntry(id, { slotType: targetSlot })
-      setSlots(prev => {
-        const entry = prev.flatMap(s => s.items).find(m => m.id === id)
-        if (!entry) return prev
-        const removed = prev.map(slot => ({ ...slot, items: slot.items.filter(m => m.id !== id) }))
-        return mergeWithDefaults(
-          removed.map(slot =>
-            slot.slotType === targetSlot ? { ...slot, items: [...slot.items, entry] } : slot
-          ).filter(slot => slot.items.length > 0)
-        )
-      })
+      const data = await listMealLog(getTodayLocalDateInputValue())
+      setSlots(mergeWithDefaults(data))
       setMovingId(null)
       onUpdated?.()
     } catch {
-      // silently fail — user can retry
+      setMoveError('Failed to move. Please try again.')
     } finally {
       setMovingToId(null)
     }
@@ -231,14 +225,15 @@ export function MealsLogCard({ refreshToken = 0, onAddToSlot, onDeleted, onUpdat
                               onClick={() => handleMove(m.id, target)}
                               disabled={movingToId === m.id}
                             >
-                              {SLOT_LABELS[target]}
+                              {movingToId === m.id ? '…' : SLOT_LABELS[target]}
                             </button>
                           ))}
                         </div>
+                        {moveError && <span className="meal-log-move__error">{moveError}</span>}
                         <button
                           type="button"
                           className="meal-log-move__cancel"
-                          onClick={() => setMovingId(null)}
+                          onClick={() => { setMovingId(null); setMoveError('') }}
                         >
                           Cancel
                         </button>

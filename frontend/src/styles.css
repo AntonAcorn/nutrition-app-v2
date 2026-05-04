@@ -3038,6 +3038,11 @@ ul {
   cursor: default;
 }
 
+.meal-log-move__error {
+  font-size: 0.72rem;
+  color: #fc8181;
+}
+
 .meal-log-move__cancel {
   border: none;
   background: none;
