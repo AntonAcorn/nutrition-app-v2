@@ -5878,3 +5878,70 @@ ul {
 [data-theme="light"] .fasting-history__protocol { color: rgba(20, 33, 61, 0.35); }
 [data-theme="light"] .fasting-history__duration { color: #14213d; }
 [data-theme="light"] .fasting-history__delete { color: rgba(20, 33, 61, 0.2); }
+
+/* ── QuickAddSheet: library list ── */
+[data-theme="light"] .qs-library-item {
+  background: rgba(20, 33, 61, 0.04);
+  border-color: rgba(20, 33, 61, 0.08);
+}
+[data-theme="light"] .qs-library-item__name { color: #14213d; }
+[data-theme="light"] .qs-library-item__kcal { color: rgba(20, 33, 61, 0.4); }
+[data-theme="light"] .qs-library-empty { color: rgba(20, 33, 61, 0.4); }
+
+/* ── QuickAddSheet: manual form ── */
+[data-theme="light"] .qs-name-input {
+  background: rgba(255, 255, 255, 0.85);
+  border-color: rgba(203, 187, 167, 0.6);
+  color: #14213d;
+}
+[data-theme="light"] .qs-name-input::placeholder { color: rgba(20, 33, 61, 0.35); }
+[data-theme="light"] .qs-chip:focus-within { outline-color: rgba(20, 33, 61, 0.35); }
+
+/* ── Barcode / product detail card (used in QS search too) ── */
+[data-theme="light"] .barcode-product-name { color: #14213d; }
+[data-theme="light"] .barcode-product-per100 { color: rgba(20, 33, 61, 0.45); }
+[data-theme="light"] .barcode-portion-label { color: rgba(20, 33, 61, 0.55); }
+[data-theme="light"] .barcode-portion-btn {
+  border-color: rgba(203, 187, 167, 0.6);
+  background: rgba(255, 255, 255, 0.7);
+  color: #14213d;
+}
+[data-theme="light"] .barcode-portion-input {
+  background: rgba(255, 255, 255, 0.85);
+  border-color: rgba(203, 187, 167, 0.6);
+  color: #14213d;
+}
+[data-theme="light"] .barcode-portion-unit { color: rgba(20, 33, 61, 0.4); }
+[data-theme="light"] .barcode-quick-btn {
+  border-color: rgba(203, 187, 167, 0.5);
+  color: rgba(20, 33, 61, 0.5);
+}
+[data-theme="light"] .barcode-quick-btn--active {
+  border-color: rgba(20, 33, 61, 0.4);
+  background: rgba(20, 33, 61, 0.07);
+  color: #14213d;
+}
+[data-theme="light"] .barcode-macro-chip__value { color: #14213d; }
+[data-theme="light"] .barcode-macro-chip__label { color: rgba(20, 33, 61, 0.45); }
+[data-theme="light"] .barcode-rescan-link { color: rgba(20, 33, 61, 0.35); }
+
+/* ── Meal log inline edit form ── */
+[data-theme="light"] .meal-log-edit-name {
+  background: rgba(255, 255, 255, 0.85);
+  border-color: rgba(203, 187, 167, 0.6);
+  color: #14213d;
+}
+[data-theme="light"] .meal-log-edit-macro span { color: rgba(20, 33, 61, 0.45); }
+[data-theme="light"] .meal-log-edit-macro input {
+  background: rgba(255, 255, 255, 0.85);
+  border-color: rgba(203, 187, 167, 0.5);
+  color: #14213d;
+}
+[data-theme="light"] .meal-log-edit-cancel {
+  border-color: rgba(203, 187, 167, 0.6);
+  color: rgba(20, 33, 61, 0.5);
+}
+
+/* ── Meals log slot headers ── */
+[data-theme="light"] .meals-log-slot__name { color: rgba(20, 33, 61, 0.4); }
+[data-theme="light"] .meals-log-slot__kcal { color: rgba(20, 33, 61, 0.3); }
