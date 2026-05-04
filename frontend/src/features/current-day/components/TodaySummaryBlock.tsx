@@ -41,9 +41,23 @@ interface TodaySummaryBlockProps {
   summary: TodaySummary
   steps?: number
   activeCalories?: number
+  weightInput?: string
+  weightFromHealth?: boolean
+  savingWeight?: boolean
+  onWeightChange?: (v: string) => void
+  onWeightSave?: () => void
 }
 
-export function TodaySummaryBlock({ summary, steps = 0, activeCalories = 0 }: TodaySummaryBlockProps) {
+export function TodaySummaryBlock({
+  summary,
+  steps = 0,
+  activeCalories = 0,
+  weightInput = '',
+  weightFromHealth = false,
+  savingWeight = false,
+  onWeightChange,
+  onWeightSave,
+}: TodaySummaryBlockProps) {
   const consumed = Math.round(summary.consumedCalories)
   const target = Math.max(1, Math.round(summary.dailyTargetCalories))
   const adjustedRemaining = Math.round(summary.remainingCalories) + activeCalories
@@ -151,6 +165,30 @@ export function TodaySummaryBlock({ summary, steps = 0, activeCalories = 0 }: To
                 ? 'Your scale is getting bored.'
                 : `Weight logged: ${summary.weightKg.toFixed(1)} kg. Keep going.`}
             </p>
+          </div>
+        )}
+
+        {onWeightChange && onWeightSave && (
+          <div className="today-weight-row">
+            <span className="today-weight-row__label">Weight</span>
+            <input
+              className="today-weight-row__input"
+              type="text"
+              inputMode="decimal"
+              value={weightInput}
+              onChange={e => { onWeightChange(e.target.value) }}
+              placeholder="82.4"
+            />
+            <span className="today-weight-row__unit">kg</span>
+            {weightFromHealth && <span className="today-weight-row__hint">· Apple Health</span>}
+            <button
+              type="button"
+              className="today-weight-row__save"
+              onClick={onWeightSave}
+              disabled={savingWeight}
+            >
+              {savingWeight ? '…' : 'Save'}
+            </button>
           </div>
         )}
       </article>

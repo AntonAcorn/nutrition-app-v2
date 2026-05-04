@@ -2,7 +2,6 @@ import { useEffect, useState } from 'react'
 import { TodaySummaryBlock } from './TodaySummaryBlock'
 import { WaterIntakeCard } from './WaterIntakeCard'
 import { QuickAddSheet } from './QuickAddSheet'
-import { SavedMealsCard } from './SavedMealsCard'
 import { MealsLogCard } from './MealsLogCard'
 import { fetchTodaySummary } from '../model/todaySummaryApi'
 import { updateTodayWeight } from '../model/weightApi'
@@ -175,7 +174,18 @@ export function CurrentDayTab({ refreshToken = 0, successMessage = '', onDayUpda
       {loading ? <section className="panel detail-panel"><p>Loading daily summary...</p></section> : null}
       {!loading && error ? <section className="panel detail-panel"><p className="error-text">{error}</p></section> : null}
 
-      {!loading && !error && summary ? <TodaySummaryBlock summary={summary} steps={steps} activeCalories={activeCalories} /> : null}
+      {!loading && !error && summary ? (
+        <TodaySummaryBlock
+          summary={summary}
+          steps={steps}
+          activeCalories={activeCalories}
+          weightInput={weightInput}
+          weightFromHealth={weightFromHealth}
+          savingWeight={savingWeight}
+          onWeightChange={(v) => { setWeightInput(v); setWeightFromHealth(false) }}
+          onWeightSave={handleWeightSave}
+        />
+      ) : null}
 
       {!loading && !error && summary ? (
         <MealsLogCard
@@ -187,36 +197,6 @@ export function CurrentDayTab({ refreshToken = 0, successMessage = '', onDayUpda
       ) : null}
 
       {!loading && !error && summary ? <WaterIntakeCard waterGlasses={summary.waterGlasses} waterGoalGlasses={summary.waterGoalGlasses} onUpdate={() => { fetchTodaySummary().then(setSummary).catch(() => {}) }} /> : null}
-
-      {!loading && summary ? (
-        <section className="weight-mascot-card panel">
-          <MascotSvg mood="cheer" size={80} className="weight-mascot-card__img" />
-          <div className="weight-mascot-card__body">
-            <div>
-              <p className="screen-header__meta">Weight</p>
-              <h3>{summary.weightKg == null ? 'Add today weight' : `${summary.weightKg.toFixed(1)} kg`}</h3>
-            </div>
-            <div className="weight-panel__form">
-              <label>
-                Weight, kg
-                {weightFromHealth && <span className="weight-health-hint"> · from Apple Health</span>}
-                <input
-                  type="text"
-                  inputMode="decimal"
-                  value={weightInput}
-                  onChange={(event) => { setWeightInput(event.target.value); setWeightFromHealth(false) }}
-                  placeholder="82.4"
-                />
-              </label>
-              <button type="button" onClick={handleWeightSave} disabled={savingWeight}>
-                {savingWeight ? 'Saving...' : 'Save'}
-              </button>
-            </div>
-          </div>
-        </section>
-      ) : null}
-
-      {!loading && !error && summary ? <SavedMealsCard onLogged={() => { onDayUpdated?.() }} /> : null}
 
       {!loading && summary ? (
         <button type="button" className="quick-add-fab" onClick={() => openQuickAdd()} aria-label="Quick add food">

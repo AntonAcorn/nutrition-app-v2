@@ -44,8 +44,13 @@ interface Props {
   onUpdated?: () => void
 }
 
+function slotsWithItems(slots: MealSlot[]): Set<MealSlot['slotType']> {
+  return new Set(slots.filter(s => s.items.length > 0).map(s => s.slotType))
+}
+
 export function MealsLogCard({ refreshToken = 0, onAddToSlot, onDeleted, onUpdated }: Props) {
   const [slots, setSlots] = useState<MealSlot[]>(SLOT_ORDER.map(makeEmptySlot))
+  const [expandedSlots, setExpandedSlots] = useState<Set<MealSlot['slotType']>>(new Set())
   const [deletingId, setDeletingId] = useState<string | null>(null)
   const [confirmId, setConfirmId] = useState<string | null>(null)
   const [deleteError, setDeleteError] = useState('')
@@ -59,9 +64,22 @@ export function MealsLogCard({ refreshToken = 0, onAddToSlot, onDeleted, onUpdat
 
   useEffect(() => {
     listMealLog(getTodayLocalDateInputValue())
-      .then(data => setSlots(mergeWithDefaults(data)))
+      .then(data => {
+        const merged = mergeWithDefaults(data)
+        setSlots(merged)
+        setExpandedSlots(slotsWithItems(merged))
+      })
       .catch(() => {})
   }, [refreshToken])
+
+  function toggleSlot(slotType: MealSlot['slotType']) {
+    setExpandedSlots(prev => {
+      const next = new Set(prev)
+      if (next.has(slotType)) next.delete(slotType)
+      else next.add(slotType)
+      return next
+    })
+  }
 
   function openEdit(m: MealLogEntry) {
     setEditingId(m.id)
@@ -113,11 +131,15 @@ export function MealsLogCard({ refreshToken = 0, onAddToSlot, onDeleted, onUpdat
     setDeleteError('')
     try {
       await deleteMealLogEntry(id)
-      setSlots(prev => mergeWithDefaults(
-        prev
-          .map(slot => ({ ...slot, items: slot.items.filter(m => m.id !== id) }))
-          .filter(slot => slot.items.length > 0)
-      ))
+      setSlots(prev => {
+        const updated = mergeWithDefaults(
+          prev
+            .map(slot => ({ ...slot, items: slot.items.filter(m => m.id !== id) }))
+            .filter(slot => slot.items.length > 0)
+        )
+        setExpandedSlots(slotsWithItems(updated))
+        return updated
+      })
       onDeleted()
     } catch {
       setDeleteError('Failed to delete. Please try again.')
@@ -132,7 +154,9 @@ export function MealsLogCard({ refreshToken = 0, onAddToSlot, onDeleted, onUpdat
     try {
       await updateMealLogEntry(id, { slotType: targetSlot })
       const data = await listMealLog(getTodayLocalDateInputValue())
-      setSlots(mergeWithDefaults(data))
+      const merged = mergeWithDefaults(data)
+      setSlots(merged)
+      setExpandedSlots(slotsWithItems(merged))
       setMovingId(null)
       onUpdated?.()
     } catch {
@@ -150,11 +174,20 @@ export function MealsLogCard({ refreshToken = 0, onAddToSlot, onDeleted, onUpdat
       {slots.map((slot, idx) => {
         const kcal = slotTotalKcal(slot)
         const isLast = idx === slots.length - 1
+        const isExpanded = expandedSlots.has(slot.slotType)
         return (
           <div key={slot.slotType} className={`meals-log-slot${isLast ? ' meals-log-slot--last' : ''}`}>
             <div className="meals-log-slot__header">
-              <span className="meals-log-slot__name">{SLOT_LABELS[slot.slotType]}</span>
-              <span className="meals-log-slot__kcal">{kcal > 0 ? `${kcal} kcal` : ''}</span>
+              <button
+                type="button"
+                className="meals-log-slot__toggle-area"
+                onClick={() => toggleSlot(slot.slotType)}
+                aria-expanded={isExpanded}
+              >
+                <span className="meals-log-slot__name">{SLOT_LABELS[slot.slotType]}</span>
+                <span className="meals-log-slot__kcal">{kcal > 0 ? `${kcal} kcal` : ''}</span>
+                <span className="meals-log-slot__chevron">{isExpanded ? '▾' : '▸'}</span>
+              </button>
               <button
                 type="button"
                 className="meals-log-slot__add"
@@ -165,7 +198,7 @@ export function MealsLogCard({ refreshToken = 0, onAddToSlot, onDeleted, onUpdat
               </button>
             </div>
 
-            {slot.items.length > 0 && (
+            {isExpanded && slot.items.length > 0 && (
               <div className="meals-log-list">
                 {slot.items.map(m => (
                   <div key={m.id} className={`meal-log-row${editingId === m.id ? ' meal-log-row--editing' : ''}`}>
