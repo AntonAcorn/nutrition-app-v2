@@ -24,12 +24,12 @@ function getGreeting(summary?: TodaySummary | null): string {
   if (summary) {
     const { weightTrend7d, targetWeightKg, remainingCalories, dailyTargetCalories, loggingStreakDays } = summary
     if (weightTrend7d != null && targetWeightKg != null) {
-      if (weightTrend7d < -0.1) return `↓ ${Math.abs(weightTrend7d).toFixed(1)} kg this week.\nYou're on track.`
-      if (weightTrend7d > 0.1)  return `Weight is up ${weightTrend7d.toFixed(1)} kg.\nWatch the surplus.`
+      if (weightTrend7d < -0.1) return `Down ${Math.abs(weightTrend7d).toFixed(1)} kg vs last week.\nKeep it up.`
+      if (weightTrend7d > 0.1)  return `Up ${weightTrend7d.toFixed(1)} kg vs last week.\nStay under your calorie target today.`
     }
-    if (loggingStreakDays >= 7) return `${loggingStreakDays} days straight.\nConsistency wins.`
+    if (loggingStreakDays >= 7) return `${loggingStreakDays} days logged in a row.\nConsistency wins.`
     const ratio = remainingCalories / Math.max(1, dailyTargetCalories)
-    if (hour >= 19 && ratio > 0.4) return `${Math.round(remainingCalories)} kcal left.\nTime to eat.`
+    if (hour >= 19 && ratio > 0.4) return `${Math.round(remainingCalories)} kcal left for today.\nStill room to eat.`
   }
 
   if (hour >= 5  && hour < 12) return 'Good morning,\nfuture athlete 👀'
