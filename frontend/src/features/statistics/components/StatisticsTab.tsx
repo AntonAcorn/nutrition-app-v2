@@ -560,6 +560,108 @@ function computeInsights(
   return insights.slice(0, 3)
 }
 
+interface CalorieSuggestion {
+  status: 'too-fast' | 'stalled' | 'on-track' | 'gaining-too-fast' | 'gaining-stalled'
+  kgPerWeek: number
+  currentTarget: number
+  suggestedTarget: number
+}
+
+function computeCalorieSuggestion(
+  loggedPoints: NutritionStatisticsPoint[],
+  allPoints: NutritionStatisticsPoint[],
+  targetWeightKg: number | null,
+): CalorieSuggestion | null {
+  if (targetWeightKg == null || loggedPoints.length < 14) return null
+  const wPoints = allPoints.filter(p => p.weightKg != null)
+  if (wPoints.length < 4) return null
+
+  const first = wPoints[0], last = wPoints[wPoints.length - 1]
+  const daysDiff = Math.max(7,
+    (new Date(last.entryDate + 'T12:00:00').getTime() - new Date(first.entryDate + 'T12:00:00').getTime()) / 86400000,
+  )
+  const kgPerWeek = ((last.weightKg ?? 0) - (first.weightKg ?? 0)) / daysDiff * 7
+  const currentWeight = last.weightKg ?? 0
+
+  const recentTarget = loggedPoints[loggedPoints.length - 1]?.calorieTarget
+  if (!recentTarget || recentTarget <= 0) return null
+  const currentTarget = Math.round(recentTarget)
+
+  const isLossGoal = targetWeightKg < currentWeight
+  const isGainGoal = targetWeightKg > currentWeight
+
+  if (isLossGoal) {
+    if (kgPerWeek < -1.0) {
+      return { status: 'too-fast', kgPerWeek, currentTarget, suggestedTarget: Math.round((currentTarget + 300) / 50) * 50 }
+    }
+    if (kgPerWeek > -0.15) {
+      return { status: 'stalled', kgPerWeek, currentTarget, suggestedTarget: Math.round((currentTarget - 200) / 50) * 50 }
+    }
+    return { status: 'on-track', kgPerWeek, currentTarget, suggestedTarget: currentTarget }
+  }
+
+  if (isGainGoal) {
+    if (kgPerWeek > 0.5) {
+      return { status: 'gaining-too-fast', kgPerWeek, currentTarget, suggestedTarget: Math.round((currentTarget - 200) / 50) * 50 }
+    }
+    if (kgPerWeek < 0.1) {
+      return { status: 'gaining-stalled', kgPerWeek, currentTarget, suggestedTarget: Math.round((currentTarget + 200) / 50) * 50 }
+    }
+    return { status: 'on-track', kgPerWeek, currentTarget, suggestedTarget: currentTarget }
+  }
+
+  return null
+}
+
+const SUGGESTION_COPY: Record<CalorieSuggestion['status'], { icon: string; title: string; body: (s: CalorieSuggestion) => string; tone: string }> = {
+  'too-fast': {
+    icon: '⚡',
+    title: 'Losing too fast',
+    body: s => `You're dropping ${Math.abs(s.kgPerWeek).toFixed(2)} kg/week — safe range is 0.5–1.0 kg. Consider raising your daily target from ${s.currentTarget} to ~${s.suggestedTarget} kcal.`,
+    tone: 'bad',
+  },
+  'stalled': {
+    icon: '📉',
+    title: 'Weight not moving',
+    body: s => `Almost no change in weight over this period. Try lowering your daily target from ${s.currentTarget} to ~${s.suggestedTarget} kcal.`,
+    tone: 'neutral',
+  },
+  'on-track': {
+    icon: '✅',
+    title: 'On track',
+    body: s => `${s.kgPerWeek.toFixed(2)} kg/week — right in the optimal range. Keep your current target of ${s.currentTarget} kcal.`,
+    tone: 'good',
+  },
+  'gaining-too-fast': {
+    icon: '⚡',
+    title: 'Gaining too fast',
+    body: s => `+${s.kgPerWeek.toFixed(2)} kg/week may mean excess fat gain. Consider lowering your target from ${s.currentTarget} to ~${s.suggestedTarget} kcal.`,
+    tone: 'bad',
+  },
+  'gaining-stalled': {
+    icon: '📈',
+    title: 'Not gaining',
+    body: s => `Weight isn't increasing despite a surplus goal. Try raising your target from ${s.currentTarget} to ~${s.suggestedTarget} kcal.`,
+    tone: 'neutral',
+  },
+}
+
+function CalorieSuggestionCard({ suggestion }: { suggestion: CalorieSuggestion }) {
+  const copy = SUGGESTION_COPY[suggestion.status]
+  return (
+    <section className={`panel calorie-suggestion-card calorie-suggestion-card--${copy.tone}`}>
+      <p className="insights-section__label">Calorie target</p>
+      <div className="calorie-suggestion-card__body">
+        <span className="insight-card__icon" aria-hidden="true">{copy.icon}</span>
+        <div>
+          <p className="insight-card__title">{copy.title}</p>
+          <p className="insight-card__body">{copy.body(suggestion)}</p>
+        </div>
+      </div>
+    </section>
+  )
+}
+
 function InsightsSection({ insights }: { insights: Insight[] }) {
   if (insights.length === 0) return null
   return (
@@ -689,6 +791,10 @@ export function StatisticsTab({ refreshToken = 0 }: StatisticsTabProps) {
     () => computeInsights(loggedPoints, points, data?.targetWeightKg ?? null, rangeDays),
     [loggedPoints, points, data, rangeDays],
   )
+  const calorieSuggestion = useMemo(
+    () => computeCalorieSuggestion(loggedPoints, points, data?.targetWeightKg ?? null),
+    [loggedPoints, points, data],
+  )
 
   return (
     <section className="screen-section screen-section--statistics-dark">
@@ -751,6 +857,7 @@ export function StatisticsTab({ refreshToken = 0 }: StatisticsTabProps) {
           </section>
 
           <InsightsSection insights={insights} />
+          {calorieSuggestion && <CalorieSuggestionCard suggestion={calorieSuggestion} />}
 
           <LineChart
             title="Weight"

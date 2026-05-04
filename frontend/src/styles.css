@@ -5759,6 +5759,28 @@ ul {
 }
 
 /* Insight cards */
+.calorie-suggestion-card {
+  padding: 1rem 1.1rem;
+}
+
+.calorie-suggestion-card .insights-section__label {
+  margin-bottom: 0.55rem;
+}
+
+.calorie-suggestion-card__body {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+}
+
+.calorie-suggestion-card--good  { border-left: 3px solid #22c55e; }
+.calorie-suggestion-card--bad   { border-left: 3px solid #ef4444; }
+.calorie-suggestion-card--neutral { border-left: 3px solid #a78bfa; }
+
+[data-theme="light"] .calorie-suggestion-card {
+  background: rgba(255, 252, 247, 0.9);
+}
+
 [data-theme="light"] .insights-section__label {
   color: rgba(20, 33, 61, 0.35);
 }
