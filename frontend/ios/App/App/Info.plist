@@ -47,12 +47,7 @@
 	</array>
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<true/>
-	<key>NSAppTransportSecurity</key>
-	<dict>
-		<key>NSAllowsArbitraryLoads</key>
-		<true/>
-	</dict>
-	<key>NSCameraUsageDescription</key>
+<key>NSCameraUsageDescription</key>
 	<string>Take a photo of your meal for nutrition analysis</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>Choose a meal photo from your library for nutrition analysis</string>
