@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import type { TodaySummary } from '../../../shared/types/nutrition'
 
 function getCaptionText(consumed: number, target: number, remaining: number): string {
@@ -58,6 +59,8 @@ export function TodaySummaryBlock({
   onWeightChange,
   onWeightSave,
 }: TodaySummaryBlockProps) {
+  const [showMacros, setShowMacros] = useState(true)
+
   const consumed = Math.round(summary.consumedCalories)
   const target = Math.max(1, Math.round(summary.dailyTargetCalories))
   const adjustedRemaining = Math.round(summary.remainingCalories) + activeCalories
@@ -71,10 +74,15 @@ export function TodaySummaryBlock({
   return (
     <section className="today-summary today-summary--dark" aria-label="Сводка питания за день">
       <article className="today-dark-card">
-        <div className="today-dark-card__topbar today-dark-card__topbar--centered">
-          <div>
-            <p className="today-dark-card__title">Calories Details</p>
-          </div>
+        <div className="today-dark-card__topbar today-dark-card__topbar--split">
+          <p className="today-dark-card__title">Calories</p>
+          <button
+            type="button"
+            className="today-card-details-toggle"
+            onClick={() => setShowMacros(v => !v)}
+          >
+            {showMacros ? 'Less ▴' : 'Macros ▾'}
+          </button>
         </div>
 
         <div className="today-dark-ring-layout">
@@ -143,29 +151,33 @@ export function TodaySummaryBlock({
           </div>
         )}
 
-        <div className="macro-meter-grid">
-          <MacroCard label="Protein" value={summary.proteinGrams} target={summary.proteinTargetGrams} unit="g" progress={Math.min(100, Math.round((summary.proteinGrams / Math.max(1, summary.proteinTargetGrams)) * 100))} tone="purple" />
-          <MacroCard label="Fat"     value={summary.fatGrams}     target={summary.fatTargetGrams}     unit="g" progress={Math.min(100, Math.round((summary.fatGrams     / Math.max(1, summary.fatTargetGrams))     * 100))} tone="orange" />
-          <MacroCard label="Carbs"   value={summary.carbsGrams}   target={summary.carbsTargetGrams}   unit="g" progress={Math.min(100, Math.round((summary.carbsGrams   / Math.max(1, summary.carbsTargetGrams))   * 100))} tone="teal" />
-          <MacroCard label="Fiber"   value={summary.fiberGrams}   target={summary.fiberTargetGrams}   unit="g" progress={Math.min(100, Math.round((summary.fiberGrams   / Math.max(1, summary.fiberTargetGrams))   * 100))} tone="pink" />
-        </div>
+        {showMacros && (
+          <>
+            <div className="macro-meter-grid">
+              <MacroCard label="Protein" value={summary.proteinGrams} target={summary.proteinTargetGrams} unit="g" progress={Math.min(100, Math.round((summary.proteinGrams / Math.max(1, summary.proteinTargetGrams)) * 100))} tone="purple" />
+              <MacroCard label="Fat"     value={summary.fatGrams}     target={summary.fatTargetGrams}     unit="g" progress={Math.min(100, Math.round((summary.fatGrams     / Math.max(1, summary.fatTargetGrams))     * 100))} tone="orange" />
+              <MacroCard label="Carbs"   value={summary.carbsGrams}   target={summary.carbsTargetGrams}   unit="g" progress={Math.min(100, Math.round((summary.carbsGrams   / Math.max(1, summary.carbsTargetGrams))   * 100))} tone="teal" />
+              <MacroCard label="Fiber"   value={summary.fiberGrams}   target={summary.fiberTargetGrams}   unit="g" progress={Math.min(100, Math.round((summary.fiberGrams   / Math.max(1, summary.fiberTargetGrams))   * 100))} tone="pink" />
+            </div>
 
-        {summary.targetWeightKg != null && summary.startingWeightKg != null ? (
-          <WeightGoalProgress
-            currentWeightKg={summary.weightKg}
-            startingWeightKg={summary.startingWeightKg}
-            targetWeightKg={summary.targetWeightKg}
-          />
-        ) : (
-          <div className="today-insight-card">
-            <div className="today-insight-card__emoji">⚡</div>
-            <h3>Today insight</h3>
-            <p>
-              {summary.weightKg == null
-                ? 'Your scale is getting bored.'
-                : `Weight logged: ${summary.weightKg.toFixed(1)} kg. Keep going.`}
-            </p>
-          </div>
+            {summary.targetWeightKg != null && summary.startingWeightKg != null ? (
+              <WeightGoalProgress
+                currentWeightKg={summary.weightKg}
+                startingWeightKg={summary.startingWeightKg}
+                targetWeightKg={summary.targetWeightKg}
+              />
+            ) : (
+              <div className="today-insight-card">
+                <div className="today-insight-card__emoji">⚡</div>
+                <h3>Today insight</h3>
+                <p>
+                  {summary.weightKg == null
+                    ? 'Your scale is getting bored.'
+                    : `Weight logged: ${summary.weightKg.toFixed(1)} kg. Keep going.`}
+                </p>
+              </div>
+            )}
+          </>
         )}
 
         {onWeightChange && onWeightSave && (

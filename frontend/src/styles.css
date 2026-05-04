@@ -664,6 +664,35 @@ ul {
   text-align: center;
 }
 
+.today-dark-card__topbar--split {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  grid-template-columns: unset;
+  margin-bottom: 18px;
+}
+
+.today-dark-card__topbar--split .today-dark-card__title {
+  text-align: left;
+}
+
+.today-card-details-toggle {
+  background: none;
+  border: none;
+  color: rgba(255, 255, 255, 0.32);
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+  padding: 4px 0;
+  transition: color 0.15s;
+  flex-shrink: 0;
+}
+
+.today-card-details-toggle:hover {
+  color: rgba(255, 255, 255, 0.65);
+}
+
 .today-dark-card__back,
 .today-dark-card__spacer {
   width: 44px;
@@ -6431,6 +6460,10 @@ ul {
 [data-theme="light"] .meal-log-move__btn:hover { background: rgba(32, 96, 232, 0.13); }
 [data-theme="light"] .meal-log-move__cancel { color: rgba(20, 33, 61, 0.3); }
 [data-theme="light"] .meal-log-move__cancel:hover { color: rgba(20, 33, 61, 0.6); }
+
+/* Today card details toggle */
+[data-theme="light"] .today-card-details-toggle { color: rgba(20, 33, 61, 0.32); }
+[data-theme="light"] .today-card-details-toggle:hover { color: rgba(20, 33, 61, 0.65); }
 
 /* Meal slot toggle */
 [data-theme="light"] .meals-log-slot__chevron { color: rgba(20, 33, 61, 0.2); }
