@@ -46,3 +46,11 @@ export async function getFastingHistory(): Promise<FastingSession[]> {
   if (!res.ok) throw new Error(`Failed to load history (${res.status})`)
   return res.json()
 }
+
+export async function deleteFastingSession(id: string): Promise<void> {
+  const res = await fetch(`${API_BASE}/api/fasting/${id}`, {
+    method: 'DELETE',
+    credentials: 'include',
+  })
+  if (!res.ok) throw new Error(`Failed to delete session (${res.status})`)
+}

@@ -5272,38 +5272,67 @@ ul {
   font-family: inherit;
 }
 
+.fasting-section-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.35);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  align-self: flex-start;
+  margin-bottom: -8px;
+}
+
 .fasting-protocols {
   display: flex;
   gap: 8px;
   flex-wrap: wrap;
   justify-content: center;
+  width: 100%;
 }
 
 .fasting-protocol-btn {
   border: 1px solid rgba(255, 255, 255, 0.12);
   background: transparent;
   color: rgba(255, 255, 255, 0.5);
-  border-radius: 999px;
-  padding: 7px 16px;
+  border-radius: 14px;
+  padding: 8px 14px;
   font-size: 0.82rem;
-  font-weight: 600;
   cursor: pointer;
   transition: 0.15s ease;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  flex: 1 1 0;
+  min-width: 56px;
+}
+
+.fasting-protocol-btn__hours {
+  font-weight: 700;
+  font-size: 0.88rem;
+}
+
+.fasting-protocol-btn__hint {
+  font-size: 0.68rem;
+  opacity: 0.55;
 }
 
 .fasting-protocol-btn--active {
-  border-color: #6f4cff;
-  background: rgba(111, 76, 255, 0.18);
-  color: #c4b5fd;
+  border-color: rgba(59, 125, 255, 0.6);
+  background: rgba(59, 125, 255, 0.12);
+  color: #93b8ff;
 }
 
 .fasting-custom-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
   width: 100%;
   max-width: 200px;
 }
 
 .fasting-custom-input {
-  width: 100%;
+  flex: 1;
   text-align: center;
   border: 1px solid rgba(255, 255, 255, 0.12);
   background: rgba(255, 255, 255, 0.04);
@@ -5311,6 +5340,12 @@ ul {
   border-radius: 14px;
   padding: 10px 14px;
   font-size: 0.95rem;
+}
+
+.fasting-custom-unit {
+  font-size: 0.88rem;
+  color: rgba(255, 255, 255, 0.4);
+  white-space: nowrap;
 }
 
 .fasting-status-text {
@@ -5324,13 +5359,13 @@ ul {
   width: 100%;
   border: 0;
   border-radius: 18px;
-  padding: 15px 18px;
-  background: linear-gradient(135deg, #6f4cff 0%, #4f46e5 100%);
+  padding: 14px 18px;
+  background: linear-gradient(135deg, #3b7dff 0%, #2060e8 100%);
   color: #ffffff;
   font-size: 1rem;
   font-weight: 700;
   cursor: pointer;
-  box-shadow: 0 8px 24px rgba(111, 76, 255, 0.35);
+  box-shadow: 0 8px 24px rgba(59, 125, 255, 0.35);
   transition: 0.15s ease;
 }
 
@@ -5347,7 +5382,6 @@ ul {
 .fasting-history {
   display: flex;
   flex-direction: column;
-  gap: 0;
 }
 
 .fasting-history__title {
@@ -5363,6 +5397,7 @@ ul {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 8px;
   padding: 10px 0;
   border-bottom: 1px solid rgba(255, 255, 255, 0.05);
 }
@@ -5371,27 +5406,40 @@ ul {
   border-bottom: none;
 }
 
+.fasting-history__item-left {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  overflow: hidden;
+}
+
 .fasting-history__date {
   font-size: 0.88rem;
   color: rgba(255, 255, 255, 0.8);
-  margin-right: 8px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .fasting-history__protocol {
-  font-size: 0.78rem;
+  font-size: 0.75rem;
   color: rgba(255, 255, 255, 0.35);
+  white-space: nowrap;
 }
 
 .fasting-history__right {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
+  flex-shrink: 0;
 }
 
 .fasting-history__duration {
   font-size: 0.88rem;
   font-weight: 600;
   color: rgba(255, 255, 255, 0.75);
+  white-space: nowrap;
 }
 
 .fasting-history__badge {
@@ -5416,27 +5464,46 @@ ul {
   color: rgba(255, 255, 255, 0.3);
 }
 
+.fasting-history__delete {
+  border: none;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.2);
+  font-size: 1rem;
+  cursor: pointer;
+  padding: 2px 4px;
+  line-height: 1;
+  flex-shrink: 0;
+  transition: color 0.15s ease;
+}
+
+.fasting-history__delete:hover {
+  color: rgba(239, 68, 68, 0.7);
+}
+
 /* Fasting light theme */
 [data-theme="light"] .fasting-ring__track { stroke: rgba(20, 33, 61, 0.08); }
 [data-theme="light"] .fasting-ring__time  { fill: #14213d; }
 [data-theme="light"] .fasting-ring__sub   { fill: rgba(20, 33, 61, 0.4); }
+[data-theme="light"] .fasting-section-label { color: rgba(20, 33, 61, 0.35); }
 [data-theme="light"] .fasting-protocol-btn {
   border-color: rgba(203, 187, 167, 0.55);
   color: rgba(20, 33, 61, 0.5);
 }
 [data-theme="light"] .fasting-protocol-btn--active {
-  border-color: #6f4cff;
-  background: rgba(111, 76, 255, 0.1);
-  color: #4f46e5;
+  border-color: rgba(59, 125, 255, 0.5);
+  background: rgba(59, 125, 255, 0.08);
+  color: #2060e8;
 }
 [data-theme="light"] .fasting-custom-input {
   border-color: rgba(203, 187, 167, 0.55);
   background: rgba(255, 255, 255, 0.82);
   color: #14213d;
 }
+[data-theme="light"] .fasting-custom-unit { color: rgba(20, 33, 61, 0.4); }
 [data-theme="light"] .fasting-status-text { color: rgba(20, 33, 61, 0.4); }
 [data-theme="light"] .fasting-history__title { color: rgba(20, 33, 61, 0.35); }
 [data-theme="light"] .fasting-history__item { border-bottom-color: rgba(20, 33, 61, 0.06); }
 [data-theme="light"] .fasting-history__date { color: #14213d; }
 [data-theme="light"] .fasting-history__protocol { color: rgba(20, 33, 61, 0.35); }
 [data-theme="light"] .fasting-history__duration { color: #14213d; }
+[data-theme="light"] .fasting-history__delete { color: rgba(20, 33, 61, 0.2); }

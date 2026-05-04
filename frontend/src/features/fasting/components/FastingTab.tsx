@@ -1,11 +1,11 @@
 import { useEffect, useRef, useState } from 'react'
-import { getActiveSession, startFast, stopFast, getFastingHistory, type FastingSession } from '../model/fastingApi'
+import { getActiveSession, startFast, stopFast, getFastingHistory, deleteFastingSession, type FastingSession } from '../model/fastingApi'
 
 const PROTOCOLS = [
-  { hours: 16, label: '16:8' },
-  { hours: 18, label: '18:6' },
-  { hours: 20, label: '20:4' },
-  { hours: 23, label: 'OMAD' },
+  { hours: 16, label: '16h', hint: '8h eating' },
+  { hours: 18, label: '18h', hint: '6h eating' },
+  { hours: 20, label: '20h', hint: '4h eating' },
+  { hours: 23, label: 'OMAD', hint: '1h eating' },
 ]
 
 const CIRCUMFERENCE = 2 * Math.PI * 54
@@ -42,10 +42,7 @@ export function FastingTab() {
 
   useEffect(() => {
     Promise.all([getActiveSession(), getFastingHistory()])
-      .then(([sess, hist]) => {
-        setActive(sess)
-        setHistory(hist)
-      })
+      .then(([sess, hist]) => { setActive(sess); setHistory(hist) })
       .catch(() => setError('Failed to load fasting data'))
       .finally(() => setLoading(false))
   }, [])
@@ -63,30 +60,30 @@ export function FastingTab() {
 
   async function handleStart() {
     const hours = showCustom ? (parseInt(customHours, 10) || 16) : selected
-    setActing(true)
-    setError('')
+    setActing(true); setError('')
     try {
-      const sess = await startFast(hours)
-      setActive(sess)
+      setActive(await startFast(hours))
     } catch (e) {
-      setError(e instanceof Error ? e.message : 'Failed to start fast')
-    } finally {
-      setActing(false)
-    }
+      setError(e instanceof Error ? e.message : 'Failed to start')
+    } finally { setActing(false) }
   }
 
   async function handleStop() {
-    setActing(true)
-    setError('')
+    setActing(true); setError('')
     try {
       const sess = await stopFast()
       setActive(null)
       setHistory(prev => [sess, ...prev].slice(0, 10))
     } catch (e) {
-      setError(e instanceof Error ? e.message : 'Failed to stop fast')
-    } finally {
-      setActing(false)
-    }
+      setError(e instanceof Error ? e.message : 'Failed to stop')
+    } finally { setActing(false) }
+  }
+
+  async function handleDelete(id: string) {
+    try {
+      await deleteFastingSession(id)
+      setHistory(prev => prev.filter(s => s.id !== id))
+    } catch { /* ignore */ }
   }
 
   const targetSec = (active?.targetHours ?? selected) * 3600
@@ -121,47 +118,53 @@ export function FastingTab() {
             <text x="60" y="53" className="fasting-ring__time">{active ? formatElapsed(elapsed) : '--:--:--'}</text>
             <text x="60" y="70" className="fasting-ring__sub">
               {active
-                ? (targetReached ? '🎉 target reached' : `of ${active.targetHours}h goal`)
+                ? (targetReached ? 'goal reached!' : `of ${active.targetHours}h goal`)
                 : 'not fasting'}
             </text>
           </svg>
         </div>
 
-        {/* Protocol picker — only when not fasting */}
+        {/* Protocol picker */}
         {!active && (
-          <div className="fasting-protocols">
-            {PROTOCOLS.map(p => (
+          <>
+            <p className="fasting-section-label">Fast duration</p>
+            <div className="fasting-protocols">
+              {PROTOCOLS.map(p => (
+                <button
+                  key={p.hours}
+                  type="button"
+                  className={`fasting-protocol-btn ${!showCustom && selected === p.hours ? 'fasting-protocol-btn--active' : ''}`}
+                  onClick={() => { setSelected(p.hours); setShowCustom(false) }}
+                >
+                  <span className="fasting-protocol-btn__hours">{p.label}</span>
+                  <span className="fasting-protocol-btn__hint">{p.hint}</span>
+                </button>
+              ))}
               <button
-                key={p.hours}
                 type="button"
-                className={`fasting-protocol-btn ${!showCustom && selected === p.hours ? 'fasting-protocol-btn--active' : ''}`}
-                onClick={() => { setSelected(p.hours); setShowCustom(false) }}
+                className={`fasting-protocol-btn ${showCustom ? 'fasting-protocol-btn--active' : ''}`}
+                onClick={() => setShowCustom(true)}
               >
-                {p.label}
+                <span className="fasting-protocol-btn__hours">Custom</span>
+                <span className="fasting-protocol-btn__hint">any hours</span>
               </button>
-            ))}
-            <button
-              type="button"
-              className={`fasting-protocol-btn ${showCustom ? 'fasting-protocol-btn--active' : ''}`}
-              onClick={() => setShowCustom(true)}
-            >
-              Custom
-            </button>
-          </div>
-        )}
+            </div>
 
-        {!active && showCustom && (
-          <div className="fasting-custom-wrap">
-            <input
-              type="number"
-              min={1}
-              max={72}
-              value={customHours}
-              onChange={e => setCustomHours(e.target.value)}
-              placeholder="Hours, e.g. 14"
-              className="fasting-custom-input"
-            />
-          </div>
+            {showCustom && (
+              <div className="fasting-custom-wrap">
+                <input
+                  type="number"
+                  min={1}
+                  max={72}
+                  value={customHours}
+                  onChange={e => setCustomHours(e.target.value)}
+                  placeholder="e.g. 14"
+                  className="fasting-custom-input"
+                />
+                <span className="fasting-custom-unit">hours</span>
+              </div>
+            )}
+          </>
         )}
 
         {active && (
@@ -172,24 +175,13 @@ export function FastingTab() {
 
         {error ? <p className="error-text" style={{ textAlign: 'center' }}>{error}</p> : null}
 
-        {/* CTA */}
         {active ? (
-          <button
-            type="button"
-            className="fasting-action-btn fasting-action-btn--stop"
-            onClick={handleStop}
-            disabled={acting}
-          >
+          <button type="button" className="fasting-action-btn fasting-action-btn--stop" onClick={handleStop} disabled={acting}>
             {acting ? 'Stopping...' : 'End fast'}
           </button>
         ) : (
-          <button
-            type="button"
-            className="fasting-action-btn"
-            onClick={handleStart}
-            disabled={acting}
-          >
-            {acting ? 'Starting...' : `Start ${showCustom ? (customHours || '?') : selected}h fast`}
+          <button type="button" className="fasting-action-btn" onClick={handleStart} disabled={acting}>
+            {acting ? 'Starting...' : `Start ${showCustom ? ((customHours || '?') + 'h') : (PROTOCOLS.find(p => p.hours === selected)?.label ?? selected + 'h')} fast`}
           </button>
         )}
       </div>
@@ -203,7 +195,7 @@ export function FastingTab() {
             const achieved = dur >= sess.targetHours * 3600
             return (
               <div key={sess.id} className="fasting-history__item">
-                <div>
+                <div className="fasting-history__item-left">
                   <span className="fasting-history__date">{formatDate(sess.startedAt)}</span>
                   <span className="fasting-history__protocol">{sess.targetHours}h target</span>
                 </div>
@@ -212,6 +204,7 @@ export function FastingTab() {
                   <span className={`fasting-history__badge ${achieved ? 'fasting-history__badge--achieved' : 'fasting-history__badge--missed'}`}>
                     {achieved ? '✓' : '✗'}
                   </span>
+                  <button type="button" className="fasting-history__delete" onClick={() => handleDelete(sess.id)} aria-label="Delete">×</button>
                 </div>
               </div>
             )

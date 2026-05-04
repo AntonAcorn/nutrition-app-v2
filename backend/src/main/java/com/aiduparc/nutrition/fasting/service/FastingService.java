@@ -63,6 +63,15 @@ public class FastingService {
                 .toList();
     }
 
+    @Transactional
+    public void deleteSession(UUID userId, UUID sessionId) {
+        var entity = repository.findById(sessionId)
+                .filter(e -> e.getNutritionUserId().equals(userId))
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Session not found"));
+        repository.delete(entity);
+        log.info("fasting session deleted userId={} sessionId={}", userId, sessionId);
+    }
+
     private FastingSessionResponse toResponse(FastingSessionEntity entity) {
         return new FastingSessionResponse(
                 entity.getId(),
