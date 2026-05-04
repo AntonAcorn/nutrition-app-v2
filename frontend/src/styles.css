@@ -5473,6 +5473,62 @@ ul {
 }
 
 /* ════════════════════════════════════════════════════════════════════════
+   PATTERN INSIGHTS
+   ════════════════════════════════════════════════════════════════════════ */
+
+.insights-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 0 1rem 0.5rem;
+}
+
+.insights-section__label {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.3);
+  margin: 0 0 0.1rem;
+}
+
+.insight-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  padding: 0.7rem 0.9rem;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.04);
+  border-left: 3px solid transparent;
+}
+
+.insight-card--good    { border-left-color: #22c55e; }
+.insight-card--bad     { border-left-color: #ef4444; }
+.insight-card--neutral { border-left-color: #a78bfa; }
+.insight-card--info    { border-left-color: #3b82f6; }
+
+.insight-card__icon {
+  font-size: 1.15rem;
+  line-height: 1;
+  margin-top: 0.1rem;
+  flex-shrink: 0;
+}
+
+.insight-card__title {
+  font-size: 0.83rem;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.9);
+  margin: 0 0 0.15rem;
+}
+
+.insight-card__body {
+  font-size: 0.77rem;
+  color: rgba(255, 255, 255, 0.5);
+  margin: 0;
+  line-height: 1.45;
+}
+
+/* ════════════════════════════════════════════════════════════════════════
    THEME TOGGLE BUTTON
    ════════════════════════════════════════════════════════════════════════ */
 
@@ -5633,6 +5689,20 @@ ul {
 }
 [data-theme="light"] .stats-metric-card strong {
   color: #14213d;
+}
+
+/* Insight cards */
+[data-theme="light"] .insights-section__label {
+  color: rgba(20, 33, 61, 0.35);
+}
+[data-theme="light"] .insight-card {
+  background: rgba(255, 252, 247, 0.9);
+}
+[data-theme="light"] .insight-card__title {
+  color: #14213d;
+}
+[data-theme="light"] .insight-card__body {
+  color: #6b5b4b;
 }
 
 /* ── Today tab ── */

@@ -423,6 +423,161 @@ function LineChart({
   )
 }
 
+interface Insight {
+  id: string
+  icon: string
+  title: string
+  body: string
+  tone: 'good' | 'bad' | 'neutral' | 'info'
+}
+
+const DOW_NAMES = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
+
+function computeInsights(
+  loggedPoints: NutritionStatisticsPoint[],
+  allPoints: NutritionStatisticsPoint[],
+  targetWeightKg: number | null,
+  rangeDays: number,
+): Insight[] {
+  if (loggedPoints.length === 0) return []
+  const insights: Insight[] = []
+
+  // 1. Logging consistency
+  const pct = (loggedPoints.length / rangeDays) * 100
+  if (pct < 60) {
+    insights.push({
+      id: 'consistency-low',
+      icon: '📅',
+      title: 'Logging gaps',
+      body: `${loggedPoints.length} of ${rangeDays} days logged (${Math.round(pct)}%). Missing days hide the full picture.`,
+      tone: 'bad',
+    })
+  } else if (pct >= 85) {
+    insights.push({
+      id: 'consistency-high',
+      icon: '✅',
+      title: 'Consistent tracker',
+      body: `${Math.round(pct)}% of days logged. Consistency is the #1 predictor of long-term results.`,
+      tone: 'good',
+    })
+  }
+
+  // 2. Momentum — first half vs second half average calorie balance
+  if (loggedPoints.length >= 6) {
+    const mid = Math.floor(loggedPoints.length / 2)
+    const avgFirst  = loggedPoints.slice(0, mid).reduce((s, p) => s + p.calorieBalance, 0) / mid
+    const avgSecond = loggedPoints.slice(mid).reduce((s, p) => s + p.calorieBalance, 0) / (loggedPoints.length - mid)
+    const delta = avgFirst - avgSecond // positive = recent half is better (lower balance)
+    if (delta > 100) {
+      insights.push({
+        id: 'momentum-improving',
+        icon: '📈',
+        title: 'Improving momentum',
+        body: `Recent days are ${Math.round(delta)} kcal/day better vs the earlier half of this period.`,
+        tone: 'good',
+      })
+    } else if (delta < -100) {
+      insights.push({
+        id: 'momentum-declining',
+        icon: '📉',
+        title: 'Momentum slipping',
+        body: `Recent days are ${Math.round(-delta)} kcal/day worse than the earlier half. Time to refocus.`,
+        tone: 'bad',
+      })
+    }
+  }
+
+  // 3. Worst day-of-week (needs ≥14 logged days, ≥2 per DOW)
+  if (loggedPoints.length >= 14) {
+    const byDow: Record<number, number[]> = {}
+    for (const p of loggedPoints) {
+      const dow = new Date(p.entryDate + 'T12:00:00').getDay()
+      byDow[dow] = byDow[dow] ?? []
+      byDow[dow].push(p.calorieBalance)
+    }
+    let worstDow = -1, worstAvg = -Infinity
+    for (const [dow, balances] of Object.entries(byDow)) {
+      if (balances.length < 2) continue
+      const avg = balances.reduce((s, v) => s + v, 0) / balances.length
+      if (avg > worstAvg) { worstAvg = avg; worstDow = Number(dow) }
+    }
+    if (worstDow >= 0 && worstAvg > 100) {
+      insights.push({
+        id: 'worst-dow',
+        icon: '📆',
+        title: `${DOW_NAMES[worstDow]}s are tough`,
+        body: `Avg surplus of +${Math.round(worstAvg)} kcal on ${DOW_NAMES[worstDow]}s. Plan that day more carefully.`,
+        tone: 'bad',
+      })
+    }
+  }
+
+  // 4. High day-to-day variance (≥7 logged days, std dev > 600, avg balance positive)
+  if (loggedPoints.length >= 7) {
+    const balances = loggedPoints.map(p => p.calorieBalance)
+    const avgBal = balances.reduce((s, v) => s + v, 0) / balances.length
+    const stdDev = Math.sqrt(balances.reduce((s, v) => s + (v - avgBal) ** 2, 0) / balances.length)
+    if (stdDev > 600 && avgBal > 0) {
+      insights.push({
+        id: 'high-variance',
+        icon: '🎢',
+        title: 'Feast-or-famine pattern',
+        body: `High day-to-day variance (σ ${Math.round(stdDev)} kcal). Steady days beat big swings.`,
+        tone: 'neutral',
+      })
+    }
+  }
+
+  // 5. Weight goal ETA (≥4 weight entries + target set)
+  if (targetWeightKg != null) {
+    const wPoints = allPoints.filter(p => p.weightKg != null)
+    if (wPoints.length >= 4) {
+      const first = wPoints[0], last = wPoints[wPoints.length - 1]
+      const daysDiff = Math.max(1,
+        (new Date(last.entryDate + 'T12:00:00').getTime() - new Date(first.entryDate + 'T12:00:00').getTime()) / 86400000,
+      )
+      const kgPerDay = ((last.weightKg ?? 0) - (first.weightKg ?? 0)) / daysDiff
+      const kgToGo   = targetWeightKg - (last.weightKg ?? 0)
+      if (kgToGo !== 0 && kgPerDay !== 0 && Math.sign(kgToGo) === Math.sign(kgPerDay)) {
+        const daysToGoal = Math.round(kgToGo / kgPerDay)
+        if (daysToGoal > 0 && daysToGoal < 365) {
+          const eta = new Date()
+          eta.setDate(eta.getDate() + daysToGoal)
+          const etaStr = eta.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })
+          const rateStr = `${kgPerDay > 0 ? '+' : ''}${(kgPerDay * 7).toFixed(2)} kg/wk`
+          insights.push({
+            id: 'goal-eta',
+            icon: '🏁',
+            title: 'Goal ETA',
+            body: `At ${rateStr}, you reach ${targetWeightKg} kg around ${etaStr}.`,
+            tone: 'info',
+          })
+        }
+      }
+    }
+  }
+
+  return insights.slice(0, 3)
+}
+
+function InsightsSection({ insights }: { insights: Insight[] }) {
+  if (insights.length === 0) return null
+  return (
+    <section className="insights-section">
+      <p className="insights-section__label">Pattern insights</p>
+      {insights.map(insight => (
+        <div key={insight.id} className={`insight-card insight-card--${insight.tone}`}>
+          <span className="insight-card__icon" aria-hidden="true">{insight.icon}</span>
+          <div>
+            <p className="insight-card__title">{insight.title}</p>
+            <p className="insight-card__body">{insight.body}</p>
+          </div>
+        </div>
+      ))}
+    </section>
+  )
+}
+
 function StatisticsTable({ points }: { points: NutritionStatisticsPoint[] }) {
   const orderedPoints = [...points].reverse()
 
@@ -530,6 +685,10 @@ export function StatisticsTab({ refreshToken = 0 }: StatisticsTabProps) {
 
   const streak = useMemo(() => computeStreak(points), [points])
   const weightTrendline = useMemo(() => movingAvg(points), [points])
+  const insights = useMemo(
+    () => computeInsights(loggedPoints, points, data?.targetWeightKg ?? null, rangeDays),
+    [loggedPoints, points, data, rangeDays],
+  )
 
   return (
     <section className="screen-section screen-section--statistics-dark">
@@ -590,6 +749,8 @@ export function StatisticsTab({ refreshToken = 0 }: StatisticsTabProps) {
               emoji={streak === 0 ? '💤' : streak >= 14 ? '🔥' : streak >= 7 ? '⚡' : '📅'}
             />
           </section>
+
+          <InsightsSection insights={insights} />
 
           <LineChart
             title="Weight"
