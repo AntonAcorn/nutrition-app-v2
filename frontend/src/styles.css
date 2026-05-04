@@ -2774,28 +2774,58 @@ ul {
   display: flex;
   flex-direction: column;
   gap: 0;
-  margin-bottom: 4px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  padding-bottom: 2px;
+  margin-bottom: 2px;
+}
+
+.meals-log-slot--last {
+  border-bottom: none;
+  margin-bottom: 0;
 }
 
 .meals-log-slot__header {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  padding: 8px 0 4px;
+  padding: 10px 0 6px;
+  gap: 8px;
 }
 
 .meals-log-slot__name {
-  font-size: 0.72rem;
+  flex: 1;
+  font-size: 0.78rem;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.06em;
-  color: rgba(255, 255, 255, 0.45);
+  color: rgba(255, 255, 255, 0.5);
 }
 
 .meals-log-slot__kcal {
-  font-size: 0.72rem;
+  font-size: 0.78rem;
   font-weight: 600;
   color: rgba(255, 255, 255, 0.35);
+}
+
+.meals-log-slot__add {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  border: 1.5px solid rgba(59, 125, 255, 0.55);
+  background: rgba(59, 125, 255, 0.1);
+  color: #5b9aff;
+  font-size: 1.15rem;
+  line-height: 1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: background 0.15s, border-color 0.15s;
+}
+
+.meals-log-slot__add:hover {
+  background: rgba(59, 125, 255, 0.22);
+  border-color: rgba(59, 125, 255, 0.8);
 }
 
 .meals-log-card__title {
@@ -3363,6 +3393,34 @@ ul {
   height: 100%;
   cursor: pointer;
   font-size: 16px; /* prevents iOS zoom */
+}
+
+.qs-slot-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 0 2px;
+  margin-bottom: 4px;
+}
+
+.qs-slot-row__label {
+  font-size: 0.82rem;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.qs-slot-row__label strong {
+  color: #fff;
+  font-weight: 600;
+}
+
+.qs-slot-row__change {
+  background: none;
+  border: none;
+  color: rgba(59, 125, 255, 0.85);
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 2px 0;
 }
 
 .qs-slot-toggle {
@@ -5943,5 +6001,19 @@ ul {
 }
 
 /* ── Meals log slot headers ── */
-[data-theme="light"] .meals-log-slot__name { color: rgba(20, 33, 61, 0.4); }
-[data-theme="light"] .meals-log-slot__kcal { color: rgba(20, 33, 61, 0.3); }
+[data-theme="light"] .meals-log-slot { border-bottom-color: rgba(20, 33, 61, 0.07); }
+[data-theme="light"] .meals-log-slot__name { color: rgba(20, 33, 61, 0.45); }
+[data-theme="light"] .meals-log-slot__kcal { color: rgba(20, 33, 61, 0.35); }
+[data-theme="light"] .meals-log-slot__add {
+  border-color: rgba(59, 125, 255, 0.45);
+  background: rgba(59, 125, 255, 0.07);
+  color: #2060e8;
+}
+[data-theme="light"] .meals-log-slot__add:hover {
+  background: rgba(59, 125, 255, 0.14);
+}
+
+/* ── QS slot row ── */
+[data-theme="light"] .qs-slot-row__label { color: rgba(20, 33, 61, 0.5); }
+[data-theme="light"] .qs-slot-row__label strong { color: #14213d; }
+[data-theme="light"] .qs-slot-row__change { color: #2060e8; }

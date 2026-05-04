@@ -38,6 +38,7 @@ export function CurrentDayTab({ refreshToken = 0, successMessage = '', onDayUpda
   const [savingNutrition, setSavingNutrition] = useState(false)
   const [resettingDay, setResettingDay] = useState(false)
   const [showQuickAdd, setShowQuickAdd] = useState(false)
+  const [quickAddSlot, setQuickAddSlot] = useState<string | undefined>(undefined)
 
   useEffect(() => {
     let cancelled = false
@@ -87,6 +88,11 @@ export function CurrentDayTab({ refreshToken = 0, successMessage = '', onDayUpda
     } finally {
       setSavingNutrition(false)
     }
+  }
+
+  function openQuickAdd(slotType?: string) {
+    setQuickAddSlot(slotType)
+    setShowQuickAdd(true)
   }
 
   async function handleResetDay() {
@@ -146,6 +152,17 @@ export function CurrentDayTab({ refreshToken = 0, successMessage = '', onDayUpda
 
       {!loading && !error && summary ? <TodaySummaryBlock summary={summary} /> : null}
 
+      {!loading && !error && summary ? (
+        <MealsLogCard
+          refreshToken={refreshToken}
+          onAddToSlot={openQuickAdd}
+          onDeleted={() => { fetchTodaySummary().then(setSummary).catch(() => {}) }}
+          onUpdated={() => { fetchTodaySummary().then(setSummary).catch(() => {}); onDayUpdated?.() }}
+        />
+      ) : null}
+
+      {!loading && !error && summary ? <WaterIntakeCard waterGlasses={summary.waterGlasses} waterGoalGlasses={summary.waterGoalGlasses} onUpdate={() => { fetchTodaySummary().then(setSummary).catch(() => {}) }} /> : null}
+
       {!loading && summary ? (
         <section className="weight-mascot-card panel">
           <MascotSvg mood="cheer" size={80} className="weight-mascot-card__img" />
@@ -173,18 +190,17 @@ export function CurrentDayTab({ refreshToken = 0, successMessage = '', onDayUpda
         </section>
       ) : null}
 
-      {!loading && !error && summary ? <MealsLogCard refreshToken={refreshToken} onDeleted={() => { fetchTodaySummary().then(setSummary).catch(() => {}) }} onUpdated={() => { fetchTodaySummary().then(setSummary).catch(() => {}); onDayUpdated?.() }} /> : null}
-      {!loading && !error && summary ? <WaterIntakeCard waterGlasses={summary.waterGlasses} waterGoalGlasses={summary.waterGoalGlasses} onUpdate={() => { fetchTodaySummary().then(setSummary).catch(() => {}) }} /> : null}
       {!loading && !error && summary ? <SavedMealsCard onLogged={() => { onDayUpdated?.() }} /> : null}
 
       {!loading && summary ? (
-        <button type="button" className="quick-add-fab" onClick={() => setShowQuickAdd(true)} aria-label="Quick add food">
+        <button type="button" className="quick-add-fab" onClick={() => openQuickAdd()} aria-label="Quick add food">
           +
         </button>
       ) : null}
 
       {showQuickAdd && (
         <QuickAddSheet
+          initialSlot={quickAddSlot}
           onAdd={handleMealAdd}
           onLogTemplate={handleTemplateLog}
           onClose={() => setShowQuickAdd(false)}

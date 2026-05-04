@@ -9,6 +9,7 @@ import type { MealSlot } from '../model/mealLogApi'
 const SLOT_TYPES: MealSlot['slotType'][] = ['BREAKFAST', 'LUNCH', 'DINNER', 'SNACK']
 
 interface Props {
+  initialSlot?: string
   onAdd: (calories: number, protein: number, fat: number, fiber: number, carbs: number, name?: string, slotType?: string) => Promise<void>
   onLogTemplate: (templateId: string, slotType: string) => Promise<void>
   onClose: () => void
@@ -45,8 +46,15 @@ function round1(v: number | null | undefined): number {
   return Math.round(v * 10) / 10
 }
 
-export function QuickAddSheet({ onAdd, onLogTemplate, onClose, onOpenAnalyzer }: Props) {
-  const [slot, setSlot] = useState<MealSlot['slotType']>(defaultSlotByTime())
+function resolveInitialSlot(s?: string): MealSlot['slotType'] {
+  if (!s) return defaultSlotByTime()
+  const up = s.toUpperCase() as MealSlot['slotType']
+  return SLOT_TYPES.includes(up) ? up : defaultSlotByTime()
+}
+
+export function QuickAddSheet({ initialSlot, onAdd, onLogTemplate, onClose, onOpenAnalyzer }: Props) {
+  const [slot, setSlot] = useState<MealSlot['slotType']>(() => resolveInitialSlot(initialSlot))
+  const [slotPickerOpen, setSlotPickerOpen] = useState(false)
   const [mode, setMode] = useState<'library' | 'search' | 'manual'>('library')
 
   // library
@@ -238,13 +246,28 @@ export function QuickAddSheet({ onAdd, onLogTemplate, onClose, onOpenAnalyzer }:
         )}
 
         {!loggedName && (
+          <div className="qs-slot-row">
+            <span className="qs-slot-row__label">
+              Adding to: <strong>{SLOT_LABELS[slot]}</strong>
+            </span>
+            <button
+              type="button"
+              className="qs-slot-row__change"
+              onClick={() => setSlotPickerOpen(p => !p)}
+            >
+              {slotPickerOpen ? 'Done' : 'Change'}
+            </button>
+          </div>
+        )}
+
+        {!loggedName && slotPickerOpen && (
           <div className="qs-slot-toggle">
             {SLOT_TYPES.map(s => (
               <button
                 key={s}
                 type="button"
                 className={`qs-slot-btn${slot === s ? ' qs-slot-btn--active' : ''}`}
-                onClick={() => setSlot(s)}
+                onClick={() => { setSlot(s); setSlotPickerOpen(false) }}
               >
                 {SLOT_LABELS[s]}
               </button>
