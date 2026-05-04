@@ -17,3 +17,15 @@
 		reverse_proxy frontend:80
 	}
 }
+
+rumblyeats.org, www.rumblyeats.org {
+	encode gzip
+
+	handle /api/* {
+		reverse_proxy backend:8080
+	}
+
+	handle {
+		reverse_proxy frontend:80
+	}
+}
