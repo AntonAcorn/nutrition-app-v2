@@ -59,7 +59,7 @@ export function TodaySummaryBlock({
   onWeightChange,
   onWeightSave,
 }: TodaySummaryBlockProps) {
-  const [showMacros, setShowMacros] = useState(true)
+  const [showMacros, setShowMacros] = useState(false)
 
   const consumed = Math.round(summary.consumedCalories)
   const target = Math.max(1, Math.round(summary.dailyTargetCalories))
@@ -78,10 +78,10 @@ export function TodaySummaryBlock({
           <p className="today-dark-card__title">Calories</p>
           <button
             type="button"
-            className="today-card-details-toggle"
+            className={`today-card-details-toggle${showMacros ? '' : ' today-card-details-toggle--pill'}`}
             onClick={() => setShowMacros(v => !v)}
           >
-            {showMacros ? 'Less ▴' : 'Macros ▾'}
+            {showMacros ? 'Hide ▴' : 'Macros ▾'}
           </button>
         </div>
 
