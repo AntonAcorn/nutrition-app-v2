@@ -81,7 +81,16 @@ export function TodaySummaryBlock({
             className={`today-card-details-toggle${showMacros ? '' : ' today-card-details-toggle--pill'}`}
             onClick={() => setShowMacros(v => !v)}
           >
-            {showMacros ? 'Hide ▴' : 'Macros ▾'}
+            {showMacros ? 'Hide ▴' : (
+              <span className="today-macros-preview">
+                <span className="today-macros-preview__item today-macros-preview__item--p">P {Math.round(summary.proteinGrams)}</span>
+                <span className="today-macros-preview__dot">·</span>
+                <span className="today-macros-preview__item today-macros-preview__item--f">F {Math.round(summary.fatGrams)}</span>
+                <span className="today-macros-preview__dot">·</span>
+                <span className="today-macros-preview__item today-macros-preview__item--c">C {Math.round(summary.carbsGrams)}</span>
+                <span className="today-macros-preview__chevron"> ▾</span>
+              </span>
+            )}
           </button>
         </div>
 
