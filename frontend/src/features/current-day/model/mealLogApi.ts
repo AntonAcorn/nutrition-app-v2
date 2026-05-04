@@ -45,6 +45,7 @@ export interface UpdateMealLogEntryData {
   fatG?: number
   carbsG?: number
   fiberG?: number
+  slotType?: string
 }
 
 export async function updateMealLogEntry(id: string, data: UpdateMealLogEntryData): Promise<MealLogEntry> {

@@ -8,5 +8,6 @@ public record UpdateMealLogEntryRequest(
     BigDecimal proteinG,
     BigDecimal fatG,
     BigDecimal carbsG,
-    BigDecimal fiberG
+    BigDecimal fiberG,
+    String slotType
 ) {}
