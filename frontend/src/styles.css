@@ -1229,6 +1229,76 @@ ul {
   border-color: rgba(255, 255, 255, 0.35);
 }
 
+/* ── Water Card v2 (tap-circles) ─────────────────────────────────────────── */
+.water-card-v2 {
+  padding: 16px 18px;
+}
+
+.water-card-v2__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px;
+}
+
+.water-card-v2__title {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.82);
+  letter-spacing: 0.02em;
+}
+
+.water-card-v2__count {
+  font-size: 0.82rem;
+  color: rgba(255, 255, 255, 0.4);
+}
+
+.water-card-v2__count strong {
+  color: rgba(255, 255, 255, 0.82);
+  font-weight: 700;
+}
+
+.water-card-v2__done {
+  color: #5b9aff;
+  font-weight: 600;
+}
+
+.water-card-v2__circles {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.water-circle {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  border: 2px solid rgba(59, 125, 255, 0.22);
+  background: rgba(59, 125, 255, 0.06);
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s, transform 0.1s;
+  flex-shrink: 0;
+  padding: 0;
+}
+
+.water-circle:hover {
+  border-color: rgba(59, 125, 255, 0.45);
+  background: rgba(59, 125, 255, 0.14);
+}
+
+.water-circle--filled {
+  background: rgba(59, 125, 255, 0.72);
+  border-color: #5b9aff;
+}
+
+.water-circle--filled:hover {
+  background: rgba(59, 125, 255, 0.55);
+}
+
+.water-circle:active {
+  transform: scale(0.88);
+}
+
 .weight-mascot-card {
   display: flex;
   align-items: center;
@@ -6490,6 +6560,25 @@ ul {
 [data-theme="light"] .meal-log-move__btn:hover { background: rgba(32, 96, 232, 0.13); }
 [data-theme="light"] .meal-log-move__cancel { color: rgba(20, 33, 61, 0.3); }
 [data-theme="light"] .meal-log-move__cancel:hover { color: rgba(20, 33, 61, 0.6); }
+
+/* Water card v2 */
+[data-theme="light"] .water-card-v2__title { color: rgba(20, 33, 61, 0.82); }
+[data-theme="light"] .water-card-v2__count { color: rgba(20, 33, 61, 0.4); }
+[data-theme="light"] .water-card-v2__count strong { color: rgba(20, 33, 61, 0.82); }
+[data-theme="light"] .water-card-v2__done { color: #2060e8; }
+[data-theme="light"] .water-circle {
+  border-color: rgba(32, 96, 232, 0.2);
+  background: rgba(32, 96, 232, 0.05);
+}
+[data-theme="light"] .water-circle:hover {
+  border-color: rgba(32, 96, 232, 0.45);
+  background: rgba(32, 96, 232, 0.1);
+}
+[data-theme="light"] .water-circle--filled {
+  background: rgba(32, 96, 232, 0.72);
+  border-color: #2060e8;
+}
+[data-theme="light"] .water-circle--filled:hover { background: rgba(32, 96, 232, 0.55); }
 
 /* Today card details toggle */
 [data-theme="light"] .today-card-details-toggle { color: rgba(20, 33, 61, 0.32); }
