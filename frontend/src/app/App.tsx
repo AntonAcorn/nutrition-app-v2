@@ -105,6 +105,7 @@ export default function App() {
   const [statisticsRefreshToken, setStatisticsRefreshToken] = useState(0)
   const [pendingLibrarySave, setPendingLibrarySave] = useState<{ name: string; items: MealTemplateItem[] } | null>(null)
   const [daySuccessMessage, setDaySuccessMessage] = useState('')
+  const [analyzerMode, setAnalyzerMode] = useState<'photo' | 'voice' | 'barcode'>('photo')
   const [authUser, setAuthUser] = useState<AuthUser | null>(null)
   const [authLoading, setAuthLoading] = useState(true)
   const [authMode, setAuthMode] = useState<'login' | 'register' | 'forgot-password' | 'reset-password' | 'check-email'>('login')
@@ -302,6 +303,11 @@ export default function App() {
     } catch {
       // session already active, keep current state
     }
+  }
+
+  function openAnalyzer(mode: 'photo' | 'voice' | 'barcode') {
+    setAnalyzerMode(mode)
+    setActiveTab(tabs.photoAnalyzer)
   }
 
   function handleDraftConfirmed() {
@@ -630,15 +636,6 @@ export default function App() {
           <button
             type="button"
             role="tab"
-            className={`tab-button tab-button--dark ${activeTab === tabs.photoAnalyzer ? 'tab-button--active' : ''}`}
-            aria-selected={activeTab === tabs.photoAnalyzer}
-            onClick={() => setActiveTab(tabs.photoAnalyzer)}
-          >
-            Log
-          </button>
-          <button
-            type="button"
-            role="tab"
             className={`tab-button tab-button--dark ${activeTab === tabs.fasting ? 'tab-button--active' : ''}`}
             aria-selected={activeTab === tabs.fasting}
             onClick={() => setActiveTab(tabs.fasting)}
@@ -672,10 +669,18 @@ export default function App() {
               successMessage={daySuccessMessage}
               onDayUpdated={handleDayUpdated}
               displayName={authUser.displayName}
+              onOpenAnalyzer={openAnalyzer}
             />
           ) : null}
           {activeTab === tabs.statistics ? <StatisticsTab refreshToken={statisticsRefreshToken} /> : null}
-          {activeTab === tabs.photoAnalyzer ? <PhotoAnalyzerTab onConfirmed={handleDraftConfirmed} onSaveToLibrary={handleSaveToLibrary} /> : null}
+          {activeTab === tabs.photoAnalyzer ? (
+            <PhotoAnalyzerTab
+              onConfirmed={handleDraftConfirmed}
+              onSaveToLibrary={handleSaveToLibrary}
+              initialMode={analyzerMode}
+              onBack={() => setActiveTab(tabs.currentDay)}
+            />
+          ) : null}
           {activeTab === tabs.fasting ? <FastingTab /> : null}
           {activeTab === tabs.library ? (
             <FoodLibraryTab

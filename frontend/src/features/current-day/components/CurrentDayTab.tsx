@@ -26,9 +26,10 @@ interface CurrentDayTabProps {
   successMessage?: string
   onDayUpdated?: () => void
   displayName?: string | null
+  onOpenAnalyzer?: (mode: 'photo' | 'voice' | 'barcode') => void
 }
 
-export function CurrentDayTab({ refreshToken = 0, successMessage = '', onDayUpdated, displayName }: CurrentDayTabProps) {
+export function CurrentDayTab({ refreshToken = 0, successMessage = '', onDayUpdated, displayName, onOpenAnalyzer }: CurrentDayTabProps) {
   const [summary, setSummary] = useState<TodaySummary | null>(null)
   const [loading, setLoading] = useState(true)
   const [savingWeight, setSavingWeight] = useState(false)
@@ -188,6 +189,7 @@ export function CurrentDayTab({ refreshToken = 0, successMessage = '', onDayUpda
           onAdd={handleMealAdd}
           onLogTemplate={handleTemplateLog}
           onClose={() => setShowQuickAdd(false)}
+          onOpenAnalyzer={onOpenAnalyzer}
         />
       )}
 

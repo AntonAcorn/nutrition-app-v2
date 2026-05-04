@@ -44,6 +44,8 @@ async function isNativePlatform(): Promise<boolean> {
 interface PhotoAnalyzerTabProps {
   onConfirmed?: () => void
   onSaveToLibrary?: (data: { name: string; items: MealTemplateItem[] }) => void
+  initialMode?: AnalyzerMode
+  onBack?: () => void
 }
 
 function currentEntryDate(): string {
@@ -82,8 +84,8 @@ async function nativeSpeechAvailable(): Promise<boolean> {
   }
 }
 
-export function PhotoAnalyzerTab({ onConfirmed, onSaveToLibrary }: PhotoAnalyzerTabProps) {
-  const [mode, setMode] = useState<AnalyzerMode>('photo')
+export function PhotoAnalyzerTab({ onConfirmed, onSaveToLibrary, initialMode, onBack }: PhotoAnalyzerTabProps) {
+  const [mode, setMode] = useState<AnalyzerMode>(initialMode ?? 'photo')
 
   // Photo mode: multi-draft queue
   const [photoDrafts, setPhotoDrafts] = useState<DraftEntry[]>([])
@@ -546,6 +548,9 @@ export function PhotoAnalyzerTab({ onConfirmed, onSaveToLibrary }: PhotoAnalyzer
 
   return (
     <section className="screen-section screen-section--photo-dark">
+      {onBack && (
+        <button type="button" className="analyzer-back-btn" onClick={onBack}>← Back</button>
+      )}
       <section className="panel analyzer-panel analyzer-panel--dark">
 
         {/* Mode toggle — hidden when voice draft is active */}

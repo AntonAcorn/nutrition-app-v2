@@ -8,6 +8,7 @@ interface Props {
   onAdd: (calories: number, protein: number, fat: number, fiber: number, carbs: number, name?: string) => Promise<void>
   onLogTemplate: (templateId: string) => Promise<void>
   onClose: () => void
+  onOpenAnalyzer?: (mode: 'photo' | 'voice' | 'barcode') => void
 }
 
 interface ChipProps {
@@ -40,7 +41,7 @@ function round1(v: number | null | undefined): number {
   return Math.round(v * 10) / 10
 }
 
-export function QuickAddSheet({ onAdd, onLogTemplate, onClose }: Props) {
+export function QuickAddSheet({ onAdd, onLogTemplate, onClose, onOpenAnalyzer }: Props) {
   const [mode, setMode] = useState<'library' | 'search' | 'manual'>('library')
 
   // library
@@ -196,6 +197,23 @@ export function QuickAddSheet({ onAdd, onLogTemplate, onClose }: Props) {
           </div>
           <button type="button" className="qs-close" onClick={onClose}>✕</button>
         </div>
+
+        {onOpenAnalyzer && (
+          <div className="qs-analyzer-row">
+            <button type="button" className="qs-analyzer-btn" onClick={() => { onClose(); onOpenAnalyzer('photo') }}>
+              <span className="qs-analyzer-btn__icon">📷</span>
+              <span>Photo</span>
+            </button>
+            <button type="button" className="qs-analyzer-btn" onClick={() => { onClose(); onOpenAnalyzer('voice') }}>
+              <span className="qs-analyzer-btn__icon">🎤</span>
+              <span>Voice</span>
+            </button>
+            <button type="button" className="qs-analyzer-btn" onClick={() => { onClose(); onOpenAnalyzer('barcode') }}>
+              <span className="qs-analyzer-btn__icon">▦</span>
+              <span>Barcode</span>
+            </button>
+          </div>
+        )}
 
         <div className="qs-mode-toggle">
           <button type="button" className={`qs-mode-btn${mode === 'library' ? ' qs-mode-btn--active' : ''}`} onClick={() => setMode('library')}>Library</button>
