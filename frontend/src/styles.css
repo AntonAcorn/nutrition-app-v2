@@ -5225,6 +5225,7 @@ ul {
   flex-direction: column;
   align-items: center;
   gap: 20px;
+  padding: 22px;
 }
 
 .fasting-ring-wrap {
@@ -5278,7 +5279,7 @@ ul {
   color: rgba(255, 255, 255, 0.35);
   text-transform: uppercase;
   letter-spacing: 0.06em;
-  align-self: flex-start;
+  width: 100%;
   margin-bottom: -8px;
 }
 
@@ -5368,6 +5369,7 @@ ul {
 .fasting-history {
   display: flex;
   flex-direction: column;
+  padding: 22px;
 }
 
 .fasting-history__title {

@@ -2,10 +2,10 @@ import { useEffect, useRef, useState } from 'react'
 import { getActiveSession, startFast, stopFast, getFastingHistory, deleteFastingSession, type FastingSession } from '../model/fastingApi'
 
 const PROTOCOLS = [
+  { hours: 8,  label: '8 hours'  },
   { hours: 16, label: '16 hours' },
-  { hours: 18, label: '18 hours' },
-  { hours: 20, label: '20 hours' },
-  { hours: 23, label: '23 hours' },
+  { hours: 24, label: '24 hours' },
+  { hours: 36, label: '36 hours' },
 ]
 
 const CIRCUMFERENCE = 2 * Math.PI * 54
