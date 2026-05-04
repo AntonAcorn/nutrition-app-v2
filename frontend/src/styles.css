@@ -5722,6 +5722,29 @@ ul {
 [data-theme="light"] .photo-draft-totals-summary__label { color: rgba(20, 33, 61, 0.45); }
 [data-theme="light"] .photo-draft-totals-summary__macros { color: #14213d; }
 
+/* Photo draft card buttons (Details ▼ and ✕) */
+[data-theme="light"] .photo-draft-card__name { color: #14213d; }
+[data-theme="light"] .photo-draft-card__macros { color: rgba(20, 33, 61, 0.5); }
+[data-theme="light"] .photo-draft-card__edit-btn {
+  border-color: rgba(20, 33, 61, 0.2);
+  color: rgba(20, 33, 61, 0.6);
+}
+[data-theme="light"] .photo-draft-card__edit-btn:hover {
+  background: rgba(20, 33, 61, 0.05);
+  color: #14213d;
+}
+[data-theme="light"] .photo-draft-card__discard-btn { color: rgba(20, 33, 61, 0.35); }
+[data-theme="light"] .photo-draft-card__discard-btn:hover { color: rgba(220, 38, 38, 0.8); }
+[data-theme="light"] .photo-draft-card__details { border-top-color: rgba(20, 33, 61, 0.1); }
+[data-theme="light"] .photo-draft-save-all-btn {
+  background: rgba(32, 96, 232, 0.08);
+  border-color: rgba(32, 96, 232, 0.3);
+  color: #2060e8;
+}
+[data-theme="light"] .photo-draft-save-all-btn:hover { background: rgba(32, 96, 232, 0.14); }
+[data-theme="light"] .photo-draft-save-to-library-btn { color: rgba(32, 96, 232, 0.7); }
+[data-theme="light"] .photo-draft-save-to-library-btn:hover { color: #2060e8; }
+
 /* Upload secondary button */
 [data-theme="light"] .screen-section--photo-dark .upload-button--secondary {
   background: rgba(20, 33, 61, 0.06);
