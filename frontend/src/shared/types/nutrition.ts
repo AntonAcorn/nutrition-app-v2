@@ -17,6 +17,7 @@ export interface TodaySummary {
   waterGoalGlasses: number
   targetWeightKg: number | null
   startingWeightKg: number | null
+  loggingStreakDays: number
 }
 
 export interface DraftItem {

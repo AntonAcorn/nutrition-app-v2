@@ -167,6 +167,9 @@ export function CurrentDayTab({ refreshToken = 0, successMessage = '', onDayUpda
         <div className="mascot-hero-card__text">
           <p className="mascot-hero-card__greeting">{getGreeting()}</p>
           {displayName ? <p className="mascot-hero-card__name">{displayName}</p> : null}
+          {summary && summary.loggingStreakDays >= 2 && (
+            <span className="streak-badge">🔥 {summary.loggingStreakDays} days</span>
+          )}
         </div>
       </div>
 

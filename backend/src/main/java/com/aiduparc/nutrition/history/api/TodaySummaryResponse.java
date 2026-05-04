@@ -24,6 +24,7 @@ public record TodaySummaryResponse(
         int waterGlasses,
         int waterGoalGlasses,
         BigDecimal targetWeightKg,
-        BigDecimal startingWeightKg
+        BigDecimal startingWeightKg,
+        int loggingStreakDays
 ) {
 }

@@ -28,7 +28,9 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -101,6 +103,8 @@ public class NutritionHistoryService {
             .map(p -> p.getStartingWeightKg())
             .orElse(null);
 
+        int loggingStreakDays = calculateLoggingStreak(userId, entryDate, consumedCalories);
+
         TodaySummaryResponse response = new TodaySummaryResponse(
             userId,
             entryDate,
@@ -120,7 +124,8 @@ public class NutritionHistoryService {
             snapshot.waterGlasses(),
             waterGoalGlasses,
             targetWeightKg,
-            startingWeightKg
+            startingWeightKg,
+            loggingStreakDays
         );
 
         log.info(
@@ -135,6 +140,22 @@ public class NutritionHistoryService {
         );
 
         return response;
+    }
+
+    private int calculateLoggingStreak(UUID userId, LocalDate today, BigDecimal todayCalories) {
+        LocalDate endDate = todayCalories.compareTo(BigDecimal.ZERO) > 0 ? today : today.minusDays(1);
+        List<DailyNutritionEntrySnapshot> recent = findByUserAndRange(userId, endDate.minusDays(89), endDate);
+        Set<LocalDate> loggedDates = recent.stream()
+            .filter(s -> s.caloriesConsumedKcal() != null && s.caloriesConsumedKcal().compareTo(BigDecimal.ZERO) > 0)
+            .map(DailyNutritionEntrySnapshot::entryDate)
+            .collect(Collectors.toSet());
+        int streak = 0;
+        LocalDate current = endDate;
+        while (loggedDates.contains(current)) {
+            streak++;
+            current = current.minusDays(1);
+        }
+        return streak;
     }
 
     public NutritionStatisticsResponse getStatistics(UUID userId, LocalDate fromInclusive, LocalDate toInclusive) {
