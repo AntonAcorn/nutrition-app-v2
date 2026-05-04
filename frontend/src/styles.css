@@ -5895,6 +5895,16 @@ ul {
   color: #6b5b4b;
 }
 
+[data-theme="light"] .add-note-btn {
+  color: rgba(20, 33, 61, 0.4);
+}
+[data-theme="light"] .add-note-btn:hover {
+  color: rgba(20, 33, 61, 0.7);
+}
+[data-theme="light"] .add-note-btn--dismiss {
+  color: rgba(20, 33, 61, 0.3);
+}
+
 /* Photo draft totals summary */
 [data-theme="light"] .photo-draft-totals-summary {
   background: rgba(20, 33, 61, 0.04);
