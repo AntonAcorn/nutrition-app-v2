@@ -301,42 +301,72 @@ export function QuickAddSheet({ onAdd, onLogTemplate, onClose, onOpenAnalyzer }:
                 )}
               </>
             ) : (
-              <div className="qs-search-detail">
-                <div className="qs-search-detail__header">
-                  <button type="button" className="qs-search-back" onClick={clearSelection}>← Back</button>
-                  <p className="qs-search-detail__name">{selectedProduct.name}</p>
+              <div className="barcode-product-card">
+                <button type="button" className="qs-search-back" onClick={clearSelection}>← Back</button>
+                <div className="barcode-product-header">
+                  <p className="barcode-product-name">{selectedProduct.name}</p>
+                  <p className="barcode-product-per100">
+                    {Math.round(selectedProduct.caloriesPer100g ?? 0)} kcal per 100 g
+                  </p>
                 </div>
 
-                <div className="qs-search-detail__grams-row">
-                  <label className="qs-search-detail__grams-label">Portion (g)</label>
-                  <input
-                    className="qs-search-detail__grams-input"
-                    type="number"
-                    inputMode="decimal"
-                    min="1"
-                    value={grams}
-                    onChange={e => setGrams(e.target.value)}
-                  />
+                <div className="barcode-portion-section">
+                  <p className="barcode-portion-label">How much did you eat?</p>
+                  <div className="barcode-portion-row">
+                    <button
+                      type="button"
+                      className="barcode-portion-btn"
+                      onClick={() => setGrams(String(Math.max(25, (Number(grams) || 100) - 25)))}
+                    >−</button>
+                    <div className="barcode-portion-input-wrap">
+                      <input
+                        type="number"
+                        min={1}
+                        max={2000}
+                        value={grams}
+                        onChange={e => setGrams(e.target.value)}
+                        className="barcode-portion-input"
+                      />
+                      <span className="barcode-portion-unit">g</span>
+                    </div>
+                    <button
+                      type="button"
+                      className="barcode-portion-btn"
+                      onClick={() => setGrams(String((Number(grams) || 100) + 25))}
+                    >+</button>
+                  </div>
+                  <div className="barcode-quick-portions">
+                    {[50, 100, 150, 200, 250].map(g => (
+                      <button
+                        key={g}
+                        type="button"
+                        className={`barcode-quick-btn${Number(grams) === g ? ' barcode-quick-btn--active' : ''}`}
+                        onClick={() => setGrams(String(g))}
+                      >{g}g</button>
+                    ))}
+                  </div>
                 </div>
 
-                <div className="qs-search-detail__macros">
-                  <div className="qs-search-detail__macro qs-search-detail__macro--cal">
-                    <span className="qs-search-detail__macro-val">{calcMacro(selectedProduct.caloriesPer100g)}</span>
-                    <span className="qs-search-detail__macro-lbl">kcal</span>
+                {gramsNum > 0 && (
+                  <div className="barcode-macros-grid">
+                    <div className="barcode-macro-chip barcode-macro-chip--calories">
+                      <span className="barcode-macro-chip__value">{calcMacro(selectedProduct.caloriesPer100g)}</span>
+                      <span className="barcode-macro-chip__label">kcal</span>
+                    </div>
+                    <div className="barcode-macro-chip barcode-macro-chip--protein">
+                      <span className="barcode-macro-chip__value">{calcMacro(selectedProduct.proteinPer100g)}g</span>
+                      <span className="barcode-macro-chip__label">protein</span>
+                    </div>
+                    <div className="barcode-macro-chip barcode-macro-chip--fat">
+                      <span className="barcode-macro-chip__value">{calcMacro(selectedProduct.fatPer100g)}g</span>
+                      <span className="barcode-macro-chip__label">fat</span>
+                    </div>
+                    <div className="barcode-macro-chip barcode-macro-chip--carbs">
+                      <span className="barcode-macro-chip__value">{calcMacro(selectedProduct.carbsPer100g)}g</span>
+                      <span className="barcode-macro-chip__label">carbs</span>
+                    </div>
                   </div>
-                  <div className="qs-search-detail__macro">
-                    <span className="qs-search-detail__macro-val">{calcMacro(selectedProduct.proteinPer100g)}g</span>
-                    <span className="qs-search-detail__macro-lbl">protein</span>
-                  </div>
-                  <div className="qs-search-detail__macro">
-                    <span className="qs-search-detail__macro-val">{calcMacro(selectedProduct.fatPer100g)}g</span>
-                    <span className="qs-search-detail__macro-lbl">fat</span>
-                  </div>
-                  <div className="qs-search-detail__macro">
-                    <span className="qs-search-detail__macro-val">{calcMacro(selectedProduct.carbsPer100g)}g</span>
-                    <span className="qs-search-detail__macro-lbl">carbs</span>
-                  </div>
-                </div>
+                )}
 
                 <button
                   type="button"
