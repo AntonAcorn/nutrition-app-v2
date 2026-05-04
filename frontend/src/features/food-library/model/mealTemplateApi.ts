@@ -38,10 +38,10 @@ export function deleteTemplate(id: string): Promise<void> {
   return request(`/api/meal-templates/${id}`, { method: 'DELETE' })
 }
 
-export function logTemplate(id: string, entryDate: string): Promise<void> {
+export function logTemplate(id: string, entryDate: string, slotType?: string): Promise<void> {
   return request(`/api/meal-templates/${id}/log`, {
     method: 'POST',
-    body: JSON.stringify({ entryDate }),
+    body: JSON.stringify({ entryDate, slotType }),
   })
 }
 

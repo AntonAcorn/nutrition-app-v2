@@ -8,6 +8,7 @@ export interface MealPayload {
   fiberGrams: number
   carbsGrams?: number
   mealName?: string
+  slotType?: string
 }
 
 export async function addMealManually(payload: MealPayload): Promise<void> {

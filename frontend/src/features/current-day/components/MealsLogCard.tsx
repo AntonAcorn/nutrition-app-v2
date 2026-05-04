@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
-import { listMealLog, deleteMealLogEntry, updateMealLogEntry } from '../model/mealLogApi'
+import { listMealLog, deleteMealLogEntry, updateMealLogEntry, SLOT_LABELS } from '../model/mealLogApi'
 import { getTodayLocalDateInputValue } from '../../../shared/lib/date'
-import type { MealLogEntry } from '../model/mealLogApi'
+import type { MealSlot, MealLogEntry } from '../model/mealLogApi'
 
 interface Props {
   refreshToken?: number
@@ -29,8 +29,12 @@ function toEditForm(m: MealLogEntry): EditForm {
   }
 }
 
+function slotTotalKcal(slot: MealSlot): number {
+  return Math.round(slot.items.reduce((sum, i) => sum + i.caloriesKcal, 0))
+}
+
 export function MealsLogCard({ refreshToken = 0, onDeleted, onUpdated }: Props) {
-  const [meals, setMeals] = useState<MealLogEntry[]>([])
+  const [slots, setSlots] = useState<MealSlot[]>([])
   const [deletingId, setDeletingId] = useState<string | null>(null)
   const [confirmId, setConfirmId] = useState<string | null>(null)
   const [deleteError, setDeleteError] = useState('')
@@ -40,10 +44,11 @@ export function MealsLogCard({ refreshToken = 0, onDeleted, onUpdated }: Props) 
   const [editError, setEditError] = useState('')
 
   useEffect(() => {
-    listMealLog(getTodayLocalDateInputValue()).then(setMeals).catch(() => {})
+    listMealLog(getTodayLocalDateInputValue()).then(setSlots).catch(() => {})
   }, [refreshToken])
 
-  if (meals.length === 0) return null
+  const totalItems = slots.reduce((n, s) => n + s.items.length, 0)
+  if (totalItems === 0) return null
 
   function openEdit(m: MealLogEntry) {
     setEditingId(m.id)
@@ -74,7 +79,10 @@ export function MealsLogCard({ refreshToken = 0, onDeleted, onUpdated }: Props) 
         carbsG: parseFloat(editForm.carbsG) || 0,
         fiberG: parseFloat(editForm.fiberG) || 0,
       })
-      setMeals(prev => prev.map(m => m.id === id ? updated : m))
+      setSlots(prev => prev.map(slot => ({
+        ...slot,
+        items: slot.items.map(m => m.id === id ? updated : m),
+      })))
       setEditingId(null)
       setEditForm(null)
       onUpdated?.()
@@ -91,7 +99,11 @@ export function MealsLogCard({ refreshToken = 0, onDeleted, onUpdated }: Props) 
     setDeleteError('')
     try {
       await deleteMealLogEntry(id)
-      setMeals(prev => prev.filter(m => m.id !== id))
+      setSlots(prev =>
+        prev
+          .map(slot => ({ ...slot, items: slot.items.filter(m => m.id !== id) }))
+          .filter(slot => slot.items.length > 0)
+      )
       onDeleted()
     } catch {
       setDeleteError('Failed to delete. Please try again.')
@@ -104,102 +116,111 @@ export function MealsLogCard({ refreshToken = 0, onDeleted, onUpdated }: Props) 
     <section className="panel meals-log-card">
       <p className="meals-log-card__title">Today's meals</p>
       {deleteError ? <p className="error-text" style={{ marginBottom: '0.5rem' }}>{deleteError}</p> : null}
-      <div className="meals-log-list">
-        {meals.map(m => (
-          <div key={m.id} className={`meal-log-row${editingId === m.id ? ' meal-log-row--editing' : ''}`}>
-            {editingId === m.id && editForm ? (
-              <div className="meal-log-edit-form">
-                <input
-                  className="meal-log-edit-name"
-                  type="text"
-                  value={editForm.name}
-                  onChange={e => setEditForm(f => f ? { ...f, name: e.target.value } : f)}
-                  placeholder="Meal name"
-                />
-                <div className="meal-log-edit-macros">
-                  {([
-                    { key: 'caloriesKcal', label: 'Kcal' },
-                    { key: 'proteinG',     label: 'P, g' },
-                    { key: 'fatG',         label: 'F, g' },
-                    { key: 'carbsG',       label: 'C, g' },
-                    { key: 'fiberG',       label: 'Fi, g' },
-                  ] as const).map(({ key, label }) => (
-                    <label key={key} className="meal-log-edit-macro">
-                      <span>{label}</span>
-                      <input
-                        type="number"
-                        min="0"
-                        step="0.1"
-                        value={editForm[key]}
-                        onChange={e => setEditForm(f => f ? { ...f, [key]: e.target.value } : f)}
-                      />
-                    </label>
-                  ))}
-                </div>
-                {editError && <p className="error-text" style={{ fontSize: '0.78rem', margin: '4px 0 0' }}>{editError}</p>}
-                <div className="meal-log-edit-actions">
-                  <button
-                    type="button"
-                    className="meal-log-edit-save"
-                    onClick={() => saveEdit(m.id)}
-                    disabled={savingId === m.id}
-                  >
-                    {savingId === m.id ? 'Saving…' : 'Save'}
-                  </button>
-                  <button type="button" className="meal-log-edit-cancel" onClick={cancelEdit}>
-                    Cancel
-                  </button>
-                </div>
-              </div>
-            ) : (
-              <>
-                <div className="meal-log-row__info">
-                  <p className="meal-log-row__name">{m.name}</p>
-                  <p className="meal-log-row__meta">{Math.round(m.caloriesKcal)} kcal</p>
-                </div>
-                <div className="meal-log-row__actions">
-                  <button
-                    type="button"
-                    className="meal-log-row__edit"
-                    onClick={() => openEdit(m)}
-                    aria-label={`Edit ${m.name}`}
-                  >
-                    ✎
-                  </button>
-                  {confirmId === m.id ? (
-                    <div className="meal-log-row__confirm">
+
+      {slots.map(slot => (
+        <div key={slot.slotId} className="meals-log-slot">
+          <div className="meals-log-slot__header">
+            <span className="meals-log-slot__name">{SLOT_LABELS[slot.slotType]}</span>
+            <span className="meals-log-slot__kcal">{slotTotalKcal(slot)} kcal</span>
+          </div>
+          <div className="meals-log-list">
+            {slot.items.map(m => (
+              <div key={m.id} className={`meal-log-row${editingId === m.id ? ' meal-log-row--editing' : ''}`}>
+                {editingId === m.id && editForm ? (
+                  <div className="meal-log-edit-form">
+                    <input
+                      className="meal-log-edit-name"
+                      type="text"
+                      value={editForm.name}
+                      onChange={e => setEditForm(f => f ? { ...f, name: e.target.value } : f)}
+                      placeholder="Meal name"
+                    />
+                    <div className="meal-log-edit-macros">
+                      {([
+                        { key: 'caloriesKcal', label: 'Kcal' },
+                        { key: 'proteinG',     label: 'P, g' },
+                        { key: 'fatG',         label: 'F, g' },
+                        { key: 'carbsG',       label: 'C, g' },
+                        { key: 'fiberG',       label: 'Fi, g' },
+                      ] as const).map(({ key, label }) => (
+                        <label key={key} className="meal-log-edit-macro">
+                          <span>{label}</span>
+                          <input
+                            type="number"
+                            min="0"
+                            step="0.1"
+                            value={editForm[key]}
+                            onChange={e => setEditForm(f => f ? { ...f, [key]: e.target.value } : f)}
+                          />
+                        </label>
+                      ))}
+                    </div>
+                    {editError && <p className="error-text" style={{ fontSize: '0.78rem', margin: '4px 0 0' }}>{editError}</p>}
+                    <div className="meal-log-edit-actions">
                       <button
                         type="button"
-                        className="meal-log-row__confirm-yes"
-                        onClick={() => handleDelete(m.id)}
-                        disabled={deletingId === m.id}
+                        className="meal-log-edit-save"
+                        onClick={() => saveEdit(m.id)}
+                        disabled={savingId === m.id}
                       >
-                        {deletingId === m.id ? '…' : 'Delete'}
+                        {savingId === m.id ? 'Saving…' : 'Save'}
                       </button>
-                      <button
-                        type="button"
-                        className="meal-log-row__confirm-no"
-                        onClick={() => setConfirmId(null)}
-                      >
+                      <button type="button" className="meal-log-edit-cancel" onClick={cancelEdit}>
                         Cancel
                       </button>
                     </div>
-                  ) : (
-                    <button
-                      type="button"
-                      className="meal-log-row__delete"
-                      onClick={() => setConfirmId(m.id)}
-                      aria-label={`Delete ${m.name}`}
-                    >
-                      ✕
-                    </button>
-                  )}
-                </div>
-              </>
-            )}
+                  </div>
+                ) : (
+                  <>
+                    <div className="meal-log-row__info">
+                      <p className="meal-log-row__name">{m.name}</p>
+                      <p className="meal-log-row__meta">{Math.round(m.caloriesKcal)} kcal</p>
+                    </div>
+                    <div className="meal-log-row__actions">
+                      <button
+                        type="button"
+                        className="meal-log-row__edit"
+                        onClick={() => openEdit(m)}
+                        aria-label={`Edit ${m.name}`}
+                      >
+                        ✎
+                      </button>
+                      {confirmId === m.id ? (
+                        <div className="meal-log-row__confirm">
+                          <button
+                            type="button"
+                            className="meal-log-row__confirm-yes"
+                            onClick={() => handleDelete(m.id)}
+                            disabled={deletingId === m.id}
+                          >
+                            {deletingId === m.id ? '…' : 'Delete'}
+                          </button>
+                          <button
+                            type="button"
+                            className="meal-log-row__confirm-no"
+                            onClick={() => setConfirmId(null)}
+                          >
+                            Cancel
+                          </button>
+                        </div>
+                      ) : (
+                        <button
+                          type="button"
+                          className="meal-log-row__delete"
+                          onClick={() => setConfirmId(m.id)}
+                          aria-label={`Delete ${m.name}`}
+                        >
+                          ✕
+                        </button>
+                      )}
+                    </div>
+                  </>
+                )}
+              </div>
+            ))}
           </div>
-        ))}
-      </div>
+        </div>
+      ))}
     </section>
   )
 }

@@ -91,7 +91,8 @@ public class DefaultPhotoAnalysisDraftService implements PhotoAnalysisDraftServi
                 carbs,
                 request.notes(),
                 mealName,
-                "photo"
+                "photo",
+                null
         ));
 
         entity.setStatus(PhotoAnalysisDraftStatus.CONFIRMED);

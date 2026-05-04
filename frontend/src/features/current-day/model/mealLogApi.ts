@@ -10,7 +10,29 @@ export interface MealLogEntry {
   createdAt: string
 }
 
-export async function listMealLog(date: string): Promise<MealLogEntry[]> {
+export interface MealSlot {
+  slotId: string
+  slotType: 'BREAKFAST' | 'LUNCH' | 'DINNER' | 'SNACK'
+  sortOrder: number
+  items: MealLogEntry[]
+}
+
+export const SLOT_LABELS: Record<MealSlot['slotType'], string> = {
+  BREAKFAST: 'Breakfast',
+  LUNCH: 'Lunch',
+  DINNER: 'Dinner',
+  SNACK: 'Snack',
+}
+
+export function defaultSlotByTime(): MealSlot['slotType'] {
+  const hour = new Date().getHours()
+  if (hour < 11) return 'BREAKFAST'
+  if (hour < 15) return 'LUNCH'
+  if (hour < 20) return 'DINNER'
+  return 'SNACK'
+}
+
+export async function listMealLog(date: string): Promise<MealSlot[]> {
   const res = await fetch(`/api/history/meals?date=${date}`, { credentials: 'include' })
   if (!res.ok) throw new Error('Failed to load meals')
   return res.json()

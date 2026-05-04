@@ -76,7 +76,7 @@ public class TodaySummaryController {
         nutritionHistoryService.addToDailyTotals(new NutritionHistoryService.AddToDailyTotalsCommand(
             resolvedUserId, safeDate,
             request.caloriesConsumedKcal(), request.proteinGrams(), request.fatGrams(), request.fiberGrams(),
-            request.carbsGrams(), null, mealName, "manual"
+            request.carbsGrams(), null, mealName, "manual", request.slotType()
         ));
         return nutritionHistoryService.getTodaySummary(resolvedUserId, safeDate);
     }

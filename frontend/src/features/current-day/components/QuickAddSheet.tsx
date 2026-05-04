@@ -3,10 +3,14 @@ import { listTemplates } from '../../food-library/model/mealTemplateApi'
 import { searchFood } from '../../barcode/model/barcodeApi'
 import type { FoodProduct } from '../../barcode/model/barcodeApi'
 import type { MealTemplate } from '../../../shared/types/nutrition'
+import { SLOT_LABELS, defaultSlotByTime } from '../model/mealLogApi'
+import type { MealSlot } from '../model/mealLogApi'
+
+const SLOT_TYPES: MealSlot['slotType'][] = ['BREAKFAST', 'LUNCH', 'DINNER', 'SNACK']
 
 interface Props {
-  onAdd: (calories: number, protein: number, fat: number, fiber: number, carbs: number, name?: string) => Promise<void>
-  onLogTemplate: (templateId: string) => Promise<void>
+  onAdd: (calories: number, protein: number, fat: number, fiber: number, carbs: number, name?: string, slotType?: string) => Promise<void>
+  onLogTemplate: (templateId: string, slotType: string) => Promise<void>
   onClose: () => void
   onOpenAnalyzer?: (mode: 'photo' | 'voice' | 'barcode') => void
 }
@@ -42,6 +46,7 @@ function round1(v: number | null | undefined): number {
 }
 
 export function QuickAddSheet({ onAdd, onLogTemplate, onClose, onOpenAnalyzer }: Props) {
+  const [slot, setSlot] = useState<MealSlot['slotType']>(defaultSlotByTime())
   const [mode, setMode] = useState<'library' | 'search' | 'manual'>('library')
 
   // library
@@ -150,7 +155,7 @@ export function QuickAddSheet({ onAdd, onLogTemplate, onClose, onOpenAnalyzer }:
       const fat   = calcMacro(selectedProduct.fatPer100g)
       const fib   = calcMacro(selectedProduct.fiberPer100g)
       const carbs = calcMacro(selectedProduct.carbsPer100g)
-      await onAdd(kcal, prot, fat, fib, carbs, selectedProduct.name)
+      await onAdd(kcal, prot, fat, fib, carbs, selectedProduct.name, slot)
       setLoggedName(`${selectedProduct.name} · ${kcal} kcal`)
       setTimeout(() => onClose(), 1400)
     } catch {
@@ -163,7 +168,7 @@ export function QuickAddSheet({ onAdd, onLogTemplate, onClose, onOpenAnalyzer }:
     setLoggingId(id)
     setLibError('')
     try {
-      await onLogTemplate(id)
+      await onLogTemplate(id, slot)
       setLoggedName(t ? `${t.name} · ${Math.round(t.totalCalories)} kcal` : 'Meal logged')
       setLoggingId(null)
       setTimeout(() => onClose(), 1400)
@@ -179,7 +184,7 @@ export function QuickAddSheet({ onAdd, onLogTemplate, onClose, onOpenAnalyzer }:
     setSaving(true)
     setError('')
     try {
-      await onAdd(kcal, Number(protein) || 0, Number(fat) || 0, Number(fiber) || 0, Number(carbs) || 0, mealName.trim() || undefined)
+      await onAdd(kcal, Number(protein) || 0, Number(fat) || 0, Number(fiber) || 0, Number(carbs) || 0, mealName.trim() || undefined, slot)
       const label = mealName.trim() ? `${mealName.trim()} · ${kcal} kcal` : `${kcal} kcal`
       setLoggedName(label)
       setTimeout(() => onClose(), 1400)
@@ -229,6 +234,21 @@ export function QuickAddSheet({ onAdd, onLogTemplate, onClose, onOpenAnalyzer }:
               <span className="qs-analyzer-btn__icon">▦</span>
               <span>Barcode</span>
             </button>
+          </div>
+        )}
+
+        {!loggedName && (
+          <div className="qs-slot-toggle">
+            {SLOT_TYPES.map(s => (
+              <button
+                key={s}
+                type="button"
+                className={`qs-slot-btn${slot === s ? ' qs-slot-btn--active' : ''}`}
+                onClick={() => setSlot(s)}
+              >
+                {SLOT_LABELS[s]}
+              </button>
+            ))}
           </div>
         )}
 

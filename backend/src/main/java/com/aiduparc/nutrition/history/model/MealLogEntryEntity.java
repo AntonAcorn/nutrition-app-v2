@@ -42,6 +42,9 @@ public class MealLogEntryEntity {
     @Column(name = "fiber_g", nullable = false, precision = 10, scale = 2)
     private BigDecimal fiberG;
 
+    @Column(name = "meal_slot_id")
+    private UUID mealSlotId;
+
     @Column(name = "source")
     private String source;
 
@@ -71,6 +74,8 @@ public class MealLogEntryEntity {
     public void setCarbsG(BigDecimal carbsG) { this.carbsG = carbsG; }
     public BigDecimal getFiberG() { return fiberG; }
     public void setFiberG(BigDecimal fiberG) { this.fiberG = fiberG; }
+    public UUID getMealSlotId() { return mealSlotId; }
+    public void setMealSlotId(UUID mealSlotId) { this.mealSlotId = mealSlotId; }
     public String getSource() { return source; }
     public void setSource(String source) { this.source = source; }
     public OffsetDateTime getCreatedAt() { return createdAt; }

@@ -69,17 +69,17 @@ export function CurrentDayTab({ refreshToken = 0, successMessage = '', onDayUpda
     }
   }, [refreshToken])
 
-  async function handleTemplateLog(templateId: string) {
-    await logTemplate(templateId, getTodayLocalDateInputValue())
+  async function handleTemplateLog(templateId: string, slotType?: string) {
+    await logTemplate(templateId, getTodayLocalDateInputValue(), slotType)
     const nextSummary = await fetchTodaySummary()
     setSummary(nextSummary)
     onDayUpdated?.()
   }
 
-  async function handleMealAdd(kcal: number, protein: number, fat: number, fiber: number, carbs: number, name?: string) {
+  async function handleMealAdd(kcal: number, protein: number, fat: number, fiber: number, carbs: number, name?: string, slotType?: string) {
     setSavingNutrition(true)
     try {
-      await addMealManually({ caloriesConsumedKcal: kcal, proteinGrams: protein, fatGrams: fat, fiberGrams: fiber, carbsGrams: carbs, mealName: name })
+      await addMealManually({ caloriesConsumedKcal: kcal, proteinGrams: protein, fatGrams: fat, fiberGrams: fiber, carbsGrams: carbs, mealName: name, slotType })
       const nextSummary = await fetchTodaySummary()
       setSummary(nextSummary)
       setShowQuickAdd(false)

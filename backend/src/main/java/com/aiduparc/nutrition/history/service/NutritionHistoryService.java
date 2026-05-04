@@ -1,6 +1,7 @@
 package com.aiduparc.nutrition.history.service;
 
 import com.aiduparc.nutrition.history.api.MealLogEntryResponse;
+import com.aiduparc.nutrition.history.api.MealSlotResponse;
 import com.aiduparc.nutrition.history.api.NutritionBalanceSummaryResponse;
 import com.aiduparc.nutrition.history.api.NutritionStatisticsPointResponse;
 import com.aiduparc.nutrition.history.api.NutritionStatisticsResponse;
@@ -8,8 +9,10 @@ import com.aiduparc.nutrition.history.api.TodaySummaryResponse;
 import com.aiduparc.nutrition.history.model.DailyNutritionEntryEntity;
 import com.aiduparc.nutrition.history.model.DailyNutritionEntrySnapshot;
 import com.aiduparc.nutrition.history.model.MealLogEntryEntity;
+import com.aiduparc.nutrition.history.model.MealSlotEntity;
 import com.aiduparc.nutrition.history.repository.DailyNutritionEntryRepository;
 import com.aiduparc.nutrition.history.repository.MealLogEntryRepository;
+import com.aiduparc.nutrition.history.repository.MealSlotRepository;
 import com.aiduparc.nutrition.notifications.TelegramNotificationService;
 import com.aiduparc.nutrition.user.service.UserProfileService;
 import jakarta.validation.constraints.NotNull;
@@ -17,7 +20,11 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.time.YearMonth;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import org.slf4j.Logger;
@@ -34,19 +41,34 @@ public class NutritionHistoryService {
     private static final Logger log = LoggerFactory.getLogger(NutritionHistoryService.class);
     private static final BigDecimal DEFAULT_DAILY_TARGET_KCAL = BigDecimal.valueOf(2000);
 
+    public static final String SLOT_BREAKFAST = "BREAKFAST";
+    public static final String SLOT_LUNCH     = "LUNCH";
+    public static final String SLOT_DINNER    = "DINNER";
+    public static final String SLOT_SNACK     = "SNACK";
+
+    private static final Map<String, Integer> SLOT_ORDER = Map.of(
+        SLOT_BREAKFAST, 0,
+        SLOT_LUNCH,     1,
+        SLOT_DINNER,    2,
+        SLOT_SNACK,     3
+    );
+
     private final DailyNutritionEntryRepository repository;
     private final MealLogEntryRepository mealLogRepository;
+    private final MealSlotRepository mealSlotRepository;
     private final UserProfileService userProfileService;
     private final TelegramNotificationService telegramNotificationService;
 
     public NutritionHistoryService(
             DailyNutritionEntryRepository repository,
             MealLogEntryRepository mealLogRepository,
+            MealSlotRepository mealSlotRepository,
             UserProfileService userProfileService,
             TelegramNotificationService telegramNotificationService
     ) {
         this.repository = repository;
         this.mealLogRepository = mealLogRepository;
+        this.mealSlotRepository = mealSlotRepository;
         this.userProfileService = userProfileService;
         this.telegramNotificationService = telegramNotificationService;
     }
@@ -239,15 +261,58 @@ public class NutritionHistoryService {
         return result;
     }
 
-    public List<MealLogEntryResponse> getMealLog(UUID userId, LocalDate date) {
-        return mealLogRepository.findByUserIdAndEntryDateOrderByCreatedAtAsc(userId, date)
-            .stream()
-            .map(e -> new MealLogEntryResponse(
-                e.getId(), e.getName(), e.getCaloriesKcal(),
-                e.getProteinG(), e.getFatG(), e.getCarbsG(), e.getFiberG(),
-                e.getSource(), e.getCreatedAt()
+    public List<MealSlotResponse> getMealLog(UUID userId, LocalDate date) {
+        List<MealSlotEntity> slots = mealSlotRepository.findByUserIdAndEntryDateOrderBySortOrderAsc(userId, date);
+        List<MealLogEntryEntity> entries = mealLogRepository.findByUserIdAndEntryDateOrderByCreatedAtAsc(userId, date);
+
+        Map<UUID, List<MealLogEntryResponse>> bySlot = new LinkedHashMap<>();
+        for (MealSlotEntity slot : slots) {
+            bySlot.put(slot.getId(), new ArrayList<>());
+        }
+        for (MealLogEntryEntity e : entries) {
+            if (e.getMealSlotId() != null) {
+                bySlot.computeIfAbsent(e.getMealSlotId(), k -> new ArrayList<>())
+                    .add(toEntryResponse(e));
+            }
+        }
+
+        return slots.stream()
+            .filter(slot -> !bySlot.getOrDefault(slot.getId(), List.of()).isEmpty())
+            .map(slot -> new MealSlotResponse(
+                slot.getId(),
+                slot.getSlotType(),
+                slot.getSortOrder(),
+                bySlot.get(slot.getId())
             ))
             .toList();
+    }
+
+    @Transactional
+    public MealSlotEntity getOrCreateSlot(UUID userId, LocalDate date, String slotType) {
+        String normalizedType = normalizeSlotType(slotType);
+        return mealSlotRepository.findByUserIdAndEntryDateAndSlotType(userId, date, normalizedType)
+            .orElseGet(() -> {
+                MealSlotEntity slot = new MealSlotEntity();
+                slot.setUserId(userId);
+                slot.setEntryDate(date);
+                slot.setSlotType(normalizedType);
+                slot.setSortOrder(SLOT_ORDER.getOrDefault(normalizedType, 3));
+                return mealSlotRepository.save(slot);
+            });
+    }
+
+    private static String normalizeSlotType(String slotType) {
+        if (slotType == null || slotType.isBlank()) return SLOT_SNACK;
+        String upper = slotType.trim().toUpperCase();
+        return SLOT_ORDER.containsKey(upper) ? upper : SLOT_SNACK;
+    }
+
+    private static MealLogEntryResponse toEntryResponse(MealLogEntryEntity e) {
+        return new MealLogEntryResponse(
+            e.getId(), e.getName(), e.getCaloriesKcal(),
+            e.getProteinG(), e.getFatG(), e.getCarbsG(), e.getFiberG(),
+            e.getSource(), e.getCreatedAt()
+        );
     }
 
     @Transactional
@@ -315,9 +380,11 @@ public class NutritionHistoryService {
     }
 
     private void saveMealLogEntry(AddToDailyTotalsCommand command) {
+        MealSlotEntity slot = getOrCreateSlot(command.userId(), command.entryDate(), command.slotType());
         var entry = new MealLogEntryEntity();
         entry.setUserId(command.userId());
         entry.setEntryDate(command.entryDate());
+        entry.setMealSlotId(slot.getId());
         entry.setName(command.mealName() != null && !command.mealName().isBlank() ? command.mealName() : "Manual entry");
         entry.setCaloriesKcal(defaultBigDecimal(command.caloriesConsumedKcal()));
         entry.setProteinG(defaultBigDecimal(command.proteinGrams()));
@@ -384,14 +451,15 @@ public class NutritionHistoryService {
         BigDecimal carbsGrams,
         String notes,
         String mealName,
-        String source
+        String source,
+        String slotType
     ) {
         public AddToDailyTotalsCommand(
             UUID userId, LocalDate entryDate, BigDecimal caloriesConsumedKcal,
             BigDecimal proteinGrams, BigDecimal fatGrams, BigDecimal fiberGrams,
             BigDecimal carbsGrams, String notes
         ) {
-            this(userId, entryDate, caloriesConsumedKcal, proteinGrams, fatGrams, fiberGrams, carbsGrams, notes, null, null);
+            this(userId, entryDate, caloriesConsumedKcal, proteinGrams, fatGrams, fiberGrams, carbsGrams, notes, null, null, null);
         }
     }
     @Transactional

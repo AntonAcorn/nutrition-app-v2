@@ -77,7 +77,7 @@ public class MealTemplateService {
     }
 
     @Transactional
-    public void log(UUID userId, UUID templateId, LocalDate entryDate) {
+    public void log(UUID userId, UUID templateId, LocalDate entryDate, String slotType) {
         var entity = repository.findByIdAndNutritionUserId(templateId, userId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Template not found"));
 
@@ -91,7 +91,8 @@ public class MealTemplateService {
                 entity.getTotalCarbs(),
                 null,
                 entity.getName(),
-                "template"
+                "template",
+                slotType
         ));
         log.info("meal-template logged userId={} templateId={} entryDate={} calories={}",
                 userId, templateId, entryDate, entity.getTotalCalories());

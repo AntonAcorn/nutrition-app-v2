@@ -31,7 +31,7 @@ public class MealLogController {
     }
 
     @GetMapping
-    public List<MealLogEntryResponse> getMeals(
+    public List<MealSlotResponse> getMeals(
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date,
             HttpSession session
     ) {

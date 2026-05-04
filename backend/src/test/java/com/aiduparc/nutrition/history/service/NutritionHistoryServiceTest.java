@@ -9,8 +9,10 @@ import com.aiduparc.nutrition.history.api.NutritionStatisticsResponse;
 import com.aiduparc.nutrition.history.api.TodaySummaryResponse;
 import com.aiduparc.nutrition.history.model.DailyNutritionEntryEntity;
 import com.aiduparc.nutrition.history.model.MealLogEntryEntity;
+import com.aiduparc.nutrition.history.model.MealSlotEntity;
 import com.aiduparc.nutrition.history.repository.DailyNutritionEntryRepository;
 import com.aiduparc.nutrition.history.repository.MealLogEntryRepository;
+import com.aiduparc.nutrition.history.repository.MealSlotRepository;
 import com.aiduparc.nutrition.notifications.TelegramNotificationService;
 import com.aiduparc.nutrition.user.service.UserProfileService;
 import java.math.BigDecimal;
@@ -40,6 +42,9 @@ class NutritionHistoryServiceTest {
     private MealLogEntryRepository mealLogRepository;
 
     @Mock
+    private MealSlotRepository mealSlotRepository;
+
+    @Mock
     private UserProfileService userProfileService;
 
     @Mock
@@ -53,6 +58,9 @@ class NutritionHistoryServiceTest {
         lenient().when(userProfileService.findByNutritionUserId(any())).thenReturn(Optional.empty());
         lenient().when(userProfileService.getMacroTargets(any())).thenReturn(UserProfileService.MacroTargets.DEFAULT);
         lenient().when(mealLogRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
+        lenient().when(mealSlotRepository.findByUserIdAndEntryDateAndSlotType(any(), any(), any()))
+            .thenReturn(Optional.empty());
+        lenient().when(mealSlotRepository.save(any(MealSlotEntity.class))).thenAnswer(inv -> inv.getArgument(0));
     }
 
     @Test
