@@ -120,6 +120,7 @@ class DefaultPhotoAnalysisDraftServiceTest {
                 userId,
                 entryDate,
                 null,
+                null,
                 BigDecimal.valueOf(420),
                 null,
                 BigDecimal.valueOf(30),

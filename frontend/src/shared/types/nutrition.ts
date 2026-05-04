@@ -1,6 +1,7 @@
 export interface TodaySummary {
   dateLabel: string
   weightKg: number | null
+  weightUpdatedAt: string | null
   consumedCalories: number
   dailyTargetCalories: number
   remainingCalories: number

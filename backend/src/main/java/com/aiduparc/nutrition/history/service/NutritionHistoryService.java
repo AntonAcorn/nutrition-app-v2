@@ -19,6 +19,8 @@ import jakarta.validation.constraints.NotNull;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDate;
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.time.YearMonth;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -103,6 +105,7 @@ public class NutritionHistoryService {
             userId,
             entryDate,
             snapshot.weightKg(),
+            snapshot.weightUpdatedAt(),
             consumedCalories,
             dailyTargetCalories,
             remainingCalories,
@@ -179,17 +182,23 @@ public class NutritionHistoryService {
 
     @Transactional
     public DailyNutritionEntrySnapshot updateWeight(UUID userId, LocalDate entryDate, BigDecimal weightKg) {
-        DailyNutritionEntrySnapshot current = getOrCreateEmptySnapshot(userId, entryDate);
+        DailyNutritionEntryEntity entity = repository
+            .findByUserIdAndEntryDate(userId, entryDate)
+            .orElseGet(DailyNutritionEntryEntity::new);
 
-        DailyNutritionEntrySnapshot result = upsert(new UpsertDailyNutritionEntryCommand(
-            userId, entryDate,
-            defaultBigDecimal(current.caloriesConsumedKcal()),
-            current.calorieTargetKcal(), weightKg,
-            current.proteinGrams(), current.fatGrams(), current.fiberGrams(), current.carbsGrams(),
-            current.notes(), current.waterGlasses()
-        ));
+        if (entity.getUserId() == null) {
+            entity.setUserId(userId);
+            entity.setEntryDate(entryDate);
+            entity.setCaloriesConsumedKcal(BigDecimal.ZERO);
+            entity.setWaterGlasses(0);
+        }
+
+        entity.setWeightKg(weightKg);
+        entity.setWeightUpdatedAt(OffsetDateTime.now(ZoneOffset.UTC));
+
+        DailyNutritionEntryEntity saved = repository.save(entity);
         telegramNotificationService.notifyActivity(userId, "weight update");
-        return result;
+        return DailyNutritionEntrySnapshot.fromEntity(saved);
     }
 
     @Transactional
@@ -491,7 +500,7 @@ public class NutritionHistoryService {
         return findByUserAndDate(userId, entryDate)
             .orElseGet(() -> new DailyNutritionEntrySnapshot(
                 null, userId, entryDate,
-                null, BigDecimal.ZERO, BigDecimal.ZERO,
+                null, null, BigDecimal.ZERO, BigDecimal.ZERO,
                 BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO,
                 0, null, null, null
             ));
@@ -542,7 +551,7 @@ public class NutritionHistoryService {
 
             completed.add(new DailyNutritionEntrySnapshot(
                 null, userId, cursor,
-                null, null, null, null, null, null, null, 0, null, null, null
+                null, null, null, null, null, null, null, null, 0, null, null, null
             ));
         }
 

@@ -48,6 +48,7 @@ class TodaySummaryControllerTest {
                         userId,
                         entryDate,
                         new BigDecimal("82.40"),
+                        null,
                         new BigDecimal("1640.00"),
                         new BigDecimal("2100.00"),
                         new BigDecimal("460.00"),
@@ -88,7 +89,7 @@ class TodaySummaryControllerTest {
         when(nutritionHistoryService.getTodaySummary(userId, entryDate)).thenReturn(
             new TodaySummaryResponse(
                 userId, entryDate,
-                null,
+                null, null,
                 new BigDecimal("1200.00"),
                 new BigDecimal("2000.00"),
                 new BigDecimal("800.00"),

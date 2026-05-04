@@ -57,6 +57,9 @@ public class DailyNutritionEntryEntity {
     @Column(name = "notes")
     private String notes;
 
+    @Column(name = "weight_updated_at")
+    private OffsetDateTime weightUpdatedAt;
+
     @Column(name = "created_at", nullable = false, updatable = false)
     private OffsetDateTime createdAt;
 
@@ -157,6 +160,14 @@ public class DailyNutritionEntryEntity {
 
     public void setNotes(String notes) {
         this.notes = notes;
+    }
+
+    public OffsetDateTime getWeightUpdatedAt() {
+        return weightUpdatedAt;
+    }
+
+    public void setWeightUpdatedAt(OffsetDateTime weightUpdatedAt) {
+        this.weightUpdatedAt = weightUpdatedAt;
     }
 
     public OffsetDateTime getCreatedAt() {

@@ -56,7 +56,12 @@ export async function getTodayActiveCalories(): Promise<number> {
   }
 }
 
-export async function getLatestWeightFromHealth(): Promise<number | null> {
+export interface HealthWeightSample {
+  weightKg: number
+  measuredAt: Date
+}
+
+export async function getLatestWeightFromHealth(): Promise<HealthWeightSample | null> {
   if (!isHealthKitSupported()) return null
   try {
     const now = new Date()
@@ -70,7 +75,10 @@ export async function getLatestWeightFromHealth(): Promise<number | null> {
       ascending: false,
     })
     if (samples.length === 0) return null
-    return Math.round(samples[0].value * 10) / 10
+    return {
+      weightKg: Math.round(samples[0].value * 10) / 10,
+      measuredAt: new Date(samples[0].endDate),
+    }
   } catch {
     return null
   }

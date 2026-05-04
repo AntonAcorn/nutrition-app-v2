@@ -55,14 +55,20 @@ export function CurrentDayTab({ refreshToken = 0, successMessage = '', onDayUpda
         const nextSummary = await fetchTodaySummary()
         if (!cancelled) {
           setSummary(nextSummary)
-          if (nextSummary.weightKg != null) {
-            setWeightInput(String(nextSummary.weightKg))
-          } else if (isHealthKitSupported()) {
-            const healthWeight = await getLatestWeightFromHealth()
-            if (!cancelled && healthWeight != null) {
-              setWeightInput(String(healthWeight))
-              setWeightFromHealth(true)
+          if (isHealthKitSupported()) {
+            const healthSample = await getLatestWeightFromHealth()
+            if (!cancelled) {
+              const dbTime = nextSummary.weightUpdatedAt ? new Date(nextSummary.weightUpdatedAt) : null
+              const healthIsNewer = healthSample != null && (dbTime == null || healthSample.measuredAt > dbTime)
+              if (healthIsNewer) {
+                setWeightInput(String(healthSample!.weightKg))
+                setWeightFromHealth(true)
+              } else if (nextSummary.weightKg != null) {
+                setWeightInput(String(nextSummary.weightKg))
+              }
             }
+          } else if (nextSummary.weightKg != null) {
+            setWeightInput(String(nextSummary.weightKg))
           }
         }
       } catch (err) {
