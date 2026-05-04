@@ -425,12 +425,14 @@ ul {
 
 .tabs-header--dark {
   width: 100%;
-  justify-content: space-between;
+  justify-content: flex-start;
   align-items: center;
   background: #17191f;
   border: 1px solid rgba(255, 255, 255, 0.06);
   box-shadow: 0 16px 36px rgba(0, 0, 0, 0.24);
   padding: 8px;
+  overflow-x: auto;
+  scrollbar-width: none;
 }
 
 .tabs-header::-webkit-scrollbar,
@@ -461,9 +463,10 @@ ul {
 }
 
 .tab-button--dark {
-  flex: 1 1 0;
+  flex: 0 0 auto;
   color: rgba(255, 255, 255, 0.58);
   font-size: 0.875rem;
+  padding: 10px 14px;
 }
 
 .tab-button--active {
