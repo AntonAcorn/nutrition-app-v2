@@ -1135,6 +1135,12 @@ ul {
   gap: 10px;
 }
 
+.weight-health-hint {
+  font-size: 0.72rem;
+  color: rgba(59, 125, 255, 0.7);
+  font-weight: 400;
+}
+
 .weight-mascot-card .weight-panel__form {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;

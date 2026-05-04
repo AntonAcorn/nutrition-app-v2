@@ -56,6 +56,26 @@ export async function getTodayActiveCalories(): Promise<number> {
   }
 }
 
+export async function getLatestWeightFromHealth(): Promise<number | null> {
+  if (!isHealthKitSupported()) return null
+  try {
+    const now = new Date()
+    const thirtyDaysAgo = new Date(now)
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30)
+    const { samples } = await Health.readSamples({
+      dataType: 'weight',
+      startDate: thirtyDaysAgo.toISOString(),
+      endDate: now.toISOString(),
+      limit: 1,
+      ascending: false,
+    })
+    if (samples.length === 0) return null
+    return Math.round(samples[0].value * 10) / 10
+  } catch {
+    return null
+  }
+}
+
 export async function writeWeightToHealth(weightKg: number, date: string): Promise<void> {
   if (!isHealthKitSupported()) return
   try {

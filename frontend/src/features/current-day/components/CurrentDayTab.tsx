@@ -12,7 +12,7 @@ import { getTodayLocalDateInputValue } from '../../../shared/lib/date'
 import type { TodaySummary } from '../../../shared/types/nutrition'
 import { MascotSvg } from './MascotSvg'
 import { getMascotMood } from '../model/getMascotMood'
-import { getTodaySteps, getTodayActiveCalories, isHealthKitSupported } from '../../../shared/lib/healthKit'
+import { getTodaySteps, getTodayActiveCalories, getLatestWeightFromHealth, isHealthKitSupported } from '../../../shared/lib/healthKit'
 
 function getGreeting(): string {
   const hour = new Date().getHours()
@@ -37,6 +37,7 @@ export function CurrentDayTab({ refreshToken = 0, successMessage = '', onDayUpda
   const [activeCalories, setActiveCalories] = useState(0)
   const [savingWeight, setSavingWeight] = useState(false)
   const [weightInput, setWeightInput] = useState('')
+  const [weightFromHealth, setWeightFromHealth] = useState(false)
   const [error, setError] = useState('')
   const [savingNutrition, setSavingNutrition] = useState(false)
   const [resettingDay, setResettingDay] = useState(false)
@@ -54,7 +55,15 @@ export function CurrentDayTab({ refreshToken = 0, successMessage = '', onDayUpda
         const nextSummary = await fetchTodaySummary()
         if (!cancelled) {
           setSummary(nextSummary)
-          setWeightInput(nextSummary.weightKg != null ? String(nextSummary.weightKg) : '')
+          if (nextSummary.weightKg != null) {
+            setWeightInput(String(nextSummary.weightKg))
+          } else if (isHealthKitSupported()) {
+            const healthWeight = await getLatestWeightFromHealth()
+            if (!cancelled && healthWeight != null) {
+              setWeightInput(String(healthWeight))
+              setWeightFromHealth(true)
+            }
+          }
         }
       } catch (err) {
         if (!cancelled) {
@@ -137,6 +146,7 @@ export function CurrentDayTab({ refreshToken = 0, successMessage = '', onDayUpda
       const nextSummary = await fetchTodaySummary()
       setSummary(nextSummary)
       setWeightInput(nextSummary.weightKg != null ? String(nextSummary.weightKg) : '')
+      setWeightFromHealth(false)
       onDayUpdated?.()
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to save weight')
@@ -183,11 +193,12 @@ export function CurrentDayTab({ refreshToken = 0, successMessage = '', onDayUpda
             <div className="weight-panel__form">
               <label>
                 Weight, kg
+                {weightFromHealth && <span className="weight-health-hint"> · from Apple Health</span>}
                 <input
                   type="text"
                   inputMode="decimal"
                   value={weightInput}
-                  onChange={(event) => setWeightInput(event.target.value)}
+                  onChange={(event) => { setWeightInput(event.target.value); setWeightFromHealth(false) }}
                   placeholder="82.4"
                 />
               </label>
