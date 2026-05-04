@@ -28,3 +28,17 @@ export function formatLocalDateInputValue(date: Date, timeZone: string = APP_TIM
 export function getTodayLocalDateInputValue(timeZone: string = APP_TIME_ZONE): string {
   return formatLocalDateInputValue(new Date(), timeZone)
 }
+
+export function offsetDate(dateStr: string, days: number): string {
+  const d = new Date(`${dateStr}T12:00:00`)
+  d.setDate(d.getDate() + days)
+  return formatLocalDateInputValue(d)
+}
+
+export function formatNavDateLabel(dateStr: string): string {
+  const today = getTodayLocalDateInputValue()
+  if (dateStr === today) return 'Today'
+  if (dateStr === offsetDate(today, -1)) return 'Yesterday'
+  const d = new Date(`${dateStr}T12:00:00`)
+  return new Intl.DateTimeFormat('en-US', { weekday: 'short', day: 'numeric', month: 'short' }).format(d)
+}

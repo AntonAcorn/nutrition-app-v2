@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { setWaterGlasses } from '../model/waterApi'
 
 function GlassIcon({ filled }: { filled: boolean }) {
@@ -18,13 +18,18 @@ function GlassIcon({ filled }: { filled: boolean }) {
 interface Props {
   waterGlasses: number
   waterGoalGlasses: number
+  date: string
   onUpdate: () => void
 }
 
-export function WaterIntakeCard({ waterGlasses, waterGoalGlasses, onUpdate }: Props) {
+export function WaterIntakeCard({ waterGlasses, waterGoalGlasses, date, onUpdate }: Props) {
   const [glasses, setGlasses] = useState(waterGlasses)
   const [saving, setSaving] = useState(false)
   const goal = Math.max(waterGoalGlasses, 1)
+
+  useEffect(() => {
+    setGlasses(waterGlasses)
+  }, [waterGlasses, date])
 
   async function handleTap(index: number) {
     if (saving) return
@@ -33,7 +38,7 @@ export function WaterIntakeCard({ waterGlasses, waterGoalGlasses, onUpdate }: Pr
     setGlasses(next)
     setSaving(true)
     try {
-      await setWaterGlasses(next)
+      await setWaterGlasses(next, date)
       onUpdate()
     } catch {
       setGlasses(glasses)

@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react'
 import { listMealLog, deleteMealLogEntry, updateMealLogEntry, SLOT_LABELS } from '../model/mealLogApi'
-import { getTodayLocalDateInputValue } from '../../../shared/lib/date'
 import type { MealSlot, MealLogEntry } from '../model/mealLogApi'
 
 const SLOT_ORDER: MealSlot['slotType'][] = ['BREAKFAST', 'LUNCH', 'DINNER', 'SNACK']
@@ -45,6 +44,7 @@ function toEditForm(m: MealLogEntry): EditForm {
 }
 
 interface Props {
+  date: string
   refreshToken?: number
   onAddToSlot: (slotType: string) => void
   onDeleted: () => void
@@ -55,7 +55,7 @@ function slotsWithItems(slots: MealSlot[]): Set<MealSlot['slotType']> {
   return new Set(slots.filter(s => s.items.length > 0).map(s => s.slotType))
 }
 
-export function MealsLogCard({ refreshToken = 0, onAddToSlot, onDeleted, onUpdated }: Props) {
+export function MealsLogCard({ date, refreshToken = 0, onAddToSlot, onDeleted, onUpdated }: Props) {
   const [slots, setSlots] = useState<MealSlot[]>(SLOT_ORDER.map(makeEmptySlot))
   const [showSlots, setShowSlots] = useState(true)
   const [expandedSlots, setExpandedSlots] = useState<Set<MealSlot['slotType']>>(new Set())
@@ -71,14 +71,14 @@ export function MealsLogCard({ refreshToken = 0, onAddToSlot, onDeleted, onUpdat
   const [moveError, setMoveError] = useState('')
 
   useEffect(() => {
-    listMealLog(getTodayLocalDateInputValue())
+    listMealLog(date)
       .then(data => {
         const merged = mergeWithDefaults(data)
         setSlots(merged)
         setExpandedSlots(slotsWithItems(merged))
       })
       .catch(() => {})
-  }, [refreshToken])
+  }, [date, refreshToken])
 
   function toggleSlot(slotType: MealSlot['slotType']) {
     setExpandedSlots(prev => {

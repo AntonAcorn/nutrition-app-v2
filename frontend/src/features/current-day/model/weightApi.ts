@@ -1,14 +1,8 @@
-import { getTodayLocalDateInputValue } from '../../../shared/lib/date'
 import { API_BASE } from '../../../shared/lib/apiBase'
 import { writeWeightToHealth } from '../../../shared/lib/healthKit'
 
-function currentEntryDate(): string {
-  return getTodayLocalDateInputValue()
-}
-
-export async function updateTodayWeight(weightKg: number): Promise<void> {
-  const entryDate = currentEntryDate()
-  const response = await fetch(`${API_BASE}/api/history/today-summary/weight?entryDate=${entryDate}`, {
+export async function updateTodayWeight(weightKg: number, date: string): Promise<void> {
+  const response = await fetch(`${API_BASE}/api/history/today-summary/weight?entryDate=${date}`, {
     method: 'PUT',
     credentials: 'include',
     headers: {
@@ -21,5 +15,5 @@ export async function updateTodayWeight(weightKg: number): Promise<void> {
     throw new Error(`Не удалось сохранить вес (${response.status})`)
   }
 
-  writeWeightToHealth(weightKg, entryDate)
+  writeWeightToHealth(weightKg, date)
 }

@@ -7,11 +7,13 @@ import { fetchTodaySummary } from '../model/todaySummaryApi'
 import { updateTodayWeight } from '../model/weightApi'
 import { addMealManually, resetToday } from '../model/nutritionTotalsApi'
 import { logTemplate } from '../../food-library/model/mealTemplateApi'
-import { getTodayLocalDateInputValue } from '../../../shared/lib/date'
+import { getTodayLocalDateInputValue, offsetDate, formatNavDateLabel } from '../../../shared/lib/date'
 import type { TodaySummary } from '../../../shared/types/nutrition'
 import { MascotSvg } from './MascotSvg'
 import { getMascotMood } from '../model/getMascotMood'
 import { getTodaySteps, getTodayActiveCalories, getLatestWeightFromHealth, isHealthKitSupported } from '../../../shared/lib/healthKit'
+
+const MAX_PAST_DAYS = 90
 
 function getGreeting(summary?: TodaySummary | null): string {
   const hour = new Date().getHours()
@@ -42,6 +44,7 @@ interface CurrentDayTabProps {
 }
 
 export function CurrentDayTab({ refreshToken = 0, successMessage = '', onDayUpdated, displayName, onOpenAnalyzer }: CurrentDayTabProps) {
+  const [selectedDate, setSelectedDate] = useState(() => getTodayLocalDateInputValue())
   const [summary, setSummary] = useState<TodaySummary | null>(null)
   const [loading, setLoading] = useState(true)
   const [steps, setSteps] = useState(0)
@@ -55,6 +58,10 @@ export function CurrentDayTab({ refreshToken = 0, successMessage = '', onDayUpda
   const [showQuickAdd, setShowQuickAdd] = useState(false)
   const [quickAddSlot, setQuickAddSlot] = useState<string | undefined>(undefined)
 
+  const today = getTodayLocalDateInputValue()
+  const isToday = selectedDate === today
+  const minDate = offsetDate(today, -MAX_PAST_DAYS)
+
   useEffect(() => {
     let cancelled = false
 
@@ -63,10 +70,10 @@ export function CurrentDayTab({ refreshToken = 0, successMessage = '', onDayUpda
       setError('')
 
       try {
-        const nextSummary = await fetchTodaySummary()
+        const nextSummary = await fetchTodaySummary(selectedDate)
         if (!cancelled) {
           setSummary(nextSummary)
-          if (isHealthKitSupported()) {
+          if (isToday && isHealthKitSupported()) {
             const healthSample = await getLatestWeightFromHealth()
             if (!cancelled) {
               const dbTime = nextSummary.weightUpdatedAt ? new Date(nextSummary.weightUpdatedAt) : null
@@ -76,10 +83,18 @@ export function CurrentDayTab({ refreshToken = 0, successMessage = '', onDayUpda
                 setWeightFromHealth(true)
               } else if (nextSummary.weightKg != null) {
                 setWeightInput(String(nextSummary.weightKg))
+                setWeightFromHealth(false)
+              } else {
+                setWeightInput('')
+                setWeightFromHealth(false)
               }
             }
           } else if (nextSummary.weightKg != null) {
             setWeightInput(String(nextSummary.weightKg))
+            setWeightFromHealth(false)
+          } else {
+            setWeightInput('')
+            setWeightFromHealth(false)
           }
         }
       } catch (err) {
@@ -95,19 +110,22 @@ export function CurrentDayTab({ refreshToken = 0, successMessage = '', onDayUpda
 
     loadSummary()
 
-    if (isHealthKitSupported()) {
+    if (isToday && isHealthKitSupported()) {
       getTodaySteps().then(setSteps)
       getTodayActiveCalories().then(setActiveCalories)
+    } else {
+      setSteps(0)
+      setActiveCalories(0)
     }
 
     return () => {
       cancelled = true
     }
-  }, [refreshToken])
+  }, [refreshToken, selectedDate, isToday])
 
   async function handleTemplateLog(templateId: string, slotType?: string) {
-    await logTemplate(templateId, getTodayLocalDateInputValue(), slotType)
-    const nextSummary = await fetchTodaySummary()
+    await logTemplate(templateId, selectedDate, slotType)
+    const nextSummary = await fetchTodaySummary(selectedDate)
     setSummary(nextSummary)
     onDayUpdated?.()
   }
@@ -115,8 +133,8 @@ export function CurrentDayTab({ refreshToken = 0, successMessage = '', onDayUpda
   async function handleMealAdd(kcal: number, protein: number, fat: number, fiber: number, carbs: number, name?: string, slotType?: string) {
     setSavingNutrition(true)
     try {
-      await addMealManually({ caloriesConsumedKcal: kcal, proteinGrams: protein, fatGrams: fat, fiberGrams: fiber, carbsGrams: carbs, mealName: name, slotType })
-      const nextSummary = await fetchTodaySummary()
+      await addMealManually({ caloriesConsumedKcal: kcal, proteinGrams: protein, fatGrams: fat, fiberGrams: fiber, carbsGrams: carbs, mealName: name, slotType }, selectedDate)
+      const nextSummary = await fetchTodaySummary(selectedDate)
       setSummary(nextSummary)
       setShowQuickAdd(false)
       onDayUpdated?.()
@@ -131,12 +149,12 @@ export function CurrentDayTab({ refreshToken = 0, successMessage = '', onDayUpda
   }
 
   async function handleResetDay() {
-    if (!window.confirm('Reset today\'s nutrition totals to zero?')) return
+    if (!window.confirm('Reset this day\'s nutrition totals to zero?')) return
     setResettingDay(true)
     setError('')
     try {
-      await resetToday()
-      const nextSummary = await fetchTodaySummary()
+      await resetToday(selectedDate)
+      const nextSummary = await fetchTodaySummary(selectedDate)
       setSummary(nextSummary)
       onDayUpdated?.()
     } catch (err) {
@@ -159,8 +177,8 @@ export function CurrentDayTab({ refreshToken = 0, successMessage = '', onDayUpda
     setError('')
 
     try {
-      await updateTodayWeight(parsedWeight)
-      const nextSummary = await fetchTodaySummary()
+      await updateTodayWeight(parsedWeight, selectedDate)
+      const nextSummary = await fetchTodaySummary(selectedDate)
       setSummary(nextSummary)
       setWeightInput(nextSummary.weightKg != null ? String(nextSummary.weightKg) : '')
       setWeightFromHealth(false)
@@ -172,18 +190,56 @@ export function CurrentDayTab({ refreshToken = 0, successMessage = '', onDayUpda
     }
   }
 
+  function goToPrevDay() {
+    const prev = offsetDate(selectedDate, -1)
+    if (prev >= minDate) setSelectedDate(prev)
+  }
+
+  function goToNextDay() {
+    if (!isToday) setSelectedDate(offsetDate(selectedDate, 1))
+  }
+
+  const canGoPrev = selectedDate > minDate
+  const dateLabel = formatNavDateLabel(selectedDate)
+
   return (
     <section className="screen-section screen-section--home-dark">
-      <div className="mascot-hero-card">
-        <MascotSvg mood={getMascotMood(summary)} size={100} className="mascot-hero-card__image" />
-        <div className="mascot-hero-card__text">
-          <p className="mascot-hero-card__greeting">{getGreeting(summary)}</p>
-          {displayName ? <p className="mascot-hero-card__name">{displayName}</p> : null}
-          {summary && summary.loggingStreakDays >= 2 && (
-            <span className="streak-badge">🔥 {summary.loggingStreakDays} days</span>
-          )}
-        </div>
+      <div className="day-nav">
+        <button
+          type="button"
+          className="day-nav__btn"
+          onClick={goToPrevDay}
+          disabled={!canGoPrev}
+          aria-label="Previous day"
+        >
+          ←
+        </button>
+        <span className={`day-nav__label${!isToday ? ' day-nav__label--past' : ''}`}>
+          {dateLabel}
+        </span>
+        <button
+          type="button"
+          className="day-nav__btn"
+          onClick={goToNextDay}
+          disabled={isToday}
+          aria-label="Next day"
+        >
+          →
+        </button>
       </div>
+
+      {isToday && (
+        <div className="mascot-hero-card">
+          <MascotSvg mood={getMascotMood(summary)} size={100} className="mascot-hero-card__image" />
+          <div className="mascot-hero-card__text">
+            <p className="mascot-hero-card__greeting">{getGreeting(summary)}</p>
+            {displayName ? <p className="mascot-hero-card__name">{displayName}</p> : null}
+            {summary && summary.loggingStreakDays >= 2 && (
+              <span className="streak-badge">🔥 {summary.loggingStreakDays} days</span>
+            )}
+          </div>
+        </div>
+      )}
 
       {successMessage ? <section className="panel detail-panel"><p className="success-text">{successMessage}</p></section> : null}
       {loading ? <section className="panel detail-panel"><p>Loading daily summary...</p></section> : null}
@@ -204,14 +260,22 @@ export function CurrentDayTab({ refreshToken = 0, successMessage = '', onDayUpda
 
       {!loading && !error && summary ? (
         <MealsLogCard
+          date={selectedDate}
           refreshToken={refreshToken}
           onAddToSlot={openQuickAdd}
-          onDeleted={() => { fetchTodaySummary().then(setSummary).catch(() => {}) }}
-          onUpdated={() => { fetchTodaySummary().then(setSummary).catch(() => {}); onDayUpdated?.() }}
+          onDeleted={() => { fetchTodaySummary(selectedDate).then(setSummary).catch(() => {}) }}
+          onUpdated={() => { fetchTodaySummary(selectedDate).then(setSummary).catch(() => {}); onDayUpdated?.() }}
         />
       ) : null}
 
-      {!loading && !error && summary ? <WaterIntakeCard waterGlasses={summary.waterGlasses} waterGoalGlasses={summary.waterGoalGlasses} onUpdate={() => { fetchTodaySummary().then(setSummary).catch(() => {}) }} /> : null}
+      {!loading && !error && summary ? (
+        <WaterIntakeCard
+          waterGlasses={summary.waterGlasses}
+          waterGoalGlasses={summary.waterGoalGlasses}
+          date={selectedDate}
+          onUpdate={() => { fetchTodaySummary(selectedDate).then(setSummary).catch(() => {}) }}
+        />
+      ) : null}
 
       {!loading && summary ? (
         <button type="button" className="quick-add-fab" onClick={() => openQuickAdd()} aria-label="Quick add food">

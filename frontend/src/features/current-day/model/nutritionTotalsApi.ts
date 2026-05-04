@@ -1,4 +1,3 @@
-import { getTodayLocalDateInputValue } from '../../../shared/lib/date'
 import { API_BASE } from '../../../shared/lib/apiBase'
 
 export interface MealPayload {
@@ -11,9 +10,9 @@ export interface MealPayload {
   slotType?: string
 }
 
-export async function addMealManually(payload: MealPayload): Promise<void> {
+export async function addMealManually(payload: MealPayload, date: string): Promise<void> {
   const response = await fetch(
-    `${API_BASE}/api/history/today-summary/add-meal?entryDate=${getTodayLocalDateInputValue()}`,
+    `${API_BASE}/api/history/today-summary/add-meal?entryDate=${date}`,
     {
       method: 'POST',
       credentials: 'include',
@@ -27,9 +26,9 @@ export async function addMealManually(payload: MealPayload): Promise<void> {
   }
 }
 
-export async function resetToday(): Promise<void> {
+export async function resetToday(date: string): Promise<void> {
   const response = await fetch(
-    `${API_BASE}/api/history/today-summary/reset?entryDate=${getTodayLocalDateInputValue()}`,
+    `${API_BASE}/api/history/today-summary/reset?entryDate=${date}`,
     {
       method: 'POST',
       credentials: 'include',
@@ -41,9 +40,9 @@ export async function resetToday(): Promise<void> {
   }
 }
 
-export async function updateTodayNutritionTotals(payload: MealPayload): Promise<void> {
+export async function updateTodayNutritionTotals(payload: MealPayload, date: string): Promise<void> {
   const response = await fetch(
-    `${API_BASE}/api/history/today-summary/nutrition-totals?entryDate=${getTodayLocalDateInputValue()}`,
+    `${API_BASE}/api/history/today-summary/nutrition-totals?entryDate=${date}`,
     {
       method: 'PUT',
       credentials: 'include',

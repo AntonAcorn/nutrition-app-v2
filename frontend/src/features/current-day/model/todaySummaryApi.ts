@@ -1,10 +1,10 @@
-import { getTodayLocalDateInputValue } from '../../../shared/lib/date'
 import { API_BASE } from '../../../shared/lib/apiBase'
 import type { TodaySummary } from '../../../shared/types/nutrition'
 
 interface TodaySummaryApiResponse {
   entryDate: string
   weightKg: number | null
+  weightUpdatedAt: string | null
   consumedCalories: number
   dailyTargetCalories: number
   remainingCalories: number
@@ -18,10 +18,10 @@ interface TodaySummaryApiResponse {
   fiberTargetGrams: number
   waterGlasses: number
   waterGoalGlasses: number
-}
-
-function currentEntryDate(): string {
-  return getTodayLocalDateInputValue()
+  targetWeightKg: number | null
+  startingWeightKg: number | null
+  loggingStreakDays: number
+  weightTrend7d: number | null
 }
 
 function formatDateLabel(entryDate: string): string {
@@ -32,9 +32,9 @@ function formatDateLabel(entryDate: string): string {
   }).format(date)
 }
 
-export async function fetchTodaySummary(): Promise<TodaySummary> {
+export async function fetchTodaySummary(date: string): Promise<TodaySummary> {
   const response = await fetch(
-    `${API_BASE}/api/history/today-summary?entryDate=${currentEntryDate()}`,
+    `${API_BASE}/api/history/today-summary?entryDate=${date}`,
     { credentials: 'include' },
   )
 
@@ -47,6 +47,7 @@ export async function fetchTodaySummary(): Promise<TodaySummary> {
   return {
     dateLabel: formatDateLabel(payload.entryDate),
     weightKg: payload.weightKg,
+    weightUpdatedAt: payload.weightUpdatedAt ?? null,
     consumedCalories: payload.consumedCalories,
     dailyTargetCalories: payload.dailyTargetCalories,
     remainingCalories: payload.remainingCalories,
@@ -60,5 +61,9 @@ export async function fetchTodaySummary(): Promise<TodaySummary> {
     fiberTargetGrams: payload.fiberTargetGrams ?? 25,
     waterGlasses: payload.waterGlasses ?? 0,
     waterGoalGlasses: payload.waterGoalGlasses ?? 4,
+    targetWeightKg: payload.targetWeightKg ?? null,
+    startingWeightKg: payload.startingWeightKg ?? null,
+    loggingStreakDays: payload.loggingStreakDays ?? 0,
+    weightTrend7d: payload.weightTrend7d ?? null,
   }
 }

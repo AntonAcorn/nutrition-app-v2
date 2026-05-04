@@ -6733,3 +6733,51 @@ ul {
 [data-theme="light"] .onboarding-complete__subtitle    { color: rgba(20, 33, 61, 0.55); }
 [data-theme="light"] .onboarding-pace-warning          { color: rgba(160, 100, 0, 0.9); }
 [data-theme="light"] .today-weight-row__save:hover { background: rgba(32, 96, 232, 0.15); }
+
+/* ── Day navigation bar ── */
+.day-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.35rem 1rem;
+  gap: 0.5rem;
+}
+.day-nav__btn {
+  background: none;
+  border: none;
+  color: rgba(255, 255, 255, 0.55);
+  font-size: 1.1rem;
+  padding: 0.25rem 0.6rem;
+  cursor: pointer;
+  border-radius: 6px;
+  transition: color 0.15s, background 0.15s;
+  line-height: 1;
+}
+.day-nav__btn:hover:not(:disabled) {
+  color: #fff;
+  background: rgba(255, 255, 255, 0.08);
+}
+.day-nav__btn:disabled {
+  opacity: 0.25;
+  cursor: default;
+}
+.day-nav__label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.9);
+  letter-spacing: 0.01em;
+  flex: 1;
+  text-align: center;
+}
+.day-nav__label--past {
+  color: rgba(251, 191, 36, 0.85);
+}
+
+/* ── Day nav light mode ── */
+[data-theme="light"] .day-nav__btn { color: rgba(20, 33, 61, 0.45); }
+[data-theme="light"] .day-nav__btn:hover:not(:disabled) {
+  color: #14213d;
+  background: rgba(20, 33, 61, 0.06);
+}
+[data-theme="light"] .day-nav__label { color: rgba(20, 33, 61, 0.85); }
+[data-theme="light"] .day-nav__label--past { color: rgba(160, 100, 0, 0.85); }

@@ -1,9 +1,8 @@
-import { getTodayLocalDateInputValue } from '../../../shared/lib/date'
 import { API_BASE } from '../../../shared/lib/apiBase'
 
-export async function setWaterGlasses(glasses: number): Promise<void> {
+export async function setWaterGlasses(glasses: number, date: string): Promise<void> {
   const res = await fetch(
-    `${API_BASE}/api/history/today-summary/water?entryDate=${getTodayLocalDateInputValue()}`,
+    `${API_BASE}/api/history/today-summary/water?entryDate=${date}`,
     {
       method: 'PUT',
       credentials: 'include',
