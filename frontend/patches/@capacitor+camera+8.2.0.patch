@@ -1,0 +1,12 @@
+diff --git a/node_modules/@capacitor/camera/Package.swift b/node_modules/@capacitor/camera/Package.swift
+index e59ef72..4e1cf0e 100644
+--- a/node_modules/@capacitor/camera/Package.swift
++++ b/node_modules/@capacitor/camera/Package.swift
+@@ -4,6 +4,7 @@ import PackageDescription
+ let package = Package(
+     name: "CapacitorCamera",
+     platforms: [.iOS(.v15)],
++    swiftLanguageVersions: [.v5],
+     products: [
+         .library(
+             name: "CapacitorCamera",
