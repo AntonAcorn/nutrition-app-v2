@@ -8,6 +8,32 @@
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+
+  /* Option-button tokens (used by optionStyle inline styles) */
+  --opt-border-on:  rgba(255,255,255,0.75);
+  --opt-border-off: rgba(255,255,255,0.12);
+  --opt-color-on:   #ffffff;
+  --opt-color-off:  rgba(255,255,255,0.45);
+  --opt-bg-on:      rgba(255,255,255,0.08);
+
+  /* Form field tokens */
+  --field-bg:          #17191f;
+  --field-color:       #ffffff;
+  --field-border:      rgba(255,255,255,0.08);
+  --field-placeholder: rgba(255,255,255,0.28);
+}
+
+[data-theme="light"] {
+  --opt-border-on:  rgba(20,33,61,0.6);
+  --opt-border-off: rgba(20,33,61,0.12);
+  --opt-color-on:   #14213d;
+  --opt-color-off:  rgba(20,33,61,0.45);
+  --opt-bg-on:      rgba(20,33,61,0.08);
+
+  --field-bg:          rgba(255,252,247,0.9);
+  --field-color:       #14213d;
+  --field-border:      rgba(20,33,61,0.14);
+  --field-placeholder: rgba(20,33,61,0.3);
 }
 
 * {
@@ -167,15 +193,15 @@ ul {
 }
 
 .auth-form-grid input {
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  background: #17191f;
-  color: #ffffff;
+  border: 1px solid var(--field-border);
+  background: var(--field-bg);
+  color: var(--field-color);
   border-radius: 16px;
   padding: 12px 14px;
 }
 
 .auth-form-grid input::placeholder {
-  color: rgba(255, 255, 255, 0.28);
+  color: var(--field-placeholder);
 }
 
 .onboarding-hint {

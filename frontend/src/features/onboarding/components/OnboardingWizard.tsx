@@ -9,9 +9,9 @@ interface Props {
 type Step = 1 | 2 | 3 | 4
 
 const optionStyle = (selected: boolean): CSSProperties => ({
-  border: selected ? '1.5px solid rgba(255,255,255,0.75)' : '1px solid rgba(255,255,255,0.12)',
-  color: selected ? '#ffffff' : 'rgba(255,255,255,0.45)',
-  background: selected ? 'rgba(255,255,255,0.08)' : 'transparent',
+  border: selected ? '1.5px solid var(--opt-border-on)' : '1px solid var(--opt-border-off)',
+  color: selected ? 'var(--opt-color-on)' : 'var(--opt-color-off)',
+  background: selected ? 'var(--opt-bg-on)' : 'transparent',
   textAlign: 'left',
 })
 
