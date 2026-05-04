@@ -711,7 +711,6 @@ ul {
 }
 
 .today-ring__progress {
-  stroke: url(#ringGradient);
   stroke-linecap: round;
 }
 

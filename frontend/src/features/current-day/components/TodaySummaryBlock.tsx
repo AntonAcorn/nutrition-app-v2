@@ -45,9 +45,11 @@ export function TodaySummaryBlock({ summary }: TodaySummaryBlockProps) {
   const consumed = Math.round(summary.consumedCalories)
   const target = Math.max(1, Math.round(summary.dailyTargetCalories))
   const remaining = Math.round(summary.remainingCalories)
-  const ringProgress = Math.min(100, Math.max(0, Math.round((consumed / target) * 100)))
+  const ratio = consumed / target
+  const ringProgress = Math.min(100, Math.max(0, Math.round(ratio * 100)))
   const circumference = 2 * Math.PI * 64
   const dashOffset = circumference - (circumference * ringProgress) / 100
+  const ringGradId = ratio >= 1 ? 'ringGradDanger' : ratio >= 0.85 ? 'ringGradWarning' : 'ringGradNormal'
 
   return (
     <section className="today-summary today-summary--dark" aria-label="Сводка питания за день">
@@ -67,9 +69,17 @@ export function TodaySummaryBlock({ summary }: TodaySummaryBlockProps) {
           <div className="today-ring">
             <svg viewBox="0 0 160 160" className="today-ring__svg" aria-hidden="true">
               <defs>
-                <linearGradient id="ringGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                <linearGradient id="ringGradNormal" x1="0%" y1="0%" x2="100%" y2="0%">
                   <stop offset="0%" stopColor="#3b7dff" />
                   <stop offset="100%" stopColor="#22d3ee" />
+                </linearGradient>
+                <linearGradient id="ringGradWarning" x1="0%" y1="0%" x2="100%" y2="0%">
+                  <stop offset="0%" stopColor="#f97316" />
+                  <stop offset="100%" stopColor="#fbbf24" />
+                </linearGradient>
+                <linearGradient id="ringGradDanger" x1="0%" y1="0%" x2="100%" y2="0%">
+                  <stop offset="0%" stopColor="#ef4444" />
+                  <stop offset="100%" stopColor="#f87171" />
                 </linearGradient>
               </defs>
               <circle cx="80" cy="80" r="64" className="today-ring__track" />
@@ -78,6 +88,7 @@ export function TodaySummaryBlock({ summary }: TodaySummaryBlockProps) {
                 cy="80"
                 r="64"
                 className="today-ring__progress"
+                stroke={`url(#${ringGradId})`}
                 strokeDasharray={circumference}
                 strokeDashoffset={dashOffset}
               />
