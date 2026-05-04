@@ -5012,6 +5012,39 @@ ul {
   background: transparent;
 }
 
+/* ── Notifications (profile tab) ── */
+[data-theme="light"] .notif-settings__unsupported { color: rgba(20, 33, 61, 0.4); }
+[data-theme="light"] .notif-settings-card {
+  background: rgba(20, 33, 61, 0.04);
+  border-color: rgba(20, 33, 61, 0.1);
+}
+[data-theme="light"] .notif-settings-card__title { color: #14213d; }
+[data-theme="light"] .notif-settings-card__desc { color: rgba(20, 33, 61, 0.5); }
+[data-theme="light"] .notif-toggle {
+  border-color: rgba(20, 33, 61, 0.2);
+  background: rgba(20, 33, 61, 0.05);
+  color: rgba(20, 33, 61, 0.5);
+}
+[data-theme="light"] .notif-toggle--on {
+  background: rgba(34, 160, 80, 0.12);
+  border-color: rgba(34, 160, 80, 0.35);
+  color: #1a8040;
+}
+[data-theme="light"] .notif-settings-card__time {
+  border-top-color: rgba(20, 33, 61, 0.08);
+}
+[data-theme="light"] .notif-settings-card__time-label { color: rgba(20, 33, 61, 0.5); }
+[data-theme="light"] .notif-settings-card__time-select {
+  background: rgba(20, 33, 61, 0.05);
+  border-color: rgba(20, 33, 61, 0.15);
+  color: #14213d;
+}
+[data-theme="light"] .notif-settings-card__save-btn {
+  background: rgba(20, 33, 61, 0.07);
+  border-color: rgba(20, 33, 61, 0.15);
+  color: #14213d;
+}
+
 /* ── Photo analyzer ── */
 [data-theme="light"] .screen-section--photo-dark .panel,
 [data-theme="light"] .screen-section--photo-dark .draft-item-card,
