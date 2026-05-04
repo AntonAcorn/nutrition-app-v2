@@ -99,6 +99,49 @@ function MoonIcon() {
   )
 }
 
+function TabIconToday() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M3 11.5L12 4L21 11.5V20A1 1 0 0 1 20 21H15V15.5H9V21H4A1 1 0 0 1 3 20V11.5Z"/>
+    </svg>
+  )
+}
+
+function TabIconStats() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M4 20V14H8V20M10 20V8H14V20M16 20V4H20V20"/>
+      <line x1="2" y1="20" x2="22" y2="20"/>
+    </svg>
+  )
+}
+
+function TabIconFast() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M13 2L5 13H12L11 22L19 11H12L13 2Z"/>
+    </svg>
+  )
+}
+
+function TabIconLibrary() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M2 7C2 7 4 6.5 6 6.5C8 6.5 9.5 7.5 12 7.5C14.5 7.5 16 6.5 18 6.5C20 6.5 22 7 22 7V19.5C22 19.5 20 19 18 19C16 19 14.5 20 12 20C9.5 20 8 19 6 19C4 19 2 19.5 2 19.5V7Z"/>
+      <line x1="12" y1="7.5" x2="12" y2="20"/>
+    </svg>
+  )
+}
+
+function TabIconMe() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <circle cx="12" cy="8" r="4"/>
+      <path d="M4 20C4 16.2 7.6 13.5 12 13.5C16.4 13.5 20 16.2 20 20"/>
+    </svg>
+  )
+}
+
 export default function App() {
   const [activeTab, setActiveTab] = useState<TabKey>(tabs.currentDay)
   const [theme, setTheme] = useState<Theme>(getInitialTheme)
@@ -616,54 +659,6 @@ export default function App() {
       </header>
 
       <section className="tabs-shell tabs-shell--dark">
-        <div className="tabs-header tabs-header--dark" role="tablist" aria-label="App sections">
-          <button
-            type="button"
-            role="tab"
-            className={`tab-button tab-button--dark ${activeTab === tabs.currentDay ? 'tab-button--active' : ''}`}
-            aria-selected={activeTab === tabs.currentDay}
-            onClick={() => setActiveTab(tabs.currentDay)}
-          >
-            Today
-          </button>
-          <button
-            type="button"
-            role="tab"
-            className={`tab-button tab-button--dark ${activeTab === tabs.statistics ? 'tab-button--active' : ''}`}
-            aria-selected={activeTab === tabs.statistics}
-            onClick={() => setActiveTab(tabs.statistics)}
-          >
-            Statistics
-          </button>
-          <button
-            type="button"
-            role="tab"
-            className={`tab-button tab-button--dark ${activeTab === tabs.fasting ? 'tab-button--active' : ''}`}
-            aria-selected={activeTab === tabs.fasting}
-            onClick={() => setActiveTab(tabs.fasting)}
-          >
-            Fast
-          </button>
-          <button
-            type="button"
-            role="tab"
-            className={`tab-button tab-button--dark ${activeTab === tabs.library ? 'tab-button--active' : ''}`}
-            aria-selected={activeTab === tabs.library}
-            onClick={() => setActiveTab(tabs.library)}
-          >
-            Library
-          </button>
-          <button
-            type="button"
-            role="tab"
-            className={`tab-button tab-button--dark ${activeTab === tabs.profile ? 'tab-button--active' : ''}`}
-            aria-selected={activeTab === tabs.profile}
-            onClick={() => setActiveTab(tabs.profile)}
-          >
-            Me
-          </button>
-        </div>
-
         <div className="tabs-body tabs-body--dark">
           {activeTab === tabs.currentDay ? (
             <CurrentDayTab
@@ -701,6 +696,28 @@ export default function App() {
           ) : null}
         </div>
       </section>
+
+      <nav className="bottom-tab-bar" role="tablist" aria-label="App sections">
+        {([
+          { key: tabs.currentDay, label: 'Today',   Icon: TabIconToday   },
+          { key: tabs.statistics, label: 'Stats',   Icon: TabIconStats   },
+          { key: tabs.fasting,    label: 'Fast',    Icon: TabIconFast    },
+          { key: tabs.library,    label: 'Library', Icon: TabIconLibrary },
+          { key: tabs.profile,    label: 'Me',      Icon: TabIconMe      },
+        ] as const).map(({ key, label, Icon }) => (
+          <button
+            key={key}
+            type="button"
+            role="tab"
+            className={`bottom-tab-item${activeTab === key ? ' bottom-tab-item--active' : ''}`}
+            aria-selected={activeTab === key}
+            onClick={() => setActiveTab(key)}
+          >
+            <Icon />
+            <span className="bottom-tab-item__label">{label}</span>
+          </button>
+        ))}
+      </nav>
     </main>
   )
 }
