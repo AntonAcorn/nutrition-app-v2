@@ -3000,52 +3000,31 @@ ul {
 }
 
 /* ── Quick Add Trigger Card ──────────────────────────────────────────────── */
-.quick-add-trigger-card {
-  padding: 16px 20px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-}
-
-.quick-add-trigger-card__left {
-  display: grid;
-  gap: 3px;
-}
-
-.quick-add-trigger-card__title {
-  font-size: 1rem;
-  font-weight: 700;
-  color: #ffffff;
-}
-
-.quick-add-trigger-card__subtitle {
-  font-size: 0.8rem;
-  color: rgba(255, 255, 255, 0.35);
-}
-
-.quick-add-trigger-card__btn {
-  flex-shrink: 0;
-  width: 44px;
-  height: 44px;
+.quick-add-fab {
+  position: fixed;
+  bottom: 28px;
+  right: max(16px, calc(50vw - 246px));
+  width: 58px;
+  height: 58px;
   border-radius: 50%;
   border: none;
   background: linear-gradient(135deg, #3b7dff 0%, #2060e8 100%);
   color: #ffffff;
-  font-size: 1.5rem;
+  font-size: 2rem;
   font-weight: 300;
   line-height: 1;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 6px 18px rgba(59, 125, 255, 0.35);
-  transition: opacity 0.15s, transform 0.1s;
+  box-shadow: 0 6px 24px rgba(59, 125, 255, 0.5);
+  transition: transform 0.15s, box-shadow 0.15s;
+  z-index: 200;
 }
 
-.quick-add-trigger-card__btn:active {
-  transform: scale(0.93);
-  opacity: 0.85;
+.quick-add-fab:active {
+  transform: scale(0.91);
+  box-shadow: 0 3px 12px rgba(59, 125, 255, 0.4);
 }
 
 /* ── Reset Day Link ───────────────────────────────────────────────────────── */
@@ -5047,12 +5026,6 @@ ul {
 }
 
 /* Quick-add trigger card */
-[data-theme="light"] .quick-add-trigger-card__title {
-  color: #14213d;
-}
-[data-theme="light"] .quick-add-trigger-card__subtitle {
-  color: rgba(20, 33, 61, 0.4);
-}
 [data-theme="light"] .reset-day-link {
   color: rgba(20, 33, 61, 0.22);
 }

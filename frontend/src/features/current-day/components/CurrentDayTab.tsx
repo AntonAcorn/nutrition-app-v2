@@ -178,15 +178,9 @@ export function CurrentDayTab({ refreshToken = 0, successMessage = '', onDayUpda
       {!loading && !error && summary ? <SavedMealsCard onLogged={() => { onDayUpdated?.() }} /> : null}
 
       {!loading && summary ? (
-        <section className="panel quick-add-trigger-card">
-          <div className="quick-add-trigger-card__left">
-            <p className="quick-add-trigger-card__title">Quick add</p>
-            <p className="quick-add-trigger-card__subtitle">No photo? Log it manually.</p>
-          </div>
-          <button type="button" className="quick-add-trigger-card__btn" onClick={() => setShowQuickAdd(true)}>
-            +
-          </button>
-        </section>
+        <button type="button" className="quick-add-fab" onClick={() => setShowQuickAdd(true)} aria-label="Quick add food">
+          +
+        </button>
       ) : null}
 
       {showQuickAdd && (
