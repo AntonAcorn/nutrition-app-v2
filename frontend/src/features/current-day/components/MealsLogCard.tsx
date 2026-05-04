@@ -50,6 +50,7 @@ function slotsWithItems(slots: MealSlot[]): Set<MealSlot['slotType']> {
 
 export function MealsLogCard({ refreshToken = 0, onAddToSlot, onDeleted, onUpdated }: Props) {
   const [slots, setSlots] = useState<MealSlot[]>(SLOT_ORDER.map(makeEmptySlot))
+  const [showSlots, setShowSlots] = useState(true)
   const [expandedSlots, setExpandedSlots] = useState<Set<MealSlot['slotType']>>(new Set())
   const [deletingId, setDeletingId] = useState<string | null>(null)
   const [confirmId, setConfirmId] = useState<string | null>(null)
@@ -166,12 +167,23 @@ export function MealsLogCard({ refreshToken = 0, onAddToSlot, onDeleted, onUpdat
     }
   }
 
+  const totalKcal = slots.reduce((sum, slot) => sum + slotTotalKcal(slot), 0)
+
   return (
     <section className="panel meals-log-card">
-      <p className="meals-log-card__title">Today's meals</p>
+      <div className="meals-log-card__header">
+        <p className="meals-log-card__title">Today's meals</p>
+        <button
+          type="button"
+          className="today-card-details-toggle"
+          onClick={() => setShowSlots(v => !v)}
+        >
+          {showSlots ? 'Hide ▴' : `${totalKcal > 0 ? `${totalKcal} kcal · ` : ''}Show ▾`}
+        </button>
+      </div>
       {deleteError ? <p className="error-text" style={{ marginBottom: '0.5rem' }}>{deleteError}</p> : null}
 
-      {slots.map((slot, idx) => {
+      {showSlots && slots.map((slot, idx) => {
         const kcal = slotTotalKcal(slot)
         const isLast = idx === slots.length - 1
         const isExpanded = expandedSlots.has(slot.slotType)
