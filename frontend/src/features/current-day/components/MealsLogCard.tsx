@@ -196,21 +196,36 @@ export function MealsLogCard({ refreshToken = 0, onAddToSlot, onDeleted, onUpdat
         </button>
       </div>
       {totalKcal > 0 && (
-        <div className="meals-breakdown-bar">
-          {SLOT_ORDER.map(slotType => {
-            const slot = slots.find(s => s.slotType === slotType)
-            const kcal = slot ? slotTotalKcal(slot) : 0
-            const pct = (kcal / totalKcal) * 100
-            return pct > 0 ? (
-              <div
-                key={slotType}
-                className="meals-breakdown-bar__segment"
-                style={{ width: `${pct}%`, background: SLOT_COLORS[slotType] }}
-                title={`${SLOT_LABELS[slotType]}: ${kcal} kcal`}
-              />
-            ) : null
-          })}
-        </div>
+        <>
+          <div className="meals-breakdown-bar">
+            {SLOT_ORDER.map(slotType => {
+              const slot = slots.find(s => s.slotType === slotType)
+              const kcal = slot ? slotTotalKcal(slot) : 0
+              const pct = (kcal / totalKcal) * 100
+              return pct > 0 ? (
+                <div
+                  key={slotType}
+                  className="meals-breakdown-bar__segment"
+                  style={{ width: `${pct}%`, background: SLOT_COLORS[slotType] }}
+                />
+              ) : null
+            })}
+          </div>
+          <div className="meals-breakdown-legend">
+            {SLOT_ORDER.map(slotType => {
+              const slot = slots.find(s => s.slotType === slotType)
+              const kcal = slot ? slotTotalKcal(slot) : 0
+              return kcal > 0 ? (
+                <span key={slotType} className="meals-breakdown-legend__item">
+                  <span className="meals-breakdown-legend__dot" style={{ background: SLOT_COLORS[slotType] }} />
+                  <span className="meals-breakdown-legend__icon">{SLOT_ICONS[slotType]}</span>
+                  <span className="meals-breakdown-legend__label">{SLOT_LABELS[slotType]}</span>
+                  <span className="meals-breakdown-legend__kcal">{kcal}</span>
+                </span>
+              ) : null
+            })}
+          </div>
+        </>
       )}
 
       {deleteError ? <p className="error-text" style={{ marginBottom: '0.5rem' }}>{deleteError}</p> : null}

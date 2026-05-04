@@ -1,6 +1,20 @@
 import { useState } from 'react'
 import { setWaterGlasses } from '../model/waterApi'
 
+function GlassIcon({ filled }: { filled: boolean }) {
+  return (
+    <svg viewBox="0 0 16 22" width="16" height="22" aria-hidden="true" fill="none">
+      <path
+        d="M2 2 L14 2 L11.5 20 L4.5 20 Z"
+        stroke="currentColor"
+        strokeWidth="1.4"
+        strokeLinejoin="round"
+        fill={filled ? 'currentColor' : 'none'}
+      />
+    </svg>
+  )
+}
+
 interface Props {
   waterGlasses: number
   waterGoalGlasses: number
@@ -45,10 +59,12 @@ export function WaterIntakeCard({ waterGlasses, waterGoalGlasses, onUpdate }: Pr
           <button
             key={i}
             type="button"
-            className={`water-circle${i < glasses ? ' water-circle--filled' : ''}`}
+            className={`water-glass-btn${i < glasses ? ' water-glass-btn--filled' : ''}`}
             onClick={() => handleTap(i)}
             aria-label={`Glass ${i + 1}`}
-          />
+          >
+            <GlassIcon filled={i < glasses} />
+          </button>
         ))}
       </div>
     </section>
