@@ -13,8 +13,20 @@ import { MascotSvg } from './MascotSvg'
 import { getMascotMood } from '../model/getMascotMood'
 import { getTodaySteps, getTodayActiveCalories, getLatestWeightFromHealth, isHealthKitSupported } from '../../../shared/lib/healthKit'
 
-function getGreeting(): string {
+function getGreeting(summary?: TodaySummary | null): string {
   const hour = new Date().getHours()
+
+  if (summary) {
+    const { weightTrend7d, targetWeightKg, remainingCalories, dailyTargetCalories, loggingStreakDays } = summary
+    if (weightTrend7d != null && targetWeightKg != null) {
+      if (weightTrend7d < -0.1) return `↓ ${Math.abs(weightTrend7d).toFixed(1)} kg this week.\nYou're on track.`
+      if (weightTrend7d > 0.1)  return `Weight is up ${weightTrend7d.toFixed(1)} kg.\nWatch the surplus.`
+    }
+    if (loggingStreakDays >= 7) return `${loggingStreakDays} days straight.\nConsistency wins.`
+    const ratio = remainingCalories / Math.max(1, dailyTargetCalories)
+    if (hour >= 19 && ratio > 0.4) return `${Math.round(remainingCalories)} kcal left.\nTime to eat.`
+  }
+
   if (hour >= 5  && hour < 12) return 'Good morning,\nfuture athlete 👀'
   if (hour >= 12 && hour < 17) return 'Good afternoon.\nStill going? Impressive.'
   if (hour >= 17 && hour < 22) return 'Survived another day.\nRespect.'
@@ -165,7 +177,7 @@ export function CurrentDayTab({ refreshToken = 0, successMessage = '', onDayUpda
       <div className="mascot-hero-card">
         <MascotSvg mood={getMascotMood(summary)} size={100} className="mascot-hero-card__image" />
         <div className="mascot-hero-card__text">
-          <p className="mascot-hero-card__greeting">{getGreeting()}</p>
+          <p className="mascot-hero-card__greeting">{getGreeting(summary)}</p>
           {displayName ? <p className="mascot-hero-card__name">{displayName}</p> : null}
           {summary && summary.loggingStreakDays >= 2 && (
             <span className="streak-badge">🔥 {summary.loggingStreakDays} days</span>
