@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { listMealLog, deleteMealLogEntry, updateMealLogEntry, SLOT_LABELS } from '../model/mealLogApi'
 import type { MealSlot, MealLogEntry } from '../model/mealLogApi'
 
@@ -9,6 +9,64 @@ const SLOT_ICONS: Record<MealSlot['slotType'], string> = {
   LUNCH: '☀️',
   DINNER: '🌙',
   SNACK: '⚡',
+}
+
+const SWIPE_SNAP = 76
+const SWIPE_REVEAL = 40
+
+function SwipeableRow({ onDelete, disabled, children }: { onDelete: () => void; disabled: boolean; children: ReactNode }) {
+  const [offset, setOffsetState] = useState(0)
+  const offsetRef = useRef(0)
+  const startXRef = useRef(0)
+  const startYRef = useRef(0)
+  const startOffsetRef = useRef(0)
+  const draggingRef = useRef(false)
+
+  function setOffset(v: number) {
+    offsetRef.current = v
+    setOffsetState(v)
+  }
+
+  function onTouchStart(e: React.TouchEvent) {
+    startXRef.current = e.touches[0].clientX
+    startYRef.current = e.touches[0].clientY
+    startOffsetRef.current = offsetRef.current
+    draggingRef.current = false
+  }
+
+  function onTouchMove(e: React.TouchEvent) {
+    if (disabled) return
+    const dx = startXRef.current - e.touches[0].clientX
+    const dy = Math.abs(e.touches[0].clientY - startYRef.current)
+    if (!draggingRef.current) {
+      if (dy > 8) return
+      if (Math.abs(dx) > 4) draggingRef.current = true
+      else return
+    }
+    setOffset(Math.max(0, Math.min(SWIPE_SNAP * 1.1, startOffsetRef.current + dx)))
+  }
+
+  function onTouchEnd() {
+    if (!draggingRef.current) return
+    draggingRef.current = false
+    setOffset(offsetRef.current >= SWIPE_REVEAL ? SWIPE_SNAP : 0)
+  }
+
+  return (
+    <div className="swipeable-row" onTouchStart={onTouchStart} onTouchMove={onTouchMove} onTouchEnd={onTouchEnd}>
+      <div className="swipeable-row__delete-bg" style={{ opacity: Math.min(1, offset / SWIPE_SNAP) }}>
+        <button type="button" className="swipeable-row__delete-btn" onClick={onDelete} disabled={disabled}>
+          Delete
+        </button>
+      </div>
+      <div
+        className="swipeable-row__content"
+        style={{ transform: `translateX(-${offset}px)`, transition: draggingRef.current ? 'none' : 'transform 0.22s ease' }}
+      >
+        {children}
+      </div>
+    </div>
+  )
 }
 
 function makeEmptySlot(slotType: MealSlot['slotType'], idx: number): MealSlot {
@@ -260,79 +318,94 @@ export function MealsLogCard({ date, refreshToken = 0, onAddToSlot, onDeleted, o
 
             {isExpanded && slot.items.length > 0 && (
               <div className="meals-log-list">
-                {slot.items.map(m => (
-                  <div key={m.id} className={`meal-log-row${editingId === m.id ? ' meal-log-row--editing' : ''}`}>
-                    {editingId === m.id && editForm ? (
-                      <div className="meal-log-edit-form">
-                        <input
-                          className="meal-log-edit-name"
-                          type="text"
-                          value={editForm.name}
-                          onChange={e => setEditForm(f => f ? { ...f, name: e.target.value } : f)}
-                          placeholder="Meal name"
-                        />
-                        <div className="meal-log-edit-macros">
-                          {([
-                            { key: 'caloriesKcal', label: 'Kcal' },
-                            { key: 'proteinG',     label: 'P, g' },
-                            { key: 'fatG',         label: 'F, g' },
-                            { key: 'carbsG',       label: 'C, g' },
-                            { key: 'fiberG',       label: 'Fi, g' },
-                          ] as const).map(({ key, label }) => (
-                            <label key={key} className="meal-log-edit-macro">
-                              <span>{label}</span>
-                              <input
-                                type="number"
-                                min="0"
-                                step="0.1"
-                                value={editForm[key]}
-                                onChange={e => setEditForm(f => f ? { ...f, [key]: e.target.value } : f)}
-                              />
-                            </label>
-                          ))}
+                {slot.items.map(m => {
+                  const isEditing = editingId === m.id
+                  const isMoving  = movingId === m.id
+
+                  if (isEditing && editForm) {
+                    return (
+                      <div key={m.id} className="meal-log-row meal-log-row--editing">
+                        <div className="meal-log-edit-form">
+                          <input
+                            className="meal-log-edit-name"
+                            type="text"
+                            value={editForm.name}
+                            onChange={e => setEditForm(f => f ? { ...f, name: e.target.value } : f)}
+                            placeholder="Meal name"
+                          />
+                          <div className="meal-log-edit-macros">
+                            {([
+                              { key: 'caloriesKcal', label: 'Kcal' },
+                              { key: 'proteinG',     label: 'P, g' },
+                              { key: 'fatG',         label: 'F, g' },
+                              { key: 'carbsG',       label: 'C, g' },
+                              { key: 'fiberG',       label: 'Fi, g' },
+                            ] as const).map(({ key, label }) => (
+                              <label key={key} className="meal-log-edit-macro">
+                                <span>{label}</span>
+                                <input
+                                  type="number"
+                                  min="0"
+                                  step="0.1"
+                                  value={editForm[key]}
+                                  onChange={e => setEditForm(f => f ? { ...f, [key]: e.target.value } : f)}
+                                />
+                              </label>
+                            ))}
+                          </div>
+                          {editError && <p className="error-text" style={{ fontSize: '0.78rem', margin: '4px 0 0' }}>{editError}</p>}
+                          <div className="meal-log-edit-actions">
+                            <button
+                              type="button"
+                              className="meal-log-edit-save"
+                              onClick={() => saveEdit(m.id)}
+                              disabled={savingId === m.id}
+                            >
+                              {savingId === m.id ? 'Saving…' : 'Save'}
+                            </button>
+                            <button type="button" className="meal-log-edit-cancel" onClick={cancelEdit}>
+                              Cancel
+                            </button>
+                          </div>
                         </div>
-                        {editError && <p className="error-text" style={{ fontSize: '0.78rem', margin: '4px 0 0' }}>{editError}</p>}
-                        <div className="meal-log-edit-actions">
+                      </div>
+                    )
+                  }
+
+                  if (isMoving) {
+                    return (
+                      <div key={m.id} className="meal-log-row">
+                        <div className="meal-log-move">
+                          <span className="meal-log-move__label">Move to:</span>
+                          <div className="meal-log-move__slots">
+                            {SLOT_ORDER.filter(s => s !== slot.slotType).map(target => (
+                              <button
+                                key={target}
+                                type="button"
+                                className="meal-log-move__btn"
+                                onClick={() => handleMove(m.id, target)}
+                                disabled={movingToId === m.id}
+                              >
+                                {movingToId === m.id ? '…' : SLOT_LABELS[target]}
+                              </button>
+                            ))}
+                          </div>
+                          {moveError && <span className="meal-log-move__error">{moveError}</span>}
                           <button
                             type="button"
-                            className="meal-log-edit-save"
-                            onClick={() => saveEdit(m.id)}
-                            disabled={savingId === m.id}
+                            className="meal-log-move__cancel"
+                            onClick={() => { setMovingId(null); setMoveError('') }}
                           >
-                            {savingId === m.id ? 'Saving…' : 'Save'}
-                          </button>
-                          <button type="button" className="meal-log-edit-cancel" onClick={cancelEdit}>
                             Cancel
                           </button>
                         </div>
                       </div>
-                    ) : movingId === m.id ? (
-                      <div className="meal-log-move">
-                        <span className="meal-log-move__label">Move to:</span>
-                        <div className="meal-log-move__slots">
-                          {SLOT_ORDER.filter(s => s !== slot.slotType).map(target => (
-                            <button
-                              key={target}
-                              type="button"
-                              className="meal-log-move__btn"
-                              onClick={() => handleMove(m.id, target)}
-                              disabled={movingToId === m.id}
-                            >
-                              {movingToId === m.id ? '…' : SLOT_LABELS[target]}
-                            </button>
-                          ))}
-                        </div>
-                        {moveError && <span className="meal-log-move__error">{moveError}</span>}
-                        <button
-                          type="button"
-                          className="meal-log-move__cancel"
-                          onClick={() => { setMovingId(null); setMoveError('') }}
-                        >
-                          Cancel
-                        </button>
-                      </div>
-                    ) : (
-                      <>
+                    )
+                  }
+
+                  return (
+                    <SwipeableRow key={m.id} onDelete={() => handleDelete(m.id)} disabled={deletingId === m.id}>
+                      <div className="meal-log-row">
                         <div className="meal-log-row__info">
                           <p className="meal-log-row__name">{m.name}</p>
                           <p className="meal-log-row__meta">{Math.round(m.caloriesKcal)} kcal</p>
@@ -383,10 +456,10 @@ export function MealsLogCard({ date, refreshToken = 0, onAddToSlot, onDeleted, o
                             </button>
                           )}
                         </div>
-                      </>
-                    )}
-                  </div>
-                ))}
+                      </div>
+                    </SwipeableRow>
+                  )
+                })}
               </div>
             )}
           </div>

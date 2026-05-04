@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { setWaterGlasses } from '../model/waterApi'
+import { hapticLight } from '../../../shared/lib/haptic'
 
 function GlassIcon({ filled }: { filled: boolean }) {
   return (
@@ -33,6 +34,7 @@ export function WaterIntakeCard({ waterGlasses, waterGoalGlasses, date, onUpdate
 
   async function handleTap(index: number) {
     if (saving) return
+    hapticLight()
     // tap last filled → remove it; tap anything else → set to that level
     const next = index + 1 === glasses ? index : index + 1
     setGlasses(next)

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { TodaySummaryBlock } from './TodaySummaryBlock'
 import { WaterIntakeCard } from './WaterIntakeCard'
 import { QuickAddSheet } from './QuickAddSheet'
@@ -12,6 +12,9 @@ import type { TodaySummary } from '../../../shared/types/nutrition'
 import { MascotSvg } from './MascotSvg'
 import { getMascotMood } from '../model/getMascotMood'
 import { getTodaySteps, getTodayActiveCalories, getLatestWeightFromHealth, isHealthKitSupported } from '../../../shared/lib/healthKit'
+import { hapticLight, hapticMedium } from '../../../shared/lib/haptic'
+
+const PTR_THRESHOLD = 56
 
 const MAX_PAST_DAYS = 90
 
@@ -57,6 +60,12 @@ export function CurrentDayTab({ refreshToken = 0, successMessage = '', onDayUpda
   const [resettingDay, setResettingDay] = useState(false)
   const [showQuickAdd, setShowQuickAdd] = useState(false)
   const [quickAddSlot, setQuickAddSlot] = useState<string | undefined>(undefined)
+  const [localRefresh, setLocalRefresh] = useState(0)
+  const [pullDist, setPullDist] = useState(0)
+  const [ptrRefreshing, setPtrRefreshing] = useState(false)
+  const pullRef = useRef(0)
+  const ptrStartY = useRef(0)
+  const ptrDragging = useRef(false)
 
   const today = getTodayLocalDateInputValue()
   const isToday = selectedDate === today
@@ -104,6 +113,7 @@ export function CurrentDayTab({ refreshToken = 0, successMessage = '', onDayUpda
       } finally {
         if (!cancelled) {
           setLoading(false)
+          setPtrRefreshing(false)
         }
       }
     }
@@ -121,7 +131,45 @@ export function CurrentDayTab({ refreshToken = 0, successMessage = '', onDayUpda
     return () => {
       cancelled = true
     }
-  }, [refreshToken, selectedDate, isToday])
+  }, [refreshToken, selectedDate, isToday, localRefresh])
+
+  useEffect(() => {
+    function onTouchStart(e: TouchEvent) {
+      if (window.scrollY > 4) return
+      ptrStartY.current = e.touches[0].clientY
+      ptrDragging.current = false
+    }
+    function onTouchMove(e: TouchEvent) {
+      if (!ptrStartY.current) return
+      const dy = e.touches[0].clientY - ptrStartY.current
+      if (dy <= 0) { ptrStartY.current = 0; return }
+      if (!ptrDragging.current && dy > 8) ptrDragging.current = true
+      if (!ptrDragging.current) return
+      const dist = Math.min(dy * 0.5, PTR_THRESHOLD * 1.4)
+      pullRef.current = dist
+      setPullDist(dist)
+    }
+    function onTouchEnd() {
+      if (!ptrDragging.current) return
+      ptrDragging.current = false
+      ptrStartY.current = 0
+      if (pullRef.current >= PTR_THRESHOLD) {
+        hapticMedium()
+        setPtrRefreshing(true)
+        setLocalRefresh(n => n + 1)
+      }
+      setPullDist(0)
+      pullRef.current = 0
+    }
+    document.addEventListener('touchstart', onTouchStart, { passive: true })
+    document.addEventListener('touchmove', onTouchMove, { passive: true })
+    document.addEventListener('touchend', onTouchEnd)
+    return () => {
+      document.removeEventListener('touchstart', onTouchStart)
+      document.removeEventListener('touchmove', onTouchMove)
+      document.removeEventListener('touchend', onTouchEnd)
+    }
+  }, [])
 
   async function handleTemplateLog(templateId: string, slotType?: string) {
     await logTemplate(templateId, selectedDate, slotType)
@@ -202,8 +250,19 @@ export function CurrentDayTab({ refreshToken = 0, successMessage = '', onDayUpda
   const canGoPrev = selectedDate > minDate
   const dateLabel = formatNavDateLabel(selectedDate)
 
+  const ptrPct = Math.min(1, pullDist / PTR_THRESHOLD)
+  const showPtr = pullDist > 4 || ptrRefreshing
+
   return (
     <section className="screen-section screen-section--home-dark">
+      {showPtr && (
+        <div className="ptr-indicator" style={{ height: ptrRefreshing ? 40 : pullDist * 0.6 }}>
+          <div className={`ptr-indicator__icon${ptrRefreshing ? ' ptr-indicator__icon--spin' : ''}`}
+               style={{ opacity: ptrRefreshing ? 1 : ptrPct, transform: `rotate(${ptrPct * 180}deg)` }}>
+            ↓
+          </div>
+        </div>
+      )}
       <div className="day-nav">
         <button
           type="button"
@@ -261,7 +320,7 @@ export function CurrentDayTab({ refreshToken = 0, successMessage = '', onDayUpda
       {!loading && !error && summary ? (
         <MealsLogCard
           date={selectedDate}
-          refreshToken={refreshToken}
+          refreshToken={refreshToken + localRefresh}
           onAddToSlot={openQuickAdd}
           onDeleted={() => { fetchTodaySummary(selectedDate).then(setSummary).catch(() => {}) }}
           onUpdated={() => { fetchTodaySummary(selectedDate).then(setSummary).catch(() => {}); onDayUpdated?.() }}
@@ -278,7 +337,7 @@ export function CurrentDayTab({ refreshToken = 0, successMessage = '', onDayUpda
       ) : null}
 
       {!loading && summary ? (
-        <button type="button" className="quick-add-fab" onClick={() => openQuickAdd()} aria-label="Quick add food">
+        <button type="button" className="quick-add-fab" onClick={() => { hapticLight(); openQuickAdd() }} aria-label="Quick add food">
           +
         </button>
       ) : null}
