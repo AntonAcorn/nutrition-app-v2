@@ -1,8 +1,8 @@
 import type { CapacitorConfig } from '@capacitor/cli'
 
 const config: CapacitorConfig = {
-  appId: 'com.aiduparc.nutrition',
-  appName: 'Nutrition',
+  appId: 'com.aiduparc.rumblyeats',
+  appName: 'Rumbly Eats',
   webDir: 'dist',
   plugins: {
     SplashScreen: {

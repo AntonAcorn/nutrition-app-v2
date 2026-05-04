@@ -1,7 +1,7 @@
 {
-  "name": "Nutrition Tracker",
-  "short_name": "Nutrition",
-  "description": "AI-powered daily nutrition tracking",
+  "name": "Rumbly Eats",
+  "short_name": "Rumbly Eats",
+  "description": "Track what you eat, without the guilt",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#1a1a1a",
