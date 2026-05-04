@@ -176,6 +176,13 @@ export function MealsLogCard({ refreshToken = 0, onAddToSlot, onDeleted, onUpdat
 
   const totalKcal = slots.reduce((sum, slot) => sum + slotTotalKcal(slot), 0)
 
+  const SLOT_COLORS: Record<MealSlot['slotType'], string> = {
+    BREAKFAST: '#fb923c',
+    LUNCH:     '#fbbf24',
+    DINNER:    '#a78bfa',
+    SNACK:     '#2dd4bf',
+  }
+
   return (
     <section className="panel meals-log-card">
       <div className="meals-log-card__header">
@@ -188,6 +195,24 @@ export function MealsLogCard({ refreshToken = 0, onAddToSlot, onDeleted, onUpdat
           {showSlots ? 'Hide ▴' : `${totalKcal > 0 ? `${totalKcal} kcal · ` : ''}Show ▾`}
         </button>
       </div>
+      {totalKcal > 0 && (
+        <div className="meals-breakdown-bar">
+          {SLOT_ORDER.map(slotType => {
+            const slot = slots.find(s => s.slotType === slotType)
+            const kcal = slot ? slotTotalKcal(slot) : 0
+            const pct = (kcal / totalKcal) * 100
+            return pct > 0 ? (
+              <div
+                key={slotType}
+                className="meals-breakdown-bar__segment"
+                style={{ width: `${pct}%`, background: SLOT_COLORS[slotType] }}
+                title={`${SLOT_LABELS[slotType]}: ${kcal} kcal`}
+              />
+            ) : null
+          })}
+        </div>
+      )}
+
       {deleteError ? <p className="error-text" style={{ marginBottom: '0.5rem' }}>{deleteError}</p> : null}
 
       {showSlots && slots.map((slot, idx) => {

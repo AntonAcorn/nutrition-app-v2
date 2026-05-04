@@ -3256,6 +3256,22 @@ ul {
   margin-bottom: 8px;
 }
 
+.meals-breakdown-bar {
+  display: flex;
+  height: 4px;
+  border-radius: 999px;
+  overflow: hidden;
+  gap: 2px;
+  margin-bottom: 10px;
+}
+
+.meals-breakdown-bar__segment {
+  border-radius: 999px;
+  min-width: 4px;
+  transition: width 0.3s ease;
+  opacity: 0.75;
+}
+
 .meals-log-card__title {
   font-size: 0.75rem;
   font-weight: 600;
