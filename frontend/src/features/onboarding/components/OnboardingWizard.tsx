@@ -21,6 +21,7 @@ export function OnboardingWizard({ onComplete }: Props) {
   const [gender, setGender] = useState<'male' | 'female' | ''>('')
   const [heightCm, setHeightCm] = useState('')
   const [startingWeightKg, setStartingWeightKg] = useState('')
+  const [targetWeightKg, setTargetWeightKg] = useState('')
   const [activityLevel, setActivityLevel] = useState<OnboardingPayload['activityLevel'] | ''>('')
   const [goal, setGoal] = useState<OnboardingPayload['goal'] | ''>('')
   const [weightLossStrategy, setWeightLossStrategy] = useState<OnboardingPayload['weightLossStrategy'] | ''>('')
@@ -67,6 +68,7 @@ export function OnboardingWizard({ onComplete }: Props) {
         gender: gender as 'male' | 'female',
         heightCm: Number(heightCm),
         startingWeightKg: Number(startingWeightKg),
+        targetWeightKg: targetWeightKg ? Number(targetWeightKg) : undefined,
         activityLevel: activityLevel as OnboardingPayload['activityLevel'],
         goal: goal as OnboardingPayload['goal'],
         weightLossStrategy: goal === 'lose' ? weightLossStrategy as OnboardingPayload['weightLossStrategy'] : undefined,
@@ -157,6 +159,19 @@ export function OnboardingWizard({ onComplete }: Props) {
               step="0.1"
               value={startingWeightKg}
               onChange={(e) => setStartingWeightKg(e.target.value)}
+              placeholder="e.g. 85"
+            />
+          </label>
+
+          <label>
+            Target weight (kg) <span style={{ opacity: 0.45, fontWeight: 400, fontSize: '0.85em' }}>optional</span>
+            <input
+              type="number"
+              min={30}
+              max={300}
+              step="0.1"
+              value={targetWeightKg}
+              onChange={(e) => setTargetWeightKg(e.target.value)}
               placeholder="e.g. 75"
             />
           </label>
