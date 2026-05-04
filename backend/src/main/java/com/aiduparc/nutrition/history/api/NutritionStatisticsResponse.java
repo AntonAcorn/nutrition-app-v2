@@ -14,6 +14,7 @@ public record NutritionStatisticsResponse(
     NutritionBalanceSummaryResponse monthlySummary,
     BigDecimal weeklyAverageWeightKg,
     BigDecimal monthlyAverageWeightKg,
+    BigDecimal targetWeightKg,
     List<NutritionStatisticsPointResponse> points
 ) {
 }

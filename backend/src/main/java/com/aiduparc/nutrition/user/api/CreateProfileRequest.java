@@ -11,6 +11,7 @@ public record CreateProfileRequest(
     @NotBlank String gender,
     @NotNull BigDecimal heightCm,
     @NotNull BigDecimal startingWeightKg,
+    BigDecimal targetWeightKg,
     @NotBlank String activityLevel,
     @NotBlank String goal,
     String weightLossStrategy,

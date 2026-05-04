@@ -5,6 +5,7 @@ export interface OnboardingPayload {
   gender: 'male' | 'female'
   heightCm: number
   startingWeightKg: number
+  targetWeightKg?: number
   activityLevel: 'sedentary' | 'lightly_active' | 'moderately_active' | 'very_active'
   goal: 'lose' | 'maintain' | 'gain'
   weightLossStrategy?: 'mild' | 'optimal' | 'aggressive'

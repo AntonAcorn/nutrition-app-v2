@@ -46,6 +46,7 @@ export function ProfileTab({ displayName, email, onLogout, onDeleteAccount }: Pr
   const [gender, setGender] = useState<'male' | 'female' | ''>('')
   const [heightCm, setHeightCm] = useState('')
   const [startingWeightKg, setStartingWeightKg] = useState('')
+  const [targetWeightKg, setTargetWeightKg] = useState('')
   const [activityLevel, setActivityLevel] = useState<OnboardingPayload['activityLevel'] | ''>('')
   const [goal, setGoal] = useState<OnboardingPayload['goal'] | ''>('')
   const [weightLossStrategy, setWeightLossStrategy] = useState<OnboardingPayload['weightLossStrategy'] | ''>('')
@@ -70,6 +71,7 @@ export function ProfileTab({ displayName, email, onLogout, onDeleteAccount }: Pr
     setGender(profile.gender as 'male' | 'female')
     setHeightCm(String(profile.heightCm))
     setStartingWeightKg(String(profile.startingWeightKg))
+    setTargetWeightKg(profile.targetWeightKg != null ? String(profile.targetWeightKg) : '')
     setActivityLevel(profile.activityLevel as OnboardingPayload['activityLevel'])
     setGoal(profile.goal as OnboardingPayload['goal'])
     setWeightLossStrategy((profile.weightLossStrategy ?? '') as OnboardingPayload['weightLossStrategy'])
@@ -93,6 +95,7 @@ export function ProfileTab({ displayName, email, onLogout, onDeleteAccount }: Pr
         gender,
         heightCm: Number(heightCm),
         startingWeightKg: Number(startingWeightKg),
+        targetWeightKg: targetWeightKg ? Number(targetWeightKg) : undefined,
         activityLevel,
         goal,
         weightLossStrategy: goal === 'lose' ? weightLossStrategy || undefined : undefined,
@@ -160,6 +163,11 @@ export function ProfileTab({ displayName, email, onLogout, onDeleteAccount }: Pr
             <label>
               Starting weight (kg)
               <input type="number" min={30} max={300} step="0.1" value={startingWeightKg} onChange={(e) => setStartingWeightKg(e.target.value)} />
+            </label>
+
+            <label>
+              Target weight (kg) <span style={{ opacity: 0.45, fontWeight: 400, fontSize: '0.85em' }}>optional</span>
+              <input type="number" min={30} max={300} step="0.1" value={targetWeightKg} onChange={(e) => setTargetWeightKg(e.target.value)} placeholder="e.g. 75" />
             </label>
 
             <div>
@@ -288,6 +296,12 @@ export function ProfileTab({ displayName, email, onLogout, onDeleteAccount }: Pr
             <span className="profile-stat__label">Starting weight</span>
             <span className="profile-stat__value">{profile.startingWeightKg} kg</span>
           </div>
+          {profile.targetWeightKg != null ? (
+            <div className="profile-stat">
+              <span className="profile-stat__label">Target weight</span>
+              <span className="profile-stat__value">{profile.targetWeightKg} kg</span>
+            </div>
+          ) : null}
         </div>
       </div>
 

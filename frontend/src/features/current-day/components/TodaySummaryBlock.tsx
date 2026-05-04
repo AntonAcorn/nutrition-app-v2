@@ -114,16 +114,82 @@ export function TodaySummaryBlock({ summary }: TodaySummaryBlockProps) {
           <MacroCard label="Fiber"   value={summary.fiberGrams}   target={summary.fiberTargetGrams}   unit="g" progress={Math.min(100, Math.round((summary.fiberGrams   / Math.max(1, summary.fiberTargetGrams))   * 100))} tone="pink" />
         </div>
 
-        <div className="today-insight-card">
-          <div className="today-insight-card__emoji">⚡</div>
-          <h3>Today insight</h3>
-          <p>
-            {summary.weightKg == null
-              ? 'Your scale is getting bored.'
-              : `Weight logged: ${summary.weightKg.toFixed(1)} kg. Keep going.`}
-          </p>
-        </div>
+        {summary.targetWeightKg != null && summary.startingWeightKg != null ? (
+          <WeightGoalProgress
+            currentWeightKg={summary.weightKg}
+            startingWeightKg={summary.startingWeightKg}
+            targetWeightKg={summary.targetWeightKg}
+          />
+        ) : (
+          <div className="today-insight-card">
+            <div className="today-insight-card__emoji">⚡</div>
+            <h3>Today insight</h3>
+            <p>
+              {summary.weightKg == null
+                ? 'Your scale is getting bored.'
+                : `Weight logged: ${summary.weightKg.toFixed(1)} kg. Keep going.`}
+            </p>
+          </div>
+        )}
       </article>
     </section>
+  )
+}
+
+function WeightGoalProgress({
+  currentWeightKg,
+  startingWeightKg,
+  targetWeightKg,
+}: {
+  currentWeightKg: number | null
+  startingWeightKg: number
+  targetWeightKg: number
+}) {
+  const isLoss = targetWeightKg < startingWeightKg
+  const totalDelta = Math.abs(targetWeightKg - startingWeightKg)
+
+  let progress = 0
+  let remaining: number | null = null
+  let currentDisplay = currentWeightKg
+
+  if (currentWeightKg != null && totalDelta > 0) {
+    const done = isLoss
+      ? startingWeightKg - currentWeightKg
+      : currentWeightKg - startingWeightKg
+    progress = Math.min(100, Math.max(0, (done / totalDelta) * 100))
+    remaining = isLoss
+      ? currentWeightKg - targetWeightKg
+      : targetWeightKg - currentWeightKg
+  }
+
+  const reached = remaining != null && remaining <= 0
+  const emoji = reached ? '🏆' : isLoss ? '📉' : '📈'
+
+  return (
+    <div className="weight-goal-card">
+      <div className="weight-goal-card__header">
+        <span className="weight-goal-card__emoji">{emoji}</span>
+        <span className="weight-goal-card__title">Weight goal</span>
+        {remaining != null && remaining > 0 ? (
+          <span className="weight-goal-card__badge">{remaining.toFixed(1)} kg to go</span>
+        ) : reached ? (
+          <span className="weight-goal-card__badge weight-goal-card__badge--reached">Goal reached!</span>
+        ) : (
+          <span className="weight-goal-card__badge weight-goal-card__badge--pending">Log your weight</span>
+        )}
+      </div>
+      <div className="weight-goal-card__bar-wrap">
+        <div className="weight-goal-card__bar">
+          <div className="weight-goal-card__fill" style={{ width: `${progress}%` }} />
+        </div>
+        <div className="weight-goal-card__labels">
+          <span>{startingWeightKg} kg</span>
+          {currentDisplay != null ? (
+            <span className="weight-goal-card__current">{currentDisplay.toFixed(1)} kg now</span>
+          ) : null}
+          <span>{targetWeightKg} kg</span>
+        </div>
+      </div>
+    </div>
   )
 }

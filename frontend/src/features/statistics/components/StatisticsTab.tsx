@@ -113,11 +113,13 @@ function getChartBounds({
   targets,
   trendline,
   valueKey,
+  goalLine,
 }: {
   values: Array<number | null>
   targets: Array<number | null>
   trendline?: Array<number | null>
   valueKey: 'weightKg' | 'consumedCalories' | 'proteinGrams' | 'fatGrams' | 'fiberGrams' | 'carbsGrams'
+  goalLine?: number | null
 }) {
   const numericValues = values.filter((value): value is number => value != null)
   const numericTargets = targets.filter((value): value is number => value != null)
@@ -128,7 +130,7 @@ function getChartBounds({
   }
 
   if (valueKey === 'weightKg' && numericValues.length > 0) {
-    const allW = [...numericValues, ...numericTrend]
+    const allW = [...numericValues, ...numericTrend, ...(goalLine != null ? [goalLine] : [])]
     const rawMin = Math.min(...allW)
     const rawMax = Math.max(...allW)
     const spread = rawMax - rawMin
@@ -290,6 +292,7 @@ function LineChart({
   colorClass,
   gradColor,
   trendline,
+  goalLine,
 }: {
   title: string
   unit: string
@@ -299,12 +302,13 @@ function LineChart({
   colorClass: string
   gradColor: string
   trendline?: Array<number | null>
+  goalLine?: number | null
 }) {
   const values = points.map((point) => point[valueKey] ?? null)
   const targets = targetKey ? points.map((point) => point[targetKey] ?? null) : []
   const width = 760
   const height = 180
-  const { min, max } = getChartBounds({ values, targets, trendline, valueKey })
+  const { min, max } = getChartBounds({ values, targets, trendline, valueKey, goalLine })
   const range = Math.max(1, max - min)
 
   const valuePath    = buildLinePath(values, width, height, min, max)
@@ -356,6 +360,15 @@ function LineChart({
             <path d={valuePath} className={`line-chart__path ${colorClass} line-chart__path--glow`} />
             {targetPath ? <path d={targetPath} className="line-chart__path line-chart__path--target" /> : null}
             {trendlinePath ? <path d={trendlinePath} className="line-chart__path line-chart__path--trendline" /> : null}
+            {goalLine != null ? (() => {
+              const goalY = height - ((goalLine - min) / range) * height
+              return (
+                <g>
+                  <line x1={0} y1={goalY.toFixed(1)} x2={width} y2={goalY.toFixed(1)} className="line-chart__path--goal-line" strokeDasharray="6 4" strokeWidth="1.5" stroke="rgba(251,191,36,0.7)" />
+                  <text x={width - 4} y={goalY - 5} fontSize="20" textAnchor="end" fill="rgba(251,191,36,0.8)">{goalLine} kg</text>
+                </g>
+              )
+            })() : null}
             {dotX != null && dotY != null ? (
               <circle cx={dotX.toFixed(1)} cy={dotY.toFixed(1)} r="7" fill={gradColor} className="line-chart__dot" strokeWidth="2.5" />
             ) : null}
@@ -367,18 +380,28 @@ function LineChart({
           </div>
         </div>
       </div>
-      {trendline && trendline.some(v => v != null) && (
+      {(trendline && trendline.some(v => v != null)) || goalLine != null ? (
         <div className="chart-legend">
-          <span className="chart-legend__item">
-            <span className="chart-legend__line chart-legend__line--solid" style={{ background: gradColor }} />
-            Weight
-          </span>
-          <span className="chart-legend__item">
-            <span className="chart-legend__line chart-legend__line--dashed" />
-            5-day trend
-          </span>
+          {trendline && trendline.some(v => v != null) ? (
+            <>
+              <span className="chart-legend__item">
+                <span className="chart-legend__line chart-legend__line--solid" style={{ background: gradColor }} />
+                Weight
+              </span>
+              <span className="chart-legend__item">
+                <span className="chart-legend__line chart-legend__line--dashed" />
+                5-day trend
+              </span>
+            </>
+          ) : null}
+          {goalLine != null ? (
+            <span className="chart-legend__item">
+              <span className="chart-legend__line chart-legend__line--dashed" style={{ background: 'rgba(251,191,36,0.7)' }} />
+              Goal: {goalLine} kg
+            </span>
+          ) : null}
         </div>
-      )}
+      ) : null}
     </div>
   )
 
@@ -576,6 +599,7 @@ export function StatisticsTab({ refreshToken = 0 }: StatisticsTabProps) {
             colorClass="line-chart__path--weight"
             gradColor="#7b61ff"
             trendline={weightTrendline}
+            goalLine={data.targetWeightKg}
           />
 
           <section className="panel statistics-panel statistics-panel--dark">

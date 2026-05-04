@@ -14,6 +14,8 @@ export interface TodaySummary {
   fiberTargetGrams: number
   waterGlasses: number
   waterGoalGlasses: number
+  targetWeightKg: number | null
+  startingWeightKg: number | null
 }
 
 export interface DraftItem {
@@ -94,5 +96,6 @@ export interface NutritionStatisticsResponse {
   monthlySummary: NutritionBalanceSummary
   weeklyAverageWeightKg: number | null
   monthlyAverageWeightKg: number | null
+  targetWeightKg: number | null
   points: NutritionStatisticsPoint[]
 }

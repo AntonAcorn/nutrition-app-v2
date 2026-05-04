@@ -61,6 +61,7 @@ class NutritionStatisticsControllerTest {
                 ),
                 new BigDecimal("82.4"),
                 new BigDecimal("81.9"),
+                null,
                 List.of(new NutritionStatisticsPointResponse(
                     LocalDate.of(2026, 4, 8),
                     new BigDecimal("82.4"),

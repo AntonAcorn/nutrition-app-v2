@@ -38,6 +38,7 @@ public class UserProfileService {
         entity.setGender(command.gender());
         entity.setHeightCm(command.heightCm());
         entity.setStartingWeightKg(command.startingWeightKg());
+        entity.setTargetWeightKg(command.targetWeightKg());
         entity.setActivityLevel(command.activityLevel());
         entity.setGoal(command.goal());
         entity.setWeightLossStrategy(command.weightLossStrategy());
@@ -83,6 +84,7 @@ public class UserProfileService {
         entity.setGender(command.gender());
         entity.setHeightCm(command.heightCm());
         entity.setStartingWeightKg(command.startingWeightKg());
+        entity.setTargetWeightKg(command.targetWeightKg());
         entity.setActivityLevel(command.activityLevel());
         entity.setGoal(command.goal());
         entity.setWeightLossStrategy(command.weightLossStrategy());
@@ -102,6 +104,23 @@ public class UserProfileService {
         return findByNutritionUserId(userId)
             .map(UserProfileEntity::getWaterGoalGlasses)
             .orElse(4);
+    }
+
+    public Optional<BigDecimal> getTargetWeightKg(UUID userId) {
+        return findByNutritionUserId(userId)
+            .map(UserProfileEntity::getTargetWeightKg);
+    }
+
+    public BigDecimal getAdaptiveCalorieTarget(UserProfileEntity profile, BigDecimal currentWeightKg) {
+        return CalorieTargetCalculator.calculate(
+            profile.getAgeYears(),
+            profile.getGender(),
+            profile.getHeightCm(),
+            currentWeightKg,
+            profile.getActivityLevel(),
+            profile.getGoal(),
+            profile.getWeightLossStrategy()
+        );
     }
 
     public MacroTargets getMacroTargets(UUID userId) {
@@ -147,6 +166,7 @@ public class UserProfileService {
         String gender,
         BigDecimal heightCm,
         BigDecimal startingWeightKg,
+        BigDecimal targetWeightKg,
         String activityLevel,
         String goal,
         String weightLossStrategy,
@@ -159,6 +179,7 @@ public class UserProfileService {
         String gender,
         BigDecimal heightCm,
         BigDecimal startingWeightKg,
+        BigDecimal targetWeightKg,
         String activityLevel,
         String goal,
         String weightLossStrategy,

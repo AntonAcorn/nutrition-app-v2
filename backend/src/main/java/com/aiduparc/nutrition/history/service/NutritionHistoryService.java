@@ -89,11 +89,15 @@ public class NutritionHistoryService {
         DailyNutritionEntrySnapshot snapshot = getOrCreateEmptySnapshot(userId, entryDate);
 
         BigDecimal consumedCalories = defaultBigDecimal(snapshot.caloriesConsumedKcal());
-        BigDecimal dailyTargetCalories = defaultTarget(snapshot.calorieTargetKcal(), userId);
+        BigDecimal dailyTargetCalories = resolveAdaptiveTarget(userId, snapshot.weightKg());
         BigDecimal remainingCalories = dailyTargetCalories.subtract(consumedCalories).max(BigDecimal.ZERO);
         UserProfileService.MacroTargets macroTargets = userProfileService.getMacroTargets(userId);
 
         int waterGoalGlasses = userProfileService.getWaterGoal(userId);
+        BigDecimal targetWeightKg = userProfileService.getTargetWeightKg(userId).orElse(null);
+        BigDecimal startingWeightKg = userProfileService.findByNutritionUserId(userId)
+            .map(p -> p.getStartingWeightKg())
+            .orElse(null);
 
         TodaySummaryResponse response = new TodaySummaryResponse(
             userId,
@@ -111,7 +115,9 @@ public class NutritionHistoryService {
             macroTargets.carbsG(),
             macroTargets.fiberG(),
             snapshot.waterGlasses(),
-            waterGoalGlasses
+            waterGoalGlasses,
+            targetWeightKg,
+            startingWeightKg
         );
 
         log.info(
@@ -155,6 +161,8 @@ public class NutritionHistoryService {
         NutritionBalanceSummaryResponse weeklySummary = summarizeBalance(weeklySnapshots, weeklyFrom, toInclusive, userId);
         NutritionBalanceSummaryResponse monthlySummary = summarizeBalance(monthlySnapshots, monthlyFrom, toInclusive, userId);
 
+        BigDecimal targetWeightKg = userProfileService.getTargetWeightKg(userId).orElse(null);
+
         return new NutritionStatisticsResponse(
             userId,
             fromInclusive,
@@ -164,6 +172,7 @@ public class NutritionHistoryService {
             monthlySummary,
             averageWeight(weeklySnapshots),
             averageWeight(monthlySnapshots),
+            targetWeightKg,
             points
         );
     }
@@ -326,6 +335,10 @@ public class NutritionHistoryService {
         if (req.fatG() != null) entry.setFatG(req.fatG());
         if (req.carbsG() != null) entry.setCarbsG(req.carbsG());
         if (req.fiberG() != null) entry.setFiberG(req.fiberG());
+        if (req.slotType() != null && !req.slotType().isBlank()) {
+            MealSlotEntity targetSlot = getOrCreateSlot(userId, entry.getEntryDate(), req.slotType());
+            entry.setMealSlotId(targetSlot.getId());
+        }
         mealLogRepository.save(entry);
         mealLogRepository.flush();
 
@@ -499,6 +512,14 @@ public class NutritionHistoryService {
             return resolvedDefaultTarget(userId);
         }
         return value;
+    }
+
+    private BigDecimal resolveAdaptiveTarget(UUID userId, BigDecimal currentWeightKg) {
+        return userProfileService.findByNutritionUserId(userId)
+            .map(profile -> currentWeightKg != null
+                ? userProfileService.getAdaptiveCalorieTarget(profile, currentWeightKg)
+                : profile.getDailyCalorieTargetKcal())
+            .orElse(DEFAULT_DAILY_TARGET_KCAL);
     }
 
     private static List<DailyNutritionEntrySnapshot> completeRangeWithMissingDays(

@@ -841,6 +841,84 @@ ul {
   color: rgba(255, 255, 255, 0.7);
 }
 
+.weight-goal-card {
+  margin-top: 14px;
+  border-radius: 24px;
+  background: #17191f;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  padding: 18px 18px 16px;
+}
+
+.weight-goal-card__header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.weight-goal-card__emoji {
+  font-size: 1.5rem;
+  line-height: 1;
+}
+
+.weight-goal-card__title {
+  font-size: 1rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.85);
+  flex: 1;
+}
+
+.weight-goal-card__badge {
+  font-size: 0.8rem;
+  font-weight: 600;
+  padding: 3px 10px;
+  border-radius: 20px;
+  background: rgba(251, 191, 36, 0.15);
+  color: rgba(251, 191, 36, 0.9);
+}
+
+.weight-goal-card__badge--reached {
+  background: rgba(34, 197, 94, 0.15);
+  color: rgba(34, 197, 94, 0.9);
+}
+
+.weight-goal-card__badge--pending {
+  background: rgba(255, 255, 255, 0.07);
+  color: rgba(255, 255, 255, 0.4);
+}
+
+.weight-goal-card__bar-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.weight-goal-card__bar {
+  height: 8px;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.08);
+  overflow: hidden;
+}
+
+.weight-goal-card__fill {
+  height: 100%;
+  border-radius: 4px;
+  background: linear-gradient(90deg, #7b61ff, #f59e0b);
+  transition: width 0.4s ease;
+}
+
+.weight-goal-card__labels {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.78rem;
+  color: rgba(255, 255, 255, 0.4);
+}
+
+.weight-goal-card__current {
+  color: rgba(255, 255, 255, 0.65);
+  font-weight: 600;
+}
+
 .water-card {
   display: grid;
   gap: 16px;
@@ -5223,6 +5301,24 @@ ul {
 }
 [data-theme="light"] .today-insight-card p {
   color: #6b5b4b;
+}
+
+/* Weight goal card */
+[data-theme="light"] .weight-goal-card {
+  background: rgba(255, 250, 240, 0.85);
+  border: 1px solid rgba(224, 211, 195, 0.7);
+}
+[data-theme="light"] .weight-goal-card__title {
+  color: #14213d;
+}
+[data-theme="light"] .weight-goal-card__labels {
+  color: rgba(20, 33, 61, 0.4);
+}
+[data-theme="light"] .weight-goal-card__current {
+  color: rgba(20, 33, 61, 0.65);
+}
+[data-theme="light"] .weight-goal-card__bar {
+  background: rgba(20, 33, 61, 0.08);
 }
 
 /* Water card buttons */

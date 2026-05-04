@@ -57,6 +57,9 @@ public class UserProfileEntity {
     @Column(name = "fiber_target_g", precision = 8, scale = 1)
     private BigDecimal fiberTargetG;
 
+    @Column(name = "target_weight_kg", precision = 6, scale = 2)
+    private BigDecimal targetWeightKg;
+
     @Column(name = "water_goal_glasses", nullable = false)
     private Integer waterGoalGlasses = 4;
 
@@ -107,6 +110,9 @@ public class UserProfileEntity {
 
     public BigDecimal getFiberTargetG() { return fiberTargetG; }
     public void setFiberTargetG(BigDecimal fiberTargetG) { this.fiberTargetG = fiberTargetG; }
+
+    public BigDecimal getTargetWeightKg() { return targetWeightKg; }
+    public void setTargetWeightKg(BigDecimal targetWeightKg) { this.targetWeightKg = targetWeightKg; }
 
     public Integer getWaterGoalGlasses() { return waterGoalGlasses != null ? waterGoalGlasses : 4; }
     public void setWaterGoalGlasses(Integer waterGoalGlasses) { this.waterGoalGlasses = waterGoalGlasses != null ? waterGoalGlasses : 4; }

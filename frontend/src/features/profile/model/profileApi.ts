@@ -6,6 +6,7 @@ export interface UserProfile {
   gender: string
   heightCm: number
   startingWeightKg: number
+  targetWeightKg: number | null
   activityLevel: string
   goal: string
   weightLossStrategy: string | null
