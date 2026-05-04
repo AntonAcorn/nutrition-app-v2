@@ -265,7 +265,7 @@ export function OnboardingWizard({ onComplete }: Props) {
                 ))}
               </div>
               {weightLossStrategy === 'aggressive' && (
-                <p style={{ color: 'rgba(255,200,80,0.85)', fontSize: '0.8rem', margin: '2px 0 0' }}>
+                <p className="onboarding-pace-warning">
                   ⚠️ Warning: your fridge will start looking at you funny.
                 </p>
               )}
@@ -298,8 +298,8 @@ export function OnboardingWizard({ onComplete }: Props) {
       {step === 4 && (
         <div className="auth-form-grid">
           <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '0.25rem' }}><MascotCameraSvg size={80} /></div>
-          <p style={{ textAlign: 'center', fontSize: '1.5rem', fontWeight: 700, color: '#ffffff', margin: '0 0 0.2rem', lineHeight: 1.2 }}>You're all set!</p>
-          <p style={{ textAlign: 'center', color: 'rgba(255,255,255,0.65)', fontSize: '0.875rem', margin: '0 0 1rem' }}>
+          <p className="onboarding-complete__title" style={{ textAlign: 'center', fontSize: '1.5rem', fontWeight: 700, margin: '0 0 0.2rem', lineHeight: 1.2 }}>You're all set!</p>
+          <p className="onboarding-complete__subtitle" style={{ textAlign: 'center', fontSize: '0.875rem', margin: '0 0 1rem' }}>
             Here's how to log your meals
           </p>
 

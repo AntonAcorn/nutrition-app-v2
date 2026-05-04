@@ -6709,4 +6709,27 @@ ul {
   border-color: rgba(32, 96, 232, 0.3);
   color: #2060e8;
 }
+
+/* ── Onboarding wizard base colors ── */
+.onboarding-complete__title    { color: #ffffff; }
+.onboarding-complete__subtitle { color: rgba(255, 255, 255, 0.65); }
+.onboarding-pace-warning       { color: rgba(255, 200, 80, 0.85); font-size: 0.8rem; margin: 2px 0 0; }
+
+/* ── Onboarding wizard in light mode ── */
+[data-theme="light"] .auth-panel--dark {
+  background: rgba(255, 252, 247, 0.95);
+  border-color: rgba(224, 211, 195, 0.9);
+  box-shadow: 0 20px 56px rgba(89, 72, 54, 0.1);
+}
+[data-theme="light"] .onboarding-feature-card {
+  background: rgba(20, 33, 61, 0.04);
+  border-color: rgba(20, 33, 61, 0.1);
+}
+[data-theme="light"] .onboarding-feature-card__title  { color: #14213d; }
+[data-theme="light"] .onboarding-feature-card__desc   { color: rgba(20, 33, 61, 0.5); }
+[data-theme="light"] .auth-form-grid label             { color: rgba(20, 33, 61, 0.72); }
+[data-theme="light"] .onboarding-hint                  { color: rgba(160, 100, 0, 0.9); }
+[data-theme="light"] .onboarding-complete__title       { color: #14213d; }
+[data-theme="light"] .onboarding-complete__subtitle    { color: rgba(20, 33, 61, 0.55); }
+[data-theme="light"] .onboarding-pace-warning          { color: rgba(160, 100, 0, 0.9); }
 [data-theme="light"] .today-weight-row__save:hover { background: rgba(32, 96, 232, 0.15); }
