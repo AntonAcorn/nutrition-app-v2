@@ -5256,6 +5256,28 @@ ul {
 [data-theme="light"] .qs-search-detail__macro-val { color: #14213d; }
 [data-theme="light"] .qs-search-detail__macro-lbl { color: rgba(20, 33, 61, 0.45); }
 
+[data-theme="light"] .qs-slot-toggle {
+  background: rgba(20, 33, 61, 0.06);
+}
+[data-theme="light"] .qs-slot-btn {
+  color: rgba(20, 33, 61, 0.45);
+}
+[data-theme="light"] .qs-slot-btn--active {
+  background: rgba(20, 33, 61, 0.12);
+  color: #14213d;
+}
+
+[data-theme="light"] .qs-mode-toggle {
+  background: rgba(20, 33, 61, 0.06);
+}
+[data-theme="light"] .qs-mode-btn {
+  color: rgba(20, 33, 61, 0.45);
+}
+[data-theme="light"] .qs-mode-btn--active {
+  background: rgba(20, 33, 61, 0.12);
+  color: #14213d;
+}
+
 /* ── Library ── */
 [data-theme="light"] .library-tab__title { color: #14213d; }
 [data-theme="light"] .library-empty { color: rgba(20, 33, 61, 0.4); }
