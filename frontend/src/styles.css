@@ -5093,6 +5093,15 @@ ul {
   border-color: rgba(20, 33, 61, 0.1);
   color: #6b5b4b;
 }
+[data-theme="light"] .meal-log-row__delete {
+  color: rgba(20, 33, 61, 0.3);
+  border-color: rgba(20, 33, 61, 0.12);
+}
+[data-theme="light"] .meal-log-row__delete:hover {
+  background: rgba(239, 68, 68, 0.08);
+  border-color: rgba(239, 68, 68, 0.3);
+  color: #ef4444;
+}
 
 /* Quick-add trigger card */
 [data-theme="light"] .reset-day-link {
