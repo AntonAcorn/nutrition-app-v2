@@ -5,6 +5,13 @@ import type { MealSlot, MealLogEntry } from '../model/mealLogApi'
 
 const SLOT_ORDER: MealSlot['slotType'][] = ['BREAKFAST', 'LUNCH', 'DINNER', 'SNACK']
 
+const SLOT_ICONS: Record<MealSlot['slotType'], string> = {
+  BREAKFAST: '🌅',
+  LUNCH: '☀️',
+  DINNER: '🌙',
+  SNACK: '⚡',
+}
+
 function makeEmptySlot(slotType: MealSlot['slotType'], idx: number): MealSlot {
   return { slotId: `empty-${slotType}`, slotType, sortOrder: idx, items: [] }
 }
@@ -196,6 +203,7 @@ export function MealsLogCard({ refreshToken = 0, onAddToSlot, onDeleted, onUpdat
                 onClick={() => toggleSlot(slot.slotType)}
                 aria-expanded={isExpanded}
               >
+                <span className="meals-log-slot__icon">{SLOT_ICONS[slot.slotType]}</span>
                 <span className="meals-log-slot__name">{SLOT_LABELS[slot.slotType]}</span>
                 <span className="meals-log-slot__kcal">{kcal > 0 ? `${kcal} kcal` : ''}</span>
                 <span className="meals-log-slot__chevron">{isExpanded ? '▾' : '▸'}</span>

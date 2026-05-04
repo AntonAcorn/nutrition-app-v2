@@ -3052,36 +3052,46 @@ ul {
   display: flex;
   flex-direction: column;
   gap: 0;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
-  padding-bottom: 2px;
-  margin-bottom: 2px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  padding-bottom: 6px;
+  margin-bottom: 6px;
 }
 
 .meals-log-slot--last {
   border-bottom: none;
   margin-bottom: 0;
+  padding-bottom: 0;
 }
 
 .meals-log-slot__header {
   display: flex;
   align-items: center;
-  padding: 10px 0 6px;
+  padding: 8px 10px;
   gap: 8px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 10px;
+  margin: 0 -2px;
+}
+
+.meals-log-slot__icon {
+  font-size: 1rem;
+  line-height: 1;
+  flex-shrink: 0;
 }
 
 .meals-log-slot__name {
   flex: 1;
-  font-size: 0.78rem;
+  font-size: 0.82rem;
   font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.06em;
-  color: rgba(255, 255, 255, 0.5);
+  letter-spacing: 0.05em;
+  color: rgba(255, 255, 255, 0.82);
 }
 
 .meals-log-slot__kcal {
   font-size: 0.78rem;
   font-weight: 600;
-  color: rgba(255, 255, 255, 0.35);
+  color: rgba(255, 255, 255, 0.45);
 }
 
 .meals-log-slot__add {
@@ -6444,8 +6454,9 @@ ul {
 
 /* ── Meals log slot headers ── */
 [data-theme="light"] .meals-log-slot { border-bottom-color: rgba(20, 33, 61, 0.07); }
-[data-theme="light"] .meals-log-slot__name { color: rgba(20, 33, 61, 0.45); }
-[data-theme="light"] .meals-log-slot__kcal { color: rgba(20, 33, 61, 0.35); }
+[data-theme="light"] .meals-log-slot__header { background: rgba(20, 33, 61, 0.04); }
+[data-theme="light"] .meals-log-slot__name { color: rgba(20, 33, 61, 0.82); }
+[data-theme="light"] .meals-log-slot__kcal { color: rgba(20, 33, 61, 0.42); }
 [data-theme="light"] .meals-log-slot__add {
   border-color: rgba(59, 125, 255, 0.45);
   background: rgba(59, 125, 255, 0.07);
