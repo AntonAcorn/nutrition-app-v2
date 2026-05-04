@@ -64,7 +64,8 @@ class TodaySummaryControllerTest {
                         4,
                         null,
                         new BigDecimal("92.00"),
-                        0
+                        0,
+                        null
                 )
         );
 
@@ -106,7 +107,8 @@ class TodaySummaryControllerTest {
                 4,
                 null,
                 null,
-                0
+                0,
+                null
             )
         );
 

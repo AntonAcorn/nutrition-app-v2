@@ -1088,6 +1088,16 @@ ul {
   text-overflow: ellipsis;
 }
 
+.today-weight-trend {
+  font-size: 0.72rem;
+  font-weight: 600;
+  flex: 1;
+  white-space: nowrap;
+}
+
+.today-weight-trend--down { color: #34d399; }
+.today-weight-trend--up   { color: #f87171; }
+
 .today-weight-row__save {
   background: rgba(59, 125, 255, 0.15);
   border: 1.5px solid rgba(59, 125, 255, 0.35);

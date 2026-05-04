@@ -104,6 +104,7 @@ public class NutritionHistoryService {
             .orElse(null);
 
         int loggingStreakDays = calculateLoggingStreak(userId, entryDate, consumedCalories);
+        BigDecimal weightTrend7d = calculateWeightTrend7d(userId, entryDate, snapshot.weightKg());
 
         TodaySummaryResponse response = new TodaySummaryResponse(
             userId,
@@ -125,7 +126,8 @@ public class NutritionHistoryService {
             waterGoalGlasses,
             targetWeightKg,
             startingWeightKg,
-            loggingStreakDays
+            loggingStreakDays,
+            weightTrend7d
         );
 
         log.info(
@@ -140,6 +142,16 @@ public class NutritionHistoryService {
         );
 
         return response;
+    }
+
+    private BigDecimal calculateWeightTrend7d(UUID userId, LocalDate today, BigDecimal currentWeight) {
+        if (currentWeight == null) return null;
+        List<DailyNutritionEntrySnapshot> week = findByUserAndRange(userId, today.minusDays(7), today.minusDays(1));
+        return week.stream()
+            .filter(s -> s.weightKg() != null)
+            .max(Comparator.comparing(DailyNutritionEntrySnapshot::entryDate))
+            .map(s -> currentWeight.subtract(s.weightKg()).setScale(1, RoundingMode.HALF_UP))
+            .orElse(null);
     }
 
     private int calculateLoggingStreak(UUID userId, LocalDate today, BigDecimal todayCalories) {

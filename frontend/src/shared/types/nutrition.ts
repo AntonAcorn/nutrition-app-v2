@@ -18,6 +18,7 @@ export interface TodaySummary {
   targetWeightKg: number | null
   startingWeightKg: number | null
   loggingStreakDays: number
+  weightTrend7d: number | null
 }
 
 export interface DraftItem {
