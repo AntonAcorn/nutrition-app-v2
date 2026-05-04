@@ -1,0 +1,17 @@
+App/build
+App/Pods
+App/output
+App/App/public
+DerivedData
+xcuserdata
+
+# Cordova plugins for Capacitor
+capacitor-cordova-ios-plugins
+
+# Generated Config files
+App/App/capacitor.config.json
+App/App/config.xml
+
+# Xcode project (managed by Capacitor, regenerate with: npx cap add ios && npx cap sync ios)
+App/App.xcodeproj/project.pbxproj
+App/App.xcworkspace/
