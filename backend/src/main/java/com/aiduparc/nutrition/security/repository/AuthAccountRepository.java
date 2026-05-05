@@ -15,5 +15,7 @@ public interface AuthAccountRepository extends JpaRepository<AuthAccountEntity, 
 
     Optional<AuthAccountEntity> findByGoogleId(String googleId);
 
+    Optional<AuthAccountEntity> findByAppleId(String appleId);
+
     void deleteByNutritionUserId(UUID nutritionUserId);
 }

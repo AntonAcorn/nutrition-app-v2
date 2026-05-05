@@ -84,6 +84,29 @@ public class AuthAccountService {
     }
 
     @Transactional(readOnly = true)
+    public Optional<AuthAccountEntity> findByAppleId(String appleId) {
+        if (appleId == null || appleId.isBlank()) return Optional.empty();
+        return authAccountRepository.findByAppleId(appleId);
+    }
+
+    @Transactional
+    public AuthAccountEntity createAppleAccount(String appleId, String email, String displayName, UUID nutritionUserId) {
+        var account = new AuthAccountEntity();
+        account.setEmail(email != null ? email.trim().toLowerCase() : appleId + "@privaterelay.appleid.com");
+        account.setAppleId(appleId);
+        account.setDisplayName(displayName == null || displayName.isBlank() ? null : displayName.trim());
+        account.setNutritionUserId(nutritionUserId);
+        account.setEmailVerified(true);
+        return authAccountRepository.save(account);
+    }
+
+    @Transactional
+    public void linkAppleId(AuthAccountEntity account, String appleId) {
+        account.setAppleId(appleId);
+        authAccountRepository.save(account);
+    }
+
+    @Transactional(readOnly = true)
     public boolean passwordMatches(AuthAccountEntity account, String rawPassword) {
         return rawPassword != null && passwordEncoder.matches(rawPassword, account.getPasswordHash());
     }

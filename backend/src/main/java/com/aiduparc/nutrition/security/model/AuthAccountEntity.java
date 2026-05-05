@@ -26,6 +26,9 @@ public class AuthAccountEntity {
     @Column(name = "google_id")
     private String googleId;
 
+    @Column(name = "apple_id")
+    private String appleId;
+
     @Column(name = "display_name")
     private String displayName;
 
@@ -158,6 +161,14 @@ public class AuthAccountEntity {
 
     public void setGoogleId(String googleId) {
         this.googleId = googleId;
+    }
+
+    public String getAppleId() {
+        return appleId;
+    }
+
+    public void setAppleId(String appleId) {
+        this.appleId = appleId;
     }
 
     @PrePersist

@@ -117,6 +117,24 @@ export async function logout(): Promise<void> {
   }
 }
 
+export async function loginWithApple(): Promise<AuthUser> {
+  const { SignInWithApple } = await import('@capacitor-community/apple-sign-in')
+  const result = await SignInWithApple.authorize({
+    clientId: 'com.aiduparc.rumblyeats',
+    redirectURI: '',
+    scopes: 'email name',
+  })
+  const { identityToken, givenName, familyName } = result.response
+  const displayName = [givenName, familyName].filter(Boolean).join(' ') || undefined
+  const res = await fetch(`${API_BASE}/api/auth/apple`, {
+    method: 'POST',
+    credentials: 'include',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ identityToken, displayName }),
+  })
+  return parseAuthResponse(res)
+}
+
 export async function deleteAccount(): Promise<void> {
   const response = await fetch(`${API_BASE}/api/auth/delete-account`, {
     method: 'POST',

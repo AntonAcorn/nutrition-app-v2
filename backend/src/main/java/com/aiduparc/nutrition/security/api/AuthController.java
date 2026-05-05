@@ -158,6 +158,13 @@ public class AuthController {
         return ResponseEntity.status(302).header("Location", redirect).build();
     }
 
+    @PostMapping("/apple")
+    public AuthResponse appleSignIn(@RequestBody AppleSignInRequest request, HttpSession session) {
+        AuthenticatedSession authSession = authFacade.loginWithApple(request.identityToken(), request.displayName());
+        session.setAttribute(AUTH_SESSION_KEY, authSession);
+        return authFacade.me(authSession);
+    }
+
     @GetMapping("/sentry-test")
     public void sentryTest() {
         throw new RuntimeException("Sentry test exception — can be deleted");

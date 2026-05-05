@@ -24,6 +24,7 @@ public class AuthFacade {
     private final TelegramNotificationService telegramNotificationService;
     private final EmailVerificationService emailVerificationService;
     private final PasswordResetService passwordResetService;
+    private final AppleSignInService appleSignInService;
 
     public AuthFacade(
             AuthAccountService authAccountService,
@@ -31,7 +32,8 @@ public class AuthFacade {
             UserProfileService userProfileService,
             TelegramNotificationService telegramNotificationService,
             EmailVerificationService emailVerificationService,
-            PasswordResetService passwordResetService
+            PasswordResetService passwordResetService,
+            AppleSignInService appleSignInService
     ) {
         this.authAccountService = authAccountService;
         this.nutritionUserService = nutritionUserService;
@@ -39,6 +41,7 @@ public class AuthFacade {
         this.telegramNotificationService = telegramNotificationService;
         this.emailVerificationService = emailVerificationService;
         this.passwordResetService = passwordResetService;
+        this.appleSignInService = appleSignInService;
     }
 
     @Transactional
@@ -137,6 +140,37 @@ public class AuthFacade {
                 UserEntity user = nutritionUserService.createUser(googleUser.name(), googleUser.email());
                 AuthAccountEntity newAccount = authAccountService.createGoogleAccount(
                     googleUser.id(), googleUser.email(), googleUser.name(), user.getId()
+                );
+                telegramNotificationService.notifyNewUser(newAccount.getEmail(), newAccount.getDisplayName());
+                return newAccount;
+            });
+
+        authAccountService.markLoginSuccess(account);
+        return new AuthenticatedSession(
+            account.getId(),
+            account.getEmail(),
+            account.getDisplayName(),
+            account.getNutritionUserId()
+        );
+    }
+
+    @Transactional
+    public AuthenticatedSession loginWithApple(String identityToken, String displayName) {
+        AppleUserInfo appleUser = appleSignInService.verifyIdentityToken(identityToken);
+
+        AuthAccountEntity account = authAccountService.findByAppleId(appleUser.appleId())
+            .orElseGet(() -> {
+                if (appleUser.email() != null) {
+                    Optional<AuthAccountEntity> byEmail = authAccountService.findByEmail(appleUser.email());
+                    if (byEmail.isPresent() && byEmail.get().isEmailVerified()) {
+                        authAccountService.linkAppleId(byEmail.get(), appleUser.appleId());
+                        return byEmail.get();
+                    }
+                }
+                String name = (displayName != null && !displayName.isBlank()) ? displayName : "Apple User";
+                UserEntity user = nutritionUserService.createUser(name, appleUser.email());
+                AuthAccountEntity newAccount = authAccountService.createAppleAccount(
+                    appleUser.appleId(), appleUser.email(), name, user.getId()
                 );
                 telegramNotificationService.notifyNewUser(newAccount.getEmail(), newAccount.getDisplayName());
                 return newAccount;
