@@ -1,18 +1,39 @@
 diff --git a/node_modules/@capgo/capacitor-health/ios/Sources/HealthPlugin/HealthPlugin.swift b/node_modules/@capgo/capacitor-health/ios/Sources/HealthPlugin/HealthPlugin.swift
-index d3a4574..4a4f8f4 100644
+index d3a4574..85b0327 100644
 --- a/node_modules/@capgo/capacitor-health/ios/Sources/HealthPlugin/HealthPlugin.swift
 +++ b/node_modules/@capgo/capacitor-health/ios/Sources/HealthPlugin/HealthPlugin.swift
-@@ -35,7 +35,8 @@ public class HealthPlugin: CAPPlugin, CAPBridgedPlugin {
+@@ -26,8 +26,9 @@ public class HealthPlugin: CAPPlugin, CAPBridgedPlugin {
+     }
+ 
+     @objc func requestAuthorization(_ call: CAPPluginCall) {
+-        let read = (call.getArray("read") as? [String]) ?? []
+-        let write = (call.getArray("write") as? [String]) ?? []
++        // Swift 5 compat: all optional-returning get*() forms gated behind $NonescapableTypes
++        let read = (call.getArray("read", []) as? [String]) ?? []
++        let write = (call.getArray("write", []) as? [String]) ?? []
+ 
+         implementation.requestAuthorization(readIdentifiers: read, writeIdentifiers: write) { result in
+             DispatchQueue.main.async {
+@@ -35,15 +36,15 @@ public class HealthPlugin: CAPPlugin, CAPBridgedPlugin {
                  case let .success(payload):
                      call.resolve(payload.toDictionary())
                  case let .failure(error):
 -                    call.reject(error.localizedDescription, nil, error)
-+                    // Swift 5 compat: call.reject gated behind $NonescapableTypes
 +                    call.unimplemented(error.localizedDescription)
                  }
              }
          }
-@@ -51,20 +52,24 @@ public class HealthPlugin: CAPPlugin, CAPBridgedPlugin {
+     }
+ 
+     @objc func checkAuthorization(_ call: CAPPluginCall) {
+-        let read = (call.getArray("read") as? [String]) ?? []
+-        let write = (call.getArray("write") as? [String]) ?? []
++        let read = (call.getArray("read", []) as? [String]) ?? []
++        let write = (call.getArray("write", []) as? [String]) ?? []
+ 
+         implementation.checkAuthorization(readIdentifiers: read, writeIdentifiers: write) { result in
+             DispatchQueue.main.async {
+@@ -51,22 +52,27 @@ public class HealthPlugin: CAPPlugin, CAPBridgedPlugin {
                  case let .success(payload):
                      call.resolve(payload.toDictionary())
                  case let .failure(error):
@@ -26,7 +47,6 @@ index d3a4574..4a4f8f4 100644
      @objc func readSamples(_ call: CAPPluginCall) {
 -        guard let dataType = call.getString("dataType") else {
 -            call.reject("dataType is required")
-+        // Swift 5 compat: getString(_ key:) -> String? gated behind $NonescapableTypes
 +        let dataType = call.getString("dataType", "")
 +        guard !dataType.isEmpty else {
 +            call.unimplemented("dataType is required")
@@ -35,14 +55,20 @@ index d3a4574..4a4f8f4 100644
  
 -        let startDate = call.getString("startDate")
 -        let endDate = call.getString("endDate")
+-        let limit = call.getInt("limit")
+-        let ascending = call.getBool("ascending") ?? false
 +        let startDateRaw = call.getString("startDate", "")
 +        let startDate: String? = startDateRaw.isEmpty ? nil : startDateRaw
 +        let endDateRaw = call.getString("endDate", "")
 +        let endDate: String? = endDateRaw.isEmpty ? nil : endDateRaw
-         let limit = call.getInt("limit")
-         let ascending = call.getBool("ascending") ?? false
++        // Swift 5 compat: getInt/getBool optional forms gated; use sentinel -1 for nil
++        let limitVal = call.getInt("limit", -1)
++        let limit: Int? = limitVal >= 0 ? limitVal : nil
++        let ascending = call.getBool("ascending", false)
  
-@@ -81,29 +86,33 @@ public class HealthPlugin: CAPPlugin, CAPBridgedPlugin {
+         do {
+             try implementation.readSamples(
+@@ -81,43 +87,51 @@ public class HealthPlugin: CAPPlugin, CAPBridgedPlugin {
                      case let .success(samples):
                          call.resolve(["samples": samples])
                      case let .failure(error):
@@ -66,8 +92,11 @@ index d3a4574..4a4f8f4 100644
              return
          }
  
-         guard let value = call.getDouble("value") else {
+-        guard let value = call.getDouble("value") else {
 -            call.reject("value is required")
++        // Swift 5 compat: use NaN as sentinel for "not provided" (JSON cannot encode NaN)
++        let valueRaw = call.getDouble("value", Double.nan)
++        guard !valueRaw.isNaN else {
 +            call.unimplemented("value is required")
              return
          }
@@ -75,16 +104,38 @@ index d3a4574..4a4f8f4 100644
 -        let unit = call.getString("unit")
 -        let startDate = call.getString("startDate")
 -        let endDate = call.getString("endDate")
+-        let metadataAny = call.getObject("metadata") as? [String: Any]
+-        let metadata = metadataAny?.reduce(into: [String: String]()) { result, entry in
 +        let unitRaw = call.getString("unit", "")
 +        let unit: String? = unitRaw.isEmpty ? nil : unitRaw
 +        let startDateRaw = call.getString("startDate", "")
 +        let startDate: String? = startDateRaw.isEmpty ? nil : startDateRaw
 +        let endDateRaw = call.getString("endDate", "")
 +        let endDate: String? = endDateRaw.isEmpty ? nil : endDateRaw
-         let metadataAny = call.getObject("metadata") as? [String: Any]
-         let metadata = metadataAny?.reduce(into: [String: String]()) { result, entry in
++        let metadataObj = call.getObject("metadata", [:])
++        let metadata: [String: String]? = metadataObj.isEmpty ? nil : metadataObj.reduce(into: [String: String]()) { acc, entry in
              if let stringValue = entry.value as? String {
-@@ -130,12 +139,12 @@ public class HealthPlugin: CAPPlugin, CAPBridgedPlugin {
+-                result[entry.key] = stringValue
++                acc[entry.key] = stringValue
+             }
+         }
+ 
+-        let systolic = call.getDouble("systolic")
+-        let diastolic = call.getDouble("diastolic")
++        let systolicRaw = call.getDouble("systolic", Double.nan)
++        let systolic: Double? = systolicRaw.isNaN ? nil : systolicRaw
++        let diastolicRaw = call.getDouble("diastolic", Double.nan)
++        let diastolic: Double? = diastolicRaw.isNaN ? nil : diastolicRaw
+ 
+         do {
+             try implementation.saveSample(
+                 dataTypeIdentifier: dataType,
+-                value: value,
++                value: valueRaw,
+                 unitIdentifier: unit,
+                 startDateString: startDate,
+                 endDateString: endDate,
+@@ -130,12 +144,12 @@ public class HealthPlugin: CAPPlugin, CAPBridgedPlugin {
                      case .success:
                          call.resolve()
                      case let .failure(error):
@@ -99,28 +150,41 @@ index d3a4574..4a4f8f4 100644
          }
      }
  
-@@ -154,12 +163,16 @@ public class HealthPlugin: CAPPlugin, CAPBridgedPlugin {
+@@ -144,22 +158,25 @@ public class HealthPlugin: CAPPlugin, CAPBridgedPlugin {
+     }
+ 
+     @objc func openHealthConnectSettings(_ call: CAPPluginCall) {
+-        // No-op on iOS - Health Connect is Android only
+         call.resolve()
+     }
+ 
+     @objc func showPrivacyPolicy(_ call: CAPPluginCall) {
+-        // No-op on iOS - Health Connect privacy policy is Android only
+         call.resolve()
      }
  
      @objc func queryWorkouts(_ call: CAPPluginCall) {
 -        let workoutType = call.getString("workoutType")
 -        let startDate = call.getString("startDate")
 -        let endDate = call.getString("endDate")
+-        let limit = call.getInt("limit")
+-        let ascending = call.getBool("ascending") ?? false
+-        let anchor = call.getString("anchor")
 +        let workoutTypeRaw = call.getString("workoutType", "")
 +        let workoutType: String? = workoutTypeRaw.isEmpty ? nil : workoutTypeRaw
 +        let startDateRaw = call.getString("startDate", "")
 +        let startDate: String? = startDateRaw.isEmpty ? nil : startDateRaw
 +        let endDateRaw = call.getString("endDate", "")
 +        let endDate: String? = endDateRaw.isEmpty ? nil : endDateRaw
-         let limit = call.getInt("limit")
-         let ascending = call.getBool("ascending") ?? false
--        let anchor = call.getString("anchor")
++        let limitVal = call.getInt("limit", -1)
++        let limit: Int? = limitVal >= 0 ? limitVal : nil
++        let ascending = call.getBool("ascending", false)
 +        let anchorRaw = call.getString("anchor", "")
 +        let anchor: String? = anchorRaw.isEmpty ? nil : anchorRaw
  
          implementation.queryWorkouts(
              workoutTypeString: workoutType,
-@@ -174,22 +187,27 @@ public class HealthPlugin: CAPPlugin, CAPBridgedPlugin {
+@@ -174,22 +191,27 @@ public class HealthPlugin: CAPPlugin, CAPBridgedPlugin {
                  case let .success(response):
                      call.resolve(response)
                  case let .failure(error):
@@ -155,7 +219,7 @@ index d3a4574..4a4f8f4 100644
  
          implementation.queryAggregated(
              dataTypeIdentifier: dataType,
-@@ -203,7 +221,7 @@ public class HealthPlugin: CAPPlugin, CAPBridgedPlugin {
+@@ -203,7 +225,7 @@ public class HealthPlugin: CAPPlugin, CAPBridgedPlugin {
                  case let .success(response):
                      call.resolve(response)
                  case let .failure(error):
