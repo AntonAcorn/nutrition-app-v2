@@ -62,18 +62,30 @@ extension SignInWithApple: ASAuthorizationControllerDelegate {
         guard let call = pendingCall else { return }
         pendingCall = nil
 
-        let result = [
-            "response": [
-                "user": appleIDCredential.user,
-                "email": appleIDCredential.email,
-                "givenName": appleIDCredential.fullName?.givenName,
-                "familyName": appleIDCredential.fullName?.familyName,
-                "identityToken": String(data: appleIDCredential.identityToken!, encoding: .utf8),
-                "authorizationCode": String(data: appleIDCredential.authorizationCode!, encoding: .utf8)
-            ]
-        ]
+        guard let tokenData = appleIDCredential.identityToken,
+              let identityToken = String(data: tokenData, encoding: .utf8) else {
+            call.unimplemented("Failed to extract identity token")
+            self.bridge?.releaseCall(call)
+            return
+        }
+        guard let codeData = appleIDCredential.authorizationCode,
+              let authorizationCode = String(data: codeData, encoding: .utf8) else {
+            call.unimplemented("Failed to extract authorization code")
+            self.bridge?.releaseCall(call)
+            return
+        }
 
-        call.resolve(result)
+        // Build the response without Swift Optionals — JSONSerialization cannot handle them
+        var response: [String: Any] = [
+            "user": appleIDCredential.user,
+            "identityToken": identityToken,
+            "authorizationCode": authorizationCode
+        ]
+        if let email = appleIDCredential.email { response["email"] = email }
+        if let givenName = appleIDCredential.fullName?.givenName { response["givenName"] = givenName }
+        if let familyName = appleIDCredential.fullName?.familyName { response["familyName"] = familyName }
+
+        call.resolve(["response": response])
         self.bridge?.releaseCall(call)
     }
 
