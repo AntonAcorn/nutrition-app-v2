@@ -12,6 +12,5 @@ capacitor-cordova-ios-plugins
 App/App/capacitor.config.json
 App/App/config.xml
 
-# Xcode project (managed by Capacitor, regenerate with: npx cap add ios && npx cap sync ios)
-App/App.xcodeproj/project.pbxproj
+# Xcode workspace (auto-generated)
 App/App.xcworkspace/
