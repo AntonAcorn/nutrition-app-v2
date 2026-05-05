@@ -21,7 +21,6 @@
     "@capgo/capacitor-health": "^8.4.9",
     "@sentry/react": "^10.51.0",
     "@zxing/browser": "^0.2.0",
-    "patch-package": "^8.0.1",
     "posthog-js": "^1.372.6",
     "react": "^18.3.1",
     "react-dom": "^18.3.1"
@@ -30,6 +29,7 @@
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^4.3.1",
+    "patch-package": "^8.0.1",
     "typescript": "^6.0.2",
     "vite": "^5.4.2"
   }
