@@ -1,0 +1,166 @@
+diff --git a/node_modules/@capgo/capacitor-health/ios/Sources/HealthPlugin/HealthPlugin.swift b/node_modules/@capgo/capacitor-health/ios/Sources/HealthPlugin/HealthPlugin.swift
+index d3a4574..4a4f8f4 100644
+--- a/node_modules/@capgo/capacitor-health/ios/Sources/HealthPlugin/HealthPlugin.swift
++++ b/node_modules/@capgo/capacitor-health/ios/Sources/HealthPlugin/HealthPlugin.swift
+@@ -35,7 +35,8 @@ public class HealthPlugin: CAPPlugin, CAPBridgedPlugin {
+                 case let .success(payload):
+                     call.resolve(payload.toDictionary())
+                 case let .failure(error):
+-                    call.reject(error.localizedDescription, nil, error)
++                    // Swift 5 compat: call.reject gated behind $NonescapableTypes
++                    call.unimplemented(error.localizedDescription)
+                 }
+             }
+         }
+@@ -51,20 +52,24 @@ public class HealthPlugin: CAPPlugin, CAPBridgedPlugin {
+                 case let .success(payload):
+                     call.resolve(payload.toDictionary())
+                 case let .failure(error):
+-                    call.reject(error.localizedDescription, nil, error)
++                    call.unimplemented(error.localizedDescription)
+                 }
+             }
+         }
+     }
+ 
+     @objc func readSamples(_ call: CAPPluginCall) {
+-        guard let dataType = call.getString("dataType") else {
+-            call.reject("dataType is required")
++        // Swift 5 compat: getString(_ key:) -> String? gated behind $NonescapableTypes
++        let dataType = call.getString("dataType", "")
++        guard !dataType.isEmpty else {
++            call.unimplemented("dataType is required")
+             return
+         }
+ 
+-        let startDate = call.getString("startDate")
+-        let endDate = call.getString("endDate")
++        let startDateRaw = call.getString("startDate", "")
++        let startDate: String? = startDateRaw.isEmpty ? nil : startDateRaw
++        let endDateRaw = call.getString("endDate", "")
++        let endDate: String? = endDateRaw.isEmpty ? nil : endDateRaw
+         let limit = call.getInt("limit")
+         let ascending = call.getBool("ascending") ?? false
+ 
+@@ -81,29 +86,33 @@ public class HealthPlugin: CAPPlugin, CAPBridgedPlugin {
+                     case let .success(samples):
+                         call.resolve(["samples": samples])
+                     case let .failure(error):
+-                        call.reject(error.localizedDescription, nil, error)
++                        call.unimplemented(error.localizedDescription)
+                     }
+                 }
+             }
+         } catch {
+-            call.reject(error.localizedDescription, nil, error)
++            call.unimplemented(error.localizedDescription)
+         }
+     }
+ 
+     @objc func saveSample(_ call: CAPPluginCall) {
+-        guard let dataType = call.getString("dataType") else {
+-            call.reject("dataType is required")
++        let dataType = call.getString("dataType", "")
++        guard !dataType.isEmpty else {
++            call.unimplemented("dataType is required")
+             return
+         }
+ 
+         guard let value = call.getDouble("value") else {
+-            call.reject("value is required")
++            call.unimplemented("value is required")
+             return
+         }
+ 
+-        let unit = call.getString("unit")
+-        let startDate = call.getString("startDate")
+-        let endDate = call.getString("endDate")
++        let unitRaw = call.getString("unit", "")
++        let unit: String? = unitRaw.isEmpty ? nil : unitRaw
++        let startDateRaw = call.getString("startDate", "")
++        let startDate: String? = startDateRaw.isEmpty ? nil : startDateRaw
++        let endDateRaw = call.getString("endDate", "")
++        let endDate: String? = endDateRaw.isEmpty ? nil : endDateRaw
+         let metadataAny = call.getObject("metadata") as? [String: Any]
+         let metadata = metadataAny?.reduce(into: [String: String]()) { result, entry in
+             if let stringValue = entry.value as? String {
+@@ -130,12 +139,12 @@ public class HealthPlugin: CAPPlugin, CAPBridgedPlugin {
+                     case .success:
+                         call.resolve()
+                     case let .failure(error):
+-                        call.reject(error.localizedDescription, nil, error)
++                        call.unimplemented(error.localizedDescription)
+                     }
+                 }
+             }
+         } catch {
+-            call.reject(error.localizedDescription, nil, error)
++            call.unimplemented(error.localizedDescription)
+         }
+     }
+ 
+@@ -154,12 +163,16 @@ public class HealthPlugin: CAPPlugin, CAPBridgedPlugin {
+     }
+ 
+     @objc func queryWorkouts(_ call: CAPPluginCall) {
+-        let workoutType = call.getString("workoutType")
+-        let startDate = call.getString("startDate")
+-        let endDate = call.getString("endDate")
++        let workoutTypeRaw = call.getString("workoutType", "")
++        let workoutType: String? = workoutTypeRaw.isEmpty ? nil : workoutTypeRaw
++        let startDateRaw = call.getString("startDate", "")
++        let startDate: String? = startDateRaw.isEmpty ? nil : startDateRaw
++        let endDateRaw = call.getString("endDate", "")
++        let endDate: String? = endDateRaw.isEmpty ? nil : endDateRaw
+         let limit = call.getInt("limit")
+         let ascending = call.getBool("ascending") ?? false
+-        let anchor = call.getString("anchor")
++        let anchorRaw = call.getString("anchor", "")
++        let anchor: String? = anchorRaw.isEmpty ? nil : anchorRaw
+ 
+         implementation.queryWorkouts(
+             workoutTypeString: workoutType,
+@@ -174,22 +187,27 @@ public class HealthPlugin: CAPPlugin, CAPBridgedPlugin {
+                 case let .success(response):
+                     call.resolve(response)
+                 case let .failure(error):
+-                    call.reject(error.localizedDescription, nil, error)
++                    call.unimplemented(error.localizedDescription)
+                 }
+             }
+         }
+     }
+ 
+     @objc func queryAggregated(_ call: CAPPluginCall) {
+-        guard let dataType = call.getString("dataType") else {
+-            call.reject("dataType is required")
++        let dataType = call.getString("dataType", "")
++        guard !dataType.isEmpty else {
++            call.unimplemented("dataType is required")
+             return
+         }
+ 
+-        let startDate = call.getString("startDate")
+-        let endDate = call.getString("endDate")
+-        let bucket = call.getString("bucket")
+-        let aggregation = call.getString("aggregation")
++        let startDateRaw = call.getString("startDate", "")
++        let startDate: String? = startDateRaw.isEmpty ? nil : startDateRaw
++        let endDateRaw = call.getString("endDate", "")
++        let endDate: String? = endDateRaw.isEmpty ? nil : endDateRaw
++        let bucketRaw = call.getString("bucket", "")
++        let bucket: String? = bucketRaw.isEmpty ? nil : bucketRaw
++        let aggregationRaw = call.getString("aggregation", "")
++        let aggregation: String? = aggregationRaw.isEmpty ? nil : aggregationRaw
+ 
+         implementation.queryAggregated(
+             dataTypeIdentifier: dataType,
+@@ -203,7 +221,7 @@ public class HealthPlugin: CAPPlugin, CAPBridgedPlugin {
+                 case let .success(response):
+                     call.resolve(response)
+                 case let .failure(error):
+-                    call.reject(error.localizedDescription, nil, error)
++                    call.unimplemented(error.localizedDescription)
+                 }
+             }
+         }

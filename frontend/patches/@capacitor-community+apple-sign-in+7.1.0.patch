@@ -11,3 +11,93 @@ index 94246df..7d9d007 100644
      ],
      targets: [
          .target(
+diff --git a/node_modules/@capacitor-community/apple-sign-in/ios/Sources/SignInWithApple/Plugin.swift b/node_modules/@capacitor-community/apple-sign-in/ios/Sources/SignInWithApple/Plugin.swift
+index f53087c..5113eef 100755
+--- a/node_modules/@capacitor-community/apple-sign-in/ios/Sources/SignInWithApple/Plugin.swift
++++ b/node_modules/@capacitor-community/apple-sign-in/ios/Sources/SignInWithApple/Plugin.swift
+@@ -7,19 +7,24 @@ public class SignInWithApple: CAPPlugin, CAPBridgedPlugin {
+     public let identifier = "SignInWithApple"
+     public let jsName = "SignInWithApple"
+     public let pluginMethods: [CAPPluginMethod] = [
+-        CAPPluginMethod(name: "authorize", returnType: CAPPluginReturnPromise),
++        CAPPluginMethod(name: "authorize", returnType: CAPPluginReturnPromise)
+     ]
+ 
++    // Swift 5 compat: bridge.savedCall(withID:) gated behind $NonescapableTypes
++    private var pendingCall: CAPPluginCall?
++
+     @objc func authorize(_ call: CAPPluginCall) {
+         let appleIDProvider = ASAuthorizationAppleIDProvider()
+         let request = appleIDProvider.createRequest()
+         request.requestedScopes = getRequestedScopes(from: call)
+-        request.state = call.getString("state")
+-        request.nonce = call.getString("nonce")
+ 
+-        let defaults = UserDefaults()
+-        defaults.setValue(call.callbackId, forKey: "callbackId")
++        // Swift 5 compat: getString(_ key:) -> String? gated behind $NonescapableTypes
++        let stateVal = call.getString("state", "")
++        request.state = stateVal.isEmpty ? nil : stateVal
++        let nonceVal = call.getString("nonce", "")
++        request.nonce = nonceVal.isEmpty ? nil : nonceVal
+ 
++        pendingCall = call
+         self.bridge?.saveCall(call)
+ 
+         let authorizationController = ASAuthorizationController(authorizationRequests: [request])
+@@ -30,33 +35,25 @@ public class SignInWithApple: CAPPlugin, CAPBridgedPlugin {
+     func getRequestedScopes(from call: CAPPluginCall) -> [ASAuthorization.Scope]? {
+         var requestedScopes: [ASAuthorization.Scope] = []
+ 
+-        if let scopesStr = call.getString("scopes") {
++        let scopesStr = call.getString("scopes", "")
++        if !scopesStr.isEmpty {
+             if scopesStr.contains("name") {
+                 requestedScopes.append(.fullName)
+             }
+-
+             if scopesStr.contains("email") {
+                 requestedScopes.append(.email)
+             }
+         }
+ 
+-        if requestedScopes.count > 0 {
+-            return requestedScopes
+-        }
+-
+-        return nil
++        return requestedScopes.isEmpty ? nil : requestedScopes
+     }
+ }
+ 
+ extension SignInWithApple: ASAuthorizationControllerDelegate {
+     public func authorizationController(controller: ASAuthorizationController, didCompleteWithAuthorization authorization: ASAuthorization) {
+         guard let appleIDCredential = authorization.credential as? ASAuthorizationAppleIDCredential else { return }
+-
+-        let defaults = UserDefaults()
+-        let id = defaults.string(forKey: "callbackId") ?? ""
+-        guard let call = self.bridge?.savedCall(withID: id) else {
+-            return
+-        }
++        guard let call = pendingCall else { return }
++        pendingCall = nil
+ 
+         let result = [
+             "response": [
+@@ -74,12 +71,10 @@ extension SignInWithApple: ASAuthorizationControllerDelegate {
+     }
+ 
+     public func authorizationController(controller: ASAuthorizationController, didCompleteWithError error: Error) {
+-        let defaults = UserDefaults()
+-        let id = defaults.string(forKey: "callbackId") ?? ""
+-        guard let call = self.bridge?.savedCall(withID: id) else {
+-            return
+-        }
+-        call.reject(error.localizedDescription)
++        guard let call = pendingCall else { return }
++        pendingCall = nil
++        // Swift 5 compat: call.reject gated behind $NonescapableTypes
++        call.unimplemented(error.localizedDescription)
+         self.bridge?.releaseCall(call)
+     }
+ }
