@@ -61,5 +61,9 @@
 	<string>Read your steps and active calories to adjust your daily calorie budget</string>
 	<key>NSHealthUpdateUsageDescription</key>
 	<string>Save your weight to Apple Health so it stays in sync across apps</string>
+	<key>UIBackgroundModes</key>
+	<array>
+		<string>remote-notification</string>
+	</array>
 </dict>
 </plist>
