@@ -1,3 +1,24 @@
+diff --git a/node_modules/@capacitor/camera/Package.swift b/node_modules/@capacitor/camera/Package.swift
+index 4e1cf0e..a54fe10 100644
+--- a/node_modules/@capacitor/camera/Package.swift
++++ b/node_modules/@capacitor/camera/Package.swift
+@@ -4,7 +4,6 @@ import PackageDescription
+ let package = Package(
+     name: "CapacitorCamera",
+     platforms: [.iOS(.v15)],
+-    swiftLanguageVersions: [.v5],
+     products: [
+         .library(
+             name: "CapacitorCamera",
+@@ -12,7 +11,7 @@ let package = Package(
+     ],
+     dependencies: [
+         .package(url: "https://github.com/ionic-team/capacitor-swift-pm.git", from: "8.0.0"),
+-        .package(url: "https://github.com/ionic-team/ion-ios-camera.git", from: "1.0.4")
++        .package(name: "ion-ios-camera", path: "../../../ios/ion-ios-camera")
+     ],
+     targets: [
+         .target(
 diff --git a/node_modules/@capacitor/camera/ios/Sources/CameraPlugin/CameraPlugin.swift b/node_modules/@capacitor/camera/ios/Sources/CameraPlugin/CameraPlugin.swift
 index 968733e..379a679 100644
 --- a/node_modules/@capacitor/camera/ios/Sources/CameraPlugin/CameraPlugin.swift
