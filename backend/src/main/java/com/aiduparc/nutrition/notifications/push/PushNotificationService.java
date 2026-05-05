@@ -16,26 +16,37 @@ public class PushNotificationService {
 
     private static final Logger log = LoggerFactory.getLogger(PushNotificationService.class);
 
-    private final PushService pushService;
+    private final PushService webPushService;
+    private final ApnsPushService apnsPushService;
 
     public PushNotificationService(
             @Value("${nutrition.push.vapid-public-key:}") String vapidPublicKey,
             @Value("${nutrition.push.vapid-private-key:}") String vapidPrivateKey,
-            @Value("${nutrition.push.vapid-subject:mailto:admin@puzometr.org}") String vapidSubject
+            @Value("${nutrition.push.vapid-subject:mailto:admin@rumblyeats.org}") String vapidSubject,
+            ApnsPushService apnsPushService
     ) throws Exception {
         if (Security.getProvider("BC") == null) {
             Security.addProvider(new BouncyCastleProvider());
         }
         if (StringUtils.hasText(vapidPublicKey) && StringUtils.hasText(vapidPrivateKey)) {
-            this.pushService = new PushService(vapidPublicKey, vapidPrivateKey, vapidSubject);
+            this.webPushService = new PushService(vapidPublicKey, vapidPrivateKey, vapidSubject);
         } else {
-            log.warn("VAPID keys not configured — push notifications disabled");
-            this.pushService = null;
+            log.warn("VAPID keys not configured — web push notifications disabled");
+            this.webPushService = null;
         }
+        this.apnsPushService = apnsPushService;
     }
 
     public void send(PushSubscriptionEntity sub, String title, String body) {
-        if (pushService == null) return;
+        if ("apns".equals(sub.getPlatform())) {
+            apnsPushService.send(sub.getDeviceToken(), title, body);
+        } else {
+            sendWebPush(sub, title, body);
+        }
+    }
+
+    private void sendWebPush(PushSubscriptionEntity sub, String title, String body) {
+        if (webPushService == null) return;
         String payload = """
                 {"title":"%s","body":"%s"}
                 """.formatted(escape(title), escape(body)).strip();
@@ -44,9 +55,9 @@ public class PushNotificationService {
                     sub.getEndpoint(),
                     new Subscription.Keys(sub.getP256dh(), sub.getAuth())
             );
-            pushService.send(new Notification(subscription, payload));
+            webPushService.send(new Notification(subscription, payload));
         } catch (Exception e) {
-            log.warn("Failed to send push to user={} endpoint={}: {}", sub.getUserId(), sub.getEndpoint(), e.getMessage());
+            log.warn("Failed to send web push to user={} endpoint={}: {}", sub.getUserId(), sub.getEndpoint(), e.getMessage());
         }
     }
 

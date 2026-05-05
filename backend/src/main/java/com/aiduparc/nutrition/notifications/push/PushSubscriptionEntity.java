@@ -15,14 +15,22 @@ public class PushSubscriptionEntity {
     @Column(name = "user_id", nullable = false)
     private UUID userId;
 
-    @Column(nullable = false, columnDefinition = "TEXT")
+    // Web Push fields
+    @Column(columnDefinition = "TEXT")
     private String endpoint;
 
-    @Column(nullable = false, columnDefinition = "TEXT")
+    @Column(columnDefinition = "TEXT")
     private String p256dh;
 
-    @Column(nullable = false, columnDefinition = "TEXT")
+    @Column(columnDefinition = "TEXT")
     private String auth;
+
+    // APNs field
+    @Column(name = "device_token", columnDefinition = "TEXT")
+    private String deviceToken;
+
+    @Column(nullable = false, length = 10)
+    private String platform = "web";
 
     @Column(nullable = false)
     private String timezone;
@@ -41,6 +49,7 @@ public class PushSubscriptionEntity {
         if (createdAt == null) createdAt = OffsetDateTime.now();
         if (timezone == null) timezone = "UTC";
         if (reminderHour == 0) reminderHour = 20;
+        if (platform == null) platform = "web";
         enabled = true;
     }
 
@@ -53,6 +62,10 @@ public class PushSubscriptionEntity {
     public void setP256dh(String p256dh) { this.p256dh = p256dh; }
     public String getAuth() { return auth; }
     public void setAuth(String auth) { this.auth = auth; }
+    public String getDeviceToken() { return deviceToken; }
+    public void setDeviceToken(String deviceToken) { this.deviceToken = deviceToken; }
+    public String getPlatform() { return platform; }
+    public void setPlatform(String platform) { this.platform = platform; }
     public String getTimezone() { return timezone; }
     public void setTimezone(String timezone) { this.timezone = timezone; }
     public int getReminderHour() { return reminderHour; }

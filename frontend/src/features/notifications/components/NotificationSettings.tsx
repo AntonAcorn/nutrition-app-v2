@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { getSubscriptionStatus, subscribePush, unsubscribePush, updatePushSettings } from '../model/pushApi'
+import { getSubscriptionStatus, subscribePush, unsubscribePush, updatePushSettings, isPushSupported } from '../model/pushApi'
 import type { PushSubscriptionStatus } from '../model/pushApi'
 
 const HOURS = Array.from({ length: 24 }, (_, i) => i)
@@ -15,23 +15,24 @@ export function NotificationSettings() {
   const [reminderHour, setReminderHour] = useState(20)
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
+  const [supported, setSupported] = useState(false)
   const [error, setError] = useState('')
-  const [supported] = useState(() => 'Notification' in window && 'serviceWorker' in navigator && 'PushManager' in window)
 
   useEffect(() => {
-    if (!supported) { setLoading(false); return }
-    getSubscriptionStatus()
-      .then(s => { setStatus(s); setReminderHour(s.reminderHour) })
-      .catch(() => {})
-      .finally(() => setLoading(false))
-  }, [supported])
+    isPushSupported().then(s => {
+      setSupported(s)
+      if (!s) { setLoading(false); return }
+      getSubscriptionStatus()
+        .then(st => { setStatus(st); setReminderHour(st.reminderHour) })
+        .catch(() => {})
+        .finally(() => setLoading(false))
+    })
+  }, [])
 
   async function handleEnable() {
     setError('')
     setSaving(true)
     try {
-      const perm = await Notification.requestPermission()
-      if (perm !== 'granted') { setError('Notification permission denied'); return }
       const next = await subscribePush(reminderHour)
       setStatus(next)
     } catch (e) {
@@ -103,7 +104,7 @@ export function NotificationSettings() {
             onClick={isOn ? handleDisable : handleEnable}
             disabled={saving}
           >
-            {isOn ? 'On' : 'Off'}
+            {saving ? '...' : isOn ? 'On' : 'Off'}
           </button>
         </div>
 

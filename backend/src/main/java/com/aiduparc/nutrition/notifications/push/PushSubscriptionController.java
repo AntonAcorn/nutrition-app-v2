@@ -34,12 +34,23 @@ public class PushSubscriptionController {
     @ResponseStatus(HttpStatus.CREATED)
     public PushSubscriptionResponse subscribe(@RequestBody PushSubscribeRequest request, HttpSession session) {
         UUID userId = currentNutritionUserResolver.resolve(session, null);
-        PushSubscriptionEntity sub = repository.findByUserIdAndEndpoint(userId, request.endpoint())
-                .orElseGet(PushSubscriptionEntity::new);
+        String platform = request.platform() != null ? request.platform() : "web";
+
+        PushSubscriptionEntity sub;
+        if ("apns".equals(platform)) {
+            sub = repository.findByUserIdAndDeviceToken(userId, request.deviceToken())
+                    .orElseGet(PushSubscriptionEntity::new);
+            sub.setDeviceToken(request.deviceToken());
+        } else {
+            sub = repository.findByUserIdAndEndpoint(userId, request.endpoint())
+                    .orElseGet(PushSubscriptionEntity::new);
+            sub.setEndpoint(request.endpoint());
+            sub.setP256dh(request.p256dh());
+            sub.setAuth(request.auth());
+        }
+
         sub.setUserId(userId);
-        sub.setEndpoint(request.endpoint());
-        sub.setP256dh(request.p256dh());
-        sub.setAuth(request.auth());
+        sub.setPlatform(platform);
         sub.setTimezone(request.timezone() != null ? request.timezone() : "UTC");
         sub.setReminderHour(request.reminderHour() != null ? request.reminderHour() : 20);
         sub.setEnabled(true);
