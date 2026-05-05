@@ -205,9 +205,7 @@ export function PhotoAnalyzerTab({ onConfirmed, onSaveToLibrary, initialMode, on
     if (await isNativePlatform()) {
       const file = await pickPhotoNative()
       if (file) {
-        const note = userNote
-        setUserNote('')
-        analyzePhoto(file, note)
+        analyzePhoto(file, userNote)
       }
     } else {
       fileInputRef.current?.click()
@@ -218,7 +216,6 @@ export function PhotoAnalyzerTab({ onConfirmed, onSaveToLibrary, initialMode, on
     const files = Array.from(event.target.files ?? [])
     if (files.length === 0) return
     const note = userNote
-    setUserNote('')
     files.forEach(file => analyzePhoto(file, note))
     if (event.target) event.target.value = ''
   }
