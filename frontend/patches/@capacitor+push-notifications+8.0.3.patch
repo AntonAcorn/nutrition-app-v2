@@ -51,7 +51,7 @@ index f3972b6..cb5b475 100644
      }
  }
 diff --git a/node_modules/@capacitor/push-notifications/ios/Sources/PushNotificationsPlugin/PushNotificationsPlugin.swift b/node_modules/@capacitor/push-notifications/ios/Sources/PushNotificationsPlugin/PushNotificationsPlugin.swift
-index 9044c74..cc90d74 100644
+index 9044c74..b05f554 100644
 --- a/node_modules/@capacitor/push-notifications/ios/Sources/PushNotificationsPlugin/PushNotificationsPlugin.swift
 +++ b/node_modules/@capacitor/push-notifications/ios/Sources/PushNotificationsPlugin/PushNotificationsPlugin.swift
 @@ -51,9 +51,6 @@ public class PushNotificationsPlugin: CAPPlugin, CAPBridgedPlugin {
@@ -141,8 +141,8 @@ index 9044c74..cc90d74 100644
          }
 -        guard let notifications = call.getArray("notifications", JSObject.self) else {
 -            call.reject("Must supply notifications to remove")
-+        // Swift 5 compat: getArray() without type param, then cast (getArray<T> is gated behind $NonescapableTypes)
-+        guard let notifications = call.getArray("notifications") as? [JSObject] else {
++        // Swift 5 compat: getArray(_:) optional form gated; use default-value form + cast
++        guard let notifications = call.getArray("notifications", []) as? [JSObject] else {
 +            call.unimplemented("Must supply notifications to remove")
              return
          }

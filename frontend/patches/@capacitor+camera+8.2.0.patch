@@ -1,5 +1,5 @@
 diff --git a/node_modules/@capacitor/camera/ios/Sources/CameraPlugin/CameraPlugin.swift b/node_modules/@capacitor/camera/ios/Sources/CameraPlugin/CameraPlugin.swift
-index 968733e..32f7c95 100644
+index 968733e..379a679 100644
 --- a/node_modules/@capacitor/camera/ios/Sources/CameraPlugin/CameraPlugin.swift
 +++ b/node_modules/@capacitor/camera/ios/Sources/CameraPlugin/CameraPlugin.swift
 @@ -145,7 +145,8 @@ public class CameraPlugin: CAPPlugin, CAPBridgedPlugin {
@@ -7,8 +7,8 @@ index 968733e..32f7c95 100644
      @objc override public func requestPermissions(_ call: CAPPluginCall) {
          // get the list of desired types, if passed
 -        let typeList = call.getArray("permissions", String.self)?.compactMap({ (type) -> CameraPermissionType? in
-+        // Swift 5 compat: getArray<T> gated behind $NonescapableTypes; use non-generic form + cast
-+        let typeList = (call.getArray("permissions") as? [String])?.compactMap({ (type) -> CameraPermissionType? in
++        // Swift 5 compat: getArray(_:) optional form also gated; use default-value form + cast
++        let typeList = (call.getArray("permissions", []) as? [String])?.compactMap({ (type) -> CameraPermissionType? in
              return CameraPermissionType(rawValue: type)
          }) ?? []
          // otherwise check everything
