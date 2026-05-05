@@ -42,7 +42,7 @@ function EyeOffIcon() {
   )
 }
 import { CurrentDayTab } from '../features/current-day/components/CurrentDayTab'
-import { login, logout, register, fetchMe, requestPasswordReset, resetPassword, deleteAccount, resendVerification, loginWithApple, EmailNotVerifiedError, type AuthUser } from '../features/auth/model/authApi'
+import { login, logout, register, fetchMe, requestPasswordReset, resetPassword, deleteAccount, resendVerification, loginWithApple, loginWithGoogleNative, EmailNotVerifiedError, type AuthUser } from '../features/auth/model/authApi'
 import { PhotoAnalyzerTab } from '../features/photo-analyzer/components/PhotoAnalyzerTab'
 import { StatisticsTab } from '../features/statistics/components/StatisticsTab'
 import { OnboardingWizard } from '../features/onboarding/components/OnboardingWizard'
@@ -246,6 +246,25 @@ export default function App() {
   function handleDayUpdated() {
     setSummaryRefreshToken((current) => current + 1)
     setStatisticsRefreshToken((current) => current + 1)
+  }
+
+  async function handleGoogleSignInNative() {
+    setAuthSubmitting(true)
+    setAuthError('')
+    try {
+      const nextUser = await loginWithGoogleNative()
+      setAuthUser(nextUser)
+      if (nextUser.nutritionUserId) {
+        identifyUser(nextUser.nutritionUserId, { email: nextUser.email ?? undefined, name: nextUser.displayName ?? undefined })
+        Sentry.setUser({ id: nextUser.nutritionUserId, email: nextUser.email ?? undefined })
+      }
+    } catch (e) {
+      if (e instanceof Error && !e.message.includes('canceled')) {
+        setAuthError(e instanceof Error ? e.message : 'Google Sign In failed')
+      }
+    } finally {
+      setAuthSubmitting(false)
+    }
   }
 
   async function handleAppleSignIn() {
@@ -665,10 +684,10 @@ export default function App() {
               )}
 
               {isNative && (
-                <a href={`${API_BASE}/api/auth/google`} className="auth-google-btn">
+                <button type="button" className="auth-google-btn" onClick={handleGoogleSignInNative} disabled={authSubmitting}>
                   <GoogleIcon />
                   Continue with Google
-                </a>
+                </button>
               )}
 
               <p className="auth-switch-text">

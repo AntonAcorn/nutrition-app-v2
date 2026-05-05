@@ -117,6 +117,28 @@ export async function logout(): Promise<void> {
   }
 }
 
+const GOOGLE_IOS_CLIENT_ID = 'REPLACE_WITH_IOS_CLIENT_ID'
+
+export async function loginWithGoogleNative(): Promise<AuthUser> {
+  const { registerPlugin } = await import('@capacitor/core')
+  const GoogleSignIn = registerPlugin<{
+    signIn(opts: { clientId: string }): Promise<{
+      idToken: string
+      email: string
+      displayName: string
+    }>
+  }>('GoogleSignIn')
+
+  const result = await GoogleSignIn.signIn({ clientId: GOOGLE_IOS_CLIENT_ID })
+  const res = await fetch(`${API_BASE}/api/auth/google/token`, {
+    method: 'POST',
+    credentials: 'include',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ idToken: result.idToken, displayName: result.displayName }),
+  })
+  return parseAuthResponse(res)
+}
+
 export async function loginWithApple(): Promise<AuthUser> {
   const { SignInWithApple } = await import('@capacitor-community/apple-sign-in')
   const result = await SignInWithApple.authorize({

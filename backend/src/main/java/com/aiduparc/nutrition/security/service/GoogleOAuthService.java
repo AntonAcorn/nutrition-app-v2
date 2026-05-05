@@ -85,6 +85,26 @@ public class GoogleOAuthService {
         return new GoogleUserInfo(id, email, name);
     }
 
+    public GoogleUserInfo verifyIdToken(String idToken) throws IOException, InterruptedException {
+        HttpRequest request = HttpRequest.newBuilder()
+            .uri(URI.create("https://oauth2.googleapis.com/tokeninfo?id_token=" + encode(idToken)))
+            .GET()
+            .build();
+
+        HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+        JsonNode json = objectMapper.readTree(response.body());
+
+        if (json.has("error_description")) {
+            throw new IllegalArgumentException("Invalid Google ID token: " + json.get("error_description").asText());
+        }
+
+        String id = json.get("sub").asText();
+        String email = json.has("email") ? json.get("email").asText() : null;
+        String name = json.has("name") ? json.get("name").asText() : (email != null ? email : "Google User");
+
+        return new GoogleUserInfo(id, email, name);
+    }
+
     private static String encode(String value) {
         return URLEncoder.encode(value == null ? "" : value, StandardCharsets.UTF_8);
     }

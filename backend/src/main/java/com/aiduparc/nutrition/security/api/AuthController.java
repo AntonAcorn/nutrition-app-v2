@@ -7,6 +7,7 @@ import com.aiduparc.nutrition.security.service.AuthenticatedSession;
 import com.aiduparc.nutrition.security.service.CurrentNutritionUserResolver;
 import com.aiduparc.nutrition.security.service.GoogleOAuthService;
 import com.aiduparc.nutrition.security.service.GoogleUserInfo;
+import com.aiduparc.nutrition.security.api.GoogleNativeSignInRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
@@ -156,6 +157,20 @@ public class AuthController {
         boolean ok = authFacade.verifyEmail(token);
         String redirect = appBaseUrl + (ok ? "/email-verified/" : "/email-verify-failed/");
         return ResponseEntity.status(302).header("Location", redirect).build();
+    }
+
+    @PostMapping("/google/token")
+    public AuthResponse googleNativeSignIn(@RequestBody GoogleNativeSignInRequest request, HttpSession session) {
+        try {
+            GoogleUserInfo userInfo = googleOAuthService.verifyIdToken(request.idToken());
+            AuthenticatedSession authSession = authFacade.loginWithGoogle(userInfo);
+            session.setAttribute(AUTH_SESSION_KEY, authSession);
+            return authFacade.me(authSession);
+        } catch (IllegalArgumentException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new IllegalArgumentException("Google sign-in failed");
+        }
     }
 
     @PostMapping("/apple")
