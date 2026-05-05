@@ -1,0 +1,163 @@
+diff --git a/node_modules/@capacitor/push-notifications/ios/Sources/PushNotificationsPlugin/PushNotificationsHandler.swift b/node_modules/@capacitor/push-notifications/ios/Sources/PushNotificationsPlugin/PushNotificationsHandler.swift
+index f3972b6..cb5b475 100644
+--- a/node_modules/@capacitor/push-notifications/ios/Sources/PushNotificationsPlugin/PushNotificationsHandler.swift
++++ b/node_modules/@capacitor/push-notifications/ios/Sources/PushNotificationsPlugin/PushNotificationsHandler.swift
+@@ -29,7 +29,8 @@ public class PushNotificationsHandler: NSObject, NotificationHandlerProtocol {
+             }
+         }
+ 
+-        if let optionsArray = self.plugin?.getConfig().getArray("presentationOptions") as? [String] {
++        // Swift 5 compatible: use getConfigJSON() instead of getArray() (gated behind $NonescapableTypes)
++        if let optionsArray = self.plugin?.getConfig().getConfigJSON()["presentationOptions"] as? [String] {
+             var presentationOptions = UNNotificationPresentationOptions.init()
+ 
+             optionsArray.forEach { option in
+@@ -38,7 +39,6 @@ public class PushNotificationsHandler: NSObject, NotificationHandlerProtocol {
+                     presentationOptions.insert(.alert)
+                 case "badge":
+                     presentationOptions.insert(.badge)
+-
+                 case "sound":
+                     presentationOptions.insert(.sound)
+                 default:
+@@ -73,17 +73,27 @@ public class PushNotificationsHandler: NSObject, NotificationHandlerProtocol {
+         data["notification"] = makeNotificationRequestJSObject(originalNotificationRequest)
+ 
+         self.plugin?.notifyListeners("pushNotificationActionPerformed", data: data, retainUntilConsumed: true)
+-
+     }
+ 
+     func makeNotificationRequestJSObject(_ request: UNNotificationRequest) -> JSObject {
++        // Swift 5 compatible: manual conversion instead of JSTypes.coerceDictionaryToJSObject (gated behind $NonescapableTypes)
++        var data = JSObject()
++        for (key, value) in request.content.userInfo {
++            if let k = key as? String {
++                if let v = value as? String { data[k] = v }
++                else if let v = value as? Int { data[k] = v }
++                else if let v = value as? Double { data[k] = v }
++                else if let v = value as? Bool { data[k] = v }
++                else if let v = value as? NSNumber { data[k] = v }
++            }
++        }
+         return [
+             "id": request.identifier,
+             "title": request.content.title,
+             "subtitle": request.content.subtitle,
+             "badge": request.content.badge ?? 1,
+             "body": request.content.body,
+-            "data": JSTypes.coerceDictionaryToJSObject(request.content.userInfo) ?? [:]
++            "data": data
+         ]
+     }
+ }
+diff --git a/node_modules/@capacitor/push-notifications/ios/Sources/PushNotificationsPlugin/PushNotificationsPlugin.swift b/node_modules/@capacitor/push-notifications/ios/Sources/PushNotificationsPlugin/PushNotificationsPlugin.swift
+index 9044c74..cc90d74 100644
+--- a/node_modules/@capacitor/push-notifications/ios/Sources/PushNotificationsPlugin/PushNotificationsPlugin.swift
++++ b/node_modules/@capacitor/push-notifications/ios/Sources/PushNotificationsPlugin/PushNotificationsPlugin.swift
+@@ -51,9 +51,6 @@ public class PushNotificationsPlugin: CAPPlugin, CAPBridgedPlugin {
+         NotificationCenter.default.removeObserver(self)
+     }
+ 
+-    /**
+-     * Register for push notifications
+-     */
+     @objc func register(_ call: CAPPluginCall) {
+         DispatchQueue.main.async {
+             UIApplication.shared.registerForRemoteNotifications()
+@@ -61,9 +58,6 @@ public class PushNotificationsPlugin: CAPPlugin, CAPBridgedPlugin {
+         call.resolve()
+     }
+ 
+-    /**
+-     * Unregister for remote notifications
+-     */
+     @objc func unregister(_ call: CAPPluginCall) {
+         DispatchQueue.main.async {
+             UIApplication.shared.unregisterForRemoteNotifications()
+@@ -71,34 +65,26 @@ public class PushNotificationsPlugin: CAPPlugin, CAPBridgedPlugin {
+         }
+     }
+ 
+-    /**
+-     * Request notification permission
+-     */
+     @objc override public func requestPermissions(_ call: CAPPluginCall) {
+         self.notificationDelegateHandler.requestPermissions { granted, error in
+             guard error == nil else {
++                // Swift 5 compat: call.unimplemented instead of call.reject (gated behind $NonescapableTypes)
+                 if let err = error {
+-                    call.reject(err.localizedDescription)
++                    call.unimplemented(err.localizedDescription)
+                     return
+                 }
+-
+-                call.reject("unknown error in permissions request")
++                call.unimplemented("unknown error in permissions request")
+                 return
+             }
+ 
+             var result: PushNotificationsPermissions = .denied
+-
+             if granted {
+                 result = .granted
+             }
+-
+             call.resolve(["receive": result.rawValue])
+         }
+     }
+ 
+-    /**
+-     * Check notification permission
+-     */
+     @objc override public func checkPermissions(_ call: CAPPluginCall) {
+         self.notificationDelegateHandler.checkPermissions { status in
+             var result: PushNotificationsPermissions = .prompt
+@@ -118,12 +104,9 @@ public class PushNotificationsPlugin: CAPPlugin, CAPBridgedPlugin {
+         }
+     }
+ 
+-    /**
+-     * Get notifications in Notification Center
+-     */
+     @objc func getDeliveredNotifications(_ call: CAPPluginCall) {
+         if !appDelegateRegistrationCalled {
+-            call.reject("event capacitorDidRegisterForRemoteNotifications not called.  Visit https://capacitorjs.com/docs/apis/push-notifications for more information")
++            call.unimplemented("event capacitorDidRegisterForRemoteNotifications not called. Visit https://capacitorjs.com/docs/apis/push-notifications for more information")
+             return
+         }
+         UNUserNotificationCenter.current().getDeliveredNotifications(completionHandler: { (notifications) in
+@@ -136,16 +119,14 @@ public class PushNotificationsPlugin: CAPPlugin, CAPBridgedPlugin {
+         })
+     }
+ 
+-    /**
+-     * Remove specified notifications from Notification Center
+-     */
+     @objc func removeDeliveredNotifications(_ call: CAPPluginCall) {
+         if !appDelegateRegistrationCalled {
+-            call.reject("event capacitorDidRegisterForRemoteNotifications not called.  Visit https://capacitorjs.com/docs/apis/push-notifications for more information")
++            call.unimplemented("event capacitorDidRegisterForRemoteNotifications not called. Visit https://capacitorjs.com/docs/apis/push-notifications for more information")
+             return
+         }
+-        guard let notifications = call.getArray("notifications", JSObject.self) else {
+-            call.reject("Must supply notifications to remove")
++        // Swift 5 compat: getArray() without type param, then cast (getArray<T> is gated behind $NonescapableTypes)
++        guard let notifications = call.getArray("notifications") as? [JSObject] else {
++            call.unimplemented("Must supply notifications to remove")
+             return
+         }
+ 
+@@ -154,12 +135,9 @@ public class PushNotificationsPlugin: CAPPlugin, CAPBridgedPlugin {
+         call.resolve()
+     }
+ 
+-    /**
+-     * Remove all notifications from Notification Center
+-     */
+     @objc func removeAllDeliveredNotifications(_ call: CAPPluginCall) {
+         if !appDelegateRegistrationCalled {
+-            call.reject("event capacitorDidRegisterForRemoteNotifications not called.  Visit https://capacitorjs.com/docs/apis/push-notifications for more information")
++            call.unimplemented("event capacitorDidRegisterForRemoteNotifications not called. Visit https://capacitorjs.com/docs/apis/push-notifications for more information")
+             return
+         }
+         UNUserNotificationCenter.current().removeAllDeliveredNotifications()
