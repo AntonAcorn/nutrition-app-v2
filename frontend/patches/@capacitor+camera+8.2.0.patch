@@ -1,16 +1,8 @@
 diff --git a/node_modules/@capacitor/camera/Package.swift b/node_modules/@capacitor/camera/Package.swift
-index 4e1cf0e..a54fe10 100644
+index e59ef72..a54fe10 100644
 --- a/node_modules/@capacitor/camera/Package.swift
 +++ b/node_modules/@capacitor/camera/Package.swift
-@@ -4,7 +4,6 @@ import PackageDescription
- let package = Package(
-     name: "CapacitorCamera",
-     platforms: [.iOS(.v15)],
--    swiftLanguageVersions: [.v5],
-     products: [
-         .library(
-             name: "CapacitorCamera",
-@@ -12,7 +11,7 @@ let package = Package(
+@@ -11,7 +11,7 @@ let package = Package(
      ],
      dependencies: [
          .package(url: "https://github.com/ionic-team/capacitor-swift-pm.git", from: "8.0.0"),
