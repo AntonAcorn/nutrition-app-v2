@@ -80,7 +80,7 @@ ul {
 .app-shell {
   width: min(520px, 100%);
   margin: 0 auto;
-  padding: 18px 14px calc(72px + env(safe-area-inset-bottom, 0px));
+  padding: max(env(safe-area-inset-top, 0px), 18px) 14px calc(72px + env(safe-area-inset-bottom, 0px));
 }
 
 .app-header {
