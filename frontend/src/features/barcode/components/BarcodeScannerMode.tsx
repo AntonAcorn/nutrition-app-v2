@@ -25,6 +25,7 @@ export function BarcodeScannerMode({ onAdded, onCancel }: Props) {
   const [portionGrams, setPortionGrams] = useState('100')
   const [adding, setAdding] = useState(false)
   const [addError, setAddError] = useState('')
+  const [cameraErrorDetail, setCameraErrorDetail] = useState('')
 
   useEffect(() => {
     let stopped = false
@@ -94,6 +95,8 @@ export function BarcodeScannerMode({ onAdded, onCancel }: Props) {
       } catch (err) {
         if (!stopped) {
           const name = err instanceof Error ? err.name : ''
+          const msg = err instanceof Error ? err.message : String(err)
+          setCameraErrorDetail(`${name}: ${msg}`)
           setStatus(name === 'NotAllowedError' ? 'permission_denied' : 'camera_error')
         }
       }
@@ -194,7 +197,12 @@ export function BarcodeScannerMode({ onAdded, onCancel }: Props) {
       {status === 'camera_error' && (
         <div className="barcode-state-card">
           <p className="error-text">Camera not available.</p>
-          <button type="button" className="tab-button tab-button--dark" onClick={onCancel}>
+          {cameraErrorDetail && (
+            <p className="subtle-text" style={{ marginTop: '0.5rem', fontSize: '0.75rem', wordBreak: 'break-all' }}>
+              {cameraErrorDetail}
+            </p>
+          )}
+          <button type="button" className="tab-button tab-button--dark" onClick={onCancel} style={{ marginTop: '1rem' }}>
             Go back
           </button>
         </div>
