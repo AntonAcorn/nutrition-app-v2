@@ -107,13 +107,11 @@ export function FastingTab() {
   if (loading) {
     return (
       <section className="screen-section screen-section--home-dark screen-section--fill">
-        <div style={{ padding: '0 16px' }}>
-          <div className="skeleton-card skeleton-center">
-            <div className="skeleton skeleton--circle" style={{ width: 160, height: 160 }} />
-            <div className="skeleton" style={{ height: '1rem', width: '50%' }} />
-            <div className="skeleton" style={{ height: '2.8rem', width: '100%', borderRadius: '1rem' }} />
-            <div className="skeleton" style={{ height: '2.8rem', width: '100%', borderRadius: '1rem' }} />
-          </div>
+        <div className="panel fasting-panel" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 16 }}>
+          <div className="skeleton skeleton--circle" style={{ width: 200, height: 200 }} />
+          <div className="skeleton" style={{ height: '1rem', width: '40%' }} />
+          <div className="skeleton" style={{ height: '2.8rem', width: '100%', borderRadius: '14px', marginTop: 8 }} />
+          <div className="skeleton" style={{ height: '2.8rem', width: '100%', borderRadius: '14px' }} />
         </div>
       </section>
     )

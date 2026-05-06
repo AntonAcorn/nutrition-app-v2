@@ -313,9 +313,9 @@ export function FoodLibraryTab({ onLogged, initialSave, onInitialSaveDone }: Foo
       {undoing && <p className="subtle-text" style={{ textAlign: 'center', fontSize: '0.85rem' }}>Removing...</p>}
 
       {loading ? (
-        <div style={{ padding: '8px 0' }}>
+        <div className="library-list">
           {[1,2,3,4].map(i => (
-            <div key={i} className="skeleton" style={{ height: '4rem', borderRadius: '1rem', marginBottom: 10 }} />
+            <div key={i} className="skeleton" style={{ height: '4.25rem', borderRadius: '14px' }} />
           ))}
         </div>
       ) : templates.length === 0 ? (

@@ -794,24 +794,22 @@ export function StatisticsTab({ refreshToken = 0 }: StatisticsTabProps) {
       </header>
 
       {loading ? (
-        <div style={{ padding: '0 16px' }}>
-          {/* Range selector */}
-          <div className="skeleton" style={{ height: '2.5rem', borderRadius: '2rem', marginBottom: 16 }} />
-          {/* Chart */}
-          <div className="skeleton-card">
-            <div className="skeleton" style={{ height: '1rem', width: '50%', marginBottom: 12 }} />
-            <div className="skeleton" style={{ height: 180, borderRadius: '1rem' }} />
-          </div>
-          {/* Metric cards 2x2 */}
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+        <>
+          {/* Chart panel */}
+          <section className="panel statistics-panel statistics-panel--dark">
+            <div className="skeleton" style={{ height: '1rem', width: '40%', marginBottom: 14 }} />
+            <div className="skeleton" style={{ height: 200, borderRadius: '1rem' }} />
+          </section>
+          {/* Metric grid 2x2 */}
+          <section className="stats-metric-grid">
             {[1,2,3,4].map(i => (
-              <div key={i} className="skeleton-card" style={{ padding: 16 }}>
-                <div className="skeleton" style={{ height: '0.8rem', width: '60%', marginBottom: 10 }} />
-                <div className="skeleton" style={{ height: '2rem', width: '80%' }} />
+              <div key={i} className="skeleton-card" style={{ padding: 18 }}>
+                <div className="skeleton" style={{ height: '0.75rem', width: '55%', marginBottom: 12 }} />
+                <div className="skeleton" style={{ height: '1.6rem', width: '70%' }} />
               </div>
             ))}
-          </div>
-        </div>
+          </section>
+        </>
       ) : null}
       {!loading && error ? <section className="panel detail-panel"><p className="error-text">{error}</p></section> : null}
       {!loading && !error && data && loggedPoints.length === 0 ? (

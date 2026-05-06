@@ -157,16 +157,16 @@ function TabIconMe() {
 
 function TabLoadingSkeleton() {
   return (
-    <div style={{ padding: '0 16px' }}>
-      <div className="skeleton-card">
-        <div className="skeleton" style={{ height: '1rem', width: '40%', marginBottom: 12 }} />
-        <div className="skeleton" style={{ height: 140, borderRadius: '1rem' }} />
+    <section className="screen-section screen-section--home-dark">
+      <div className="panel">
+        <div className="skeleton" style={{ height: '1rem', width: '40%', marginBottom: 14 }} />
+        <div className="skeleton" style={{ height: 160, borderRadius: '14px' }} />
       </div>
-      <div className="skeleton-card">
-        <div className="skeleton" style={{ height: '3rem', borderRadius: '1rem', marginBottom: 10 }} />
-        <div className="skeleton" style={{ height: '3rem', borderRadius: '1rem' }} />
+      <div className="panel">
+        <div className="skeleton" style={{ height: '3rem', borderRadius: '14px', marginBottom: 10 }} />
+        <div className="skeleton" style={{ height: '3rem', borderRadius: '14px' }} />
       </div>
-    </div>
+    </section>
   )
 }
 
@@ -475,25 +475,21 @@ function AppInner() {
 
   if (authLoading) {
     return (
-      <main className="app-shell" style={{ background: '#0d0e11' }}>
-        <div style={{ padding: '16px' }}>
-          <div className="skeleton-card" style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
-            <div className="skeleton skeleton--circle" style={{ width: 64, height: 64, flexShrink: 0 }} />
-            <div className="skeleton-col">
+      <main className="app-shell">
+        <section className="screen-section screen-section--home-dark">
+          <div className="mascot-hero-card">
+            <div className="skeleton skeleton--circle" style={{ width: 100, height: 100, flexShrink: 0 }} />
+            <div className="skeleton-col" style={{ flex: 1 }}>
               <div className="skeleton" style={{ height: '1.1rem', width: '60%' }} />
               <div className="skeleton" style={{ height: '0.85rem', width: '40%' }} />
             </div>
           </div>
-          <div className="skeleton-card skeleton-center">
-            <div className="skeleton skeleton--circle" style={{ width: 180, height: 180 }} />
-            <div className="skeleton" style={{ height: '1rem', width: '50%' }} />
+          <div className="today-dark-card" style={{ display: 'flex', flexDirection: 'column', gap: 16, alignItems: 'center' }}>
+            <div className="skeleton" style={{ height: '1.1rem', width: '5rem', alignSelf: 'flex-start' }} />
+            <div className="skeleton skeleton--circle" style={{ width: 160, height: 160 }} />
+            <div className="skeleton" style={{ height: '0.85rem', width: '50%' }} />
           </div>
-          <div className="skeleton-card">
-            {[1,2,3].map(i => (
-              <div key={i} className="skeleton" style={{ height: '3.5rem', marginBottom: 10, borderRadius: '1rem' }} />
-            ))}
-          </div>
-        </div>
+        </section>
       </main>
     )
   }

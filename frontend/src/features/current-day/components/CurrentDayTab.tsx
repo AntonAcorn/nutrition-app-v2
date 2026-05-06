@@ -362,30 +362,29 @@ export function CurrentDayTab({ refreshToken = 0, successMessage = '', onDayUpda
 
       {successMessage ? <section className="panel detail-panel"><p className="success-text">{successMessage}</p></section> : null}
       {loading ? (
-        <div style={{ padding: '0 16px' }}>
-          {/* Greeting card */}
-          <div className="skeleton-card" style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
-            <div className="skeleton skeleton--circle" style={{ width: 64, height: 64, flexShrink: 0 }} />
-            <div className="skeleton-col">
+        <>
+          {/* Greeting card — matches .mascot-hero-card */}
+          <div className="mascot-hero-card">
+            <div className="skeleton skeleton--circle" style={{ width: 100, height: 100, flexShrink: 0 }} />
+            <div className="skeleton-col" style={{ flex: 1 }}>
               <div className="skeleton" style={{ height: '1.1rem', width: '70%' }} />
               <div className="skeleton" style={{ height: '0.85rem', width: '40%' }} />
-              <div className="skeleton" style={{ height: '1.5rem', width: '5rem', borderRadius: '2rem' }} />
             </div>
           </div>
-          {/* Calories ring card */}
-          <div className="skeleton-card skeleton-center">
-            <div className="skeleton" style={{ height: '1rem', width: '6rem', alignSelf: 'flex-start' }} />
-            <div className="skeleton skeleton--circle" style={{ width: 180, height: 180 }} />
-            <div className="skeleton" style={{ height: '1rem', width: '60%' }} />
+          {/* Calories ring card — matches .today-dark-card */}
+          <div className="today-dark-card" style={{ display: 'flex', flexDirection: 'column', gap: 16, alignItems: 'center' }}>
+            <div className="skeleton" style={{ height: '1.1rem', width: '5rem', alignSelf: 'flex-start' }} />
+            <div className="skeleton skeleton--circle" style={{ width: 160, height: 160 }} />
+            <div className="skeleton" style={{ height: '0.85rem', width: '50%' }} />
           </div>
-          {/* Meals card */}
-          <div className="skeleton-card">
-            <div className="skeleton" style={{ height: '1rem', width: '5rem', marginBottom: 16 }} />
+          {/* Meals card — matches .today-dark-card */}
+          <div className="today-dark-card">
+            <div className="skeleton" style={{ height: '1.1rem', width: '6rem', marginBottom: 14 }} />
             {[1,2,3].map(i => (
-              <div key={i} className="skeleton" style={{ height: '3.5rem', marginBottom: 10, borderRadius: '1rem' }} />
+              <div key={i} className="skeleton" style={{ height: '3rem', marginTop: 8, borderRadius: '14px' }} />
             ))}
           </div>
-        </div>
+        </>
       ) : null}
       {!loading && error ? <section className="panel detail-panel"><p className="error-text">{error}</p></section> : null}
 
