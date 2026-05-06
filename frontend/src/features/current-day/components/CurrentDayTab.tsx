@@ -11,7 +11,7 @@ import { getTodayLocalDateInputValue, offsetDate, formatNavDateLabel } from '../
 import type { TodaySummary } from '../../../shared/types/nutrition'
 import { MascotSvg } from './MascotSvg'
 import { getMascotMood } from '../model/getMascotMood'
-import { getTodaySteps, getTodayActiveCalories, getLatestWeightFromHealth, isHealthKitSupported } from '../../../shared/lib/healthKit'
+import { getTodaySteps, getTodayActiveCalories, getLatestWeightFromHealth, isHealthKitSupported, requestHealthPermissions } from '../../../shared/lib/healthKit'
 import { hapticLight, hapticMedium } from '../../../shared/lib/haptic'
 
 const PTR_THRESHOLD = 56
@@ -121,8 +121,12 @@ export function CurrentDayTab({ refreshToken = 0, successMessage = '', onDayUpda
     loadSummary()
 
     if (isToday && isHealthKitSupported()) {
-      getTodaySteps().then(setSteps)
-      getTodayActiveCalories().then(setActiveCalories)
+      requestHealthPermissions().then(() => {
+        if (!cancelled) {
+          getTodaySteps().then(v => { if (!cancelled) setSteps(v) })
+          getTodayActiveCalories().then(v => { if (!cancelled) setActiveCalories(v) })
+        }
+      })
     } else {
       setSteps(0)
       setActiveCalories(0)

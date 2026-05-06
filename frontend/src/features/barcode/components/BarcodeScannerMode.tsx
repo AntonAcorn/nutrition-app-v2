@@ -1,9 +1,11 @@
 import { useEffect, useRef, useState } from 'react'
 import type { IScannerControls } from '@zxing/browser'
+import { Camera } from '@capacitor/camera'
+import { Capacitor } from '@capacitor/core'
 import { lookupBarcode, type FoodProduct } from '../model/barcodeApi'
 import { addMealManually } from '../../current-day/model/nutritionTotalsApi'
 
-type ScanStatus = 'scanning' | 'loading' | 'found' | 'not_found' | 'camera_error'
+type ScanStatus = 'scanning' | 'loading' | 'found' | 'not_found' | 'camera_error' | 'permission_denied'
 
 interface Props {
   onAdded: () => void
@@ -32,6 +34,13 @@ export function BarcodeScannerMode({ onAdded, onCancel }: Props) {
     async function start() {
       if (!videoRef.current) return
       try {
+        if (Capacitor.isNativePlatform()) {
+          const perm = await Camera.requestPermissions({ permissions: ['camera'] })
+          if (perm.camera !== 'granted') {
+            if (!stopped) setStatus('permission_denied')
+            return
+          }
+        }
         const { BrowserMultiFormatReader } = await import('@zxing/browser')
         // 3 = DecodeHintType.TRY_HARDER — tries harder on blurry/partial barcodes
         const hints = new Map([[3, true]])
@@ -82,8 +91,11 @@ export function BarcodeScannerMode({ onAdded, onCancel }: Props) {
             }, 600)
           }
         }
-      } catch {
-        if (!stopped) setStatus('camera_error')
+      } catch (err) {
+        if (!stopped) {
+          const name = err instanceof Error ? err.name : ''
+          setStatus(name === 'NotAllowedError' ? 'permission_denied' : 'camera_error')
+        }
       }
     }
 
@@ -181,10 +193,35 @@ export function BarcodeScannerMode({ onAdded, onCancel }: Props) {
 
       {status === 'camera_error' && (
         <div className="barcode-state-card">
-          <p className="error-text">Camera not available or permission denied.</p>
+          <p className="error-text">Camera not available.</p>
           <button type="button" className="tab-button tab-button--dark" onClick={onCancel}>
             Go back
           </button>
+        </div>
+      )}
+
+      {status === 'permission_denied' && (
+        <div className="barcode-state-card">
+          <p className="error-text">Camera access is required to scan barcodes.</p>
+          <p className="subtle-text" style={{ marginTop: '0.5rem' }}>
+            {Capacitor.isNativePlatform()
+              ? 'Enable camera access in Settings → Rumbly Eats → Camera.'
+              : 'Allow camera access in your browser address bar, then try again.'}
+          </p>
+          <div style={{ display: 'flex', gap: '0.5rem', marginTop: '1rem' }}>
+            {Capacitor.isNativePlatform() && (
+              <button
+                type="button"
+                className="tab-button tab-button--dark"
+                onClick={() => window.open('app-settings://', '_system')}
+              >
+                Open Settings
+              </button>
+            )}
+            <button type="button" className="profile-logout-btn" onClick={onCancel}>
+              Cancel
+            </button>
+          </div>
         </div>
       )}
 
