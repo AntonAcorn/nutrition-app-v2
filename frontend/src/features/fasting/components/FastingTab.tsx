@@ -95,7 +95,14 @@ export function FastingTab() {
   if (loading) {
     return (
       <section className="screen-section screen-section--home-dark screen-section--fill">
-        <p className="subtle-text" style={{ textAlign: 'center' }}>Loading...</p>
+        <div style={{ padding: '0 16px' }}>
+          <div className="skeleton-card skeleton-center">
+            <div className="skeleton skeleton--circle" style={{ width: 160, height: 160 }} />
+            <div className="skeleton" style={{ height: '1rem', width: '50%' }} />
+            <div className="skeleton" style={{ height: '2.8rem', width: '100%', borderRadius: '1rem' }} />
+            <div className="skeleton" style={{ height: '2.8rem', width: '100%', borderRadius: '1rem' }} />
+          </div>
+        </div>
       </section>
     )
   }

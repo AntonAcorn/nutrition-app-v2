@@ -121,7 +121,26 @@ export function ProfileTab({ displayName, email, onLogout, onDeleteAccount }: Pr
   if (loading) {
     return (
       <section className="screen-section screen-section--home-dark">
-        <p className="subtle-text">Loading...</p>
+        <div style={{ padding: '0 16px' }}>
+          {/* Avatar + name */}
+          <div className="skeleton-card" style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+            <div className="skeleton skeleton--circle" style={{ width: 56, height: 56, flexShrink: 0 }} />
+            <div className="skeleton-col">
+              <div className="skeleton" style={{ height: '1.1rem', width: '55%' }} />
+              <div className="skeleton" style={{ height: '0.85rem', width: '70%' }} />
+            </div>
+          </div>
+          {/* Form fields */}
+          <div className="skeleton-card">
+            {[1,2,3,4].map(i => (
+              <div key={i} style={{ marginBottom: 14 }}>
+                <div className="skeleton" style={{ height: '0.75rem', width: '35%', marginBottom: 6 }} />
+                <div className="skeleton" style={{ height: '2.8rem', borderRadius: '0.75rem' }} />
+              </div>
+            ))}
+            <div className="skeleton" style={{ height: '2.8rem', borderRadius: '2rem', marginTop: 8 }} />
+          </div>
+        </div>
       </section>
     )
   }
