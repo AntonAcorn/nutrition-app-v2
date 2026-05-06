@@ -208,8 +208,26 @@ export function QuickAddSheet({ initialSlot, onAdd, onLogTemplate, onClose, onOp
     if (e.target === e.currentTarget) onClose()
   }
 
-  function handleGalleryClick() {
-    onClose()
+  async function handleGalleryClick() {
+    try {
+      const { Capacitor } = await import('@capacitor/core')
+      if (Capacitor.isNativePlatform()) {
+        const { Camera, CameraResultType, CameraSource } = await import('@capacitor/camera')
+        const photo = await Camera.getPhoto({
+          quality: 85,
+          allowEditing: false,
+          resultType: CameraResultType.Uri,
+          source: CameraSource.Photos,
+        })
+        if (photo.webPath) {
+          const res = await fetch(photo.webPath)
+          const blob = await res.blob()
+          onClose()
+          onOpenAnalyzerWithPhoto?.(new File([blob], 'photo.jpg', { type: blob.type || 'image/jpeg' }))
+          return
+        }
+      }
+    } catch {}
     galleryInputRef.current?.click()
   }
 
@@ -217,31 +235,32 @@ export function QuickAddSheet({ initialSlot, onAdd, onLogTemplate, onClose, onOp
     const file = e.target.files?.[0]
     if (!file) return
     e.target.value = ''
-    onOpenAnalyzerWithPhoto?.(file) ?? onOpenAnalyzer?.('photo')
+    onClose()
+    if (onOpenAnalyzerWithPhoto) onOpenAnalyzerWithPhoto(file)
+    else onOpenAnalyzer?.('photo')
   }
 
   async function handlePhotoClick() {
-    onClose()
-    if (onOpenAnalyzerWithPhoto) {
-      try {
-        const { Capacitor } = await import('@capacitor/core')
-        if (Capacitor.isNativePlatform()) {
-          const { Camera, CameraResultType, CameraSource } = await import('@capacitor/camera')
-          const photo = await Camera.getPhoto({
-            quality: 85,
-            allowEditing: false,
-            resultType: CameraResultType.Uri,
-            source: CameraSource.Camera,
-          })
-          if (photo.webPath) {
-            const res = await fetch(photo.webPath)
-            const blob = await res.blob()
-            onOpenAnalyzerWithPhoto(new File([blob], 'photo.jpg', { type: blob.type || 'image/jpeg' }))
-            return
-          }
+    try {
+      const { Capacitor } = await import('@capacitor/core')
+      if (Capacitor.isNativePlatform()) {
+        const { Camera, CameraResultType, CameraSource } = await import('@capacitor/camera')
+        const photo = await Camera.getPhoto({
+          quality: 85,
+          allowEditing: false,
+          resultType: CameraResultType.Uri,
+          source: CameraSource.Camera,
+        })
+        if (photo.webPath) {
+          const res = await fetch(photo.webPath)
+          const blob = await res.blob()
+          onClose()
+          onOpenAnalyzerWithPhoto?.(new File([blob], 'photo.jpg', { type: blob.type || 'image/jpeg' }))
+          return
         }
-      } catch {}
-    }
+      }
+    } catch {}
+    onClose()
     onOpenAnalyzer?.('photo')
   }
 
