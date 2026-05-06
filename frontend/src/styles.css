@@ -3196,8 +3196,8 @@ ul {
   flex-direction: column;
   gap: 0;
   border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-  padding-bottom: 6px;
-  margin-bottom: 6px;
+  padding-bottom: 12px;
+  margin-bottom: 12px;
 }
 
 .meals-log-slot--last {
@@ -3209,10 +3209,10 @@ ul {
 .meals-log-slot__header {
   display: flex;
   align-items: center;
-  padding: 8px 10px;
+  padding: 10px 12px;
   gap: 8px;
   background: rgba(255, 255, 255, 0.05);
-  border-radius: 10px;
+  border-radius: 12px;
   margin: 0 -2px;
 }
 
@@ -3307,10 +3307,10 @@ ul {
 }
 
 .meals-breakdown-legend {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px 14px;
-  margin-bottom: 10px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px 12px;
+  margin-bottom: 12px;
 }
 
 .meals-breakdown-legend__item {
@@ -3355,6 +3355,7 @@ ul {
   display: flex;
   flex-direction: column;
   overflow: hidden;
+  padding-top: 4px;
 }
 
 .meal-log-row {
@@ -3362,7 +3363,7 @@ ul {
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  padding: 10px 0;
+  padding: 13px 0;
   border-bottom: 1px solid rgba(255, 255, 255, 0.06);
 }
 
