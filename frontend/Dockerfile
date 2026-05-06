@@ -1,6 +1,7 @@
 FROM node:22-alpine AS build
 WORKDIR /app
 COPY package.json package-lock.json* ./
+COPY scripts/ scripts/
 RUN npm install
 COPY . .
 ARG VITE_POSTHOG_KEY
