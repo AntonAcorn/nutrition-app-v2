@@ -94,14 +94,14 @@ export function FastingTab() {
 
   if (loading) {
     return (
-      <section className="screen-section screen-section--home-dark">
-        <p className="subtle-text" style={{ textAlign: 'center', marginTop: 40 }}>Loading...</p>
+      <section className="screen-section screen-section--home-dark screen-section--fill">
+        <p className="subtle-text" style={{ textAlign: 'center' }}>Loading...</p>
       </section>
     )
   }
 
   return (
-    <section className="screen-section screen-section--home-dark">
+    <section className="screen-section screen-section--home-dark screen-section--fill">
       <div className="panel fasting-panel">
 
         {/* Ring */}

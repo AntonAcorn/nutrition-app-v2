@@ -81,6 +81,9 @@ ul {
   width: min(520px, 100%);
   margin: 0 auto;
   padding: max(env(safe-area-inset-top, 0px), 18px) 14px calc(72px + env(safe-area-inset-bottom, 0px));
+  display: flex;
+  flex-direction: column;
+  min-height: 100dvh;
 }
 
 .app-header {
@@ -436,7 +439,9 @@ ul {
 }
 
 .tabs-shell {
-  display: grid;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
   gap: 18px;
 }
 
@@ -519,12 +524,24 @@ ul {
   color: #ffffff;
 }
 
-.tabs-body,
 .screen-section,
 .today-summary {
   display: grid;
   gap: 18px;
   min-width: 0;
+}
+
+.tabs-body {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  min-width: 0;
+  flex: 1;
+}
+
+.screen-section--fill {
+  flex: 1;
+  align-content: center;
 }
 
 .screen-section > * {
