@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { getActiveSession, startFast, stopFast, getFastingHistory, deleteFastingSession, type FastingSession } from '../model/fastingApi'
 
 const PROTOCOLS = [
@@ -29,23 +30,34 @@ function formatDate(iso: string): string {
 }
 
 export function FastingTab() {
-  const [active, setActive] = useState<FastingSession | null>(null)
-  const [history, setHistory] = useState<FastingSession[]>([])
+  const queryClient = useQueryClient()
+  const activeQuery = useQuery<FastingSession | null>({
+    queryKey: ['fasting', 'active'],
+    queryFn: () => getActiveSession(),
+  })
+  const historyQuery = useQuery<FastingSession[]>({
+    queryKey: ['fasting', 'history'],
+    queryFn: () => getFastingHistory(),
+  })
+  const active = activeQuery.data ?? null
+  const history = historyQuery.data ?? []
+  const loading = activeQuery.isLoading || historyQuery.isLoading
+  function setActive(next: FastingSession | null) {
+    queryClient.setQueryData(['fasting', 'active'], next)
+  }
+  function setHistory(updater: FastingSession[] | ((prev: FastingSession[]) => FastingSession[])) {
+    queryClient.setQueryData<FastingSession[]>(['fasting', 'history'], (prev) => {
+      const cur = prev ?? []
+      return typeof updater === 'function' ? (updater as (p: FastingSession[]) => FastingSession[])(cur) : updater
+    })
+  }
   const [elapsed, setElapsed] = useState(0)
   const [selected, setSelected] = useState(16)
   const [customHours, setCustomHours] = useState('')
   const [showCustom, setShowCustom] = useState(false)
-  const [loading, setLoading] = useState(true)
   const [acting, setActing] = useState(false)
-  const [error, setError] = useState('')
+  const [error, setError] = useState(activeQuery.error || historyQuery.error ? 'Failed to load fasting data' : '')
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
-
-  useEffect(() => {
-    Promise.all([getActiveSession(), getFastingHistory()])
-      .then(([sess, hist]) => { setActive(sess); setHistory(hist) })
-      .catch(() => setError('Failed to load fasting data'))
-      .finally(() => setLoading(false))
-  }, [])
 
   useEffect(() => {
     if (intervalRef.current) clearInterval(intervalRef.current)

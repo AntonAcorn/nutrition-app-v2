@@ -1,4 +1,5 @@
 import { CSSProperties, FormEvent, useEffect, useState } from 'react'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { fetchProfile, updateProfile, type UserProfile } from '../model/profileApi'
 import type { OnboardingPayload } from '../../onboarding/model/profileApi'
 import { NotificationSettings } from '../../notifications/components/NotificationSettings'
@@ -37,9 +38,17 @@ interface Props {
 }
 
 export function ProfileTab({ displayName, email, onLogout, onDeleteAccount }: Props) {
-  const [profile, setProfile] = useState<UserProfile | null>(null)
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState('')
+  const queryClient = useQueryClient()
+  const profileQuery = useQuery<UserProfile>({
+    queryKey: ['profile'],
+    queryFn: () => fetchProfile(),
+  })
+  const profile = profileQuery.data ?? null
+  const loading = profileQuery.isLoading
+  const error = profileQuery.error instanceof Error ? 'Failed to load profile' : ''
+  function setProfile(updated: UserProfile) {
+    queryClient.setQueryData(['profile'], updated)
+  }
   const [editing, setEditing] = useState(false)
 
   const [ageYears, setAgeYears] = useState('')
@@ -58,12 +67,6 @@ export function ProfileTab({ displayName, email, onLogout, onDeleteAccount }: Pr
   const [saving, setSaving] = useState(false)
   const [saveError, setSaveError] = useState('')
 
-  useEffect(() => {
-    fetchProfile()
-      .then(setProfile)
-      .catch(() => setError('Failed to load profile'))
-      .finally(() => setLoading(false))
-  }, [])
 
   function startEditing() {
     if (!profile) return
