@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import type { TodaySummary } from '../../../shared/types/nutrition'
 
 function getCaptionText(consumed: number, target: number, remaining: number): string {
@@ -60,6 +60,15 @@ export function TodaySummaryBlock({
   onWeightSave,
 }: TodaySummaryBlockProps) {
   const [showMacros, setShowMacros] = useState(false)
+  const macrosPanelRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    if (showMacros) {
+      setTimeout(() => {
+        macrosPanelRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
+      }, 50)
+    }
+  }, [showMacros])
 
   const consumed = Math.round(summary.consumedCalories)
   const target = Math.max(1, Math.round(summary.dailyTargetCalories))
@@ -162,7 +171,7 @@ export function TodaySummaryBlock({
 
         {showMacros && (
           <>
-            <div className="macro-meter-grid">
+            <div ref={macrosPanelRef} className="macro-meter-grid">
               <MacroCard label="Protein" value={summary.proteinGrams} target={summary.proteinTargetGrams} unit="g" progress={Math.min(100, Math.round((summary.proteinGrams / Math.max(1, summary.proteinTargetGrams)) * 100))} tone="purple" />
               <MacroCard label="Fat"     value={summary.fatGrams}     target={summary.fatTargetGrams}     unit="g" progress={Math.min(100, Math.round((summary.fatGrams     / Math.max(1, summary.fatTargetGrams))     * 100))} tone="orange" />
               <MacroCard label="Carbs"   value={summary.carbsGrams}   target={summary.carbsTargetGrams}   unit="g" progress={Math.min(100, Math.round((summary.carbsGrams   / Math.max(1, summary.carbsTargetGrams))   * 100))} tone="teal" />
