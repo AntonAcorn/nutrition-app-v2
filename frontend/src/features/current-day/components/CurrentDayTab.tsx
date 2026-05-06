@@ -371,53 +371,64 @@ export function CurrentDayTab({ refreshToken = 0, successMessage = '', onDayUpda
               <div className="skeleton" style={{ height: '0.85rem', width: '40%' }} />
             </div>
           </div>
-          {/* Calories ring card — matches .today-dark-card */}
+          {/* Calories ring card */}
           <div className="today-dark-card" style={{ display: 'flex', flexDirection: 'column', gap: 16, alignItems: 'center' }}>
             <div className="skeleton" style={{ height: '1.1rem', width: '5rem', alignSelf: 'flex-start' }} />
             <div className="skeleton skeleton--circle" style={{ width: 160, height: 160 }} />
             <div className="skeleton" style={{ height: '0.85rem', width: '50%' }} />
           </div>
-          {/* Meals card — matches .today-dark-card */}
+          {/* Meals card */}
           <div className="today-dark-card">
             <div className="skeleton" style={{ height: '1.1rem', width: '6rem', marginBottom: 14 }} />
-            {[1,2,3].map(i => (
+            {[1,2,3,4].map(i => (
               <div key={i} className="skeleton" style={{ height: '3rem', marginTop: 8, borderRadius: '14px' }} />
             ))}
+          </div>
+          {/* Water intake card */}
+          <div className="today-dark-card">
+            <div className="skeleton" style={{ height: '1.1rem', width: '4rem', marginBottom: 14 }} />
+            <div style={{ display: 'flex', gap: 8 }}>
+              {[1,2,3,4,5,6,7,8].map(i => (
+                <div key={i} className="skeleton skeleton--circle" style={{ width: 28, height: 28 }} />
+              ))}
+            </div>
           </div>
         </>
       ) : null}
       {!loading && error ? <section className="panel detail-panel"><p className="error-text">{error}</p></section> : null}
 
       {!loading && !error && summary ? (
-        <TodaySummaryBlock
-          summary={summary}
-          steps={steps}
-          activeCalories={activeCalories}
-          weightInput={weightInput}
-          weightFromHealth={weightFromHealth}
-          savingWeight={savingWeight}
-          onWeightChange={(v) => { setWeightInput(v); setWeightFromHealth(false) }}
-          onWeightSave={handleWeightSave}
-        />
-      ) : null}
-
-      {!loading && !error && summary ? (
-        <MealsLogCard
-          date={selectedDate}
-          refreshToken={refreshToken}
-          onAddToSlot={openQuickAdd}
-          onDeleted={() => { refetchSummary() }}
-          onUpdated={() => { refetchSummary(); onDayUpdated?.() }}
-        />
-      ) : null}
-
-      {!loading && !error && summary ? (
-        <WaterIntakeCard
-          waterGlasses={summary.waterGlasses}
-          waterGoalGlasses={summary.waterGoalGlasses}
-          date={selectedDate}
-          onUpdate={() => { refetchSummary() }}
-        />
+        <>
+          <div className="content-fade-in">
+            <TodaySummaryBlock
+              summary={summary}
+              steps={steps}
+              activeCalories={activeCalories}
+              weightInput={weightInput}
+              weightFromHealth={weightFromHealth}
+              savingWeight={savingWeight}
+              onWeightChange={(v) => { setWeightInput(v); setWeightFromHealth(false) }}
+              onWeightSave={handleWeightSave}
+            />
+          </div>
+          <div className="content-fade-in" style={{ animationDelay: '40ms' }}>
+            <MealsLogCard
+              date={selectedDate}
+              refreshToken={refreshToken}
+              onAddToSlot={openQuickAdd}
+              onDeleted={() => { refetchSummary() }}
+              onUpdated={() => { refetchSummary(); onDayUpdated?.() }}
+            />
+          </div>
+          <div className="content-fade-in" style={{ animationDelay: '80ms' }}>
+            <WaterIntakeCard
+              waterGlasses={summary.waterGlasses}
+              waterGoalGlasses={summary.waterGoalGlasses}
+              date={selectedDate}
+              onUpdate={() => { refetchSummary() }}
+            />
+          </div>
+        </>
       ) : null}
 
       {!loading && summary ? (
