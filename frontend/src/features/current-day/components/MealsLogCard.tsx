@@ -263,6 +263,7 @@ export function MealsLogCard({ date, refreshToken = 0, onAddToSlot, onDeleted, o
 
     function onMove(ev: TouchEvent) {
       if (!dragRef.current) return
+      ev.preventDefault()
       const t = ev.touches[0]
       if (ghostRef.current) {
         ghostRef.current.style.left = `${t.clientX}px`
@@ -296,7 +297,7 @@ export function MealsLogCard({ date, refreshToken = 0, onAddToSlot, onDeleted, o
       }
     }
 
-    document.addEventListener('touchmove', onMove, { passive: true })
+    document.addEventListener('touchmove', onMove, { passive: false })
     document.addEventListener('touchend', onEnd)
     document.addEventListener('touchcancel', onEnd)
   }
@@ -455,14 +456,6 @@ export function MealsLogCard({ date, refreshToken = 0, onAddToSlot, onDeleted, o
                   return (
                     <SwipeableRow key={m.id} onDelete={() => handleDelete(m.id)} disabled={deletingId === m.id}>
                       <div className="meal-log-row">
-                        <button
-                          type="button"
-                          className="meal-log-row__drag-handle"
-                          onTouchStart={e => onDragHandleTouch(e, m, slot.slotType)}
-                          aria-label={`Drag ${m.name} to another slot`}
-                        >
-                          ≡
-                        </button>
                         <div className="meal-log-row__info">
                           <p className="meal-log-row__name">{m.name}</p>
                           <p className="meal-log-row__meta">{Math.round(m.caloriesKcal)} kcal</p>
@@ -504,6 +497,14 @@ export function MealsLogCard({ date, refreshToken = 0, onAddToSlot, onDeleted, o
                               ✕
                             </button>
                           )}
+                          <button
+                            type="button"
+                            className="meal-log-row__drag-handle"
+                            onTouchStart={e => onDragHandleTouch(e, m, slot.slotType)}
+                            aria-label={`Drag ${m.name} to another slot`}
+                          >
+                            ≡
+                          </button>
                         </div>
                       </div>
                     </SwipeableRow>
