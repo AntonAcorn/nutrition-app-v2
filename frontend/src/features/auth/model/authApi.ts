@@ -117,7 +117,7 @@ export async function logout(): Promise<void> {
   }
 }
 
-const GOOGLE_IOS_CLIENT_ID = 'REPLACE_WITH_IOS_CLIENT_ID'
+const GOOGLE_IOS_CLIENT_ID = '45553583079-uapqsj71o7kn3rr18op0feb4p1qdfnem.apps.googleusercontent.com'
 
 export async function loginWithGoogleNative(): Promise<AuthUser> {
   const { registerPlugin } = await import('@capacitor/core')
