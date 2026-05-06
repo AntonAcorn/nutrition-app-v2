@@ -13,6 +13,9 @@ const config: CapacitorConfig = {
       launchShowDuration: 0,
     },
   },
+  ios: {
+    packageClassList: ['GoogleSignInPlugin'],
+  },
 }
 
 export default config
