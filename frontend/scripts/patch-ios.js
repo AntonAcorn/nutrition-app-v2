@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 // Restores iOS patches after `npm install` or `cap sync`
-import { readFileSync, writeFileSync, copyFileSync } from 'fs'
+import { readFileSync, writeFileSync, copyFileSync, existsSync } from 'fs'
 import { join, dirname } from 'path'
 import { fileURLToPath } from 'url'
 
@@ -10,11 +10,20 @@ const root = join(__dirname, '..')
 // 1. Patch Apple Sign In plugin
 const appleSignInDest = join(root, 'node_modules/@capacitor-community/apple-sign-in/ios/Sources/SignInWithApple/Plugin.swift')
 const appleSignInSrc = join(root, 'ios-patches/apple-sign-in-Plugin.swift')
-copyFileSync(appleSignInSrc, appleSignInDest)
-console.log('✓ Applied apple-sign-in patch')
+if (existsSync(appleSignInSrc) && existsSync(join(root, 'node_modules/@capacitor-community/apple-sign-in'))) {
+  copyFileSync(appleSignInSrc, appleSignInDest)
+  console.log('✓ Applied apple-sign-in patch')
+} else {
+  console.log('⚠ Skipping apple-sign-in patch (not an iOS environment)')
+}
 
 // 2. Patch CapApp-SPM/Package.swift — add GoogleSignIn-iOS
 const packagePath = join(root, 'ios/App/CapApp-SPM/Package.swift')
+if (!existsSync(packagePath)) {
+  console.log('⚠ Skipping Package.swift patch (not an iOS environment)')
+  process.exit(0)
+}
+
 let pkg = readFileSync(packagePath, 'utf8')
 
 const googleDep = '.package(url: "https://github.com/google/GoogleSignIn-iOS.git", from: "8.0.0")'
