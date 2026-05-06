@@ -1,5 +1,4 @@
 import { useEffect, useRef, useState } from 'react'
-import { BrowserMultiFormatReader } from '@zxing/browser'
 import type { IScannerControls } from '@zxing/browser'
 import { Camera } from '@capacitor/camera'
 import { Capacitor } from '@capacitor/core'
@@ -43,6 +42,7 @@ export function BarcodeScannerMode({ onAdded, onCancel }: Props) {
             return
           }
         }
+        const { BrowserMultiFormatReader } = await import('@zxing/browser')
         // 3 = DecodeHintType.TRY_HARDER — tries harder on blurry/partial barcodes
         const hints = new Map([[3, true]])
         const reader = new BrowserMultiFormatReader(hints, 150)
