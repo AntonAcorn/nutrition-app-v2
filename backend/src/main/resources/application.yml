@@ -34,7 +34,7 @@ server:
       timeout: ${SESSION_TIMEOUT:30d}
       cookie:
         max-age: ${SESSION_COOKIE_MAX_AGE:30d}
-        same-site: none
+        same-site: lax
         secure: true
 
 management:
