@@ -7097,21 +7097,19 @@ ul {
 }
 
 /* ── Skeleton loading ── */
-@keyframes skeleton-shimmer {
-  0%   { background-position: 200% 0; }
-  100% { background-position: -200% 0; }
+@keyframes skeleton-pulse {
+  0%, 100% { opacity: 0.55; }
+  50%      { opacity: 1; }
 }
 
 .skeleton {
-  background: linear-gradient(
-    90deg,
-    rgba(255,255,255,0.035) 0%,
-    rgba(255,255,255,0.055) 50%,
-    rgba(255,255,255,0.035) 100%
-  );
-  background-size: 200% 100%;
-  animation: skeleton-shimmer 2.2s ease-in-out infinite;
+  background: rgba(255,255,255,0.05);
+  animation: skeleton-pulse 1.8s ease-in-out infinite;
   border-radius: 0.5rem;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .skeleton { animation: none; opacity: 0.8; }
 }
 
 .skeleton--circle { border-radius: 50%; }
@@ -7144,13 +7142,7 @@ ul {
 }
 
 [data-theme="light"] .skeleton {
-  background: linear-gradient(
-    90deg,
-    rgba(0,0,0,0.04) 0%,
-    rgba(0,0,0,0.07) 50%,
-    rgba(0,0,0,0.04) 100%
-  );
-  background-size: 200% 100%;
+  background: rgba(20, 33, 61, 0.08);
 }
 
 /* Smooth fade when real content replaces skeleton */
