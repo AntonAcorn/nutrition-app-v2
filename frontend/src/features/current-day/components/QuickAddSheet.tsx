@@ -86,6 +86,7 @@ export function QuickAddSheet({ initialSlot, onAdd, onLogTemplate, onClose, onOp
   const [error, setError]       = useState('')
 
   const backdropRef = useRef<HTMLDivElement>(null)
+  const galleryInputRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
     listTemplates()
@@ -207,6 +208,18 @@ export function QuickAddSheet({ initialSlot, onAdd, onLogTemplate, onClose, onOp
     if (e.target === e.currentTarget) onClose()
   }
 
+  function handleGalleryClick() {
+    onClose()
+    galleryInputRef.current?.click()
+  }
+
+  function handleGalleryFile(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0]
+    if (!file) return
+    e.target.value = ''
+    onOpenAnalyzerWithPhoto?.(file) ?? onOpenAnalyzer?.('photo')
+  }
+
   async function handlePhotoClick() {
     onClose()
     if (onOpenAnalyzerWithPhoto) {
@@ -258,7 +271,11 @@ export function QuickAddSheet({ initialSlot, onAdd, onLogTemplate, onClose, onOp
           <div className="qs-analyzer-row">
             <button type="button" className="qs-analyzer-btn" onClick={handlePhotoClick}>
               <span className="qs-analyzer-btn__icon">📷</span>
-              <span>Photo</span>
+              <span>Camera</span>
+            </button>
+            <button type="button" className="qs-analyzer-btn" onClick={handleGalleryClick}>
+              <span className="qs-analyzer-btn__icon">🖼️</span>
+              <span>Gallery</span>
             </button>
             <button type="button" className="qs-analyzer-btn" onClick={() => { onClose(); onOpenAnalyzer('voice') }}>
               <span className="qs-analyzer-btn__icon">🎤</span>
@@ -268,6 +285,13 @@ export function QuickAddSheet({ initialSlot, onAdd, onLogTemplate, onClose, onOp
               <span className="qs-analyzer-btn__icon">▦</span>
               <span>Barcode</span>
             </button>
+            <input
+              ref={galleryInputRef}
+              type="file"
+              accept="image/*"
+              hidden
+              onChange={handleGalleryFile}
+            />
           </div>
         )}
 
