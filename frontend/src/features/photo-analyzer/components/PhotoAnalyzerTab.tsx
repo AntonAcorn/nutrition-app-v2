@@ -13,6 +13,7 @@ import { BarcodeScannerMode } from '../../barcode/components/BarcodeScannerMode'
 import { PhotoDraftCard } from './PhotoDraftCard'
 import type { DraftEntry } from './PhotoDraftCard'
 import { track } from '../../../shared/lib/analytics'
+import { compressImage } from '../../../shared/lib/imageCompress'
 
 async function pickPhotoNative(): Promise<File | null> {
   try {
@@ -177,8 +178,9 @@ export function PhotoAnalyzerTab({ onConfirmed, onSaveToLibrary, initialMode, in
     }])
 
     try {
+      const compressed = await compressImage(file)
       const formData = new FormData()
-      formData.append('file', file)
+      formData.append('file', compressed)
       formData.append('entryDate', currentEntryDate())
       formData.append('userNote', note)
       formData.append('locale', 'en')
