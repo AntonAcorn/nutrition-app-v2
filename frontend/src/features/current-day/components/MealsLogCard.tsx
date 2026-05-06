@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { listMealLog, deleteMealLogEntry, updateMealLogEntry, SLOT_LABELS } from '../model/mealLogApi'
 import type { MealSlot, MealLogEntry } from '../model/mealLogApi'
+import { hapticLight, hapticMedium } from '../../../shared/lib/haptic'
 
 const SLOT_ORDER: MealSlot['slotType'][] = ['BREAKFAST', 'LUNCH', 'DINNER', 'SNACK']
 
@@ -124,9 +125,15 @@ export function MealsLogCard({ date, refreshToken = 0, onAddToSlot, onDeleted, o
   const [editForm, setEditForm] = useState<EditForm | null>(null)
   const [savingId, setSavingId] = useState<string | null>(null)
   const [editError, setEditError] = useState('')
-  const [movingId, setMovingId] = useState<string | null>(null)
-  const [movingToId, setMovingToId] = useState<string | null>(null)
   const [moveError, setMoveError] = useState('')
+
+  // Drag-and-drop
+  const [isDragging, setIsDragging] = useState(false)
+  const [dropTarget, setDropTarget] = useState<MealSlot['slotType'] | null>(null)
+  const dragRef = useRef<{ id: string; fromSlot: MealSlot['slotType'] } | null>(null)
+  const dropTargetRef = useRef<MealSlot['slotType'] | null>(null)
+  const ghostRef = useRef<HTMLDivElement | null>(null)
+  const ghostLabelRef = useRef<HTMLSpanElement | null>(null)
 
   useEffect(() => {
     listMealLog(date)
@@ -151,7 +158,6 @@ export function MealsLogCard({ date, refreshToken = 0, onAddToSlot, onDeleted, o
     setEditingId(m.id)
     setEditForm(toEditForm(m))
     setConfirmId(null)
-    setMovingId(null)
     setEditError('')
   }
 
@@ -215,21 +221,84 @@ export function MealsLogCard({ date, refreshToken = 0, onAddToSlot, onDeleted, o
   }
 
   async function handleMove(id: string, targetSlot: MealSlot['slotType']) {
-    setMovingToId(id)
     setMoveError('')
     try {
       await updateMealLogEntry(id, { slotType: targetSlot })
-      const data = await listMealLog(getTodayLocalDateInputValue())
+      const data = await listMealLog(date)
       const merged = mergeWithDefaults(data)
       setSlots(merged)
       setExpandedSlots(slotsWithItems(merged))
-      setMovingId(null)
       onUpdated?.()
     } catch {
       setMoveError('Failed to move. Please try again.')
-    } finally {
-      setMovingToId(null)
     }
+  }
+
+  function findDropSlot(x: number, y: number): MealSlot['slotType'] | null {
+    const els = document.elementsFromPoint(x, y)
+    for (const el of els) {
+      const slot = (el as HTMLElement).dataset.dropSlot
+      if (slot) return slot as MealSlot['slotType']
+    }
+    return null
+  }
+
+  function onDragHandleTouch(e: React.TouchEvent, item: MealLogEntry, fromSlot: MealSlot['slotType']) {
+    e.stopPropagation()
+    const touch = e.touches[0]
+
+    dragRef.current = { id: item.id, fromSlot }
+    dropTargetRef.current = null
+
+    if (ghostLabelRef.current) ghostLabelRef.current.textContent = item.name
+    if (ghostRef.current) {
+      ghostRef.current.style.left = `${touch.clientX}px`
+      ghostRef.current.style.top = `${touch.clientY}px`
+      ghostRef.current.style.display = 'flex'
+    }
+
+    setIsDragging(true)
+    setDropTarget(null)
+    hapticMedium()
+
+    function onMove(ev: TouchEvent) {
+      if (!dragRef.current) return
+      const t = ev.touches[0]
+      if (ghostRef.current) {
+        ghostRef.current.style.left = `${t.clientX}px`
+        ghostRef.current.style.top = `${t.clientY}px`
+      }
+      const slot = findDropSlot(t.clientX, t.clientY)
+      if (slot !== dropTargetRef.current) {
+        dropTargetRef.current = slot
+        setDropTarget(slot)
+        if (slot && slot !== dragRef.current.fromSlot) hapticLight()
+      }
+    }
+
+    function onEnd() {
+      document.removeEventListener('touchmove', onMove)
+      document.removeEventListener('touchend', onEnd)
+      document.removeEventListener('touchcancel', onEnd)
+
+      if (ghostRef.current) ghostRef.current.style.display = 'none'
+
+      const target = dropTargetRef.current
+      const drag = dragRef.current
+
+      dragRef.current = null
+      dropTargetRef.current = null
+      setIsDragging(false)
+      setDropTarget(null)
+
+      if (drag && target && target !== drag.fromSlot) {
+        handleMove(drag.id, target)
+      }
+    }
+
+    document.addEventListener('touchmove', onMove, { passive: true })
+    document.addEventListener('touchend', onEnd)
+    document.addEventListener('touchcancel', onEnd)
   }
 
   const totalKcal = slots.reduce((sum, slot) => sum + slotTotalKcal(slot), 0)
@@ -243,6 +312,12 @@ export function MealsLogCard({ date, refreshToken = 0, onAddToSlot, onDeleted, o
 
   return (
     <section className="panel meals-log-card">
+      {/* Drag ghost */}
+      <div ref={ghostRef} className="drag-ghost" style={{ display: 'none' }}>
+        <span className="drag-ghost__icon">≡</span>
+        <span ref={ghostLabelRef} className="drag-ghost__label" />
+      </div>
+
       <div className="meals-log-card__header">
         <p className="meals-log-card__title">Today's meals</p>
         <button
@@ -287,24 +362,30 @@ export function MealsLogCard({ date, refreshToken = 0, onAddToSlot, onDeleted, o
       )}
 
       {deleteError ? <p className="error-text" style={{ marginBottom: '0.5rem' }}>{deleteError}</p> : null}
+      {moveError ? <p className="error-text" style={{ marginBottom: '0.5rem' }}>{moveError}</p> : null}
 
       {showSlots && slots.map((slot, idx) => {
         const kcal = slotTotalKcal(slot)
         const isLast = idx === slots.length - 1
         const isExpanded = expandedSlots.has(slot.slotType)
+        const isDropTarget = isDragging && dropTarget === slot.slotType && dragRef.current?.fromSlot !== slot.slotType
         return (
           <div key={slot.slotType} className={`meals-log-slot${isLast ? ' meals-log-slot--last' : ''}`}>
-            <div className="meals-log-slot__header">
+            <div
+              className={`meals-log-slot__header${isDropTarget ? ' meals-log-slot__header--drop-target' : ''}`}
+              data-drop-slot={slot.slotType}
+            >
               <button
                 type="button"
                 className="meals-log-slot__toggle-area"
                 onClick={() => toggleSlot(slot.slotType)}
                 aria-expanded={isExpanded}
+                data-drop-slot={slot.slotType}
               >
-                <span className="meals-log-slot__icon">{SLOT_ICONS[slot.slotType]}</span>
-                <span className="meals-log-slot__name">{SLOT_LABELS[slot.slotType]}</span>
-                <span className="meals-log-slot__kcal">{kcal > 0 ? `${kcal} kcal` : ''}</span>
-                <span className="meals-log-slot__chevron">{isExpanded ? '▾' : '▸'}</span>
+                <span className="meals-log-slot__icon" data-drop-slot={slot.slotType}>{SLOT_ICONS[slot.slotType]}</span>
+                <span className="meals-log-slot__name" data-drop-slot={slot.slotType}>{SLOT_LABELS[slot.slotType]}</span>
+                <span className="meals-log-slot__kcal" data-drop-slot={slot.slotType}>{kcal > 0 ? `${kcal} kcal` : ''}</span>
+                <span className="meals-log-slot__chevron" data-drop-slot={slot.slotType}>{isExpanded ? '▾' : '▸'}</span>
               </button>
               <button
                 type="button"
@@ -320,7 +401,6 @@ export function MealsLogCard({ date, refreshToken = 0, onAddToSlot, onDeleted, o
               <div className="meals-log-list">
                 {slot.items.map(m => {
                   const isEditing = editingId === m.id
-                  const isMoving  = movingId === m.id
 
                   if (isEditing && editForm) {
                     return (
@@ -372,53 +452,22 @@ export function MealsLogCard({ date, refreshToken = 0, onAddToSlot, onDeleted, o
                     )
                   }
 
-                  if (isMoving) {
-                    return (
-                      <div key={m.id} className="meal-log-row">
-                        <div className="meal-log-move">
-                          <span className="meal-log-move__label">Move to:</span>
-                          <div className="meal-log-move__slots">
-                            {SLOT_ORDER.filter(s => s !== slot.slotType).map(target => (
-                              <button
-                                key={target}
-                                type="button"
-                                className="meal-log-move__btn"
-                                onClick={() => handleMove(m.id, target)}
-                                disabled={movingToId === m.id}
-                              >
-                                {movingToId === m.id ? '…' : SLOT_LABELS[target]}
-                              </button>
-                            ))}
-                          </div>
-                          {moveError && <span className="meal-log-move__error">{moveError}</span>}
-                          <button
-                            type="button"
-                            className="meal-log-move__cancel"
-                            onClick={() => { setMovingId(null); setMoveError('') }}
-                          >
-                            Cancel
-                          </button>
-                        </div>
-                      </div>
-                    )
-                  }
-
                   return (
                     <SwipeableRow key={m.id} onDelete={() => handleDelete(m.id)} disabled={deletingId === m.id}>
                       <div className="meal-log-row">
+                        <button
+                          type="button"
+                          className="meal-log-row__drag-handle"
+                          onTouchStart={e => onDragHandleTouch(e, m, slot.slotType)}
+                          aria-label={`Drag ${m.name} to another slot`}
+                        >
+                          ≡
+                        </button>
                         <div className="meal-log-row__info">
                           <p className="meal-log-row__name">{m.name}</p>
                           <p className="meal-log-row__meta">{Math.round(m.caloriesKcal)} kcal</p>
                         </div>
                         <div className="meal-log-row__actions">
-                          <button
-                            type="button"
-                            className="meal-log-row__move"
-                            onClick={() => { setMovingId(m.id); setConfirmId(null) }}
-                            aria-label={`Move ${m.name}`}
-                          >
-                            ⇄
-                          </button>
                           <button
                             type="button"
                             className="meal-log-row__edit"
