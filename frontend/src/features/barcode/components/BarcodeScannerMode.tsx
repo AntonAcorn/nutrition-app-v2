@@ -4,6 +4,7 @@ import { Camera } from '@capacitor/camera'
 import { Capacitor } from '@capacitor/core'
 import { lookupBarcode, type FoodProduct } from '../model/barcodeApi'
 import { addMealManually } from '../../current-day/model/nutritionTotalsApi'
+import { getTodayLocalDateInputValue } from '../../../shared/lib/date'
 
 type ScanStatus = 'scanning' | 'loading' | 'found' | 'not_found' | 'camera_error' | 'permission_denied'
 
@@ -149,7 +150,7 @@ export function BarcodeScannerMode({ onAdded, onCancel }: Props) {
         fatGrams: round1((product.fatPer100g ?? 0) * f),
         fiberGrams: round1((product.fiberPer100g ?? 0) * f),
         carbsGrams: round1((product.carbsPer100g ?? 0) * f),
-      })
+      }, getTodayLocalDateInputValue())
       onAdded()
     } catch {
       setAddError('Failed to add. Try again.')
