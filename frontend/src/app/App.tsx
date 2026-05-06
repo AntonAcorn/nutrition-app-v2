@@ -802,44 +802,46 @@ function AppInner() {
 
       <section className="tabs-shell tabs-shell--dark">
         <div className="tabs-body tabs-body--dark">
-          {activeTab === tabs.currentDay ? (
-            <CurrentDayTab
-              refreshToken={summaryRefreshToken}
-              successMessage={daySuccessMessage}
-              onDayUpdated={handleDayUpdated}
-              displayName={authUser.displayName}
-              onOpenAnalyzer={openAnalyzer}
-              onOpenAnalyzerWithPhoto={openAnalyzerWithPhoto}
-            />
-          ) : null}
-          <Suspense fallback={<TabLoadingSkeleton />}>
-            {activeTab === tabs.statistics ? <StatisticsTab refreshToken={statisticsRefreshToken} /> : null}
-            {activeTab === tabs.photoAnalyzer ? (
-              <PhotoAnalyzerTab
-                onConfirmed={handleDraftConfirmed}
-                onSaveToLibrary={handleSaveToLibrary}
-                initialMode={analyzerMode}
-                initialPhoto={initialAnalyzerPhoto}
-                onBack={() => { setInitialAnalyzerPhoto(null); setActiveTab(tabs.currentDay) }}
-              />
-            ) : null}
-            {activeTab === tabs.fasting ? <FastingTab /> : null}
-            {activeTab === tabs.library ? (
-              <FoodLibraryTab
-                onLogged={handleDayUpdated}
-                initialSave={pendingLibrarySave}
-                onInitialSaveDone={() => setPendingLibrarySave(null)}
-              />
-            ) : null}
-            {activeTab === tabs.profile ? (
-              <ProfileTab
+          <div className="tab-content" key={activeTab}>
+            {activeTab === tabs.currentDay ? (
+              <CurrentDayTab
+                refreshToken={summaryRefreshToken}
+                successMessage={daySuccessMessage}
+                onDayUpdated={handleDayUpdated}
                 displayName={authUser.displayName}
-                email={authUser.email}
-                onLogout={handleLogout}
-                onDeleteAccount={handleDeleteAccount}
+                onOpenAnalyzer={openAnalyzer}
+                onOpenAnalyzerWithPhoto={openAnalyzerWithPhoto}
               />
             ) : null}
-          </Suspense>
+            <Suspense fallback={<TabLoadingSkeleton />}>
+              {activeTab === tabs.statistics ? <StatisticsTab refreshToken={statisticsRefreshToken} /> : null}
+              {activeTab === tabs.photoAnalyzer ? (
+                <PhotoAnalyzerTab
+                  onConfirmed={handleDraftConfirmed}
+                  onSaveToLibrary={handleSaveToLibrary}
+                  initialMode={analyzerMode}
+                  initialPhoto={initialAnalyzerPhoto}
+                  onBack={() => { setInitialAnalyzerPhoto(null); setActiveTab(tabs.currentDay) }}
+                />
+              ) : null}
+              {activeTab === tabs.fasting ? <FastingTab /> : null}
+              {activeTab === tabs.library ? (
+                <FoodLibraryTab
+                  onLogged={handleDayUpdated}
+                  initialSave={pendingLibrarySave}
+                  onInitialSaveDone={() => setPendingLibrarySave(null)}
+                />
+              ) : null}
+              {activeTab === tabs.profile ? (
+                <ProfileTab
+                  displayName={authUser.displayName}
+                  email={authUser.email}
+                  onLogout={handleLogout}
+                  onDeleteAccount={handleDeleteAccount}
+                />
+              ) : null}
+            </Suspense>
+          </div>
         </div>
       </section>
 
