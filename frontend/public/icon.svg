@@ -9,83 +9,117 @@
       <stop offset="42%" stop-color="#A8CFF4"/>
       <stop offset="100%" stop-color="#5E9EDE"/>
     </radialGradient>
-    <radialGradient id="scaleGrad" cx="50%" cy="0%" r="100%">
-      <stop offset="0%" stop-color="#EEF0F8"/>
-      <stop offset="100%" stop-color="#C8CCDA"/>
-    </radialGradient>
+    <linearGradient id="scaleGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#F4F6FB"/>
+      <stop offset="100%" stop-color="#BDC1D0"/>
+    </linearGradient>
+    <linearGradient id="tapeGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#FFE060"/>
+      <stop offset="100%" stop-color="#D49600"/>
+    </linearGradient>
   </defs>
 
   <!-- Background -->
   <rect width="512" height="512" rx="108" fill="url(#bg)"/>
 
   <!-- Scale rubber feet -->
-  <rect x="90"  y="460" width="40" height="18" rx="9" fill="#8A8EA0"/>
-  <rect x="382" y="460" width="40" height="18" rx="9" fill="#8A8EA0"/>
+  <rect x="72"  y="458" width="52" height="24" rx="12" fill="#54586C"/>
+  <rect x="388" y="458" width="52" height="24" rx="12" fill="#54586C"/>
 
-  <!-- Scale main platform -->
-  <rect x="60" y="308" width="392" height="162" rx="32" fill="url(#scaleGrad)"/>
+  <!-- Scale main platform — bigger, high-contrast -->
+  <rect x="32" y="292" width="448" height="172" rx="40" fill="url(#scaleGrad)"/>
+  <rect x="32" y="292" width="448" height="172" rx="40" fill="none" stroke="rgba(0,0,0,0.12)" stroke-width="2"/>
 
-  <!-- Scale top surface highlight -->
-  <rect x="60" y="308" width="392" height="50"  rx="32" fill="rgba(255,255,255,0.28)"/>
-  <rect x="60" y="340" width="392" height="18"  rx="0"  fill="rgba(255,255,255,0.10)"/>
+  <!-- Scale top-surface bevel highlight -->
+  <rect x="32" y="292" width="448" height="58" rx="40" fill="rgba(255,255,255,0.42)"/>
+  <rect x="32" y="338" width="448" height="14" fill="rgba(255,255,255,0.14)"/>
 
-  <!-- Digital display bezel -->
-  <rect x="142" y="326" width="228" height="76" rx="14" fill="#111825"/>
+  <!-- Display bezel -->
+  <rect x="116" y="313" width="280" height="96" rx="18" fill="#111825"/>
   <!-- Display screen -->
-  <rect x="148" y="332" width="216" height="64" rx="10" fill="#0B1318"/>
-  <!-- Green number glow -->
-  <text x="256" y="377" text-anchor="middle"
+  <rect x="122" y="319" width="268" height="84" rx="13" fill="#091018"/>
+  <!-- Green readout -->
+  <text x="256" y="378" text-anchor="middle"
         fill="#38E8A0" font-family="'Courier New',monospace"
-        font-size="38" font-weight="bold" letter-spacing="2">73.5</text>
-  <text x="256" y="392" text-anchor="middle"
+        font-size="50" font-weight="bold" letter-spacing="3">73.5</text>
+  <text x="256" y="396" text-anchor="middle"
         fill="#38E8A0" font-family="'Courier New',monospace"
-        font-size="13" opacity="0.6" letter-spacing="1">kg</text>
+        font-size="13" opacity="0.65" letter-spacing="1">kg</text>
 
-  <!-- Scale centre line -->
-  <rect x="216" y="420" width="80" height="5" rx="2.5" fill="rgba(0,0,0,0.13)"/>
+  <!-- Centre line decoration -->
+  <rect x="196" y="428" width="120" height="5" rx="2.5" fill="rgba(0,0,0,0.10)"/>
 
-  <!-- Mascot feet (resting on scale surface) -->
-  <circle cx="192" cy="322" r="32" fill="#5E9EDE" opacity="0.70"/>
-  <circle cx="320" cy="322" r="32" fill="#5E9EDE" opacity="0.70"/>
+  <!-- Mascot feet pressed down on scale surface -->
+  <ellipse cx="192" cy="302" rx="42" ry="22" fill="#5E9EDE" opacity="0.88"/>
+  <ellipse cx="320" cy="302" rx="42" ry="22" fill="#5E9EDE" opacity="0.88"/>
+  <!-- Contact shadows -->
+  <ellipse cx="192" cy="307" rx="34" ry="9" fill="rgba(0,0,0,0.13)"/>
+  <ellipse cx="320" cy="307" rx="34" ry="9" fill="rgba(0,0,0,0.13)"/>
   <!-- Toe dots -->
-  <circle cx="180" cy="327" r="8" fill="#4A82C0" opacity="0.55"/>
-  <circle cx="194" cy="335" r="8" fill="#4A82C0" opacity="0.55"/>
-  <circle cx="308" cy="335" r="8" fill="#4A82C0" opacity="0.55"/>
-  <circle cx="322" cy="327" r="8" fill="#4A82C0" opacity="0.55"/>
+  <circle cx="178" cy="305" r="9" fill="#4A82C0" opacity="0.65"/>
+  <circle cx="194" cy="314" r="9" fill="#4A82C0" opacity="0.65"/>
+  <circle cx="306" cy="314" r="9" fill="#4A82C0" opacity="0.65"/>
+  <circle cx="322" cy="305" r="9" fill="#4A82C0" opacity="0.65"/>
 
-  <!-- Mascot body -->
-  <circle cx="256" cy="204" r="120" fill="url(#body)"/>
+  <!-- Mascot body (moved up so scale is exposed) -->
+  <circle cx="256" cy="162" r="112" fill="url(#body)"/>
 
-  <!-- Body highlights -->
-  <circle cx="214" cy="146" r="40" fill="rgba(255,255,255,0.70)"/>
-  <circle cx="234" cy="166" r="21" fill="rgba(255,255,255,0.50)"/>
-  <circle cx="266" cy="155" r="11" fill="rgba(255,255,255,0.36)"/>
-  <circle cx="286" cy="170" r="8"  fill="rgba(255,255,255,0.28)"/>
-  <!-- Lower texture -->
-  <circle cx="170" cy="258" r="8"  fill="rgba(255,255,255,0.32)"/>
-  <circle cx="182" cy="272" r="5.5" fill="rgba(255,255,255,0.24)"/>
-  <circle cx="334" cy="250" r="7"  fill="rgba(255,255,255,0.26)"/>
+  <!-- Upper body highlights -->
+  <circle cx="212" cy="108" r="42" fill="rgba(255,255,255,0.70)"/>
+  <circle cx="232" cy="128" r="22" fill="rgba(255,255,255,0.50)"/>
+  <circle cx="266" cy="118" r="12" fill="rgba(255,255,255,0.36)"/>
+  <circle cx="286" cy="134" r="8"  fill="rgba(255,255,255,0.28)"/>
 
-  <!-- Blush cheeks -->
-  <circle cx="176" cy="228" r="22" fill="#FFB0C0" opacity="0.36"/>
-  <circle cx="336" cy="228" r="22" fill="#FFB0C0" opacity="0.36"/>
+  <!-- MEASURING TAPE around waist -->
+  <!-- body cy=162 r=112; at y=222: dy=60, x_half≈sqrt(112²-60²)=sqrt(12544-3600)=sqrt(8944)≈94.6 -->
+  <!-- tape goes x=162..x=350, width=188 -->
 
-  <!-- Eyes looking down at scale -->
-  <!-- Left eye -->
-  <circle cx="216" cy="200" r="28" fill="white"/>
-  <circle cx="218" cy="212" r="19" fill="#0E1520"/>
-  <circle cx="226" cy="203" r="8"  fill="white"/>
-  <circle cx="220" cy="218" r="3"  fill="rgba(255,255,255,0.5)"/>
+  <!-- Tape shadow (gives 3-D wrap feel) -->
+  <rect x="160" y="218" width="192" height="26" rx="6" fill="#7A5500" opacity="0.30"/>
+  <!-- Tape body -->
+  <rect x="160" y="214" width="192" height="22" rx="5" fill="url(#tapeGrad)"/>
+  <!-- Tape sheen -->
+  <rect x="160" y="214" width="192" height="9"  rx="5" fill="rgba(255,255,255,0.34)"/>
+  <!-- Major tick marks every 24px -->
+  <line x1="184" y1="214" x2="184" y2="236" stroke="#8B6200" stroke-width="1.5" opacity="0.75"/>
+  <line x1="208" y1="214" x2="208" y2="236" stroke="#8B6200" stroke-width="1.5" opacity="0.75"/>
+  <line x1="232" y1="214" x2="232" y2="236" stroke="#8B6200" stroke-width="1.5" opacity="0.75"/>
+  <line x1="256" y1="214" x2="256" y2="236" stroke="#8B6200" stroke-width="2"   opacity="0.80"/>
+  <line x1="280" y1="214" x2="280" y2="236" stroke="#8B6200" stroke-width="1.5" opacity="0.75"/>
+  <line x1="304" y1="214" x2="304" y2="236" stroke="#8B6200" stroke-width="1.5" opacity="0.75"/>
+  <line x1="328" y1="214" x2="328" y2="236" stroke="#8B6200" stroke-width="1.5" opacity="0.75"/>
+  <!-- Minor tick marks every 12px -->
+  <line x1="172" y1="217" x2="172" y2="233" stroke="#8B6200" stroke-width="1" opacity="0.50"/>
+  <line x1="196" y1="217" x2="196" y2="233" stroke="#8B6200" stroke-width="1" opacity="0.50"/>
+  <line x1="220" y1="217" x2="220" y2="233" stroke="#8B6200" stroke-width="1" opacity="0.50"/>
+  <line x1="244" y1="217" x2="244" y2="233" stroke="#8B6200" stroke-width="1" opacity="0.50"/>
+  <line x1="268" y1="217" x2="268" y2="233" stroke="#8B6200" stroke-width="1" opacity="0.50"/>
+  <line x1="292" y1="217" x2="292" y2="233" stroke="#8B6200" stroke-width="1" opacity="0.50"/>
+  <line x1="316" y1="217" x2="316" y2="233" stroke="#8B6200" stroke-width="1" opacity="0.50"/>
+  <line x1="340" y1="217" x2="340" y2="233" stroke="#8B6200" stroke-width="1" opacity="0.50"/>
+  <!-- Tape clasp/end at right -->
+  <rect x="348" y="213" width="14" height="24" rx="4" fill="#C08800"/>
+  <rect x="350" y="217" width="10" height="16" rx="2" fill="#7A5200"/>
+
+  <!-- Blush cheeks (above tape) -->
+  <circle cx="162" cy="186" r="24" fill="#FFB0C0" opacity="0.38"/>
+  <circle cx="350" cy="186" r="24" fill="#FFB0C0" opacity="0.38"/>
+
+  <!-- Left eye (looking down) -->
+  <circle cx="216" cy="150" r="27" fill="white"/>
+  <circle cx="218" cy="162" r="18" fill="#0E1520"/>
+  <circle cx="226" cy="153" r="7"  fill="white"/>
+  <circle cx="220" cy="168" r="3"  fill="rgba(255,255,255,0.5)"/>
   <!-- Right eye -->
-  <circle cx="296" cy="200" r="28" fill="white"/>
-  <circle cx="294" cy="212" r="19" fill="#0E1520"/>
-  <circle cx="304" cy="203" r="8"  fill="white"/>
-  <circle cx="296" cy="218" r="3"  fill="rgba(255,255,255,0.5)"/>
+  <circle cx="296" cy="150" r="27" fill="white"/>
+  <circle cx="294" cy="162" r="18" fill="#0E1520"/>
+  <circle cx="304" cy="153" r="7"  fill="white"/>
+  <circle cx="296" cy="168" r="3"  fill="rgba(255,255,255,0.5)"/>
 
-  <!-- Eyebrows (raised — surprised by the number) -->
-  <path d="M 198 178 Q 216 170 234 176" stroke="#0E1520" stroke-width="5" fill="none" stroke-linecap="round"/>
-  <path d="M 278 176 Q 296 170 314 178" stroke="#0E1520" stroke-width="5" fill="none" stroke-linecap="round"/>
+  <!-- Eyebrows (raised — surprised) -->
+  <path d="M 198 128 Q 216 120 234 126" stroke="#0E1520" stroke-width="5" fill="none" stroke-linecap="round"/>
+  <path d="M 278 126 Q 296 120 314 128" stroke="#0E1520" stroke-width="5" fill="none" stroke-linecap="round"/>
 
-  <!-- Mouth (small "oh!" circle — surprised) -->
-  <ellipse cx="256" cy="252" rx="16" ry="13" fill="#1C2E3A"/>
+  <!-- Mouth — small "oh!" above the tape -->
+  <ellipse cx="256" cy="202" rx="15" ry="12" fill="#1C2E3A"/>
 </svg>
