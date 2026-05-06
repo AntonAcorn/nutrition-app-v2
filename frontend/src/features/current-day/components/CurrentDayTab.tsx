@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { TodaySummaryBlock } from './TodaySummaryBlock'
 import { WaterIntakeCard } from './WaterIntakeCard'
 import { QuickAddSheet } from './QuickAddSheet'
@@ -48,22 +49,42 @@ interface CurrentDayTabProps {
 }
 
 export function CurrentDayTab({ refreshToken = 0, successMessage = '', onDayUpdated, displayName, onOpenAnalyzer, onOpenAnalyzerWithPhoto }: CurrentDayTabProps) {
+  const queryClient = useQueryClient()
   const [selectedDate, setSelectedDate] = useState(() => getTodayLocalDateInputValue())
-  const [summary, setSummary] = useState<TodaySummary | null>(null)
-  const [loading, setLoading] = useState(true)
   const [steps, setSteps] = useState(0)
   const [activeCalories, setActiveCalories] = useState(0)
   const [savingWeight, setSavingWeight] = useState(false)
   const [weightInput, setWeightInput] = useState('')
   const [weightFromHealth, setWeightFromHealth] = useState(false)
-  const [error, setError] = useState('')
+  const [actionError, setActionError] = useState('')
   const [savingNutrition, setSavingNutrition] = useState(false)
   const [resettingDay, setResettingDay] = useState(false)
   const [showQuickAdd, setShowQuickAdd] = useState(false)
   const [quickAddSlot, setQuickAddSlot] = useState<string | undefined>(undefined)
-  const [localRefresh, setLocalRefresh] = useState(0)
   const [pullDist, setPullDist] = useState(0)
   const [ptrRefreshing, setPtrRefreshing] = useState(false)
+
+  const summaryQuery = useQuery<TodaySummary>({
+    queryKey: ['today-summary', selectedDate],
+    queryFn: () => fetchTodaySummary(selectedDate),
+  })
+  const summary = summaryQuery.data ?? null
+  const loading = summaryQuery.isLoading
+  const error = actionError || (summaryQuery.error instanceof Error ? summaryQuery.error.message : '')
+
+  function refetchSummary() {
+    return queryClient.invalidateQueries({ queryKey: ['today-summary', selectedDate] })
+  }
+
+  // External refresh trigger from props
+  useEffect(() => {
+    if (refreshToken > 0) refetchSummary()
+  }, [refreshToken]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Stop pull-to-refresh indicator when fetch finishes
+  useEffect(() => {
+    if (!summaryQuery.isFetching && ptrRefreshing) setPtrRefreshing(false)
+  }, [summaryQuery.isFetching]) // eslint-disable-line react-hooks/exhaustive-deps
   const pullRef = useRef(0)
   const ptrStartY = useRef(0)
   const ptrDragging = useRef(false)
@@ -72,55 +93,39 @@ export function CurrentDayTab({ refreshToken = 0, successMessage = '', onDayUpda
   const isToday = selectedDate === today
   const minDate = offsetDate(today, -MAX_PAST_DAYS)
 
+  // Sync weight input from summary + HealthKit
+  useEffect(() => {
+    if (!summary) return
+    let cancelled = false
+    if (isToday && isHealthKitSupported()) {
+      getLatestWeightFromHealth().then(healthSample => {
+        if (cancelled) return
+        const dbTime = summary.weightUpdatedAt ? new Date(summary.weightUpdatedAt) : null
+        const healthIsNewer = healthSample != null && (dbTime == null || healthSample.measuredAt > dbTime)
+        if (healthIsNewer) {
+          setWeightInput(String(healthSample!.weightKg))
+          setWeightFromHealth(true)
+        } else if (summary.weightKg != null) {
+          setWeightInput(String(summary.weightKg))
+          setWeightFromHealth(false)
+        } else {
+          setWeightInput('')
+          setWeightFromHealth(false)
+        }
+      }).catch(() => {})
+    } else if (summary.weightKg != null) {
+      setWeightInput(String(summary.weightKg))
+      setWeightFromHealth(false)
+    } else {
+      setWeightInput('')
+      setWeightFromHealth(false)
+    }
+    return () => { cancelled = true }
+  }, [summary, isToday])
+
+  // HealthKit steps + active calories
   useEffect(() => {
     let cancelled = false
-
-    async function loadSummary() {
-      setLoading(true)
-      setError('')
-
-      try {
-        const nextSummary = await fetchTodaySummary(selectedDate)
-        if (!cancelled) {
-          setSummary(nextSummary)
-          if (isToday && isHealthKitSupported()) {
-            const healthSample = await getLatestWeightFromHealth()
-            if (!cancelled) {
-              const dbTime = nextSummary.weightUpdatedAt ? new Date(nextSummary.weightUpdatedAt) : null
-              const healthIsNewer = healthSample != null && (dbTime == null || healthSample.measuredAt > dbTime)
-              if (healthIsNewer) {
-                setWeightInput(String(healthSample!.weightKg))
-                setWeightFromHealth(true)
-              } else if (nextSummary.weightKg != null) {
-                setWeightInput(String(nextSummary.weightKg))
-                setWeightFromHealth(false)
-              } else {
-                setWeightInput('')
-                setWeightFromHealth(false)
-              }
-            }
-          } else if (nextSummary.weightKg != null) {
-            setWeightInput(String(nextSummary.weightKg))
-            setWeightFromHealth(false)
-          } else {
-            setWeightInput('')
-            setWeightFromHealth(false)
-          }
-        }
-      } catch (err) {
-        if (!cancelled) {
-          setError(err instanceof Error ? err.message : 'Failed to load daily summary')
-        }
-      } finally {
-        if (!cancelled) {
-          setLoading(false)
-          setPtrRefreshing(false)
-        }
-      }
-    }
-
-    loadSummary()
-
     if (isToday && isHealthKitSupported()) {
       requestHealthPermissions().then(() => {
         if (!cancelled) {
@@ -132,11 +137,8 @@ export function CurrentDayTab({ refreshToken = 0, successMessage = '', onDayUpda
       setSteps(0)
       setActiveCalories(0)
     }
-
-    return () => {
-      cancelled = true
-    }
-  }, [refreshToken, selectedDate, isToday, localRefresh])
+    return () => { cancelled = true }
+  }, [isToday, refreshToken])
 
   useEffect(() => {
     function onTouchStart(e: TouchEvent) {
@@ -161,7 +163,7 @@ export function CurrentDayTab({ refreshToken = 0, successMessage = '', onDayUpda
       if (pullRef.current >= PTR_THRESHOLD) {
         hapticMedium()
         setPtrRefreshing(true)
-        setLocalRefresh(n => n + 1)
+        refetchSummary()
       }
       setPullDist(0)
       pullRef.current = 0
@@ -176,21 +178,50 @@ export function CurrentDayTab({ refreshToken = 0, successMessage = '', onDayUpda
     }
   }, [])
 
+  function applyMealOptimistic(kcal: number, protein: number, fat: number, fiber: number, carbs: number) {
+    const key = ['today-summary', selectedDate]
+    const prev = queryClient.getQueryData<TodaySummary>(key)
+    if (prev) {
+      queryClient.setQueryData<TodaySummary>(key, {
+        ...prev,
+        consumedCalories: prev.consumedCalories + kcal,
+        proteinGrams: prev.proteinGrams + protein,
+        fatGrams: prev.fatGrams + fat,
+        fiberGrams: prev.fiberGrams + fiber,
+        carbsGrams: prev.carbsGrams + carbs,
+        remainingCalories: prev.remainingCalories - kcal,
+      })
+    }
+    return prev
+  }
+
   async function handleTemplateLog(templateId: string, slotType?: string) {
-    await logTemplate(templateId, selectedDate, slotType)
-    const nextSummary = await fetchTodaySummary(selectedDate)
-    setSummary(nextSummary)
-    onDayUpdated?.()
+    const key = ['today-summary', selectedDate]
+    await queryClient.cancelQueries({ queryKey: key })
+    const prev = queryClient.getQueryData<TodaySummary>(key)
+    try {
+      await logTemplate(templateId, selectedDate, slotType)
+      await refetchSummary()
+      onDayUpdated?.()
+    } catch (err) {
+      if (prev) queryClient.setQueryData(key, prev)
+      throw err
+    }
   }
 
   async function handleMealAdd(kcal: number, protein: number, fat: number, fiber: number, carbs: number, name?: string, slotType?: string) {
+    const key = ['today-summary', selectedDate]
+    await queryClient.cancelQueries({ queryKey: key })
+    const prev = applyMealOptimistic(kcal, protein, fat, fiber, carbs)
+    setShowQuickAdd(false)
     setSavingNutrition(true)
     try {
       await addMealManually({ caloriesConsumedKcal: kcal, proteinGrams: protein, fatGrams: fat, fiberGrams: fiber, carbsGrams: carbs, mealName: name, slotType }, selectedDate)
-      const nextSummary = await fetchTodaySummary(selectedDate)
-      setSummary(nextSummary)
-      setShowQuickAdd(false)
+      await refetchSummary()
       onDayUpdated?.()
+    } catch (err) {
+      if (prev) queryClient.setQueryData(key, prev)
+      setActionError(err instanceof Error ? err.message : 'Failed to add meal')
     } finally {
       setSavingNutrition(false)
     }
@@ -204,14 +235,13 @@ export function CurrentDayTab({ refreshToken = 0, successMessage = '', onDayUpda
   async function handleResetDay() {
     if (!window.confirm('Reset this day\'s nutrition totals to zero?')) return
     setResettingDay(true)
-    setError('')
+    setActionError('')
     try {
       await resetToday(selectedDate)
-      const nextSummary = await fetchTodaySummary(selectedDate)
-      setSummary(nextSummary)
+      await refetchSummary()
       onDayUpdated?.()
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to reset day')
+      setActionError(err instanceof Error ? err.message : 'Failed to reset day')
     } finally {
       setResettingDay(false)
     }
@@ -222,22 +252,22 @@ export function CurrentDayTab({ refreshToken = 0, successMessage = '', onDayUpda
     const parsedWeight = Number(normalizedWeightInput)
 
     if (!Number.isFinite(parsedWeight) || parsedWeight <= 0 || parsedWeight > 200) {
-      setError('Enter a valid weight between 1 and 200 kg')
+      setActionError('Enter a valid weight between 1 and 200 kg')
       return
     }
 
     setSavingWeight(true)
-    setError('')
+    setActionError('')
 
     try {
       await updateTodayWeight(parsedWeight, selectedDate)
-      const nextSummary = await fetchTodaySummary(selectedDate)
-      setSummary(nextSummary)
-      setWeightInput(nextSummary.weightKg != null ? String(nextSummary.weightKg) : '')
+      await refetchSummary()
+      const updated = queryClient.getQueryData<TodaySummary>(['today-summary', selectedDate])
+      setWeightInput(updated?.weightKg != null ? String(updated.weightKg) : '')
       setWeightFromHealth(false)
       onDayUpdated?.()
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to save weight')
+      setActionError(err instanceof Error ? err.message : 'Failed to save weight')
     } finally {
       setSavingWeight(false)
     }
@@ -350,10 +380,10 @@ export function CurrentDayTab({ refreshToken = 0, successMessage = '', onDayUpda
       {!loading && !error && summary ? (
         <MealsLogCard
           date={selectedDate}
-          refreshToken={refreshToken + localRefresh}
+          refreshToken={refreshToken}
           onAddToSlot={openQuickAdd}
-          onDeleted={() => { fetchTodaySummary(selectedDate).then(setSummary).catch(() => {}) }}
-          onUpdated={() => { fetchTodaySummary(selectedDate).then(setSummary).catch(() => {}); onDayUpdated?.() }}
+          onDeleted={() => { refetchSummary() }}
+          onUpdated={() => { refetchSummary(); onDayUpdated?.() }}
         />
       ) : null}
 
@@ -362,7 +392,7 @@ export function CurrentDayTab({ refreshToken = 0, successMessage = '', onDayUpda
           waterGlasses={summary.waterGlasses}
           waterGoalGlasses={summary.waterGoalGlasses}
           date={selectedDate}
-          onUpdate={() => { fetchTodaySummary(selectedDate).then(setSummary).catch(() => {}) }}
+          onUpdate={() => { refetchSummary() }}
         />
       ) : null}
 

@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import { useQuery } from '@tanstack/react-query'
 import { listTemplates } from '../../food-library/model/mealTemplateApi'
 import { searchFood } from '../../barcode/model/barcodeApi'
 import type { FoodProduct } from '../../barcode/model/barcodeApi'
@@ -59,8 +60,12 @@ export function QuickAddSheet({ initialSlot, onAdd, onLogTemplate, onClose, onOp
   const [mode, setMode] = useState<'library' | 'search' | 'manual'>('library')
 
   // library
-  const [templates, setTemplates] = useState<MealTemplate[]>([])
-  const [loadingLib, setLoadingLib] = useState(true)
+  const templatesQuery = useQuery<MealTemplate[]>({
+    queryKey: ['meal-templates'],
+    queryFn: () => listTemplates(),
+  })
+  const templates = templatesQuery.data ?? []
+  const loadingLib = templatesQuery.isLoading
   const [loggingId, setLoggingId] = useState<string | null>(null)
   const [libError, setLibError] = useState('')
   const [loggedName, setLoggedName] = useState<string | null>(null)
@@ -89,12 +94,7 @@ export function QuickAddSheet({ initialSlot, onAdd, onLogTemplate, onClose, onOp
   const galleryInputRef = useRef<HTMLInputElement>(null)
   const cameraInputRef = useRef<HTMLInputElement>(null)
 
-  useEffect(() => {
-    listTemplates()
-      .then(list => setTemplates(list))
-      .catch(() => {})
-      .finally(() => setLoadingLib(false))
-  }, [])
+
 
   useEffect(() => {
     const vv = window.visualViewport

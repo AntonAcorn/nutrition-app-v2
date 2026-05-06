@@ -1,4 +1,5 @@
 import { type ChangeEvent, useEffect, useRef, useState } from 'react'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { getTodayLocalDateInputValue } from '../../../shared/lib/date'
 import { API_BASE } from '../../../shared/lib/apiBase'
 import type { MealTemplate, MealTemplateItem } from '../../../shared/types/nutrition'
@@ -32,8 +33,19 @@ const MACRO_FIELDS: { field: keyof MealTemplateItem; label: string }[] = [
 const UNDO_TIMEOUT_MS = 6000
 
 export function FoodLibraryTab({ onLogged, initialSave, onInitialSaveDone }: FoodLibraryTabProps) {
-  const [templates, setTemplates] = useState<MealTemplate[]>([])
-  const [loading, setLoading] = useState(true)
+  const queryClient = useQueryClient()
+  const templatesQuery = useQuery<MealTemplate[]>({
+    queryKey: ['meal-templates'],
+    queryFn: () => listTemplates(),
+  })
+  const templates = templatesQuery.data ?? []
+  const loading = templatesQuery.isLoading
+  function setTemplates(updater: MealTemplate[] | ((prev: MealTemplate[]) => MealTemplate[])) {
+    queryClient.setQueryData<MealTemplate[]>(['meal-templates'], (prev) => {
+      const cur = prev ?? []
+      return typeof updater === 'function' ? (updater as (p: MealTemplate[]) => MealTemplate[])(cur) : updater
+    })
+  }
   const [error, setError] = useState('')
   const [editing, setEditing] = useState<MealTemplate | null>(null)
   const [creating, setCreating] = useState(false)
@@ -47,8 +59,6 @@ export function FoodLibraryTab({ onLogged, initialSave, onInitialSaveDone }: Foo
   const [loggedToast, setLoggedToast] = useState<LoggedToast | null>(null)
   const [undoing, setUndoing] = useState(false)
   const undoTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
-
-  useEffect(() => { load() }, [])
 
   useEffect(() => {
     if (initialSave) {
@@ -64,10 +74,7 @@ export function FoodLibraryTab({ onLogged, initialSave, onInitialSaveDone }: Foo
   }, [])
 
   async function load() {
-    setLoading(true)
-    try { setTemplates(await listTemplates()) }
-    catch { setError('Could not load library') }
-    finally { setLoading(false) }
+    await queryClient.invalidateQueries({ queryKey: ['meal-templates'] })
   }
 
   function openCreate() {

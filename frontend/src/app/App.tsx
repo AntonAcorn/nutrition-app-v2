@@ -1,4 +1,5 @@
 import { FormEvent, useEffect, useState } from 'react'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { API_BASE } from '../shared/lib/apiBase'
 import { MascotSvg } from '../features/current-day/components/MascotSvg'
 
@@ -151,7 +152,26 @@ function TabIconMe() {
   )
 }
 
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 30_000,
+      gcTime: 5 * 60_000,
+      refetchOnWindowFocus: false,
+      retry: 1,
+    },
+  },
+})
+
 export default function App() {
+  return (
+    <QueryClientProvider client={queryClient}>
+      <AppInner />
+    </QueryClientProvider>
+  )
+}
+
+function AppInner() {
   const [activeTab, setActiveTab] = useState<TabKey>(tabs.currentDay)
   const [theme, setTheme] = useState<Theme>(getInitialTheme)
   const [summaryRefreshToken, setSummaryRefreshToken] = useState(0)
