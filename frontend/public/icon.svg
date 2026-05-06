@@ -4,41 +4,88 @@
       <stop offset="0%" stop-color="#1E3348"/>
       <stop offset="100%" stop-color="#0C1620"/>
     </radialGradient>
-    <radialGradient id="body" cx="34%" cy="28%" r="72%">
-      <stop offset="0%" stop-color="#E4F4FF"/>
-      <stop offset="40%" stop-color="#A8CFF4"/>
-      <stop offset="100%" stop-color="#6AAAE8"/>
+    <radialGradient id="body" cx="33%" cy="27%" r="72%">
+      <stop offset="0%" stop-color="#E8F6FF"/>
+      <stop offset="42%" stop-color="#A8CFF4"/>
+      <stop offset="100%" stop-color="#5E9EDE"/>
+    </radialGradient>
+    <radialGradient id="scaleGrad" cx="50%" cy="0%" r="100%">
+      <stop offset="0%" stop-color="#EEF0F8"/>
+      <stop offset="100%" stop-color="#C8CCDA"/>
     </radialGradient>
   </defs>
 
   <!-- Background -->
-  <rect width="512" height="512" rx="100" fill="url(#bg)"/>
+  <rect width="512" height="512" rx="108" fill="url(#bg)"/>
 
-  <!-- Feet (peeking at bottom) -->
-  <circle cx="218" cy="478" r="40" fill="#6AAAE8" opacity="0.55"/>
-  <circle cx="294" cy="478" r="40" fill="#6AAAE8" opacity="0.55"/>
+  <!-- Scale rubber feet -->
+  <rect x="90"  y="460" width="40" height="18" rx="9" fill="#8A8EA0"/>
+  <rect x="382" y="460" width="40" height="18" rx="9" fill="#8A8EA0"/>
 
-  <!-- Body -->
-  <circle cx="256" cy="275" r="196" fill="url(#body)"/>
+  <!-- Scale main platform -->
+  <rect x="60" y="308" width="392" height="162" rx="32" fill="url(#scaleGrad)"/>
 
-  <!-- Glossy highlights -->
-  <circle cx="206" cy="164" r="55" fill="rgba(255,255,255,0.72)"/>
-  <circle cx="241" cy="200" r="30" fill="rgba(255,255,255,0.50)"/>
-  <circle cx="296" cy="180" r="18" fill="rgba(255,255,255,0.38)"/>
-  <circle cx="332" cy="212" r="13" fill="rgba(255,255,255,0.28)"/>
-  <!-- Lower body texture dots -->
-  <circle cx="176" cy="356" r="13" fill="rgba(255,255,255,0.35)"/>
-  <circle cx="202" cy="378" r="9"  fill="rgba(255,255,255,0.27)"/>
-  <circle cx="322" cy="350" r="11" fill="rgba(255,255,255,0.28)"/>
+  <!-- Scale top surface highlight -->
+  <rect x="60" y="308" width="392" height="50"  rx="32" fill="rgba(255,255,255,0.28)"/>
+  <rect x="60" y="340" width="392" height="18"  rx="0"  fill="rgba(255,255,255,0.10)"/>
+
+  <!-- Digital display bezel -->
+  <rect x="142" y="326" width="228" height="76" rx="14" fill="#111825"/>
+  <!-- Display screen -->
+  <rect x="148" y="332" width="216" height="64" rx="10" fill="#0B1318"/>
+  <!-- Green number glow -->
+  <text x="256" y="377" text-anchor="middle"
+        fill="#38E8A0" font-family="'Courier New',monospace"
+        font-size="38" font-weight="bold" letter-spacing="2">73.5</text>
+  <text x="256" y="392" text-anchor="middle"
+        fill="#38E8A0" font-family="'Courier New',monospace"
+        font-size="13" opacity="0.6" letter-spacing="1">kg</text>
+
+  <!-- Scale centre line -->
+  <rect x="216" y="420" width="80" height="5" rx="2.5" fill="rgba(0,0,0,0.13)"/>
+
+  <!-- Mascot feet (resting on scale surface) -->
+  <circle cx="192" cy="322" r="32" fill="#5E9EDE" opacity="0.70"/>
+  <circle cx="320" cy="322" r="32" fill="#5E9EDE" opacity="0.70"/>
+  <!-- Toe dots -->
+  <circle cx="180" cy="327" r="8" fill="#4A82C0" opacity="0.55"/>
+  <circle cx="194" cy="335" r="8" fill="#4A82C0" opacity="0.55"/>
+  <circle cx="308" cy="335" r="8" fill="#4A82C0" opacity="0.55"/>
+  <circle cx="322" cy="327" r="8" fill="#4A82C0" opacity="0.55"/>
+
+  <!-- Mascot body -->
+  <circle cx="256" cy="204" r="120" fill="url(#body)"/>
+
+  <!-- Body highlights -->
+  <circle cx="214" cy="146" r="40" fill="rgba(255,255,255,0.70)"/>
+  <circle cx="234" cy="166" r="21" fill="rgba(255,255,255,0.50)"/>
+  <circle cx="266" cy="155" r="11" fill="rgba(255,255,255,0.36)"/>
+  <circle cx="286" cy="170" r="8"  fill="rgba(255,255,255,0.28)"/>
+  <!-- Lower texture -->
+  <circle cx="170" cy="258" r="8"  fill="rgba(255,255,255,0.32)"/>
+  <circle cx="182" cy="272" r="5.5" fill="rgba(255,255,255,0.24)"/>
+  <circle cx="334" cy="250" r="7"  fill="rgba(255,255,255,0.26)"/>
 
   <!-- Blush cheeks -->
-  <circle cx="154" cy="260" r="34" fill="#FFB0C0" opacity="0.30"/>
-  <circle cx="358" cy="260" r="34" fill="#FFB0C0" opacity="0.30"/>
+  <circle cx="176" cy="228" r="22" fill="#FFB0C0" opacity="0.36"/>
+  <circle cx="336" cy="228" r="22" fill="#FFB0C0" opacity="0.36"/>
 
-  <!-- Eyes: happy squint (^ ^) -->
-  <path d="M 155 220 Q 196 190 237 220" stroke="#0E1520" stroke-width="13" fill="none" stroke-linecap="round"/>
-  <path d="M 275 220 Q 316 190 357 220" stroke="#0E1520" stroke-width="13" fill="none" stroke-linecap="round"/>
+  <!-- Eyes looking down at scale -->
+  <!-- Left eye -->
+  <circle cx="216" cy="200" r="28" fill="white"/>
+  <circle cx="218" cy="212" r="19" fill="#0E1520"/>
+  <circle cx="226" cy="203" r="8"  fill="white"/>
+  <circle cx="220" cy="218" r="3"  fill="rgba(255,255,255,0.5)"/>
+  <!-- Right eye -->
+  <circle cx="296" cy="200" r="28" fill="white"/>
+  <circle cx="294" cy="212" r="19" fill="#0E1520"/>
+  <circle cx="304" cy="203" r="8"  fill="white"/>
+  <circle cx="296" cy="218" r="3"  fill="rgba(255,255,255,0.5)"/>
 
-  <!-- Mouth: gentle closed smile -->
-  <path d="M 224 302 Q 256 322 288 302" stroke="#0E1520" stroke-width="9" fill="none" stroke-linecap="round"/>
+  <!-- Eyebrows (raised — surprised by the number) -->
+  <path d="M 198 178 Q 216 170 234 176" stroke="#0E1520" stroke-width="5" fill="none" stroke-linecap="round"/>
+  <path d="M 278 176 Q 296 170 314 178" stroke="#0E1520" stroke-width="5" fill="none" stroke-linecap="round"/>
+
+  <!-- Mouth (small "oh!" circle — surprised) -->
+  <ellipse cx="256" cy="252" rx="16" ry="13" fill="#1C2E3A"/>
 </svg>
