@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState, type ReactNode } from 'react'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { fetchNutritionStatistics } from '../model/statisticsApi'
+import { MascotSvg } from '../../current-day/components/MascotSvg'
 import type { NutritionStatisticsPoint, NutritionStatisticsResponse } from '../../../shared/types/nutrition'
 
 const RANGE_OPTIONS = [7, 30, 90] as const
@@ -813,11 +814,13 @@ export function StatisticsTab({ refreshToken = 0 }: StatisticsTabProps) {
       ) : null}
       {!loading && error ? <section className="panel detail-panel"><p className="error-text">{error}</p></section> : null}
       {!loading && !error && data && loggedPoints.length === 0 ? (
-        <section className="panel statistics-empty-state">
-          <p className="statistics-empty-state__emoji">📊</p>
-          <p className="statistics-empty-state__title">No data for this period</p>
-          <p className="statistics-empty-state__hint">Log meals on the Today tab — your charts and stats will appear here.</p>
-        </section>
+        <div className="empty-state">
+          <MascotSvg mood="neutral" size={140} className="empty-state__mascot" />
+          <h3 className="empty-state__title">No data yet for this period</h3>
+          <p className="empty-state__hint">
+            Log meals on the Today tab — once you've got a few days, charts and trends will appear here.
+          </p>
+        </div>
       ) : null}
       {!loading && !error && data && loggedPoints.length > 0 && loggedPoints.length < 3 ? (
         <section className="panel statistics-empty-state" style={{ paddingTop: '0.75rem', paddingBottom: '0.75rem' }}>

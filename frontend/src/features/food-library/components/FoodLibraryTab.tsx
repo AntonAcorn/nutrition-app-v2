@@ -1,5 +1,6 @@
 import { type ChangeEvent, useEffect, useRef, useState } from 'react'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
+import { MascotSvg } from '../../current-day/components/MascotSvg'
 import { getTodayLocalDateInputValue } from '../../../shared/lib/date'
 import { API_BASE } from '../../../shared/lib/apiBase'
 import type { MealTemplate, MealTemplateItem } from '../../../shared/types/nutrition'
@@ -319,9 +320,15 @@ export function FoodLibraryTab({ onLogged, initialSave, onInitialSaveDone }: Foo
           ))}
         </div>
       ) : templates.length === 0 ? (
-        <div className="library-empty">
-          <p>No saved meals yet.</p>
-          <p className="subtle-text">After analyzing a photo or voice, tap "Save to library" — or create one manually with + New.</p>
+        <div className="empty-state">
+          <MascotSvg mood="excited" size={140} className="empty-state__mascot" />
+          <h3 className="empty-state__title">Your library is empty</h3>
+          <p className="empty-state__hint">
+            Save meals you eat often. Snap a photo, dictate it, or build one manually — they'll show up here for one-tap logging.
+          </p>
+          <button type="button" className="empty-state__cta" onClick={openCreate}>
+            + Create your first meal
+          </button>
         </div>
       ) : (
         <div className="library-list">
