@@ -87,6 +87,7 @@ export function QuickAddSheet({ initialSlot, onAdd, onLogTemplate, onClose, onOp
 
   const backdropRef = useRef<HTMLDivElement>(null)
   const galleryInputRef = useRef<HTMLInputElement>(null)
+  const cameraInputRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
     listTemplates()
@@ -240,6 +241,15 @@ export function QuickAddSheet({ initialSlot, onAdd, onLogTemplate, onClose, onOp
     else onOpenAnalyzer?.('photo')
   }
 
+  function handleCameraFile(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0]
+    if (!file) return
+    e.target.value = ''
+    onClose()
+    if (onOpenAnalyzerWithPhoto) onOpenAnalyzerWithPhoto(file)
+    else onOpenAnalyzer?.('photo')
+  }
+
   async function handlePhotoClick() {
     try {
       const { Capacitor } = await import('@capacitor/core')
@@ -260,8 +270,7 @@ export function QuickAddSheet({ initialSlot, onAdd, onLogTemplate, onClose, onOp
         }
       }
     } catch {}
-    onClose()
-    onOpenAnalyzer?.('photo')
+    cameraInputRef.current?.click()
   }
 
   const gramsNum = parseFloat(grams) || 0
@@ -310,6 +319,14 @@ export function QuickAddSheet({ initialSlot, onAdd, onLogTemplate, onClose, onOp
               accept="image/*"
               hidden
               onChange={handleGalleryFile}
+            />
+            <input
+              ref={cameraInputRef}
+              type="file"
+              accept="image/*"
+              capture="environment"
+              hidden
+              onChange={handleCameraFile}
             />
           </div>
         )}
