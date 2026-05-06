@@ -223,6 +223,10 @@ public class NutritionHistoryService {
             entity.setUserId(userId);
             entity.setEntryDate(entryDate);
             entity.setCaloriesConsumedKcal(BigDecimal.ZERO);
+            entity.setProteinGrams(BigDecimal.ZERO);
+            entity.setFatGrams(BigDecimal.ZERO);
+            entity.setFiberGrams(BigDecimal.ZERO);
+            entity.setCarbsGrams(BigDecimal.ZERO);
             entity.setWaterGlasses(0);
         }
 
