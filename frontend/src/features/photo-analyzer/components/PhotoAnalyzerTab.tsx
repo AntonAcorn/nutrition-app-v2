@@ -568,6 +568,9 @@ export function PhotoAnalyzerTab({ onConfirmed, onSaveToLibrary, initialMode, in
         {/* ── Photo mode ── */}
         {mode === 'photo' && !voiceDraft ? (
           <>
+            {initialPhoto && photoDrafts.length === 0 ? (
+              <p className="subtle-text" style={{ textAlign: 'center', padding: '2rem 0' }}>Analyzing…</p>
+            ) : <>
             {/* Note input — collapsed by default */}
             {!noteExpanded ? (
               <button type="button" className="add-note-btn" onClick={() => setNoteExpanded(true)}>
@@ -686,6 +689,7 @@ export function PhotoAnalyzerTab({ onConfirmed, onSaveToLibrary, initialMode, in
                 )}
               </div>
             )}
+            </>}
           </>
         ) : null}
 
