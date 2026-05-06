@@ -27,12 +27,16 @@ public class AppleSignInService {
     }
 
     public AppleUserInfo verifyIdentityToken(String identityToken) {
+        if (identityToken == null || identityToken.isBlank()) {
+            log.warn("Apple identity token is null or blank");
+            throw new IllegalArgumentException("Apple identity token is missing");
+        }
         Jwt jwt;
         try {
             jwt = jwtDecoder.decode(identityToken);
-        } catch (JwtException e) {
-            log.warn("Apple identity token verification failed: {}", e.getMessage());
-            throw new IllegalArgumentException("Invalid Apple identity token");
+        } catch (Exception e) {
+            log.warn("Apple identity token verification failed ({}): {}", e.getClass().getSimpleName(), e.getMessage());
+            throw new IllegalArgumentException("Apple token verification failed: " + e.getMessage());
         }
 
         String issuer = jwt.getIssuer() != null ? jwt.getIssuer().toString() : "";
