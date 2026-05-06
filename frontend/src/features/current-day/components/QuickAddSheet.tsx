@@ -14,6 +14,7 @@ interface Props {
   onLogTemplate: (templateId: string, slotType: string) => Promise<void>
   onClose: () => void
   onOpenAnalyzer?: (mode: 'photo' | 'voice' | 'barcode') => void
+  onOpenAnalyzerWithPhoto?: (file: File) => void
 }
 
 interface ChipProps {
@@ -52,7 +53,7 @@ function resolveInitialSlot(s?: string): MealSlot['slotType'] {
   return SLOT_TYPES.includes(up) ? up : defaultSlotByTime()
 }
 
-export function QuickAddSheet({ initialSlot, onAdd, onLogTemplate, onClose, onOpenAnalyzer }: Props) {
+export function QuickAddSheet({ initialSlot, onAdd, onLogTemplate, onClose, onOpenAnalyzer, onOpenAnalyzerWithPhoto }: Props) {
   const [slot, setSlot] = useState<MealSlot['slotType']>(() => resolveInitialSlot(initialSlot))
   const [slotPickerOpen, setSlotPickerOpen] = useState(false)
   const [mode, setMode] = useState<'library' | 'search' | 'manual'>('library')
@@ -206,6 +207,31 @@ export function QuickAddSheet({ initialSlot, onAdd, onLogTemplate, onClose, onOp
     if (e.target === e.currentTarget) onClose()
   }
 
+  async function handlePhotoClick() {
+    onClose()
+    if (onOpenAnalyzerWithPhoto) {
+      try {
+        const { Capacitor } = await import('@capacitor/core')
+        if (Capacitor.isNativePlatform()) {
+          const { Camera, CameraResultType, CameraSource } = await import('@capacitor/camera')
+          const photo = await Camera.getPhoto({
+            quality: 85,
+            allowEditing: false,
+            resultType: CameraResultType.Uri,
+            source: CameraSource.Camera,
+          })
+          if (photo.webPath) {
+            const res = await fetch(photo.webPath)
+            const blob = await res.blob()
+            onOpenAnalyzerWithPhoto(new File([blob], 'photo.jpg', { type: blob.type || 'image/jpeg' }))
+            return
+          }
+        }
+      } catch {}
+    }
+    onOpenAnalyzer?.('photo')
+  }
+
   const gramsNum = parseFloat(grams) || 0
 
   return (
@@ -230,7 +256,7 @@ export function QuickAddSheet({ initialSlot, onAdd, onLogTemplate, onClose, onOp
 
         {!loggedName && onOpenAnalyzer && (
           <div className="qs-analyzer-row">
-            <button type="button" className="qs-analyzer-btn" onClick={() => { onClose(); onOpenAnalyzer('photo') }}>
+            <button type="button" className="qs-analyzer-btn" onClick={handlePhotoClick}>
               <span className="qs-analyzer-btn__icon">📷</span>
               <span>Photo</span>
             </button>

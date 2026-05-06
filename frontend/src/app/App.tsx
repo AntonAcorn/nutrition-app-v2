@@ -159,6 +159,7 @@ export default function App() {
   const [pendingLibrarySave, setPendingLibrarySave] = useState<{ name: string; items: MealTemplateItem[] } | null>(null)
   const [daySuccessMessage, setDaySuccessMessage] = useState('')
   const [analyzerMode, setAnalyzerMode] = useState<'photo' | 'voice' | 'barcode'>('photo')
+  const [initialAnalyzerPhoto, setInitialAnalyzerPhoto] = useState<File | null>(null)
   const [isNative, setIsNative] = useState(false)
   const [authUser, setAuthUser] = useState<AuthUser | null>(null)
   const [authLoading, setAuthLoading] = useState(true)
@@ -407,7 +408,14 @@ export default function App() {
     setActiveTab(tabs.photoAnalyzer)
   }
 
+  function openAnalyzerWithPhoto(file: File) {
+    setInitialAnalyzerPhoto(file)
+    setAnalyzerMode('photo')
+    setActiveTab(tabs.photoAnalyzer)
+  }
+
   function handleDraftConfirmed() {
+    setInitialAnalyzerPhoto(null)
     setActiveTab(tabs.currentDay)
     handleDayUpdated()
     setDaySuccessMessage('Analysis saved, daily summary is updating.')
@@ -737,6 +745,7 @@ export default function App() {
               onDayUpdated={handleDayUpdated}
               displayName={authUser.displayName}
               onOpenAnalyzer={openAnalyzer}
+              onOpenAnalyzerWithPhoto={openAnalyzerWithPhoto}
             />
           ) : null}
           {activeTab === tabs.statistics ? <StatisticsTab refreshToken={statisticsRefreshToken} /> : null}
@@ -745,7 +754,8 @@ export default function App() {
               onConfirmed={handleDraftConfirmed}
               onSaveToLibrary={handleSaveToLibrary}
               initialMode={analyzerMode}
-              onBack={() => setActiveTab(tabs.currentDay)}
+              initialPhoto={initialAnalyzerPhoto}
+              onBack={() => { setInitialAnalyzerPhoto(null); setActiveTab(tabs.currentDay) }}
             />
           ) : null}
           {activeTab === tabs.fasting ? <FastingTab /> : null}

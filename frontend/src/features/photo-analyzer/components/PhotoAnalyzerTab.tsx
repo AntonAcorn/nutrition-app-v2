@@ -45,6 +45,7 @@ interface PhotoAnalyzerTabProps {
   onConfirmed?: () => void
   onSaveToLibrary?: (data: { name: string; items: MealTemplateItem[] }) => void
   initialMode?: AnalyzerMode
+  initialPhoto?: File | null
   onBack?: () => void
 }
 
@@ -84,8 +85,9 @@ async function nativeSpeechAvailable(): Promise<boolean> {
   }
 }
 
-export function PhotoAnalyzerTab({ onConfirmed, onSaveToLibrary, initialMode, onBack }: PhotoAnalyzerTabProps) {
+export function PhotoAnalyzerTab({ onConfirmed, onSaveToLibrary, initialMode, initialPhoto, onBack }: PhotoAnalyzerTabProps) {
   const [mode, setMode] = useState<AnalyzerMode>(initialMode ?? 'photo')
+  const initialPhotoUsed = useRef(false)
 
   // Photo mode: multi-draft queue
   const [photoDrafts, setPhotoDrafts] = useState<DraftEntry[]>([])
@@ -124,6 +126,13 @@ export function PhotoAnalyzerTab({ onConfirmed, onSaveToLibrary, initialMode, on
     () => (voiceDraft ? calculateTotals(voiceDraft.items) : calculateTotals([])),
     [voiceDraft],
   )
+
+  useEffect(() => {
+    if (initialPhoto && !initialPhotoUsed.current) {
+      initialPhotoUsed.current = true
+      analyzePhoto(initialPhoto, '')
+    }
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     async function checkSpeech() {

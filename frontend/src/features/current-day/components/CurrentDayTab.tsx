@@ -44,9 +44,10 @@ interface CurrentDayTabProps {
   onDayUpdated?: () => void
   displayName?: string | null
   onOpenAnalyzer?: (mode: 'photo' | 'voice' | 'barcode') => void
+  onOpenAnalyzerWithPhoto?: (file: File) => void
 }
 
-export function CurrentDayTab({ refreshToken = 0, successMessage = '', onDayUpdated, displayName, onOpenAnalyzer }: CurrentDayTabProps) {
+export function CurrentDayTab({ refreshToken = 0, successMessage = '', onDayUpdated, displayName, onOpenAnalyzer, onOpenAnalyzerWithPhoto }: CurrentDayTabProps) {
   const [selectedDate, setSelectedDate] = useState(() => getTodayLocalDateInputValue())
   const [summary, setSummary] = useState<TodaySummary | null>(null)
   const [loading, setLoading] = useState(true)
@@ -353,6 +354,7 @@ export function CurrentDayTab({ refreshToken = 0, successMessage = '', onDayUpda
           onLogTemplate={handleTemplateLog}
           onClose={() => setShowQuickAdd(false)}
           onOpenAnalyzer={onOpenAnalyzer}
+          onOpenAnalyzerWithPhoto={onOpenAnalyzerWithPhoto}
         />
       )}
 
