@@ -1,4 +1,4 @@
-import { FormEvent, useEffect, useState } from 'react'
+import { FormEvent, lazy, Suspense, useEffect, useState } from 'react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { API_BASE } from '../shared/lib/apiBase'
 import { MascotSvg } from '../features/current-day/components/MascotSvg'
@@ -44,12 +44,13 @@ function EyeOffIcon() {
 }
 import { CurrentDayTab } from '../features/current-day/components/CurrentDayTab'
 import { login, logout, register, fetchMe, requestPasswordReset, resetPassword, deleteAccount, resendVerification, loginWithApple, loginWithGoogleNative, EmailNotVerifiedError, type AuthUser } from '../features/auth/model/authApi'
-import { PhotoAnalyzerTab } from '../features/photo-analyzer/components/PhotoAnalyzerTab'
-import { StatisticsTab } from '../features/statistics/components/StatisticsTab'
-import { OnboardingWizard } from '../features/onboarding/components/OnboardingWizard'
-import { ProfileTab } from '../features/profile/components/ProfileTab'
-import { FoodLibraryTab } from '../features/food-library/components/FoodLibraryTab'
-import { FastingTab } from '../features/fasting/components/FastingTab'
+
+const PhotoAnalyzerTab = lazy(() => import('../features/photo-analyzer/components/PhotoAnalyzerTab').then(m => ({ default: m.PhotoAnalyzerTab })))
+const StatisticsTab    = lazy(() => import('../features/statistics/components/StatisticsTab').then(m => ({ default: m.StatisticsTab })))
+const OnboardingWizard = lazy(() => import('../features/onboarding/components/OnboardingWizard').then(m => ({ default: m.OnboardingWizard })))
+const ProfileTab       = lazy(() => import('../features/profile/components/ProfileTab').then(m => ({ default: m.ProfileTab })))
+const FoodLibraryTab   = lazy(() => import('../features/food-library/components/FoodLibraryTab').then(m => ({ default: m.FoodLibraryTab })))
+const FastingTab       = lazy(() => import('../features/fasting/components/FastingTab').then(m => ({ default: m.FastingTab })))
 import type { MealTemplateItem } from '../shared/types/nutrition'
 import { identifyUser, resetAnalyticsUser, track } from '../shared/lib/analytics'
 import { requestHealthPermissions } from '../shared/lib/healthKit'
@@ -149,6 +150,21 @@ function TabIconMe() {
       <circle cx="12" cy="8" r="4"/>
       <path d="M4 20C4 16.2 7.6 13.5 12 13.5C16.4 13.5 20 16.2 20 20"/>
     </svg>
+  )
+}
+
+function TabLoadingSkeleton() {
+  return (
+    <div style={{ padding: '0 16px' }}>
+      <div className="skeleton-card">
+        <div className="skeleton" style={{ height: '1rem', width: '40%', marginBottom: 12 }} />
+        <div className="skeleton" style={{ height: 140, borderRadius: '1rem' }} />
+      </div>
+      <div className="skeleton-card">
+        <div className="skeleton" style={{ height: '3rem', borderRadius: '1rem', marginBottom: 10 }} />
+        <div className="skeleton" style={{ height: '3rem', borderRadius: '1rem' }} />
+      </div>
+    </div>
   )
 }
 
@@ -531,7 +547,9 @@ function AppInner() {
             {theme === 'dark' ? <SunIcon /> : <MoonIcon />}
           </button>
         </header>
-        <OnboardingWizard onComplete={handleOnboardingComplete} />
+        <Suspense fallback={null}>
+          <OnboardingWizard onComplete={handleOnboardingComplete} />
+        </Suspense>
       </main>
     )
   }
@@ -783,32 +801,34 @@ function AppInner() {
               onOpenAnalyzerWithPhoto={openAnalyzerWithPhoto}
             />
           ) : null}
-          {activeTab === tabs.statistics ? <StatisticsTab refreshToken={statisticsRefreshToken} /> : null}
-          {activeTab === tabs.photoAnalyzer ? (
-            <PhotoAnalyzerTab
-              onConfirmed={handleDraftConfirmed}
-              onSaveToLibrary={handleSaveToLibrary}
-              initialMode={analyzerMode}
-              initialPhoto={initialAnalyzerPhoto}
-              onBack={() => { setInitialAnalyzerPhoto(null); setActiveTab(tabs.currentDay) }}
-            />
-          ) : null}
-          {activeTab === tabs.fasting ? <FastingTab /> : null}
-          {activeTab === tabs.library ? (
-            <FoodLibraryTab
-              onLogged={handleDayUpdated}
-              initialSave={pendingLibrarySave}
-              onInitialSaveDone={() => setPendingLibrarySave(null)}
-            />
-          ) : null}
-          {activeTab === tabs.profile ? (
-            <ProfileTab
-              displayName={authUser.displayName}
-              email={authUser.email}
-              onLogout={handleLogout}
-              onDeleteAccount={handleDeleteAccount}
-            />
-          ) : null}
+          <Suspense fallback={<TabLoadingSkeleton />}>
+            {activeTab === tabs.statistics ? <StatisticsTab refreshToken={statisticsRefreshToken} /> : null}
+            {activeTab === tabs.photoAnalyzer ? (
+              <PhotoAnalyzerTab
+                onConfirmed={handleDraftConfirmed}
+                onSaveToLibrary={handleSaveToLibrary}
+                initialMode={analyzerMode}
+                initialPhoto={initialAnalyzerPhoto}
+                onBack={() => { setInitialAnalyzerPhoto(null); setActiveTab(tabs.currentDay) }}
+              />
+            ) : null}
+            {activeTab === tabs.fasting ? <FastingTab /> : null}
+            {activeTab === tabs.library ? (
+              <FoodLibraryTab
+                onLogged={handleDayUpdated}
+                initialSave={pendingLibrarySave}
+                onInitialSaveDone={() => setPendingLibrarySave(null)}
+              />
+            ) : null}
+            {activeTab === tabs.profile ? (
+              <ProfileTab
+                displayName={authUser.displayName}
+                email={authUser.email}
+                onLogout={handleLogout}
+                onDeleteAccount={handleDeleteAccount}
+              />
+            ) : null}
+          </Suspense>
         </div>
       </section>
 
