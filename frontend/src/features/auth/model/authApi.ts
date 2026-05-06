@@ -141,19 +141,35 @@ export async function loginWithGoogleNative(): Promise<AuthUser> {
 
 export async function loginWithApple(): Promise<AuthUser> {
   const { SignInWithApple } = await import('@capacitor-community/apple-sign-in')
-  const result = await SignInWithApple.authorize({
-    clientId: 'com.aiduparc.rumblyeats',
-    redirectURI: '',
-    scopes: 'email name',
-  })
+
+  let result: Awaited<ReturnType<typeof SignInWithApple.authorize>>
+  try {
+    result = await SignInWithApple.authorize({
+      clientId: 'com.aiduparc.rumblyeats',
+      redirectURI: '',
+      scopes: 'email name',
+    })
+  } catch (e) {
+    throw new Error(`[plugin] ${e instanceof Error ? e.message : String(e)}`)
+  }
+
   const { identityToken, givenName, familyName } = result.response
+  if (!identityToken) {
+    throw new Error(`[bridge] no token. response=${JSON.stringify(result.response)}`)
+  }
+
   const displayName = [givenName, familyName].filter(Boolean).join(' ') || undefined
-  const res = await fetch(`${API_BASE}/api/auth/apple`, {
-    method: 'POST',
-    credentials: 'include',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ identityToken, displayName }),
-  })
+  let res: Response
+  try {
+    res = await fetch(`${API_BASE}/api/auth/apple`, {
+      method: 'POST',
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ identityToken, displayName }),
+    })
+  } catch (e) {
+    throw new Error(`[fetch] ${e instanceof Error ? e.message : String(e)}`)
+  }
   return parseAuthResponse(res)
 }
 

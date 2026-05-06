@@ -7,7 +7,8 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview --host 0.0.0.0",
-    "postinstall": "cp ios-patches/apple-sign-in-Plugin.swift node_modules/@capacitor-community/apple-sign-in/ios/Sources/SignInWithApple/Plugin.swift"
+    "postinstall": "node scripts/patch-ios.js",
+    "cap:sync": "node node_modules/@capacitor/cli/bin/capacitor.js sync && node scripts/patch-ios.js"
   },
   "dependencies": {
     "@capacitor-community/apple-sign-in": "^7.1.0",
