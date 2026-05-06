@@ -204,7 +204,7 @@ export function TodaySummaryBlock({
             {weightFromHealth && <span className="today-weight-row__hint">· Apple Health</span>}
             {!weightFromHealth && summary.weightTrend7d != null && summary.weightTrend7d !== 0 && (
               <span className={`today-weight-trend${summary.weightTrend7d < 0 ? ' today-weight-trend--down' : ' today-weight-trend--up'}`}>
-                {summary.weightTrend7d > 0 ? '↑' : '↓'} {Math.abs(summary.weightTrend7d).toFixed(1)} kg vs last week
+                {summary.weightTrend7d > 0 ? '↑' : '↓'} {Math.abs(summary.weightTrend7d).toFixed(1)} kg / wk
               </span>
             )}
             <button

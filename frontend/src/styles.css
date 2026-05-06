@@ -1075,7 +1075,6 @@ ul {
   padding-top: 14px;
   margin-top: 14px;
   border-top: 1px solid rgba(255, 255, 255, 0.07);
-  flex-wrap: wrap;
 }
 
 .today-weight-row__label {
@@ -1124,6 +1123,9 @@ ul {
   font-weight: 600;
   flex: 1;
   white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
 }
 
 .today-weight-trend--down { color: #34d399; }
