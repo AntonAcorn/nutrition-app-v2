@@ -7,7 +7,8 @@ import { MealsLogCard } from './MealsLogCard'
 import { fetchTodaySummary } from '../model/todaySummaryApi'
 import { updateTodayWeight } from '../model/weightApi'
 import { addMealManually, resetToday } from '../model/nutritionTotalsApi'
-import { logTemplate } from '../../food-library/model/mealTemplateApi'
+import { logTemplate, listTemplates } from '../../food-library/model/mealTemplateApi'
+import { fetchNutritionStatistics } from '../../statistics/model/statisticsApi'
 import { getTodayLocalDateInputValue, offsetDate, formatNavDateLabel } from '../../../shared/lib/date'
 import type { TodaySummary } from '../../../shared/types/nutrition'
 import { MascotSvg } from './MascotSvg'
@@ -85,6 +86,30 @@ export function CurrentDayTab({ refreshToken = 0, successMessage = '', onDayUpda
   useEffect(() => {
     if (!summaryQuery.isFetching && ptrRefreshing) setPtrRefreshing(false)
   }, [summaryQuery.isFetching]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Prefetch neighboring tabs in the background after summary is ready
+  useEffect(() => {
+    if (!summary) return
+    const prefetch = () => {
+      queryClient.prefetchQuery({
+        queryKey: ['meal-templates'],
+        queryFn: () => listTemplates(),
+        staleTime: 60_000,
+      })
+      queryClient.prefetchQuery({
+        queryKey: ['statistics', 30],
+        queryFn: () => fetchNutritionStatistics(30),
+        staleTime: 60_000,
+      })
+    }
+    const w = window as Window & { requestIdleCallback?: (cb: () => void) => number; cancelIdleCallback?: (id: number) => void }
+    if (w.requestIdleCallback) {
+      const id = w.requestIdleCallback(prefetch)
+      return () => w.cancelIdleCallback?.(id)
+    }
+    const t = setTimeout(prefetch, 800)
+    return () => clearTimeout(t)
+  }, [summary, queryClient])
   const pullRef = useRef(0)
   const ptrStartY = useRef(0)
   const ptrDragging = useRef(false)

@@ -1,5 +1,7 @@
 import { FormEvent, lazy, Suspense, useEffect, useState } from 'react'
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import { QueryClient, QueryClientProvider, useQueryClient } from '@tanstack/react-query'
+import { listTemplates } from '../features/food-library/model/mealTemplateApi'
+import { fetchNutritionStatistics } from '../features/statistics/model/statisticsApi'
 import { API_BASE } from '../shared/lib/apiBase'
 import { MascotSvg } from '../features/current-day/components/MascotSvg'
 
@@ -188,6 +190,7 @@ export default function App() {
 }
 
 function AppInner() {
+  const qc = useQueryClient()
   const [activeTab, setActiveTab] = useState<TabKey>(tabs.currentDay)
   const [theme, setTheme] = useState<Theme>(getInitialTheme)
   const [summaryRefreshToken, setSummaryRefreshToken] = useState(0)
@@ -436,6 +439,14 @@ function AppInner() {
       setAuthUser(me)
     } catch {
       // session already active, keep current state
+    }
+  }
+
+  function prefetchForTab(key: TabKey) {
+    if (key === tabs.library) {
+      qc.prefetchQuery({ queryKey: ['meal-templates'], queryFn: () => listTemplates(), staleTime: 60_000 })
+    } else if (key === tabs.statistics) {
+      qc.prefetchQuery({ queryKey: ['statistics', 30], queryFn: () => fetchNutritionStatistics(30), staleTime: 60_000 })
     }
   }
 
@@ -846,6 +857,8 @@ function AppInner() {
             role="tab"
             className={`bottom-tab-item${activeTab === key ? ' bottom-tab-item--active' : ''}`}
             aria-selected={activeTab === key}
+            onTouchStart={() => prefetchForTab(key)}
+            onMouseEnter={() => prefetchForTab(key)}
             onClick={() => setActiveTab(key)}
           >
             <Icon />

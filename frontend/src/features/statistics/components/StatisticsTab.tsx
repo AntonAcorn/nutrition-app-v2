@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState, type ReactNode } from 'react'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { fetchNutritionStatistics } from '../model/statisticsApi'
 import type { NutritionStatisticsPoint, NutritionStatisticsResponse } from '../../../shared/types/nutrition'
 
@@ -727,40 +728,23 @@ interface StatisticsTabProps {
 }
 
 export function StatisticsTab({ refreshToken = 0 }: StatisticsTabProps) {
+  const queryClient = useQueryClient()
   const [rangeDays, setRangeDays] = useState<RangeDays>(30)
-  const [data, setData] = useState<NutritionStatisticsResponse | null>(null)
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState('')
   const [showAllCharts, setShowAllCharts] = useState(false)
 
+  const statsQuery = useQuery<NutritionStatisticsResponse>({
+    queryKey: ['statistics', rangeDays],
+    queryFn: () => fetchNutritionStatistics(rangeDays),
+  })
+  const data = statsQuery.data ?? null
+  const loading = statsQuery.isLoading
+  const error = statsQuery.error instanceof Error ? statsQuery.error.message : ''
+
   useEffect(() => {
-    let cancelled = false
-
-    async function load() {
-      setLoading(true)
-      setError('')
-
-      try {
-        const nextData = await fetchNutritionStatistics(rangeDays)
-        if (!cancelled) {
-          setData(nextData)
-        }
-      } catch (err) {
-        if (!cancelled) {
-          setError(err instanceof Error ? err.message : 'Failed to load statistics')
-        }
-      } finally {
-        if (!cancelled) {
-          setLoading(false)
-        }
-      }
+    if (refreshToken > 0) {
+      queryClient.invalidateQueries({ queryKey: ['statistics', rangeDays] })
     }
-
-    load()
-    return () => {
-      cancelled = true
-    }
-  }, [rangeDays, refreshToken])
+  }, [refreshToken]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const points = useMemo(() => data?.points ?? [], [data])
   const selectedTitle = rangeDays === 7 ? 'last week' : rangeDays === 30 ? 'last month' : 'last 3 months'
