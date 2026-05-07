@@ -2,8 +2,7 @@ package com.aiduparc.nutrition.history.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -46,7 +45,7 @@ class NutritionHistoryServiceTest {
     void stubMealLog() {
         // addToDailyTotals invokes mealLogService — return a stub slot so the
         // test focuses on the totals computation. Slot.id auto-generated; null is fine here.
-        lenient().when(mealLogService.getOrCreateSlot(any(), any(), anyString())).thenReturn(new MealSlotEntity());
+        lenient().when(mealLogService.getOrCreateSlot(any(), any(), nullable(String.class))).thenReturn(new MealSlotEntity());
     }
 
     @Test
