@@ -130,6 +130,42 @@
   opacity: 0.4;
 }
 
+.export-range-picker {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 10px 0 14px;
+}
+
+.export-range-picker__btn {
+  flex: 1 1 calc(50% - 4px);
+  background: rgba(59, 125, 255, 0.1);
+  border: 1px solid rgba(59, 125, 255, 0.25);
+  border-radius: 10px;
+  color: #3b7dff;
+  font-size: 0.85rem;
+  font-weight: 600;
+  padding: 10px 12px;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.export-range-picker__btn:hover:not(:disabled) {
+  background: rgba(59, 125, 255, 0.18);
+}
+
+.export-range-picker__btn:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.export-range-picker__hint {
+  width: 100%;
+  margin: 4px 0 0;
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+}
+
 .profile-actions {
   display: grid;
   gap: 10px;

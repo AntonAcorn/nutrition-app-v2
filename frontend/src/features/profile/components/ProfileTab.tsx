@@ -4,6 +4,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { fetchProfile, updateProfile, type UserProfile } from '../model/profileApi'
 import type { OnboardingPayload } from '../../onboarding/model/profileApi'
 import { NotificationSettings } from '../../notifications/components/NotificationSettings'
+import { exportNutritionCsv } from '../model/exportData'
 
 const ACTIVITY_LABELS: Record<string, string> = {
   sedentary: 'Sedentary',
@@ -52,6 +53,18 @@ export function ProfileTab({ displayName, email, onLogout, onDeleteAccount }: Pr
     queryClient.setQueryData(['profile'], updated)
   }
   const [editing, setEditing] = useState(false)
+  const [showExport, setShowExport] = useState(false)
+  const [exporting, setExporting] = useState(false)
+
+  async function handleExport(days: number) {
+    setExporting(true)
+    try {
+      await exportNutritionCsv(days)
+    } finally {
+      setExporting(false)
+      setShowExport(false)
+    }
+  }
 
   const [ageYears, setAgeYears] = useState('')
   const [gender, setGender] = useState<'male' | 'female' | ''>('')
@@ -398,6 +411,30 @@ export function ProfileTab({ displayName, email, onLogout, onDeleteAccount }: Pr
           <span>⏱ Intermittent fasting</span>
           <span className="profile-tool-row__chevron">›</span>
         </button>
+        <button
+          type="button"
+          className="profile-tool-row"
+          onClick={() => setShowExport(v => !v)}
+        >
+          <span>📤 Export data</span>
+          <span className="profile-tool-row__chevron">{showExport ? '▴' : '▾'}</span>
+        </button>
+        {showExport && (
+          <div className="export-range-picker">
+            {([{ label: 'Last 30 days', days: 30 }, { label: 'Last 90 days', days: 90 }, { label: 'Last year', days: 365 }, { label: 'All data', days: 730 }] as const).map(opt => (
+              <button
+                key={opt.days}
+                type="button"
+                className="export-range-picker__btn"
+                disabled={exporting}
+                onClick={() => handleExport(opt.days)}
+              >
+                {opt.label}
+              </button>
+            ))}
+            {exporting && <p className="export-range-picker__hint">Preparing…</p>}
+          </div>
+        )}
       </div>
 
       <div className="panel profile-actions">
