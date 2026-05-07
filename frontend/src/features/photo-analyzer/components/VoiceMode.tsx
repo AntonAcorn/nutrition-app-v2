@@ -16,6 +16,7 @@ import { MicButton } from './MicButton'
 interface VoiceModeProps {
   onConfirmed?: () => void
   onSaveToLibrary?: (data: { name: string; items: MealTemplateItem[] }) => void
+  slotType?: string
   speechSupported: boolean
   recognitionLang: string
   onRecognitionLangChange: (lang: string) => void
@@ -34,6 +35,7 @@ const LANG_OPTIONS = [
 export function VoiceMode({
   onConfirmed,
   onSaveToLibrary,
+  slotType,
   speechSupported,
   recognitionLang,
   onRecognitionLangChange,
@@ -192,6 +194,7 @@ export function VoiceMode({
         carbsG: voiceDraftTotals.carbs,
         notes: voiceDraft.notes.join('\n'),
         mealName,
+        slotType,
       })
       track('draft_confirmed', { method: 'voice' })
       onVoiceDraftChange({ ...voiceDraft, needsUserConfirmation: false })

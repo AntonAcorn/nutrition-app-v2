@@ -16,6 +16,7 @@ interface PhotoModeProps {
   initialPhoto?: File | null
   onConfirmed?: () => void
   onSaveToLibrary?: (data: { name: string; items: MealTemplateItem[] }) => void
+  slotType?: string
   speechSupported: boolean
   recognitionLang: string
   onVoiceError: (msg: string) => void
@@ -25,6 +26,7 @@ export function PhotoMode({
   initialPhoto,
   onConfirmed,
   onSaveToLibrary,
+  slotType,
   speechSupported,
   recognitionLang,
   onVoiceError,
@@ -118,6 +120,7 @@ export function PhotoMode({
         carbsG: totals.carbs,
         notes: draft.notes.join('\n'),
         mealName,
+        slotType,
       })
 
       track('draft_confirmed', { method: 'photo' })

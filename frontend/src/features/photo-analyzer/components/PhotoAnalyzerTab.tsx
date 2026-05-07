@@ -14,10 +14,11 @@ interface PhotoAnalyzerTabProps {
   onSaveToLibrary?: (data: { name: string; items: MealTemplateItem[] }) => void
   initialMode?: AnalyzerMode
   initialPhoto?: File | null
+  slotType?: string
   onBack?: () => void
 }
 
-export function PhotoAnalyzerTab({ onConfirmed, onSaveToLibrary, initialMode, initialPhoto, onBack }: PhotoAnalyzerTabProps) {
+export function PhotoAnalyzerTab({ onConfirmed, onSaveToLibrary, initialMode, initialPhoto, slotType, onBack }: PhotoAnalyzerTabProps) {
   const [mode, setMode] = useState<AnalyzerMode>(initialMode ?? 'photo')
   const [voiceDraft, setVoiceDraft] = useState<PhotoAnalysisDraft | null>(null)
   const [speechSupported, setSpeechSupported] = useState(false)
@@ -61,6 +62,7 @@ export function PhotoAnalyzerTab({ onConfirmed, onSaveToLibrary, initialMode, in
             initialPhoto={initialPhoto}
             onConfirmed={onConfirmed}
             onSaveToLibrary={onSaveToLibrary}
+            slotType={slotType}
             speechSupported={speechSupported}
             recognitionLang={recognitionLang}
             onVoiceError={setVoiceError}
@@ -71,6 +73,7 @@ export function PhotoAnalyzerTab({ onConfirmed, onSaveToLibrary, initialMode, in
           <VoiceMode
             onConfirmed={onConfirmed}
             onSaveToLibrary={onSaveToLibrary}
+            slotType={slotType}
             speechSupported={speechSupported}
             recognitionLang={recognitionLang}
             onRecognitionLangChange={setRecognitionLang}

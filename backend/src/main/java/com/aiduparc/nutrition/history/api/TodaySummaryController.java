@@ -71,7 +71,6 @@ public class TodaySummaryController {
     ) {
         LocalDate safeDate = entryDate != null ? entryDate : LocalDate.now();
         UUID resolvedUserId = currentNutritionUserResolver.resolve(session, null);
-        log.info("add-meal userId={} slotType={} mealName={}", resolvedUserId, request.slotType(), request.mealName());
         String mealName = request.mealName() != null && !request.mealName().isBlank()
             ? request.mealName().trim() : "Manual entry";
         nutritionHistoryService.addToDailyTotals(new NutritionHistoryService.AddToDailyTotalsCommand(

@@ -49,8 +49,8 @@ interface CurrentDayTabProps {
   successMessage?: string
   onDayUpdated?: () => void
   displayName?: string | null
-  onOpenAnalyzer?: (mode: 'photo' | 'voice' | 'barcode') => void
-  onOpenAnalyzerWithPhoto?: (file: File) => void
+  onOpenAnalyzer?: (mode: 'photo' | 'voice' | 'barcode', slotType?: string) => void
+  onOpenAnalyzerWithPhoto?: (file: File, slotType?: string) => void
   onOpenLibrary?: () => void
 }
 
@@ -542,8 +542,8 @@ export function CurrentDayTab({ refreshToken = 0, successMessage = '', onDayUpda
           onAdd={handleMealAdd}
           onLogTemplate={handleTemplateLog}
           onClose={() => setShowQuickAdd(false)}
-          onOpenAnalyzer={onOpenAnalyzer}
-          onOpenAnalyzerWithPhoto={onOpenAnalyzerWithPhoto}
+          onOpenAnalyzer={onOpenAnalyzer ? (mode) => onOpenAnalyzer(mode, quickAddSlot) : undefined}
+          onOpenAnalyzerWithPhoto={onOpenAnalyzerWithPhoto ? (file) => onOpenAnalyzerWithPhoto(file, quickAddSlot) : undefined}
           onOpenLibrary={onOpenLibrary}
         />
       )}

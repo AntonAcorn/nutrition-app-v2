@@ -27,7 +27,7 @@ const ROUTES = {
   analyze: '/analyze',
 } as const
 
-type AnalyzeNavState = { mode?: 'photo' | 'voice' | 'barcode'; photo?: File | null }
+type AnalyzeNavState = { mode?: 'photo' | 'voice' | 'barcode'; photo?: File | null; slotType?: string }
 type LibraryNavState = { pendingSave?: { name: string; items: MealTemplateItem[] } }
 type TodayNavState   = { successMessage?: string }
 
@@ -104,12 +104,12 @@ export function AppShell({ authUser, theme, onToggleTheme, onLogout, onDeleteAcc
     }
   }
 
-  function openAnalyzer(mode: 'photo' | 'voice' | 'barcode') {
-    navigate(ROUTES.analyze, { state: { mode } satisfies AnalyzeNavState })
+  function openAnalyzer(mode: 'photo' | 'voice' | 'barcode', slotType?: string) {
+    navigate(ROUTES.analyze, { state: { mode, slotType } satisfies AnalyzeNavState })
   }
 
-  function openAnalyzerWithPhoto(file: File) {
-    navigate(ROUTES.analyze, { state: { mode: 'photo', photo: file } satisfies AnalyzeNavState })
+  function openAnalyzerWithPhoto(file: File, slotType?: string) {
+    navigate(ROUTES.analyze, { state: { mode: 'photo', photo: file, slotType } satisfies AnalyzeNavState })
   }
 
   function handleDraftConfirmed() {
@@ -219,8 +219,8 @@ interface TodayScreenProps {
   authUser: AuthUser
   refreshToken: number
   onDayUpdated: () => void
-  openAnalyzer: (mode: 'photo' | 'voice' | 'barcode') => void
-  openAnalyzerWithPhoto: (file: File) => void
+  openAnalyzer: (mode: 'photo' | 'voice' | 'barcode', slotType?: string) => void
+  openAnalyzerWithPhoto: (file: File, slotType?: string) => void
   openLibrary: () => void
 }
 
@@ -233,8 +233,8 @@ function TodayScreen({ authUser, refreshToken, onDayUpdated, openAnalyzer, openA
       successMessage={successMessage}
       onDayUpdated={onDayUpdated}
       displayName={authUser.displayName}
-      onOpenAnalyzer={openAnalyzer}
-      onOpenAnalyzerWithPhoto={openAnalyzerWithPhoto}
+      onOpenAnalyzer={(mode, slotType) => openAnalyzer(mode, slotType)}
+      onOpenAnalyzerWithPhoto={(file, slotType) => openAnalyzerWithPhoto(file, slotType)}
       onOpenLibrary={openLibrary}
     />
   )
@@ -296,6 +296,7 @@ function AnalyzeScreen({ onConfirmed, onSaveToLibrary }: AnalyzeScreenProps) {
       onSaveToLibrary={onSaveToLibrary}
       initialMode={state?.mode ?? 'photo'}
       initialPhoto={state?.photo ?? null}
+      slotType={state?.slotType}
       onBack={() => navigate(ROUTES.today)}
     />
   )

@@ -17,8 +17,8 @@ interface Props {
   onAdd: (calories: number, protein: number, fat: number, fiber: number, carbs: number, name?: string, slotType?: string) => Promise<void>
   onLogTemplate: (templateId: string, slotType: string) => Promise<void>
   onClose: () => void
-  onOpenAnalyzer?: (mode: 'photo' | 'voice' | 'barcode') => void
-  onOpenAnalyzerWithPhoto?: (file: File) => void
+  onOpenAnalyzer?: (mode: 'photo' | 'voice' | 'barcode', slotType?: string) => void
+  onOpenAnalyzerWithPhoto?: (file: File, slotType?: string) => void
   onOpenLibrary?: () => void
 }
 
@@ -231,7 +231,7 @@ export function QuickAddSheet({ initialSlot, onAdd, onLogTemplate, onClose, onOp
           const res = await fetch(photo.webPath)
           const blob = await res.blob()
           onClose()
-          onOpenAnalyzerWithPhoto?.(new File([blob], 'photo.jpg', { type: blob.type || 'image/jpeg' }))
+          onOpenAnalyzerWithPhoto?.(new File([blob], 'photo.jpg', { type: blob.type || 'image/jpeg' }), slot)
           return
         }
       }
@@ -244,8 +244,8 @@ export function QuickAddSheet({ initialSlot, onAdd, onLogTemplate, onClose, onOp
     if (!file) return
     e.target.value = ''
     onClose()
-    if (onOpenAnalyzerWithPhoto) onOpenAnalyzerWithPhoto(file)
-    else onOpenAnalyzer?.('photo')
+    if (onOpenAnalyzerWithPhoto) onOpenAnalyzerWithPhoto(file, slot)
+    else onOpenAnalyzer?.('photo', slot)
   }
 
   function handleCameraFile(e: React.ChangeEvent<HTMLInputElement>) {
@@ -253,8 +253,8 @@ export function QuickAddSheet({ initialSlot, onAdd, onLogTemplate, onClose, onOp
     if (!file) return
     e.target.value = ''
     onClose()
-    if (onOpenAnalyzerWithPhoto) onOpenAnalyzerWithPhoto(file)
-    else onOpenAnalyzer?.('photo')
+    if (onOpenAnalyzerWithPhoto) onOpenAnalyzerWithPhoto(file, slot)
+    else onOpenAnalyzer?.('photo', slot)
   }
 
   async function handlePhotoClick() {
@@ -272,7 +272,7 @@ export function QuickAddSheet({ initialSlot, onAdd, onLogTemplate, onClose, onOp
           const res = await fetch(photo.webPath)
           const blob = await res.blob()
           onClose()
-          onOpenAnalyzerWithPhoto?.(new File([blob], 'photo.jpg', { type: blob.type || 'image/jpeg' }))
+          onOpenAnalyzerWithPhoto?.(new File([blob], 'photo.jpg', { type: blob.type || 'image/jpeg' }), slot)
           return
         }
       }
@@ -312,11 +312,11 @@ export function QuickAddSheet({ initialSlot, onAdd, onLogTemplate, onClose, onOp
               <span className="qs-analyzer-btn__icon">🖼️</span>
               <span>Gallery</span>
             </button>
-            <button type="button" className="qs-analyzer-btn" onClick={() => { onClose(); onOpenAnalyzer('voice') }}>
+            <button type="button" className="qs-analyzer-btn" onClick={() => { onClose(); onOpenAnalyzer('voice', slot) }}>
               <span className="qs-analyzer-btn__icon">🎤</span>
               <span>Voice</span>
             </button>
-            <button type="button" className="qs-analyzer-btn" onClick={() => { onClose(); onOpenAnalyzer('barcode') }}>
+            <button type="button" className="qs-analyzer-btn" onClick={() => { onClose(); onOpenAnalyzer('barcode', slot) }}>
               <span className="qs-analyzer-btn__icon">▦</span>
               <span>Barcode</span>
             </button>
