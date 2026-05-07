@@ -1,0 +1,52 @@
+interface FoodItem {
+  name: string
+  kcal: number
+}
+
+const FOODS: FoodItem[] = [
+  { name: 'пиво 0.5л', kcal: 200 },
+  { name: 'бокал вина', kcal: 125 },
+  { name: 'кусок пиццы', kcal: 290 },
+  { name: 'бургер', kcal: 550 },
+  { name: 'картошка фри', kcal: 350 },
+  { name: 'шоколадка', kcal: 230 },
+  { name: 'пончик', kcal: 250 },
+  { name: 'мороженое', kcal: 140 },
+  { name: 'кусок торта', kcal: 350 },
+  { name: 'круассан', kcal: 270 },
+  { name: 'коктейль', kcal: 220 },
+]
+
+function hashSeed(s: string): number {
+  let h = 0
+  for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) | 0
+  return Math.abs(h)
+}
+
+function pickCombo(kcal: number, seed: number): string | null {
+  if (kcal < 100) return null
+
+  type Combo = { label: string; total: number }
+  const candidates: Combo[] = []
+
+  FOODS.forEach((a, i) => {
+    candidates.push({ label: a.name, total: a.kcal })
+    FOODS.forEach((b, j) => {
+      if (j <= i) return
+      candidates.push({ label: `${a.name} + ${b.name}`, total: a.kcal + b.kcal })
+    })
+  })
+
+  const tolerance = Math.max(80, kcal * 0.18)
+  const within = candidates.filter(c => Math.abs(c.total - kcal) <= tolerance)
+  const pool = within.length > 0 ? within : candidates
+
+  pool.sort((a, b) => Math.abs(a.total - kcal) - Math.abs(b.total - kcal))
+  const topN = pool.slice(0, Math.min(5, pool.length))
+  return topN[seed % topN.length].label
+}
+
+export function describeBankAsFood(kcal: number, dateKey: string): string | null {
+  if (kcal < 100) return null
+  return pickCombo(kcal, hashSeed(dateKey))
+}

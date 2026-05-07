@@ -14,6 +14,9 @@ export interface OnboardingPayload {
   carbsTargetG?: number
   fiberTargetG?: number
   waterGoalGlasses?: number
+  dailyBankCapKcal?: number
+  bankMaxKcal?: number
+  relaxDaysPerMonth?: number
 }
 
 export function submitProfile(payload: OnboardingPayload): Promise<void> {

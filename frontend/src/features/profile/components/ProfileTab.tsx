@@ -79,6 +79,9 @@ export function ProfileTab({ displayName, email, onLogout, onDeleteAccount }: Pr
   const [carbsTargetG, setCarbsTargetG] = useState('')
   const [fiberTargetG, setFiberTargetG] = useState('')
   const [waterGoalGlasses, setWaterGoalGlasses] = useState('')
+  const [dailyBankCapKcal, setDailyBankCapKcal] = useState('')
+  const [bankMaxKcal, setBankMaxKcal] = useState('')
+  const [relaxDaysPerMonth, setRelaxDaysPerMonth] = useState('')
   const [saving, setSaving] = useState(false)
   const [saveError, setSaveError] = useState('')
 
@@ -98,6 +101,9 @@ export function ProfileTab({ displayName, email, onLogout, onDeleteAccount }: Pr
     setCarbsTargetG(String(Math.round(Number(profile.carbsTargetG))))
     setFiberTargetG(String(Math.round(Number(profile.fiberTargetG))))
     setWaterGoalGlasses(String(profile.waterGoalGlasses ?? 4))
+    setDailyBankCapKcal(String(profile.dailyBankCapKcal ?? 300))
+    setBankMaxKcal(String(profile.bankMaxKcal ?? 2000))
+    setRelaxDaysPerMonth(String(profile.relaxDaysPerMonth ?? 2))
     setSaveError('')
     setEditing(true)
   }
@@ -122,6 +128,9 @@ export function ProfileTab({ displayName, email, onLogout, onDeleteAccount }: Pr
         carbsTargetG: Number(carbsTargetG) || undefined,
         fiberTargetG: Number(fiberTargetG) || undefined,
         waterGoalGlasses: Number(waterGoalGlasses) || undefined,
+        dailyBankCapKcal: dailyBankCapKcal === '' ? undefined : Number(dailyBankCapKcal),
+        bankMaxKcal: bankMaxKcal === '' ? undefined : Number(bankMaxKcal),
+        relaxDaysPerMonth: relaxDaysPerMonth === '' ? undefined : Number(relaxDaysPerMonth),
       })
       setProfile(updated)
       setEditing(false)
@@ -283,6 +292,24 @@ export function ProfileTab({ displayName, email, onLogout, onDeleteAccount }: Pr
               <input type="number" min={1} max={20} value={waterGoalGlasses} onChange={(e) => setWaterGoalGlasses(e.target.value)} />
             </label>
 
+            <div>
+              <label style={{ display: 'block', marginBottom: '6px' }}>Калорийный банк</label>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem' }}>
+                <label>
+                  В банк / день (ккал)
+                  <input type="number" min={0} max={2000} value={dailyBankCapKcal} onChange={(e) => setDailyBankCapKcal(e.target.value)} />
+                </label>
+                <label>
+                  Потолок банка (ккал)
+                  <input type="number" min={0} max={10000} value={bankMaxKcal} onChange={(e) => setBankMaxKcal(e.target.value)} />
+                </label>
+                <label style={{ gridColumn: '1 / -1' }}>
+                  Релакс-дней в месяц
+                  <input type="number" min={0} max={31} value={relaxDaysPerMonth} onChange={(e) => setRelaxDaysPerMonth(e.target.value)} />
+                </label>
+              </div>
+            </div>
+
             {saveError ? <p className="error-text">{saveError}</p> : null}
           </div>
 
@@ -383,6 +410,24 @@ export function ProfileTab({ displayName, email, onLogout, onDeleteAccount }: Pr
           <div className="profile-stat">
             <span className="profile-stat__label">Fiber</span>
             <span className="profile-stat__value">{Math.round(Number(profile.fiberTargetG))} g</span>
+          </div>
+        </div>
+      </div>
+
+      <div className="panel">
+        <p className="profile-section-title">Калорийный банк</p>
+        <div className="profile-stats-grid">
+          <div className="profile-stat">
+            <span className="profile-stat__label">В банк / день</span>
+            <span className="profile-stat__value">{profile.dailyBankCapKcal ?? 300} kcal</span>
+          </div>
+          <div className="profile-stat">
+            <span className="profile-stat__label">Потолок</span>
+            <span className="profile-stat__value">{profile.bankMaxKcal ?? 2000} kcal</span>
+          </div>
+          <div className="profile-stat profile-stat--full">
+            <span className="profile-stat__label">Релакс-дней / месяц</span>
+            <span className="profile-stat__value">{profile.relaxDaysPerMonth ?? 2}</span>
           </div>
         </div>
       </div>

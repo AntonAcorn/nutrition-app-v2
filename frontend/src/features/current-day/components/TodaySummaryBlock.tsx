@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import type { TodaySummary } from '../../../shared/types/nutrition'
+import { CalorieBankBadge } from '../../calorie-bank/components/CalorieBankBadge'
+import { useCalorieBank } from '../../calorie-bank/model/useCalorieBank'
 
 function getCaptionText(consumed: number, target: number, remaining: number): string {
   if (consumed === 0)           return 'A blank canvas. A legendary opportunity.'
@@ -40,6 +42,7 @@ function MacroCard({ label, value, target, unit, progress, tone }: MacroCardProp
 
 interface TodaySummaryBlockProps {
   summary: TodaySummary
+  date: string
   steps?: number
   activeCalories?: number
   weightInput?: string
@@ -51,6 +54,7 @@ interface TodaySummaryBlockProps {
 
 export function TodaySummaryBlock({
   summary,
+  date,
   steps = 0,
   activeCalories = 0,
   weightInput = '',
@@ -59,6 +63,7 @@ export function TodaySummaryBlock({
   onWeightChange,
   onWeightSave,
 }: TodaySummaryBlockProps) {
+  const { snapshot: bankSnapshot } = useCalorieBank(date)
   const [showMacros, setShowMacros] = useState(false)
   const macrosPanelRef = useRef<HTMLDivElement>(null)
 
@@ -148,6 +153,10 @@ export function TodaySummaryBlock({
         </div>
 
         <p className="today-ring__caption">{getCaptionText(consumed, target, Math.max(0, remaining))}</p>
+
+        <div style={{ display: 'flex', justifyContent: 'center' }}>
+          <CalorieBankBadge snapshot={bankSnapshot} date={date} consumedRatio={ratio} />
+        </div>
 
         {(steps > 0 || activeCalories > 0) && (
           <div className="activity-row">

@@ -16,6 +16,9 @@ export interface UserProfile {
   carbsTargetG: number
   fiberTargetG: number
   waterGoalGlasses: number
+  dailyBankCapKcal: number
+  bankMaxKcal: number
+  relaxDaysPerMonth: number
 }
 
 export function fetchProfile(): Promise<UserProfile> {

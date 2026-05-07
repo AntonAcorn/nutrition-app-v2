@@ -79,7 +79,10 @@ public class UserProfileController {
             request.fatTargetG(),
             request.carbsTargetG(),
             request.fiberTargetG(),
-            request.waterGoalGlasses()
+            request.waterGoalGlasses(),
+            request.dailyBankCapKcal(),
+            request.bankMaxKcal(),
+            request.relaxDaysPerMonth()
         ));
 
         return UserProfileResponse.from(entity);

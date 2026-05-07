@@ -96,6 +96,15 @@ public class UserProfileService {
         if (command.waterGoalGlasses() != null) {
             entity.setWaterGoalGlasses(command.waterGoalGlasses());
         }
+        if (command.dailyBankCapKcal() != null) {
+            entity.setDailyBankCapKcal(command.dailyBankCapKcal());
+        }
+        if (command.bankMaxKcal() != null) {
+            entity.setBankMaxKcal(command.bankMaxKcal());
+        }
+        if (command.relaxDaysPerMonth() != null) {
+            entity.setRelaxDaysPerMonth(command.relaxDaysPerMonth());
+        }
 
         return repository.save(entity);
     }
@@ -187,6 +196,9 @@ public class UserProfileService {
         BigDecimal fatTargetG,
         BigDecimal carbsTargetG,
         BigDecimal fiberTargetG,
-        Integer waterGoalGlasses
+        Integer waterGoalGlasses,
+        Integer dailyBankCapKcal,
+        Integer bankMaxKcal,
+        Integer relaxDaysPerMonth
     ) {}
 }

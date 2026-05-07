@@ -1,0 +1,412 @@
+.calorie-bank-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin: 6px auto 0;
+  padding: 7px 14px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.06);
+  color: rgba(255, 255, 255, 0.85);
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s ease, transform 0.05s ease;
+}
+
+.calorie-bank-badge:active {
+  transform: scale(0.97);
+}
+
+.calorie-bank-badge:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.calorie-bank-badge__emoji {
+  font-size: 1rem;
+  line-height: 1;
+}
+
+.calorie-bank-badge__text {
+  letter-spacing: 0.01em;
+}
+
+[data-theme="light"] .calorie-bank-badge {
+  border-color: rgba(20, 33, 61, 0.14);
+  background: rgba(20, 33, 61, 0.04);
+  color: rgba(20, 33, 61, 0.78);
+}
+
+[data-theme="light"] .calorie-bank-badge:hover {
+  background: rgba(20, 33, 61, 0.08);
+}
+
+.calorie-bank-sheet-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  z-index: 1000;
+  animation: cb-fade 0.15s ease;
+}
+
+.calorie-bank-sheet {
+  position: relative;
+  width: 100%;
+  max-width: 560px;
+  max-height: 90vh;
+  overflow-y: auto;
+  background: #1a1d24;
+  color: #fff;
+  border-radius: 22px 22px 0 0;
+  padding: 24px 22px 28px;
+  box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.4);
+  animation: cb-slide 0.22s cubic-bezier(.2,.8,.3,1);
+}
+
+[data-theme="light"] .calorie-bank-sheet {
+  background: #fffaf0;
+  color: #14213d;
+}
+
+@keyframes cb-fade {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes cb-slide {
+  from { transform: translateY(20px); }
+  to { transform: translateY(0); }
+}
+
+.calorie-bank-sheet__close {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 1rem;
+  cursor: pointer;
+}
+
+[data-theme="light"] .calorie-bank-sheet__close {
+  background: rgba(20, 33, 61, 0.06);
+  color: rgba(20, 33, 61, 0.6);
+}
+
+.calorie-bank-sheet__header {
+  text-align: center;
+  margin-bottom: 18px;
+}
+
+.calorie-bank-sheet__emoji {
+  font-size: 2rem;
+  display: block;
+  margin-bottom: 4px;
+}
+
+.calorie-bank-sheet__header h2 {
+  font-size: 1.1rem;
+  margin: 0 0 6px;
+}
+
+.calorie-bank-sheet__header p {
+  font-size: 0.85rem;
+  margin: 0;
+  opacity: 0.65;
+  line-height: 1.4;
+}
+
+.calorie-bank-sheet__stats {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.calorie-bank-sheet__stat {
+  flex: 1;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 14px;
+  padding: 12px 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+
+[data-theme="light"] .calorie-bank-sheet__stat {
+  background: rgba(20, 33, 61, 0.04);
+  border-color: rgba(20, 33, 61, 0.08);
+}
+
+.calorie-bank-sheet__stat--spent {
+  color: #fb923c;
+}
+
+.calorie-bank-sheet__stat-label {
+  font-size: 0.72rem;
+  opacity: 0.6;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.calorie-bank-sheet__stat-value {
+  font-size: 1.4rem;
+  font-weight: 700;
+}
+
+.calorie-bank-sheet__stat-unit {
+  font-size: 0.7rem;
+  opacity: 0.5;
+}
+
+.calorie-bank-sheet__food-hint {
+  margin: -12px 4px 18px;
+  text-align: center;
+  font-size: 0.85rem;
+  font-style: italic;
+  opacity: 0.7;
+  letter-spacing: 0.01em;
+}
+
+.calorie-bank-sheet__relax {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 14px;
+  padding: 14px 14px 12px;
+}
+
+[data-theme="light"] .calorie-bank-sheet__relax {
+  background: rgba(20, 33, 61, 0.04);
+  border-color: rgba(20, 33, 61, 0.08);
+}
+
+.calorie-bank-sheet__relax-row,
+.calorie-bank-sheet__relax-toggle {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  border: none;
+  background: transparent;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+  padding: 0;
+}
+
+.calorie-bank-sheet__chevron {
+  font-size: 1.4rem;
+  opacity: 0.5;
+  transition: transform 0.2s ease;
+}
+
+.calorie-bank-sheet__chevron--open {
+  transform: rotate(90deg);
+}
+
+.calorie-bank-sheet__relax-emoji {
+  font-size: 1.4rem;
+}
+
+.calorie-bank-sheet__relax-text {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.calorie-bank-sheet__relax-text strong {
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+
+.calorie-bank-sheet__relax-text span {
+  font-size: 0.78rem;
+  opacity: 0.6;
+}
+
+.calorie-bank-sheet__relax-btn {
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  background: rgba(255, 255, 255, 0.06);
+  color: #fff;
+  border-radius: 999px;
+  padding: 7px 14px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.calorie-bank-sheet__relax-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.calorie-bank-sheet__relax-btn--active {
+  background: #fb923c;
+  color: #fff;
+  border-color: transparent;
+}
+
+[data-theme="light"] .calorie-bank-sheet__relax-btn {
+  border-color: rgba(20, 33, 61, 0.16);
+  background: rgba(20, 33, 61, 0.06);
+  color: #14213d;
+}
+
+.calorie-bank-sheet__relax-note {
+  margin: 8px 2px 0;
+  font-size: 0.78rem;
+  opacity: 0.55;
+  line-height: 1.4;
+}
+
+.calorie-bank-sheet__error {
+  margin-top: 12px;
+  padding: 8px 12px;
+  background: rgba(239, 68, 68, 0.12);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  border-radius: 10px;
+  color: #fca5a5;
+  font-size: 0.82rem;
+}
+
+.calorie-bank-sheet__footer {
+  margin-top: 18px;
+  font-size: 0.74rem;
+  opacity: 0.5;
+  text-align: center;
+  line-height: 1.5;
+}
+
+.relax-calendar {
+  margin-top: 14px;
+}
+
+.relax-calendar__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 6px;
+}
+
+.relax-calendar__title {
+  font-size: 0.92rem;
+  font-weight: 600;
+  text-transform: capitalize;
+}
+
+.relax-calendar__nav {
+  width: 30px;
+  height: 30px;
+  border: none;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.06);
+  color: inherit;
+  font-size: 1.1rem;
+  cursor: pointer;
+}
+
+[data-theme="light"] .relax-calendar__nav {
+  background: rgba(20, 33, 61, 0.06);
+}
+
+.relax-calendar__counter {
+  text-align: center;
+  font-size: 0.78rem;
+  opacity: 0.6;
+  margin-bottom: 10px;
+}
+
+.relax-calendar__weekdays {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 2px;
+  margin-bottom: 4px;
+  font-size: 0.66rem;
+  opacity: 0.5;
+  text-align: center;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.relax-calendar__grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+}
+
+.relax-calendar__cell {
+  position: relative;
+  aspect-ratio: 1;
+  border-radius: 10px;
+  border: 1px solid transparent;
+  background: rgba(255, 255, 255, 0.04);
+  color: inherit;
+  font-size: 0.85rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.1s ease, border-color 0.1s ease;
+}
+
+.relax-calendar__cell:disabled {
+  cursor: not-allowed;
+}
+
+.relax-calendar__cell--pad {
+  background: transparent;
+  border: none;
+  cursor: default;
+}
+
+[data-theme="light"] .relax-calendar__cell {
+  background: rgba(20, 33, 61, 0.04);
+}
+
+.relax-calendar__cell--past {
+  opacity: 0.3;
+}
+
+.relax-calendar__cell--today {
+  border-color: rgba(255, 255, 255, 0.32);
+  font-weight: 700;
+}
+
+[data-theme="light"] .relax-calendar__cell--today {
+  border-color: rgba(20, 33, 61, 0.4);
+}
+
+.relax-calendar__cell--relax {
+  background: rgba(251, 146, 60, 0.18);
+  border-color: rgba(251, 146, 60, 0.45);
+  color: #fb923c;
+  font-weight: 700;
+}
+
+.relax-calendar__cell:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.relax-calendar__dot {
+  position: absolute;
+  bottom: -2px;
+  right: -2px;
+  font-size: 0.7rem;
+}
+
+.relax-calendar__error {
+  margin-top: 10px;
+  padding: 6px 10px;
+  background: rgba(239, 68, 68, 0.12);
+  border-radius: 8px;
+  font-size: 0.78rem;
+  color: #fca5a5;
+}

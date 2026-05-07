@@ -494,6 +494,7 @@ export function CurrentDayTab({ refreshToken = 0, successMessage = '', onDayUpda
           <div className="content-fade-in">
             <TodaySummaryBlock
               summary={summary}
+              date={selectedDate}
               steps={steps}
               activeCalories={activeCalories}
               weightInput={weightInput}

@@ -19,5 +19,8 @@ public record CreateProfileRequest(
     BigDecimal fatTargetG,
     BigDecimal carbsTargetG,
     BigDecimal fiberTargetG,
-    Integer waterGoalGlasses
+    Integer waterGoalGlasses,
+    @Min(0) @Max(2000) Integer dailyBankCapKcal,
+    @Min(0) @Max(10000) Integer bankMaxKcal,
+    @Min(0) @Max(31) Integer relaxDaysPerMonth
 ) {}

@@ -63,6 +63,15 @@ public class UserProfileEntity {
     @Column(name = "water_goal_glasses", nullable = false)
     private Integer waterGoalGlasses = 4;
 
+    @Column(name = "daily_bank_cap_kcal", nullable = false)
+    private Integer dailyBankCapKcal = 300;
+
+    @Column(name = "bank_max_kcal", nullable = false)
+    private Integer bankMaxKcal = 2000;
+
+    @Column(name = "relax_days_per_month", nullable = false)
+    private Integer relaxDaysPerMonth = 2;
+
     @Column(name = "created_at", nullable = false, updatable = false)
     private OffsetDateTime createdAt;
 
@@ -116,6 +125,15 @@ public class UserProfileEntity {
 
     public Integer getWaterGoalGlasses() { return waterGoalGlasses != null ? waterGoalGlasses : 4; }
     public void setWaterGoalGlasses(Integer waterGoalGlasses) { this.waterGoalGlasses = waterGoalGlasses != null ? waterGoalGlasses : 4; }
+
+    public Integer getDailyBankCapKcal() { return dailyBankCapKcal != null ? dailyBankCapKcal : 300; }
+    public void setDailyBankCapKcal(Integer dailyBankCapKcal) { this.dailyBankCapKcal = dailyBankCapKcal != null ? dailyBankCapKcal : 300; }
+
+    public Integer getBankMaxKcal() { return bankMaxKcal != null ? bankMaxKcal : 2000; }
+    public void setBankMaxKcal(Integer bankMaxKcal) { this.bankMaxKcal = bankMaxKcal != null ? bankMaxKcal : 2000; }
+
+    public Integer getRelaxDaysPerMonth() { return relaxDaysPerMonth != null ? relaxDaysPerMonth : 2; }
+    public void setRelaxDaysPerMonth(Integer relaxDaysPerMonth) { this.relaxDaysPerMonth = relaxDaysPerMonth != null ? relaxDaysPerMonth : 2; }
 
     public OffsetDateTime getCreatedAt() { return createdAt; }
     public OffsetDateTime getUpdatedAt() { return updatedAt; }

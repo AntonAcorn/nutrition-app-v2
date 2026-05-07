@@ -1,5 +1,6 @@
 package com.aiduparc.nutrition.notifications.push;
 
+import com.aiduparc.nutrition.calorieBank.service.CalorieBankService;
 import com.aiduparc.nutrition.history.repository.DailyNutritionEntryRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,15 +21,18 @@ public class PushScheduler {
     private final PushSubscriptionRepository subscriptionRepository;
     private final PushNotificationService pushNotificationService;
     private final DailyNutritionEntryRepository nutritionEntryRepository;
+    private final CalorieBankService calorieBankService;
 
     public PushScheduler(
             PushSubscriptionRepository subscriptionRepository,
             PushNotificationService pushNotificationService,
-            DailyNutritionEntryRepository nutritionEntryRepository
+            DailyNutritionEntryRepository nutritionEntryRepository,
+            CalorieBankService calorieBankService
     ) {
         this.subscriptionRepository = subscriptionRepository;
         this.pushNotificationService = pushNotificationService;
         this.nutritionEntryRepository = nutritionEntryRepository;
+        this.calorieBankService = calorieBankService;
     }
 
     @Scheduled(cron = "0 0 * * * *")
@@ -52,11 +56,18 @@ public class PushScheduler {
                         .orElse(false);
 
                 if (loggedToday) {
-                    int streak = calculateStreak(sub.getUserId(), today);
-                    if (streak >= 3) {
+                    int deposit = calorieBankService.getTodayDeposit(sub.getUserId(), today);
+                    if (deposit >= 100) {
                         pushNotificationService.send(sub,
-                                "Day " + streak + " streak! 🔥",
-                                "You've logged every day for " + streak + " days. Keep going!");
+                                "🏦 +" + deposit + " в банке",
+                                "Сегодня съел меньше — копится на пир.");
+                    } else {
+                        int streak = calculateStreak(sub.getUserId(), today);
+                        if (streak >= 3) {
+                            pushNotificationService.send(sub,
+                                    "Day " + streak + " streak! 🔥",
+                                    "You've logged every day for " + streak + " days. Keep going!");
+                        }
                     }
                 } else {
                     pushNotificationService.send(sub,
