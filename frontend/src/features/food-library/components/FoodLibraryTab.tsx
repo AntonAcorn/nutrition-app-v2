@@ -55,6 +55,7 @@ export function FoodLibraryTab({ onLogged, initialSave, onInitialSaveDone }: Foo
   const [saving, setSaving] = useState(false)
   const [photoAnalyzing, setPhotoAnalyzing] = useState(false)
   const photoFileInputRef = useRef<HTMLInputElement | null>(null)
+  const cameraInputRef = useRef<HTMLInputElement | null>(null)
   const [loggingId, setLoggingId] = useState<string | null>(null)
   const [confirmTarget, setConfirmTarget] = useState<MealTemplate | null>(null)
   const [loggedToast, setLoggedToast] = useState<LoggedToast | null>(null)
@@ -83,10 +84,7 @@ export function FoodLibraryTab({ onLogged, initialSave, onInitialSaveDone }: Foo
     setEditName(''); setEditItems([EMPTY_ITEM()]); setError('')
   }
 
-  async function handlePhotoFile(e: ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0]
-    if (!file) return
-    if (e.target) e.target.value = ''
+  async function analyzeFile(file: File) {
     setPhotoAnalyzing(true)
     setError('')
     try {
@@ -114,6 +112,57 @@ export function FoodLibraryTab({ onLogged, initialSave, onInitialSaveDone }: Foo
     } finally {
       setPhotoAnalyzing(false)
     }
+  }
+
+  function handlePhotoFile(e: ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0]
+    if (!file) return
+    if (e.target) e.target.value = ''
+    analyzeFile(file)
+  }
+
+  async function handleCameraClick() {
+    try {
+      const { Capacitor } = await import('@capacitor/core')
+      if (Capacitor.isNativePlatform()) {
+        const { Camera, CameraResultType, CameraSource } = await import('@capacitor/camera')
+        const photo = await Camera.getPhoto({
+          quality: 85,
+          allowEditing: false,
+          resultType: CameraResultType.Uri,
+          source: CameraSource.Camera,
+        })
+        if (photo.webPath) {
+          const res = await fetch(photo.webPath)
+          const blob = await res.blob()
+          analyzeFile(new File([blob], 'photo.jpg', { type: blob.type || 'image/jpeg' }))
+          return
+        }
+      }
+    } catch {}
+    cameraInputRef.current?.click()
+  }
+
+  async function handleGalleryClick() {
+    try {
+      const { Capacitor } = await import('@capacitor/core')
+      if (Capacitor.isNativePlatform()) {
+        const { Camera, CameraResultType, CameraSource } = await import('@capacitor/camera')
+        const photo = await Camera.getPhoto({
+          quality: 85,
+          allowEditing: false,
+          resultType: CameraResultType.Uri,
+          source: CameraSource.Photos,
+        })
+        if (photo.webPath) {
+          const res = await fetch(photo.webPath)
+          const blob = await res.blob()
+          analyzeFile(new File([blob], 'photo.jpg', { type: blob.type || 'image/jpeg' }))
+          return
+        }
+      }
+    } catch {}
+    photoFileInputRef.current?.click()
   }
 
   function openEdit(t: MealTemplate) {
@@ -285,24 +334,19 @@ export function FoodLibraryTab({ onLogged, initialSave, onInitialSaveDone }: Foo
       <div className="library-tab__header">
         <h3 className="library-tab__title">Food Library</h3>
         <div className="library-tab__actions">
-          <button
-            type="button"
-            className="library-photo-btn"
-            onClick={() => photoFileInputRef.current?.click()}
-            disabled={photoAnalyzing}
-          >
-            {photoAnalyzing ? 'Analyzing...' : '+ From photo'}
-          </button>
-          <button type="button" className="library-new-btn" onClick={openCreate}>+ New</button>
+          <button type="button" className="library-new-btn" onClick={openCreate} disabled={photoAnalyzing}>+ New</button>
         </div>
       </div>
-      <input
-        ref={photoFileInputRef}
-        type="file"
-        accept="image/*"
-        style={{ display: 'none' }}
-        onChange={handlePhotoFile}
-      />
+      <div className="library-photo-row">
+        <button type="button" className="library-photo-btn" onClick={handleCameraClick} disabled={photoAnalyzing}>
+          📷 {photoAnalyzing ? 'Analyzing...' : 'Camera'}
+        </button>
+        <button type="button" className="library-photo-btn" onClick={handleGalleryClick} disabled={photoAnalyzing}>
+          🖼 Gallery
+        </button>
+      </div>
+      <input ref={photoFileInputRef} type="file" accept="image/*" hidden onChange={handlePhotoFile} />
+      <input ref={cameraInputRef} type="file" accept="image/*" capture="environment" hidden onChange={handlePhotoFile} />
 
       {error && <p className="error-text">{error}</p>}
       {undoing && <p className="subtle-text" style={{ textAlign: 'center', fontSize: '0.85rem' }}>Removing...</p>}

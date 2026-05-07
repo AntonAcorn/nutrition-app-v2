@@ -37,6 +37,16 @@
   cursor: pointer;
 }
 
+.library-photo-row {
+  display: flex;
+  gap: 8px;
+  padding: 0 16px 12px;
+}
+
+.library-photo-row .library-photo-btn {
+  flex: 1;
+}
+
 .library-photo-btn {
   padding: 7px 16px;
   border-radius: 20px;
