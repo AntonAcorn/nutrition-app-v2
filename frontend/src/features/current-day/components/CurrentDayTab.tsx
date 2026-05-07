@@ -47,9 +47,10 @@ interface CurrentDayTabProps {
   displayName?: string | null
   onOpenAnalyzer?: (mode: 'photo' | 'voice' | 'barcode') => void
   onOpenAnalyzerWithPhoto?: (file: File) => void
+  onOpenLibrary?: () => void
 }
 
-export function CurrentDayTab({ refreshToken = 0, successMessage = '', onDayUpdated, displayName, onOpenAnalyzer, onOpenAnalyzerWithPhoto }: CurrentDayTabProps) {
+export function CurrentDayTab({ refreshToken = 0, successMessage = '', onDayUpdated, displayName, onOpenAnalyzer, onOpenAnalyzerWithPhoto, onOpenLibrary }: CurrentDayTabProps) {
   const queryClient = useQueryClient()
   const [selectedDate, setSelectedDate] = useState(() => getTodayLocalDateInputValue())
   const [steps, setSteps] = useState(0)
@@ -445,6 +446,7 @@ export function CurrentDayTab({ refreshToken = 0, successMessage = '', onDayUpda
           onClose={() => setShowQuickAdd(false)}
           onOpenAnalyzer={onOpenAnalyzer}
           onOpenAnalyzerWithPhoto={onOpenAnalyzerWithPhoto}
+          onOpenLibrary={onOpenLibrary}
         />
       )}
 

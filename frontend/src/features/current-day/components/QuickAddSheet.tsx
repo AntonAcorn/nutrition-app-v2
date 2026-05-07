@@ -16,6 +16,7 @@ interface Props {
   onClose: () => void
   onOpenAnalyzer?: (mode: 'photo' | 'voice' | 'barcode') => void
   onOpenAnalyzerWithPhoto?: (file: File) => void
+  onOpenLibrary?: () => void
 }
 
 interface ChipProps {
@@ -54,7 +55,7 @@ function resolveInitialSlot(s?: string): MealSlot['slotType'] {
   return SLOT_TYPES.includes(up) ? up : defaultSlotByTime()
 }
 
-export function QuickAddSheet({ initialSlot, onAdd, onLogTemplate, onClose, onOpenAnalyzer, onOpenAnalyzerWithPhoto }: Props) {
+export function QuickAddSheet({ initialSlot, onAdd, onLogTemplate, onClose, onOpenAnalyzer, onOpenAnalyzerWithPhoto, onOpenLibrary }: Props) {
   const [slot, setSlot] = useState<MealSlot['slotType']>(() => resolveInitialSlot(initialSlot))
   const [slotPickerOpen, setSlotPickerOpen] = useState(false)
   const [mode, setMode] = useState<'library' | 'search' | 'manual'>('library')
@@ -373,7 +374,14 @@ export function QuickAddSheet({ initialSlot, onAdd, onLogTemplate, onClose, onOp
           loadingLib ? (
             <p className="qs-library-empty">Loading...</p>
           ) : templates.length === 0 ? (
-            <p className="qs-library-empty">No saved meals yet. Add some in the Food Library tab.</p>
+            <div className="qs-library-empty-state">
+              <p className="qs-library-empty">No saved meals yet.</p>
+              {onOpenLibrary && (
+                <button type="button" className="qs-library-manage-btn" onClick={() => { onClose(); onOpenLibrary() }}>
+                  Create a meal template →
+                </button>
+              )}
+            </div>
           ) : (
             <>
               {libError && <p className="error-text">{libError}</p>}
@@ -393,6 +401,11 @@ export function QuickAddSheet({ initialSlot, onAdd, onLogTemplate, onClose, onOp
                   </div>
                 ))}
               </div>
+              {onOpenLibrary && (
+                <button type="button" className="qs-library-manage-btn" onClick={() => { onClose(); onOpenLibrary() }}>
+                  Manage library →
+                </button>
+              )}
             </>
           )
         )}
