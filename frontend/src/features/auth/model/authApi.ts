@@ -1,4 +1,4 @@
-import { API_BASE } from '../../../shared/lib/apiBase'
+import { apiClient, ApiError } from '../../../shared/lib/apiClient'
 
 export interface AuthUser {
   accountId: string | null
@@ -28,93 +28,44 @@ export interface RegisterPayload {
   displayName: string
 }
 
-async function parseAuthResponse(response: Response): Promise<AuthUser> {
-  if (!response.ok) {
-    const body = await response.json().catch(() => ({}))
-    throw new Error((body as { message?: string }).message ?? `Auth request failed (${response.status})`)
-  }
-
-  return (await response.json()) as AuthUser
-}
-
-export async function fetchMe(): Promise<AuthUser> {
-  const response = await fetch(`${API_BASE}/api/auth/me`, {
-    credentials: 'include',
-  })
-
-  return parseAuthResponse(response)
+// fetchMe is the auth check itself — don't trigger global 401 handler on its 401.
+export function fetchMe(): Promise<AuthUser> {
+  return apiClient.get<AuthUser>('/api/auth/me', { skipUnauthorizedHandler: true })
 }
 
 export async function login(payload: LoginPayload): Promise<AuthUser> {
-  const response = await fetch(`${API_BASE}/api/auth/login`, {
-    method: 'POST',
-    credentials: 'include',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(payload),
-  })
-
-  if (response.status === 403) {
-    throw new EmailNotVerifiedError(payload.email)
+  try {
+    return await apiClient.post<AuthUser>('/api/auth/login', payload, { skipUnauthorizedHandler: true })
+  } catch (e) {
+    if (e instanceof ApiError && e.status === 403) {
+      throw new EmailNotVerifiedError(payload.email)
+    }
+    throw e
   }
-
-  return parseAuthResponse(response)
 }
 
 export async function resendVerification(email: string): Promise<void> {
-  await fetch(`${API_BASE}/api/auth/resend-verification`, {
-    method: 'POST',
-    credentials: 'include',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ email }),
-  })
-}
-
-export async function register(payload: RegisterPayload): Promise<AuthUser> {
-  const response = await fetch(`${API_BASE}/api/auth/register`, {
-    method: 'POST',
-    credentials: 'include',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(payload),
-  })
-
-  return parseAuthResponse(response)
-}
-
-export async function requestPasswordReset(email: string): Promise<void> {
-  await fetch(`${API_BASE}/api/auth/forgot-password`, {
-    method: 'POST',
-    credentials: 'include',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ email }),
-  })
-}
-
-export async function resetPassword(token: string, newPassword: string): Promise<void> {
-  const res = await fetch(`${API_BASE}/api/auth/reset-password`, {
-    method: 'POST',
-    credentials: 'include',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ token, newPassword }),
-  })
-  if (!res.ok) {
-    const body = await res.json().catch(() => ({}))
-    throw new Error((body as { message?: string }).message ?? 'Reset failed')
+  try {
+    await apiClient.post('/api/auth/resend-verification', { email }, { skipUnauthorizedHandler: true })
+  } catch {
+    // backend never reveals if email is registered — silent fail is intentional
   }
 }
 
-export async function logout(): Promise<void> {
-  const response = await fetch(`${API_BASE}/api/auth/logout`, {
-    method: 'POST',
-    credentials: 'include',
-  })
+export function register(payload: RegisterPayload): Promise<AuthUser> {
+  return apiClient.post<AuthUser>('/api/auth/register', payload, { skipUnauthorizedHandler: true })
+}
 
-  if (!response.ok && response.status !== 204) {
-    throw new Error(`Logout failed (${response.status})`)
-  }
+export function requestPasswordReset(email: string): Promise<void> {
+  return apiClient.post('/api/auth/forgot-password', { email }, { skipUnauthorizedHandler: true })
+}
+
+export function resetPassword(token: string, newPassword: string): Promise<void> {
+  return apiClient.post('/api/auth/reset-password', { token, newPassword }, { skipUnauthorizedHandler: true })
+}
+
+export function logout(): Promise<void> {
+  return apiClient.post('/api/auth/logout')
 }
 
 const GOOGLE_IOS_CLIENT_ID = '45553583079-uapqsj71o7kn3rr18op0feb4p1qdfnem.apps.googleusercontent.com'
@@ -130,13 +81,11 @@ export async function loginWithGoogleNative(): Promise<AuthUser> {
   }>('GoogleSignIn')
 
   const result = await GoogleSignIn.signIn({ clientId: GOOGLE_IOS_CLIENT_ID })
-  const res = await fetch(`${API_BASE}/api/auth/google/token`, {
-    method: 'POST',
-    credentials: 'include',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ idToken: result.idToken, displayName: result.displayName }),
-  })
-  return parseAuthResponse(res)
+  return apiClient.post<AuthUser>(
+    '/api/auth/google/token',
+    { idToken: result.idToken, displayName: result.displayName },
+    { skipUnauthorizedHandler: true },
+  )
 }
 
 export async function loginWithApple(): Promise<AuthUser> {
@@ -159,27 +108,13 @@ export async function loginWithApple(): Promise<AuthUser> {
   }
 
   const displayName = [givenName, familyName].filter(Boolean).join(' ') || undefined
-  let res: Response
-  try {
-    res = await fetch(`${API_BASE}/api/auth/apple`, {
-      method: 'POST',
-      credentials: 'include',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ identityToken, displayName }),
-    })
-  } catch (e) {
-    throw new Error(`[fetch] ${e instanceof Error ? e.message : String(e)}`)
-  }
-  return parseAuthResponse(res)
+  return apiClient.post<AuthUser>(
+    '/api/auth/apple',
+    { identityToken, displayName },
+    { skipUnauthorizedHandler: true },
+  )
 }
 
-export async function deleteAccount(): Promise<void> {
-  const response = await fetch(`${API_BASE}/api/auth/delete-account`, {
-    method: 'POST',
-    credentials: 'include',
-  })
-
-  if (!response.ok && response.status !== 204) {
-    throw new Error(`Account deletion failed (${response.status})`)
-  }
+export function deleteAccount(): Promise<void> {
+  return apiClient.post('/api/auth/delete-account')
 }

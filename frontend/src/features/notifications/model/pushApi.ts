@@ -1,4 +1,4 @@
-import { API_BASE } from '../../../shared/lib/apiBase'
+import { apiClient } from '../../../shared/lib/apiClient'
 
 const VAPID_PUBLIC_KEY = import.meta.env.VITE_VAPID_PUBLIC_KEY as string | undefined
 
@@ -23,10 +23,8 @@ function urlBase64ToUint8Array(base64: string): Uint8Array {
   return Uint8Array.from([...raw].map(c => c.charCodeAt(0)))
 }
 
-export async function getSubscriptionStatus(): Promise<PushSubscriptionStatus> {
-  const res = await fetch(`${API_BASE}/api/push/subscription`, { credentials: 'include' })
-  if (!res.ok) throw new Error('Failed to load push status')
-  return res.json()
+export function getSubscriptionStatus(): Promise<PushSubscriptionStatus> {
+  return apiClient.get<PushSubscriptionStatus>('/api/push/subscription')
 }
 
 async function subscribeApns(reminderHour: number): Promise<PushSubscriptionStatus> {
@@ -51,19 +49,12 @@ async function subscribeApns(reminderHour: number): Promise<PushSubscriptionStat
     })
   })
 
-  const res = await fetch(`${API_BASE}/api/push/subscribe`, {
-    method: 'POST',
-    credentials: 'include',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      deviceToken,
-      platform: 'apns',
-      timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
-      reminderHour,
-    }),
+  return apiClient.post<PushSubscriptionStatus>('/api/push/subscribe', {
+    deviceToken,
+    platform: 'apns',
+    timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+    reminderHour,
   })
-  if (!res.ok) throw new Error('Failed to subscribe')
-  return res.json()
 }
 
 async function subscribeWebPush(reminderHour: number): Promise<PushSubscriptionStatus> {
@@ -76,21 +67,14 @@ async function subscribeWebPush(reminderHour: number): Promise<PushSubscriptionS
     applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY),
   })
   const json = sub.toJSON()
-  const res = await fetch(`${API_BASE}/api/push/subscribe`, {
-    method: 'POST',
-    credentials: 'include',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      endpoint: json.endpoint,
-      p256dh: json.keys?.p256dh,
-      auth: json.keys?.auth,
-      platform: 'web',
-      timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
-      reminderHour,
-    }),
+  return apiClient.post<PushSubscriptionStatus>('/api/push/subscribe', {
+    endpoint: json.endpoint,
+    p256dh: json.keys?.p256dh,
+    auth: json.keys?.auth,
+    platform: 'web',
+    timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+    reminderHour,
   })
-  if (!res.ok) throw new Error('Failed to subscribe')
-  return res.json()
 }
 
 export async function subscribePush(reminderHour: number): Promise<PushSubscriptionStatus> {
@@ -100,15 +84,8 @@ export async function subscribePush(reminderHour: number): Promise<PushSubscript
   return subscribeWebPush(reminderHour)
 }
 
-export async function updatePushSettings(enabled: boolean, reminderHour: number): Promise<PushSubscriptionStatus> {
-  const res = await fetch(`${API_BASE}/api/push/settings`, {
-    method: 'PUT',
-    credentials: 'include',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ enabled, reminderHour }),
-  })
-  if (!res.ok) throw new Error('Failed to update settings')
-  return res.json()
+export function updatePushSettings(enabled: boolean, reminderHour: number): Promise<PushSubscriptionStatus> {
+  return apiClient.put<PushSubscriptionStatus>('/api/push/settings', { enabled, reminderHour })
 }
 
 export async function unsubscribePush(): Promise<void> {
@@ -122,7 +99,7 @@ export async function unsubscribePush(): Promise<void> {
     const sub = await reg.pushManager.getSubscription()
     if (sub) await sub.unsubscribe()
   }
-  await fetch(`${API_BASE}/api/push/unsubscribe`, { method: 'DELETE', credentials: 'include' })
+  await apiClient.delete('/api/push/unsubscribe')
 }
 
 export async function isPushSupported(): Promise<boolean> {

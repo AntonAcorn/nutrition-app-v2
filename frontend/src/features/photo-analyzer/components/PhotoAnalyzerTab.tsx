@@ -2,7 +2,7 @@ import { ChangeEvent, useEffect, useMemo, useRef, useState } from 'react'
 import { MascotCameraSvg } from '../../current-day/components/MascotCameraSvg'
 import { MascotSvg } from '../../current-day/components/MascotSvg'
 import { getTodayLocalDateInputValue } from '../../../shared/lib/date'
-import { API_BASE } from '../../../shared/lib/apiBase'
+import { apiClient } from '../../../shared/lib/apiClient'
 import { toNumber } from '../../../shared/lib/number'
 import type { DraftItem, MealTemplateItem, PhotoAnalysisDraft } from '../../../shared/types/nutrition'
 import { DraftItemEditor } from './DraftItemEditor'
@@ -184,20 +184,7 @@ export function PhotoAnalyzerTab({ onConfirmed, onSaveToLibrary, initialMode, in
       formData.append('entryDate', currentEntryDate())
       formData.append('userNote', note)
       formData.append('locale', 'en')
-      const response = await fetch(`${API_BASE}/api/photo-analysis/upload`, {
-        method: 'POST',
-        credentials: 'include',
-        body: formData,
-      })
-      if (!response.ok) {
-        let message = `Analysis failed (${response.status})`
-        try {
-          const body = await response.json()
-          if (body.message) message = body.message
-        } catch {}
-        throw new Error(message)
-      }
-      const payload = await response.json()
+      const payload = await apiClient.post<{ draft: Parameters<typeof normalizeDraft>[0] }>('/api/photo-analysis/upload', formData)
       const draft = normalizeDraft(payload.draft)
       track('photo_analyzed', { item_count: draft.items.length, confidence: draft.confidence })
       setPhotoDrafts(prev => prev.map(e =>
@@ -247,21 +234,15 @@ export function PhotoAnalyzerTab({ onConfirmed, onSaveToLibrary, initialMode, in
     const mealName = rawName.length > 50 ? rawName.slice(0, 47) + '...' : rawName
 
     try {
-      const response = await fetch(`${API_BASE}/api/photo-analysis/drafts/${draft.id}/confirm`, {
-        method: 'POST',
-        credentials: 'include',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          caloriesKcal: totals.calories,
-          proteinG: totals.protein,
-          fatG: totals.fat,
-          fiberG: totals.fiber,
-          carbsG: totals.carbs,
-          notes: draft.notes.join('\n'),
-          mealName,
-        }),
+      await apiClient.post(`/api/photo-analysis/drafts/${draft.id}/confirm`, {
+        caloriesKcal: totals.calories,
+        proteinG: totals.protein,
+        fatG: totals.fat,
+        fiberG: totals.fiber,
+        carbsG: totals.carbs,
+        notes: draft.notes.join('\n'),
+        mealName,
       })
-      if (!response.ok) throw new Error(`Save failed (${response.status})`)
 
       track('draft_confirmed', { method: 'photo' })
       setPhotoDrafts(prev => prev.map(e =>
@@ -514,22 +495,15 @@ export function PhotoAnalyzerTab({ onConfirmed, onSaveToLibrary, initialMode, in
       : 'Analyzed meal'
     const mealName = rawName.length > 50 ? rawName.slice(0, 47) + '...' : rawName
     try {
-      const response = await fetch(`${API_BASE}/api/photo-analysis/drafts/${voiceDraft.id}/confirm`, {
-        method: 'POST',
-        credentials: 'include',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          caloriesKcal: voiceDraftTotals.calories,
-          proteinG: voiceDraftTotals.protein,
-          fatG: voiceDraftTotals.fat,
-          fiberG: voiceDraftTotals.fiber,
-          carbsG: voiceDraftTotals.carbs,
-          notes: voiceDraft.notes.join('\n'),
-          mealName,
-        }),
+      await apiClient.post(`/api/photo-analysis/drafts/${voiceDraft.id}/confirm`, {
+        caloriesKcal: voiceDraftTotals.calories,
+        proteinG: voiceDraftTotals.protein,
+        fatG: voiceDraftTotals.fat,
+        fiberG: voiceDraftTotals.fiber,
+        carbsG: voiceDraftTotals.carbs,
+        notes: voiceDraft.notes.join('\n'),
+        mealName,
       })
-      if (!response.ok) throw new Error(`Failed to save (${response.status})`)
-      await response.json()
       track('draft_confirmed', { method: 'voice' })
       setVoiceDraft(current => (current ? { ...current, needsUserConfirmation: false } : current))
       setVoiceSuccess('Saved. Daily summary updated.')

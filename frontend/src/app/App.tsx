@@ -8,6 +8,7 @@ import { AppShell } from './AppShell'
 import { logout, fetchMe, deleteAccount, type AuthUser } from '../features/auth/model/authApi'
 import { identifyUser, resetAnalyticsUser, track } from '../shared/lib/analytics'
 import { requestHealthPermissions } from '../shared/lib/healthKit'
+import { UNAUTHORIZED_EVENT } from '../shared/lib/apiClient'
 
 const OnboardingWizard = lazy(() => import('../features/onboarding/components/OnboardingWizard').then(m => ({ default: m.OnboardingWizard })))
 
@@ -106,6 +107,17 @@ function AppInner() {
   function resetAuthState() {
     setAuthUser({ accountId: null, email: null, displayName: null, nutritionUserId: null, authenticated: false, hasProfile: false, emailVerified: false })
   }
+
+  // Listen for 401 from any API call → drop session
+  useEffect(() => {
+    function onUnauthorized() {
+      resetAnalyticsUser()
+      Sentry.setUser(null)
+      resetAuthState()
+    }
+    window.addEventListener(UNAUTHORIZED_EVENT, onUnauthorized)
+    return () => window.removeEventListener(UNAUTHORIZED_EVENT, onUnauthorized)
+  }, [])
 
   async function handleLogout() {
     await logout()

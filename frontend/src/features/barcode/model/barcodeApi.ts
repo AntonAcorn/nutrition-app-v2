@@ -1,4 +1,4 @@
-import { API_BASE } from '../../../shared/lib/apiBase'
+import { apiClient, ApiError } from '../../../shared/lib/apiClient'
 
 export interface FoodProduct {
   name: string
@@ -11,19 +11,15 @@ export interface FoodProduct {
 }
 
 export async function lookupBarcode(barcode: string): Promise<FoodProduct | null> {
-  const res = await fetch(`${API_BASE}/api/food-lookup/barcode/${encodeURIComponent(barcode)}`, {
-    credentials: 'include',
-  })
-  if (res.status === 404) return null
-  if (!res.ok) throw new Error(`Barcode lookup failed (${res.status})`)
-  return res.json() as Promise<FoodProduct>
+  try {
+    return await apiClient.get<FoodProduct>(`/api/food-lookup/barcode/${encodeURIComponent(barcode)}`)
+  } catch (e) {
+    if (e instanceof ApiError && e.status === 404) return null
+    throw e
+  }
 }
 
-export async function searchFood(query: string): Promise<FoodProduct[]> {
-  if (!query || query.trim().length < 2) return []
-  const res = await fetch(`${API_BASE}/api/food-lookup/search?q=${encodeURIComponent(query.trim())}`, {
-    credentials: 'include',
-  })
-  if (!res.ok) throw new Error(`Food search failed (${res.status})`)
-  return res.json() as Promise<FoodProduct[]>
+export function searchFood(query: string): Promise<FoodProduct[]> {
+  if (!query || query.trim().length < 2) return Promise.resolve([])
+  return apiClient.get<FoodProduct[]>(`/api/food-lookup/search?q=${encodeURIComponent(query.trim())}`)
 }

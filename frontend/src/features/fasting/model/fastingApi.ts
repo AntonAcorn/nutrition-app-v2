@@ -1,4 +1,4 @@
-import { API_BASE } from '../../../shared/lib/apiBase'
+import { apiClient } from '../../../shared/lib/apiClient'
 
 export interface FastingSession {
   id: string
@@ -8,49 +8,22 @@ export interface FastingSession {
   createdAt: string
 }
 
-export async function getActiveSession(): Promise<FastingSession | null> {
-  const res = await fetch(`${API_BASE}/api/fasting/active`, { credentials: 'include' })
-  if (!res.ok) throw new Error(`Failed to load active session (${res.status})`)
-  const text = await res.text()
-  return text ? JSON.parse(text) : null
+export function getActiveSession(): Promise<FastingSession | null> {
+  return apiClient.get<FastingSession | null>('/api/fasting/active')
 }
 
-export async function startFast(targetHours: number): Promise<FastingSession> {
-  const res = await fetch(`${API_BASE}/api/fasting/start`, {
-    method: 'POST',
-    credentials: 'include',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ targetHours }),
-  })
-  if (!res.ok) {
-    const body = await res.json().catch(() => ({}))
-    throw new Error(body.message ?? `Failed to start fast (${res.status})`)
-  }
-  return res.json()
+export function startFast(targetHours: number): Promise<FastingSession> {
+  return apiClient.post<FastingSession>('/api/fasting/start', { targetHours })
 }
 
-export async function stopFast(): Promise<FastingSession> {
-  const res = await fetch(`${API_BASE}/api/fasting/stop`, {
-    method: 'POST',
-    credentials: 'include',
-  })
-  if (!res.ok) {
-    const body = await res.json().catch(() => ({}))
-    throw new Error(body.message ?? `Failed to stop fast (${res.status})`)
-  }
-  return res.json()
+export function stopFast(): Promise<FastingSession> {
+  return apiClient.post<FastingSession>('/api/fasting/stop')
 }
 
-export async function getFastingHistory(): Promise<FastingSession[]> {
-  const res = await fetch(`${API_BASE}/api/fasting/history`, { credentials: 'include' })
-  if (!res.ok) throw new Error(`Failed to load history (${res.status})`)
-  return res.json()
+export function getFastingHistory(): Promise<FastingSession[]> {
+  return apiClient.get<FastingSession[]>('/api/fasting/history')
 }
 
-export async function deleteFastingSession(id: string): Promise<void> {
-  const res = await fetch(`${API_BASE}/api/fasting/${id}`, {
-    method: 'DELETE',
-    credentials: 'include',
-  })
-  if (!res.ok) throw new Error(`Failed to delete session (${res.status})`)
+export function deleteFastingSession(id: string): Promise<void> {
+  return apiClient.delete(`/api/fasting/${id}`)
 }

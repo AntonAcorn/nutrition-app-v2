@@ -1,4 +1,4 @@
-import { API_BASE } from '../../../shared/lib/apiBase'
+import { apiClient } from '../../../shared/lib/apiClient'
 import type { TodaySummary } from '../../../shared/types/nutrition'
 
 interface TodaySummaryApiResponse {
@@ -33,16 +33,7 @@ function formatDateLabel(entryDate: string): string {
 }
 
 export async function fetchTodaySummary(date: string): Promise<TodaySummary> {
-  const response = await fetch(
-    `${API_BASE}/api/history/today-summary?entryDate=${date}`,
-    { credentials: 'include' },
-  )
-
-  if (!response.ok) {
-    throw new Error(`Failed to load daily summary (${response.status})`)
-  }
-
-  const payload = (await response.json()) as TodaySummaryApiResponse
+  const payload = await apiClient.get<TodaySummaryApiResponse>(`/api/history/today-summary?entryDate=${date}`)
 
   return {
     dateLabel: formatDateLabel(payload.entryDate),

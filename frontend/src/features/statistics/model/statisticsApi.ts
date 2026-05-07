@@ -1,5 +1,5 @@
 import { APP_TIME_ZONE, formatLocalDateInputValue } from '../../../shared/lib/date'
-import { API_BASE } from '../../../shared/lib/apiBase'
+import { apiClient } from '../../../shared/lib/apiClient'
 import type { NutritionStatisticsResponse } from '../../../shared/types/nutrition'
 
 function getRange(days: number) {
@@ -13,16 +13,7 @@ function getRange(days: number) {
   }
 }
 
-export async function fetchNutritionStatistics(days: number): Promise<NutritionStatisticsResponse> {
+export function fetchNutritionStatistics(days: number): Promise<NutritionStatisticsResponse> {
   const { fromDate, toDate } = getRange(days)
-  const response = await fetch(
-    `${API_BASE}/api/history/statistics?fromDate=${fromDate}&toDate=${toDate}`,
-    { credentials: 'include' },
-  )
-
-  if (!response.ok) {
-    throw new Error(`Failed to load statistics (${response.status})`)
-  }
-
-  return (await response.json()) as NutritionStatisticsResponse
+  return apiClient.get<NutritionStatisticsResponse>(`/api/history/statistics?fromDate=${fromDate}&toDate=${toDate}`)
 }

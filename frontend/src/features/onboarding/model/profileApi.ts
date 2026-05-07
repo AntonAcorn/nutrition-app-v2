@@ -1,4 +1,4 @@
-import { API_BASE } from '../../../shared/lib/apiBase'
+import { apiClient } from '../../../shared/lib/apiClient'
 
 export interface OnboardingPayload {
   ageYears: number
@@ -16,15 +16,6 @@ export interface OnboardingPayload {
   waterGoalGlasses?: number
 }
 
-export async function submitProfile(payload: OnboardingPayload): Promise<void> {
-  const response = await fetch(`${API_BASE}/api/profile`, {
-    method: 'POST',
-    credentials: 'include',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(payload),
-  })
-
-  if (!response.ok) {
-    throw new Error(`Failed to save profile (${response.status})`)
-  }
+export function submitProfile(payload: OnboardingPayload): Promise<void> {
+  return apiClient.post('/api/profile', payload)
 }

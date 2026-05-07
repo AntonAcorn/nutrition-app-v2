@@ -1,14 +1,5 @@
-import { API_BASE } from '../../../shared/lib/apiBase'
+import { apiClient } from '../../../shared/lib/apiClient'
 
-export async function setWaterGlasses(glasses: number, date: string): Promise<void> {
-  const res = await fetch(
-    `${API_BASE}/api/history/today-summary/water?entryDate=${date}`,
-    {
-      method: 'PUT',
-      credentials: 'include',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ glasses }),
-    }
-  )
-  if (!res.ok) throw new Error('Failed to update water')
+export function setWaterGlasses(glasses: number, date: string): Promise<void> {
+  return apiClient.put(`/api/history/today-summary/water?entryDate=${date}`, { glasses })
 }

@@ -1,53 +1,26 @@
-import { API_BASE } from '../../../shared/lib/apiBase'
+import { apiClient } from '../../../shared/lib/apiClient'
 import type { MealTemplate, MealTemplateItem } from '../../../shared/types/nutrition'
 
-async function request<T>(path: string, options?: RequestInit): Promise<T> {
-  const res = await fetch(`${API_BASE}${path}`, {
-    credentials: 'include',
-    headers: { 'Content-Type': 'application/json' },
-    ...options,
-  })
-  if (!res.ok) {
-    let msg = `Request failed (${res.status})`
-    try { const b = await res.json(); if (b.message) msg = b.message } catch {}
-    throw new Error(msg)
-  }
-  if (res.status === 204) return undefined as T
-  return res.json()
-}
-
 export function listTemplates(): Promise<MealTemplate[]> {
-  return request('/api/meal-templates')
+  return apiClient.get<MealTemplate[]>('/api/meal-templates')
 }
 
 export function createTemplate(name: string, items: MealTemplateItem[]): Promise<MealTemplate> {
-  return request('/api/meal-templates', {
-    method: 'POST',
-    body: JSON.stringify({ name, items }),
-  })
+  return apiClient.post<MealTemplate>('/api/meal-templates', { name, items })
 }
 
 export function updateTemplate(id: string, name: string, items: MealTemplateItem[]): Promise<MealTemplate> {
-  return request(`/api/meal-templates/${id}`, {
-    method: 'PUT',
-    body: JSON.stringify({ name, items }),
-  })
+  return apiClient.put<MealTemplate>(`/api/meal-templates/${id}`, { name, items })
 }
 
 export function deleteTemplate(id: string): Promise<void> {
-  return request(`/api/meal-templates/${id}`, { method: 'DELETE' })
+  return apiClient.delete(`/api/meal-templates/${id}`)
 }
 
 export function logTemplate(id: string, entryDate: string, slotType?: string): Promise<void> {
-  return request(`/api/meal-templates/${id}/log`, {
-    method: 'POST',
-    body: JSON.stringify({ entryDate, slotType }),
-  })
+  return apiClient.post(`/api/meal-templates/${id}/log`, { entryDate, slotType })
 }
 
 export function unlogTemplate(id: string, entryDate: string): Promise<void> {
-  return request(`/api/meal-templates/${id}/unlog`, {
-    method: 'POST',
-    body: JSON.stringify({ entryDate }),
-  })
+  return apiClient.post(`/api/meal-templates/${id}/unlog`, { entryDate })
 }

@@ -1,4 +1,4 @@
-import { API_BASE } from '../../../shared/lib/apiBase'
+import { apiClient } from '../../../shared/lib/apiClient'
 
 export interface MealPayload {
   caloriesConsumedKcal: number
@@ -10,48 +10,14 @@ export interface MealPayload {
   slotType?: string
 }
 
-export async function addMealManually(payload: MealPayload, date: string): Promise<void> {
-  const response = await fetch(
-    `${API_BASE}/api/history/today-summary/add-meal?entryDate=${date}`,
-    {
-      method: 'POST',
-      credentials: 'include',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload),
-    }
-  )
-
-  if (!response.ok) {
-    throw new Error(`Failed to add meal (${response.status})`)
-  }
+export function addMealManually(payload: MealPayload, date: string): Promise<void> {
+  return apiClient.post(`/api/history/today-summary/add-meal?entryDate=${date}`, payload)
 }
 
-export async function resetToday(date: string): Promise<void> {
-  const response = await fetch(
-    `${API_BASE}/api/history/today-summary/reset?entryDate=${date}`,
-    {
-      method: 'POST',
-      credentials: 'include',
-    }
-  )
-
-  if (!response.ok) {
-    throw new Error(`Failed to reset day (${response.status})`)
-  }
+export function resetToday(date: string): Promise<void> {
+  return apiClient.post(`/api/history/today-summary/reset?entryDate=${date}`)
 }
 
-export async function updateTodayNutritionTotals(payload: MealPayload, date: string): Promise<void> {
-  const response = await fetch(
-    `${API_BASE}/api/history/today-summary/nutrition-totals?entryDate=${date}`,
-    {
-      method: 'PUT',
-      credentials: 'include',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload),
-    }
-  )
-
-  if (!response.ok) {
-    throw new Error(`Failed to save nutrition totals (${response.status})`)
-  }
+export function updateTodayNutritionTotals(payload: MealPayload, date: string): Promise<void> {
+  return apiClient.put(`/api/history/today-summary/nutrition-totals?entryDate=${date}`, payload)
 }

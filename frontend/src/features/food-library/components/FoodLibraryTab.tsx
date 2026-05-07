@@ -2,7 +2,7 @@ import { type ChangeEvent, useEffect, useRef, useState } from 'react'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { MascotSvg } from '../../current-day/components/MascotSvg'
 import { getTodayLocalDateInputValue } from '../../../shared/lib/date'
-import { API_BASE } from '../../../shared/lib/apiBase'
+import { apiClient } from '../../../shared/lib/apiClient'
 import type { MealTemplate, MealTemplateItem } from '../../../shared/types/nutrition'
 import { listTemplates, createTemplate, updateTemplate, deleteTemplate, logTemplate, unlogTemplate } from '../model/mealTemplateApi'
 import { normalizeDraft } from '../../photo-analyzer/model/photoAnalysis'
@@ -95,13 +95,7 @@ export function FoodLibraryTab({ onLogged, initialSave, onInitialSaveDone }: Foo
       formData.append('entryDate', getTodayLocalDateInputValue())
       formData.append('userNote', '')
       formData.append('locale', 'en')
-      const response = await fetch(`${API_BASE}/api/photo-analysis/upload`, {
-        method: 'POST',
-        credentials: 'include',
-        body: formData,
-      })
-      if (!response.ok) throw new Error(`Analysis failed (${response.status})`)
-      const payload = await response.json()
+      const payload = await apiClient.post<{ draft: Parameters<typeof normalizeDraft>[0] }>('/api/photo-analysis/upload', formData)
       const draft = normalizeDraft(payload.draft)
       const items: MealTemplateItem[] = draft.items.map(
         ({ name, estimatedPortion, calories, protein, fat, carbs, fiber }) =>
