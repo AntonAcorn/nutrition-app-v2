@@ -2,7 +2,7 @@ import React from 'react'
 import ReactDOM from 'react-dom/client'
 import * as Sentry from '@sentry/react'
 import App from './app/App'
-import './styles.css'
+import './styles/index.css'
 import { initAnalytics } from './shared/lib/analytics'
 
 if (import.meta.env.VITE_SENTRY_DSN) {

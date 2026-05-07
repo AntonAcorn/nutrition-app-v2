@@ -1,0 +1,602 @@
+/* ── Meals Log Card ──────────────────────────────────────────────────────── */
+.meals-log-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  padding: 16px 18px;
+}
+
+.meals-log-slot {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  padding-bottom: 12px;
+  margin-bottom: 12px;
+}
+
+.meals-log-slot--last {
+  border-bottom: none;
+  margin-bottom: 0;
+  padding-bottom: 0;
+}
+
+.meals-log-slot__header {
+  display: flex;
+  align-items: center;
+  padding: 10px 12px;
+  gap: 8px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+  margin: 0 -2px;
+}
+
+.meals-log-slot__icon {
+  font-size: 1rem;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.meals-log-slot__name {
+  flex: 1;
+  font-size: 0.82rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: rgba(255, 255, 255, 0.82);
+}
+
+.meals-log-slot__kcal {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.45);
+}
+
+.meals-log-slot__add {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  border: 1.5px solid rgba(59, 125, 255, 0.55);
+  background: rgba(59, 125, 255, 0.1);
+  color: #5b9aff;
+  font-size: 1.15rem;
+  line-height: 1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: background 0.15s, border-color 0.15s;
+}
+
+.meals-log-slot__add:hover {
+  background: rgba(59, 125, 255, 0.22);
+  border-color: rgba(59, 125, 255, 0.8);
+}
+
+.meals-log-slot__toggle-area {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  text-align: left;
+  min-width: 0;
+}
+
+.meals-log-slot__chevron {
+  font-size: 0.7rem;
+  color: rgba(255, 255, 255, 0.25);
+  flex-shrink: 0;
+  transition: color 0.15s;
+}
+
+.meals-log-slot__toggle-area:hover .meals-log-slot__chevron {
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.meals-log-card__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.meals-breakdown-bar {
+  display: flex;
+  height: 4px;
+  border-radius: 999px;
+  overflow: hidden;
+  gap: 2px;
+  margin-bottom: 10px;
+}
+
+.meals-breakdown-bar__segment {
+  border-radius: 999px;
+  min-width: 4px;
+  transition: width 0.3s ease;
+  opacity: 0.75;
+}
+
+.meals-breakdown-legend {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px 12px;
+  margin-bottom: 12px;
+}
+
+.meals-breakdown-legend__item {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.meals-breakdown-legend__dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  opacity: 0.85;
+}
+
+.meals-breakdown-legend__icon {
+  font-size: 0.8rem;
+  line-height: 1;
+}
+
+.meals-breakdown-legend__label {
+  font-size: 0.72rem;
+  color: rgba(255, 255, 255, 0.45);
+}
+
+.meals-breakdown-legend__kcal {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.meals-log-card__title {
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.4);
+}
+
+.meals-log-list {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  padding-top: 4px;
+}
+
+.meal-log-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 13px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.meal-log-row:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.meal-log-row:first-child {
+  padding-top: 0;
+}
+
+.meal-log-row__info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  flex: 1;
+  overflow: hidden;
+}
+
+.meal-log-row__name {
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.85);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.meal-log-row__meta {
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.35);
+  white-space: nowrap;
+}
+
+.meal-log-row__confirm {
+  display: flex;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.meal-log-row__confirm-yes {
+  padding: 4px 10px;
+  background: rgba(239, 68, 68, 0.2);
+  border: 1px solid rgba(239, 68, 68, 0.4);
+  border-radius: 8px;
+  color: #ef4444;
+  font-size: 0.78rem;
+  cursor: pointer;
+}
+
+.meal-log-row__confirm-yes:hover {
+  background: rgba(239, 68, 68, 0.32);
+}
+
+.meal-log-row__confirm-no {
+  padding: 4px 10px;
+  background: rgba(255, 255, 255, 0.07);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 0.78rem;
+  cursor: pointer;
+}
+
+.meal-log-row__confirm-no:hover {
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.meal-log-row__delete {
+  flex-shrink: 0;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: transparent;
+  color: rgba(255, 255, 255, 0.35);
+  font-size: 0.7rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s, color 0.15s;
+}
+
+.meal-log-row__delete:hover {
+  background: rgba(239, 68, 68, 0.15);
+  border-color: rgba(239, 68, 68, 0.4);
+  color: #ef4444;
+}
+
+.meal-log-row__delete:active {
+  transform: scale(0.9);
+}
+
+.meal-log-row__actions {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.meal-log-row__edit {
+  flex-shrink: 0;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: transparent;
+  color: rgba(255, 255, 255, 0.3);
+  font-size: 0.85rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s, color 0.15s;
+}
+
+.meal-log-row__edit:hover {
+  background: rgba(99, 179, 237, 0.12);
+  border-color: rgba(99, 179, 237, 0.35);
+  color: rgba(99, 179, 237, 0.9);
+}
+
+.meal-log-row__move {
+  flex-shrink: 0;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: transparent;
+  color: rgba(255, 255, 255, 0.3);
+  font-size: 0.9rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s, color 0.15s;
+}
+
+.meal-log-row__move:hover {
+  background: rgba(99, 179, 237, 0.12);
+  border-color: rgba(99, 179, 237, 0.35);
+  color: rgba(99, 179, 237, 0.9);
+}
+
+.meal-log-move {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+  padding: 6px 0;
+  width: 100%;
+}
+
+.meal-log-move__label {
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.45);
+  white-space: nowrap;
+}
+
+.meal-log-move__slots {
+  display: flex;
+  gap: 5px;
+  flex-wrap: wrap;
+  flex: 1;
+}
+
+.meal-log-move__btn {
+  padding: 4px 10px;
+  border-radius: 12px;
+  border: 1px solid rgba(99, 179, 237, 0.4);
+  background: rgba(99, 179, 237, 0.08);
+  color: rgba(99, 179, 237, 0.9);
+  font-size: 0.72rem;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.meal-log-move__btn:hover {
+  background: rgba(99, 179, 237, 0.18);
+}
+
+.meal-log-move__btn:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.meal-log-move__error {
+  font-size: 0.72rem;
+  color: #fc8181;
+}
+
+.meal-log-move__cancel {
+  border: none;
+  background: none;
+  color: rgba(255, 255, 255, 0.3);
+  font-size: 0.72rem;
+  cursor: pointer;
+  white-space: nowrap;
+  padding: 4px 6px;
+}
+
+.meal-log-move__cancel:hover {
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.meal-log-row--editing {
+  flex-direction: column;
+  align-items: stretch;
+  padding: 12px 0;
+}
+
+/* ── Drag handle ── */
+.meal-log-row__drag-handle {
+  background: none;
+  border: none;
+  color: rgba(255, 255, 255, 0.25);
+  font-size: 1.1rem;
+  padding: 4px 6px;
+  cursor: grab;
+  flex-shrink: 0;
+  touch-action: none;
+  line-height: 1;
+  user-select: none;
+}
+.meal-log-row__drag-handle:active { cursor: grabbing; color: rgba(255, 255, 255, 0.6); }
+
+/* ── Drag ghost ── */
+.drag-ghost {
+  position: fixed;
+  z-index: 9999;
+  pointer-events: none;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(30, 34, 48, 0.92);
+  border: 1.5px solid rgba(99, 132, 255, 0.5);
+  border-radius: 10px;
+  padding: 8px 14px;
+  transform: translate(-50%, calc(-100% - 12px));
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+  max-width: 240px;
+}
+.drag-ghost__icon { color: rgba(255,255,255,0.35); font-size: 1rem; }
+.drag-ghost__label {
+  color: #fff;
+  font-size: 0.85rem;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 180px;
+}
+
+/* ── Drop target highlight ── */
+.meals-log-slot__header--drop-target {
+  background: rgba(99, 132, 255, 0.12);
+  border-radius: 12px;
+  outline: 1.5px solid rgba(99, 132, 255, 0.45);
+  transition: background 0.15s, outline-color 0.15s;
+}
+
+.meal-log-edit-form {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.meal-log-edit-name {
+  width: 100%;
+  padding: 8px 10px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  background: rgba(255, 255, 255, 0.06);
+  color: #fff;
+  font-size: 0.88rem;
+}
+
+.meal-log-edit-macros {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 6px;
+}
+
+.meal-log-edit-macro {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.meal-log-edit-macro span {
+  font-size: 0.65rem;
+  color: rgba(255, 255, 255, 0.4);
+  font-weight: 600;
+  letter-spacing: 0.03em;
+}
+
+.meal-log-edit-macro input {
+  padding: 6px 6px;
+  border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.06);
+  color: #fff;
+  font-size: 0.8rem;
+  text-align: center;
+  width: 100%;
+}
+
+.meal-log-edit-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.meal-log-edit-save {
+  padding: 7px 18px;
+  border-radius: 8px;
+  border: none;
+  background: rgba(59, 125, 255, 0.85);
+  color: #fff;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.meal-log-edit-save:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.meal-log-edit-cancel {
+  padding: 7px 14px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: transparent;
+  color: rgba(255, 255, 255, 0.45);
+  font-size: 0.82rem;
+  cursor: pointer;
+}
+
+
+/* Meals log */
+[data-theme="light"] .meal-log-row {
+  border-bottom-color: rgba(224, 211, 195, 0.6);
+}
+[data-theme="light"] .meal-log-row__name {
+  color: #14213d;
+}
+[data-theme="light"] .meal-log-row__meta {
+  color: rgba(20, 33, 61, 0.4);
+}
+[data-theme="light"] .meal-log-row__confirm-no {
+  background: rgba(20, 33, 61, 0.04);
+  border-color: rgba(20, 33, 61, 0.1);
+  color: #6b5b4b;
+}
+[data-theme="light"] .meal-log-row__delete {
+  color: rgba(20, 33, 61, 0.3);
+  border-color: rgba(20, 33, 61, 0.12);
+}
+[data-theme="light"] .meal-log-row__delete:hover {
+  background: rgba(239, 68, 68, 0.08);
+  border-color: rgba(239, 68, 68, 0.3);
+  color: #ef4444;
+}
+
+
+/* ── Meal log inline edit form ── */
+[data-theme="light"] .meal-log-edit-name {
+  background: rgba(255, 255, 255, 0.85);
+  border-color: rgba(203, 187, 167, 0.6);
+  color: #14213d;
+}
+[data-theme="light"] .meal-log-edit-macro span { color: rgba(20, 33, 61, 0.45); }
+[data-theme="light"] .meal-log-edit-macro input {
+  background: rgba(255, 255, 255, 0.85);
+  border-color: rgba(203, 187, 167, 0.5);
+  color: #14213d;
+}
+[data-theme="light"] .meal-log-edit-cancel {
+  border-color: rgba(203, 187, 167, 0.6);
+  color: rgba(20, 33, 61, 0.5);
+}
+
+
+/* ── Meals log slot headers ── */
+[data-theme="light"] .meals-log-slot { border-bottom-color: rgba(20, 33, 61, 0.07); }
+[data-theme="light"] .meals-log-slot__header { background: rgba(20, 33, 61, 0.04); }
+[data-theme="light"] .meals-log-slot__name { color: rgba(20, 33, 61, 0.82); }
+[data-theme="light"] .meals-log-slot__kcal { color: rgba(20, 33, 61, 0.42); }
+[data-theme="light"] .meals-log-slot__add {
+  border-color: rgba(59, 125, 255, 0.45);
+  background: rgba(59, 125, 255, 0.07);
+  color: #2060e8;
+}
+[data-theme="light"] .meals-log-slot__add:hover {
+  background: rgba(59, 125, 255, 0.14);
+}
+
+
+/* ── Meal log move between slots ── */
+[data-theme="light"] .meal-log-row__move {
+  border-color: rgba(20, 33, 61, 0.12);
+  color: rgba(20, 33, 61, 0.3);
+}
+[data-theme="light"] .meal-log-row__move:hover {
+  background: rgba(32, 96, 232, 0.08);
+  border-color: rgba(32, 96, 232, 0.35);
+  color: #2060e8;
+}
+[data-theme="light"] .meal-log-move__label { color: rgba(20, 33, 61, 0.45); }
+[data-theme="light"] .meal-log-move__btn {
+  border-color: rgba(32, 96, 232, 0.35);
+  background: rgba(32, 96, 232, 0.06);
+  color: #2060e8;
+}
+[data-theme="light"] .meal-log-move__btn:hover { background: rgba(32, 96, 232, 0.13); }
+[data-theme="light"] .meal-log-move__cancel { color: rgba(20, 33, 61, 0.3); }
+[data-theme="light"] .meal-log-move__cancel:hover { color: rgba(20, 33, 61, 0.6); }
+

@@ -9,10 +9,10 @@
     "preview": "vite preview --host 0.0.0.0",
     "postinstall": "node scripts/patch-ios.js",
     "cap:sync": "npx cap sync ios && node scripts/patch-ios.js",
-    "test": "vitest run",
-    "test:watch": "vitest",
+    "test": "node node_modules/vitest/vitest.mjs run",
+    "test:watch": "node node_modules/vitest/vitest.mjs",
     "test:smoke": "node tests/smoke/run-all.js",
-    "test:smoke:ci": "start-server-and-test 'vite --host 127.0.0.1 --port 5174' http://127.0.0.1:5174 'npm run test:smoke'",
+    "test:smoke:ci": "node node_modules/start-server-and-test/src/bin/start.js 'node node_modules/vite/bin/vite.js --host 127.0.0.1 --port 5174' http://127.0.0.1:5174 'npm run test:smoke'",
     "test:all": "npm test && npm run test:smoke:ci"
   },
   "dependencies": {

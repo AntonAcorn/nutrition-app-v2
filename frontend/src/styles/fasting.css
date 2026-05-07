@@ -1,0 +1,277 @@
+/* ── Fasting tracker ── */
+.fasting-panel {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  padding: 22px;
+}
+
+.fasting-ring-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 8px 0 4px;
+}
+
+.fasting-ring {
+  width: 180px;
+  height: 180px;
+}
+
+.fasting-ring__track {
+  fill: none;
+  stroke: rgba(255, 255, 255, 0.07);
+  stroke-width: 10;
+}
+
+.fasting-ring__progress {
+  fill: none;
+  stroke-width: 10;
+  stroke-linecap: round;
+  transform: rotate(-90deg);
+  transform-origin: center;
+  transition: stroke-dashoffset 0.6s ease, stroke 0.4s ease;
+}
+
+.fasting-ring__time {
+  fill: #ffffff;
+  font-size: 16px;
+  font-weight: 700;
+  text-anchor: middle;
+  dominant-baseline: middle;
+  font-family: inherit;
+  letter-spacing: 0.04em;
+}
+
+.fasting-ring__sub {
+  fill: rgba(255, 255, 255, 0.45);
+  font-size: 8px;
+  text-anchor: middle;
+  dominant-baseline: middle;
+  font-family: inherit;
+}
+
+.fasting-section-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.35);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  width: 100%;
+  margin-bottom: -8px;
+}
+
+.fasting-protocols {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: center;
+  width: 100%;
+}
+
+.fasting-protocol-btn {
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: transparent;
+  color: rgba(255, 255, 255, 0.5);
+  border-radius: 999px;
+  padding: 9px 16px;
+  font-size: 0.88rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.15s ease;
+  white-space: nowrap;
+}
+
+.fasting-protocol-btn--active {
+  border-color: rgba(59, 125, 255, 0.6);
+  background: rgba(59, 125, 255, 0.12);
+  color: #93b8ff;
+}
+
+.fasting-custom-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  max-width: 200px;
+}
+
+.fasting-custom-input {
+  flex: 1;
+  text-align: center;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.04);
+  color: #ffffff;
+  border-radius: 14px;
+  padding: 10px 14px;
+  font-size: 0.95rem;
+}
+
+.fasting-custom-unit {
+  font-size: 0.88rem;
+  color: rgba(255, 255, 255, 0.4);
+  white-space: nowrap;
+}
+
+.fasting-status-text {
+  font-size: 0.8rem;
+  color: rgba(255, 255, 255, 0.4);
+  text-align: center;
+  margin: -8px 0;
+}
+
+.fasting-action-btn {
+  width: 100%;
+  border: 0;
+  border-radius: 18px;
+  padding: 14px 18px;
+  background: linear-gradient(135deg, #3b7dff 0%, #2060e8 100%);
+  color: #ffffff;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 8px 24px rgba(59, 125, 255, 0.35);
+  transition: 0.15s ease;
+}
+
+.fasting-action-btn--stop {
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+  box-shadow: 0 8px 24px rgba(239, 68, 68, 0.3);
+}
+
+.fasting-action-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.fasting-history {
+  display: flex;
+  flex-direction: column;
+  padding: 22px;
+}
+
+.fasting-history__title {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.35);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-bottom: 10px;
+}
+
+.fasting-history__item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.fasting-history__item:last-child {
+  border-bottom: none;
+}
+
+.fasting-history__item-left {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.fasting-history__date {
+  font-size: 0.88rem;
+  color: rgba(255, 255, 255, 0.8);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.fasting-history__protocol {
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.35);
+  white-space: nowrap;
+}
+
+.fasting-history__right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.fasting-history__duration {
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.75);
+  white-space: nowrap;
+}
+
+.fasting-history__badge {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.7rem;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.fasting-history__badge--achieved {
+  background: rgba(34, 197, 94, 0.18);
+  color: #4ade80;
+}
+
+.fasting-history__badge--missed {
+  background: rgba(255, 255, 255, 0.06);
+  color: rgba(255, 255, 255, 0.3);
+}
+
+.fasting-history__delete {
+  border: none;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.2);
+  font-size: 1rem;
+  cursor: pointer;
+  padding: 2px 4px;
+  line-height: 1;
+  flex-shrink: 0;
+  transition: color 0.15s ease;
+}
+
+.fasting-history__delete:hover {
+  color: rgba(239, 68, 68, 0.7);
+}
+
+/* Fasting light theme */
+[data-theme="light"] .fasting-ring__track { stroke: rgba(20, 33, 61, 0.08); }
+[data-theme="light"] .fasting-ring__time  { fill: #14213d; }
+[data-theme="light"] .fasting-ring__sub   { fill: rgba(20, 33, 61, 0.4); }
+[data-theme="light"] .fasting-section-label { color: rgba(20, 33, 61, 0.35); }
+[data-theme="light"] .fasting-protocol-btn {
+  border-color: rgba(203, 187, 167, 0.55);
+  color: rgba(20, 33, 61, 0.5);
+}
+[data-theme="light"] .fasting-protocol-btn--active {
+  border-color: rgba(59, 125, 255, 0.5);
+  background: rgba(59, 125, 255, 0.08);
+  color: #2060e8;
+}
+[data-theme="light"] .fasting-custom-input {
+  border-color: rgba(203, 187, 167, 0.55);
+  background: rgba(255, 255, 255, 0.82);
+  color: #14213d;
+}
+[data-theme="light"] .fasting-custom-unit { color: rgba(20, 33, 61, 0.4); }
+[data-theme="light"] .fasting-status-text { color: rgba(20, 33, 61, 0.4); }
+[data-theme="light"] .fasting-history__title { color: rgba(20, 33, 61, 0.35); }
+[data-theme="light"] .fasting-history__item { border-bottom-color: rgba(20, 33, 61, 0.06); }
+[data-theme="light"] .fasting-history__date { color: #14213d; }
+[data-theme="light"] .fasting-history__protocol { color: rgba(20, 33, 61, 0.35); }
+[data-theme="light"] .fasting-history__duration { color: #14213d; }
+[data-theme="light"] .fasting-history__delete { color: rgba(20, 33, 61, 0.2); }
+
