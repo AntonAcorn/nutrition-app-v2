@@ -8,7 +8,12 @@
     "build": "vite build",
     "preview": "vite preview --host 0.0.0.0",
     "postinstall": "node scripts/patch-ios.js",
-    "cap:sync": "npx cap sync ios && node scripts/patch-ios.js"
+    "cap:sync": "npx cap sync ios && node scripts/patch-ios.js",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:smoke": "node tests/smoke/run-all.js",
+    "test:smoke:ci": "start-server-and-test 'vite --host 127.0.0.1 --port 5174' http://127.0.0.1:5174 'npm run test:smoke'",
+    "test:all": "npm test && npm run test:smoke:ci"
   },
   "dependencies": {
     "@capacitor-community/apple-sign-in": "^7.1.0",
@@ -32,8 +37,12 @@
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^4.3.1",
+    "jsdom": "^29.1.1",
     "patch-package": "^8.0.1",
+    "puppeteer-core": "^24.43.0",
+    "start-server-and-test": "^3.0.2",
     "typescript": "^6.0.2",
-    "vite": "^5.4.2"
+    "vite": "^5.4.2",
+    "vitest": "^4.1.5"
   }
 }
