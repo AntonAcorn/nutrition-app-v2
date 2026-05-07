@@ -116,7 +116,6 @@ export function CurrentDayTab({ refreshToken = 0, successMessage = '', onDayUpda
   const pullRef = useRef(0)
   const ptrStartY = useRef(0)
   const ptrDragging = useRef(false)
-  const dateInputRef = useRef<HTMLInputElement>(null)
 
   const today = getTodayLocalDateInputValue()
   const isToday = selectedDate === today
@@ -357,25 +356,19 @@ export function CurrentDayTab({ refreshToken = 0, successMessage = '', onDayUpda
         >
           ←
         </button>
-        <button
-          type="button"
-          className={`day-nav__label${!isToday ? ' day-nav__label--past' : ''}`}
-          onClick={() => dateInputRef.current?.showPicker()}
-          aria-label="Pick a date"
-        >
-          {dateLabel}
-        </button>
-        <input
-          ref={dateInputRef}
-          type="date"
-          aria-hidden="true"
-          tabIndex={-1}
-          style={{ position: 'absolute', opacity: 0, pointerEvents: 'none', width: 0, height: 0 }}
-          min={minDate}
-          max={today}
-          value={selectedDate}
-          onChange={e => { if (e.target.value) setSelectedDate(e.target.value) }}
-        />
+        <div className="day-nav__label-wrap">
+          <span className={`day-nav__label${!isToday ? ' day-nav__label--past' : ''}`}>
+            {dateLabel}
+          </span>
+          <input
+            type="date"
+            className="day-nav__date-overlay"
+            min={minDate}
+            max={today}
+            value={selectedDate}
+            onChange={e => { if (e.target.value) setSelectedDate(e.target.value) }}
+          />
+        </div>
         <button
           type="button"
           className="day-nav__btn"

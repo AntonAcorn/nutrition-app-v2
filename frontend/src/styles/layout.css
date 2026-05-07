@@ -109,25 +109,40 @@
   opacity: 0.25;
   cursor: default;
 }
+.day-nav__label-wrap {
+  position: relative;
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-radius: 8px;
+  transition: background 0.15s;
+}
+.day-nav__label-wrap:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
 .day-nav__label {
   font-size: 0.85rem;
   font-weight: 600;
   color: rgba(255, 255, 255, 0.9);
   letter-spacing: 0.01em;
-  flex: 1;
-  text-align: center;
-  background: transparent;
-  border: none;
-  cursor: pointer;
   padding: 4px 8px;
-  border-radius: 8px;
-  transition: background 0.15s;
-}
-.day-nav__label:hover {
-  background: rgba(255, 255, 255, 0.08);
+  pointer-events: none;
+  user-select: none;
 }
 .day-nav__label--past {
   color: rgba(251, 191, 36, 0.85);
+}
+.day-nav__date-overlay {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  cursor: pointer;
+  border: none;
+  background: none;
+  -webkit-appearance: none;
 }
 
 /* ── Day nav light mode ── */

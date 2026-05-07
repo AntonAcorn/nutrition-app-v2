@@ -521,14 +521,9 @@
   justify-content: center;
 }
 
-.swipeable-row__delete-btn {
-  color: #fff;
-  font-size: 0.78rem;
-  font-weight: 700;
-  background: none;
-  border: none;
-  cursor: pointer;
-  padding: 0 8px;
+.swipeable-row__delete-icon {
+  font-size: 1.2rem;
+  pointer-events: none;
 }
 
 .swipeable-row__content {

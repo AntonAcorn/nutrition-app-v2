@@ -12,10 +12,9 @@ const SLOT_ICONS: Record<MealSlot['slotType'], string> = {
   SNACK: '⚡',
 }
 
-const SWIPE_SNAP = 76
-const SWIPE_REVEAL = 40
+const SWIPE_DELETE_THRESHOLD = 76
 
-function SwipeableRow({ onDelete, disabled, children }: { onDelete: () => void; disabled: boolean; children: ReactNode }) {
+function SwipeableRow({ onDelete, children }: { onDelete: () => void; children: ReactNode }) {
   const [offset, setOffsetState] = useState(0)
   const offsetRef = useRef(0)
   const startXRef = useRef(0)
@@ -36,7 +35,6 @@ function SwipeableRow({ onDelete, disabled, children }: { onDelete: () => void; 
   }
 
   function onTouchMove(e: React.TouchEvent) {
-    if (disabled) return
     const dx = startXRef.current - e.touches[0].clientX
     const dy = Math.abs(e.touches[0].clientY - startYRef.current)
     if (!draggingRef.current) {
@@ -44,21 +42,24 @@ function SwipeableRow({ onDelete, disabled, children }: { onDelete: () => void; 
       if (Math.abs(dx) > 4) draggingRef.current = true
       else return
     }
-    setOffset(Math.max(0, Math.min(SWIPE_SNAP * 1.1, startOffsetRef.current + dx)))
+    setOffset(Math.max(0, Math.min(SWIPE_DELETE_THRESHOLD * 1.5, startOffsetRef.current + dx)))
   }
 
   function onTouchEnd() {
     if (!draggingRef.current) return
     draggingRef.current = false
-    setOffset(offsetRef.current >= SWIPE_REVEAL ? SWIPE_SNAP : 0)
+    if (offsetRef.current >= SWIPE_DELETE_THRESHOLD) {
+      setOffsetState(window.innerWidth)
+      onDelete()
+    } else {
+      setOffset(0)
+    }
   }
 
   return (
     <div className="swipeable-row" onTouchStart={onTouchStart} onTouchMove={onTouchMove} onTouchEnd={onTouchEnd}>
-      <div className="swipeable-row__delete-bg" style={{ opacity: Math.min(1, offset / SWIPE_SNAP) }}>
-        <button type="button" className="swipeable-row__delete-btn" onClick={onDelete} disabled={disabled}>
-          Delete
-        </button>
+      <div className="swipeable-row__delete-bg" style={{ opacity: Math.min(1, offset / SWIPE_DELETE_THRESHOLD) }}>
+        <span className="swipeable-row__delete-icon">🗑</span>
       </div>
       <div
         className="swipeable-row__content"
@@ -120,7 +121,6 @@ export function MealsLogCard({ date, refreshToken = 0, onAddToSlot, onDeleted, o
   const [showSlots, setShowSlots] = useState(true)
   const [expandedSlots, setExpandedSlots] = useState<Set<MealSlot['slotType']>>(new Set())
   const [deletingId, setDeletingId] = useState<string | null>(null)
-  const [confirmId, setConfirmId] = useState<string | null>(null)
   const [deleteError, setDeleteError] = useState('')
   const [editingId, setEditingId] = useState<string | null>(null)
   const [editForm, setEditForm] = useState<EditForm | null>(null)
@@ -160,7 +160,6 @@ export function MealsLogCard({ date, refreshToken = 0, onAddToSlot, onDeleted, o
   function openEdit(m: MealLogEntry) {
     setEditingId(m.id)
     setEditForm(toEditForm(m))
-    setConfirmId(null)
     setEditError('')
   }
 
@@ -202,7 +201,6 @@ export function MealsLogCard({ date, refreshToken = 0, onAddToSlot, onDeleted, o
 
   async function handleDelete(id: string) {
     setDeletingId(id)
-    setConfirmId(null)
     setDeleteError('')
     try {
       await deleteMealLogEntry(id)
@@ -477,7 +475,7 @@ export function MealsLogCard({ date, refreshToken = 0, onAddToSlot, onDeleted, o
                   }
 
                   return (
-                    <SwipeableRow key={m.id} onDelete={() => handleDelete(m.id)} disabled={deletingId === m.id}>
+                    <SwipeableRow key={m.id} onDelete={() => handleDelete(m.id)}>
                       <div className="meal-log-row">
                         <div className="meal-log-row__info">
                           <p className="meal-log-row__name">{m.name}</p>
@@ -492,34 +490,6 @@ export function MealsLogCard({ date, refreshToken = 0, onAddToSlot, onDeleted, o
                           >
                             ✎
                           </button>
-                          {confirmId === m.id ? (
-                            <div className="meal-log-row__confirm">
-                              <button
-                                type="button"
-                                className="meal-log-row__confirm-yes"
-                                onClick={() => handleDelete(m.id)}
-                                disabled={deletingId === m.id}
-                              >
-                                {deletingId === m.id ? '…' : 'Delete'}
-                              </button>
-                              <button
-                                type="button"
-                                className="meal-log-row__confirm-no"
-                                onClick={() => setConfirmId(null)}
-                              >
-                                Cancel
-                              </button>
-                            </div>
-                          ) : (
-                            <button
-                              type="button"
-                              className="meal-log-row__delete"
-                              onClick={() => setConfirmId(m.id)}
-                              aria-label={`Delete ${m.name}`}
-                            >
-                              ✕
-                            </button>
-                          )}
                           <button
                             type="button"
                             className="meal-log-row__drag-handle"
