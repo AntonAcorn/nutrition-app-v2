@@ -16,6 +16,7 @@ const SWIPE_DELETE_THRESHOLD = 76
 
 function SwipeableRow({ onDelete, children }: { onDelete: () => void; children: ReactNode }) {
   const [offset, setOffsetState] = useState(0)
+  const [sliding, setSliding] = useState(false)
   const offsetRef = useRef(0)
   const startXRef = useRef(0)
   const startYRef = useRef(0)
@@ -42,28 +43,40 @@ function SwipeableRow({ onDelete, children }: { onDelete: () => void; children: 
       if (Math.abs(dx) > 4) draggingRef.current = true
       else return
     }
-    setOffset(Math.max(0, Math.min(SWIPE_DELETE_THRESHOLD * 1.5, startOffsetRef.current + dx)))
+    setOffset(Math.max(0, Math.min(SWIPE_DELETE_THRESHOLD, startOffsetRef.current + dx)))
   }
 
   function onTouchEnd() {
     if (!draggingRef.current) return
     draggingRef.current = false
     if (offsetRef.current >= SWIPE_DELETE_THRESHOLD) {
-      setOffsetState(window.innerWidth)
+      setSliding(true)
       onDelete()
     } else {
       setOffset(0)
     }
   }
 
+  const deleteFraction = Math.min(1, offset / SWIPE_DELETE_THRESHOLD)
+
   return (
-    <div className="swipeable-row" onTouchStart={onTouchStart} onTouchMove={onTouchMove} onTouchEnd={onTouchEnd}>
-      <div className="swipeable-row__delete-bg" style={{ opacity: Math.min(1, offset / SWIPE_DELETE_THRESHOLD) }}>
-        <span className="swipeable-row__delete-icon">🗑</span>
+    <div
+      className={`swipeable-row${sliding ? ' swipeable-row--sliding' : ''}`}
+      onTouchStart={onTouchStart}
+      onTouchMove={onTouchMove}
+      onTouchEnd={onTouchEnd}
+    >
+      <div className="swipeable-row__delete-bg" style={{ opacity: deleteFraction, width: `${deleteFraction * SWIPE_DELETE_THRESHOLD}px` }}>
+        <svg className="swipeable-row__trash-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <polyline points="3 6 5 6 21 6"/>
+          <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/>
+          <path d="M10 11v6M14 11v6"/>
+          <path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/>
+        </svg>
       </div>
       <div
         className="swipeable-row__content"
-        style={{ transform: `translateX(-${offset}px)`, transition: draggingRef.current ? 'none' : 'transform 0.22s ease' }}
+        style={{ transform: `translateX(-${offset}px)`, transition: draggingRef.current ? 'none' : 'transform 0.2s ease' }}
       >
         {children}
       </div>
@@ -214,8 +227,16 @@ export function MealsLogCard({ date, refreshToken = 0, onAddToSlot, onDeleted, o
         return updated
       })
       onDeleted()
-    } catch {
-      setDeleteError('Failed to delete. Please try again.')
+    } catch (err) {
+      setDeleteError(err instanceof Error ? err.message : 'Could not delete')
+      // Row already slid off screen — restore list from server
+      listMealLog(date)
+        .then(data => {
+          const merged = mergeWithDefaults(data)
+          setSlots(merged)
+          setExpandedSlots(slotsWithItems(merged))
+        })
+        .catch(() => {})
     } finally {
       setDeletingId(null)
     }

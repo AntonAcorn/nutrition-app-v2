@@ -61,5 +61,5 @@ export async function updateMealLogEntry(id: string, data: UpdateMealLogEntryDat
 
 export async function deleteMealLogEntry(id: string): Promise<void> {
   const res = await fetch(`/api/history/meals/${id}`, { method: 'DELETE', credentials: 'include' })
-  if (!res.ok) throw new Error('Failed to delete meal')
+  if (!res.ok) throw new Error(`Delete failed (${res.status})`)
 }

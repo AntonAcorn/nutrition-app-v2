@@ -510,19 +510,28 @@
   border-radius: inherit;
 }
 
+.swipeable-row--sliding .swipeable-row__content {
+  transform: translateX(-110%) !important;
+  transition: transform 0.22s ease-in !important;
+}
+
 .swipeable-row__delete-bg {
   position: absolute;
   inset: 0 0 0 auto;
-  width: 76px;
+  min-width: 0;
   background: #ef4444;
   border-radius: 0 8px 8px 0;
   display: flex;
   align-items: center;
   justify-content: center;
+  overflow: hidden;
 }
 
-.swipeable-row__delete-icon {
-  font-size: 1.2rem;
+.swipeable-row__trash-icon {
+  width: 20px;
+  height: 20px;
+  color: #fff;
+  flex-shrink: 0;
   pointer-events: none;
 }
 
