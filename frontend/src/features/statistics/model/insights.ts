@@ -197,23 +197,41 @@ export function computeInsights(
   return insights.slice(0, 3)
 }
 
+function weightTrendKgPerWeek(wPoints: NutritionStatisticsPoint[]): number {
+  const base = new Date(wPoints[0].entryDate + 'T12:00:00').getTime()
+  const xs = wPoints.map(p => (new Date(p.entryDate + 'T12:00:00').getTime() - base) / 86400000)
+  const ys = wPoints.map(p => p.weightKg ?? 0)
+  const n = xs.length
+  const sumX = xs.reduce((s, x) => s + x, 0)
+  const sumY = ys.reduce((s, y) => s + y, 0)
+  const sumXY = xs.reduce((s, x, i) => s + x * ys[i], 0)
+  const sumXX = xs.reduce((s, x) => s + x * x, 0)
+  const slope = (n * sumXY - sumX * sumY) / (n * sumXX - sumX * sumX)
+  return slope * 7
+}
+
 export function computeCalorieSuggestion(
   loggedPoints: NutritionStatisticsPoint[],
   allPoints: NutritionStatisticsPoint[],
   targetWeightKg: number | null,
 ): CalorieSuggestion | null {
-  if (targetWeightKg == null || loggedPoints.length < 14) return null
-  const wPoints = allPoints.filter(p => p.weightKg != null)
+  if (targetWeightKg == null) return null
+
+  const cutoff = new Date()
+  cutoff.setDate(cutoff.getDate() - 28)
+  const cutoffStr = localDateString(cutoff)
+
+  const recentLogged = loggedPoints.filter(p => p.entryDate >= cutoffStr)
+  const recentAll = allPoints.filter(p => p.entryDate >= cutoffStr)
+
+  if (recentLogged.length < 14) return null
+  const wPoints = recentAll.filter(p => p.weightKg != null)
   if (wPoints.length < 4) return null
 
-  const first = wPoints[0], last = wPoints[wPoints.length - 1]
-  const daysDiff = Math.max(7,
-    (new Date(last.entryDate + 'T12:00:00').getTime() - new Date(first.entryDate + 'T12:00:00').getTime()) / 86400000,
-  )
-  const kgPerWeek = ((last.weightKg ?? 0) - (first.weightKg ?? 0)) / daysDiff * 7
-  const currentWeight = last.weightKg ?? 0
+  const kgPerWeek = weightTrendKgPerWeek(wPoints)
+  const currentWeight = wPoints[wPoints.length - 1].weightKg ?? 0
 
-  const recentTarget = loggedPoints[loggedPoints.length - 1]?.calorieTarget
+  const recentTarget = recentLogged[recentLogged.length - 1]?.calorieTarget
   if (!recentTarget || recentTarget <= 0) return null
   const currentTarget = Math.round(recentTarget)
 
