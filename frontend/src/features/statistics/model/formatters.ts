@@ -1,5 +1,6 @@
 export const RANGE_OPTIONS = [7, 30, 90] as const
 export type RangeDays = (typeof RANGE_OPTIONS)[number]
+export interface CustomRange { from: string; to: string }
 
 export const DOW_NAMES = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'] as const
 

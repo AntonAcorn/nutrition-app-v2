@@ -17,3 +17,7 @@ export function fetchNutritionStatistics(days: number): Promise<NutritionStatist
   const { fromDate, toDate } = getRange(days)
   return apiClient.get<NutritionStatisticsResponse>(`/api/history/statistics?fromDate=${fromDate}&toDate=${toDate}`)
 }
+
+export function fetchNutritionStatisticsRange(from: string, to: string): Promise<NutritionStatisticsResponse> {
+  return apiClient.get<NutritionStatisticsResponse>(`/api/history/statistics?fromDate=${from}&toDate=${to}`)
+}

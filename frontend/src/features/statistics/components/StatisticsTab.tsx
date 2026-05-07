@@ -1,9 +1,9 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
-import { fetchNutritionStatistics } from '../model/statisticsApi'
+import { fetchNutritionStatistics, fetchNutritionStatisticsRange } from '../model/statisticsApi'
 import { MascotSvg } from '../../current-day/components/MascotSvg'
 import type { NutritionStatisticsResponse } from '../../../shared/types/nutrition'
-import { formatSigned, type RangeDays } from '../model/formatters'
+import { formatSigned, formatExpandedDate, type RangeDays, type CustomRange } from '../model/formatters'
 import { movingAvg } from '../model/chartGeometry'
 import { computeStreak, computeInsights, computeCalorieSuggestion } from '../model/insights'
 import { MetricCard } from './MetricCard'
@@ -19,12 +19,20 @@ interface StatisticsTabProps {
 
 export function StatisticsTab({ refreshToken = 0 }: StatisticsTabProps) {
   const queryClient = useQueryClient()
-  const [rangeDays, setRangeDays] = useState<RangeDays>(30)
-  const [showAllCharts, setShowAllCharts] = useState(false)
+  const [rangeMode, setRangeMode] = useState<RangeDays | 'custom'>(30)
+  const [customRange, setCustomRange] = useState<CustomRange | null>(null)
+  const [showDetails, setShowDetails] = useState(false)
+
+  const isCustomReady = rangeMode === 'custom' && customRange != null && customRange.from <= customRange.to
 
   const statsQuery = useQuery<NutritionStatisticsResponse>({
-    queryKey: ['statistics', rangeDays],
-    queryFn: () => fetchNutritionStatistics(rangeDays),
+    queryKey: isCustomReady
+      ? ['statistics', 'custom', customRange!.from, customRange!.to]
+      : ['statistics', rangeMode],
+    queryFn: () => isCustomReady
+      ? fetchNutritionStatisticsRange(customRange!.from, customRange!.to)
+      : fetchNutritionStatistics(rangeMode as RangeDays),
+    enabled: rangeMode !== 'custom' || isCustomReady,
   })
   const data = statsQuery.data ?? null
   const loading = statsQuery.isLoading
@@ -32,12 +40,14 @@ export function StatisticsTab({ refreshToken = 0 }: StatisticsTabProps) {
 
   useEffect(() => {
     if (refreshToken > 0) {
-      queryClient.invalidateQueries({ queryKey: ['statistics', rangeDays] })
+      queryClient.invalidateQueries({ queryKey: ['statistics'] })
     }
   }, [refreshToken]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const points = useMemo(() => data?.points ?? [], [data])
-  const selectedTitle = rangeDays === 7 ? 'last week' : rangeDays === 30 ? 'last month' : 'last 3 months'
+  const selectedTitle = rangeMode === 'custom' && customRange
+    ? `${formatExpandedDate(customRange.from)} – ${formatExpandedDate(customRange.to)}`
+    : rangeMode === 7 ? 'last week' : rangeMode === 30 ? 'last month' : 'last 3 months'
   const loggedPoints = useMemo(() => points.filter(p => p.consumedCalories > 0), [points])
 
   const avgCalorieBalance = useMemo(() => {
@@ -61,9 +71,13 @@ export function StatisticsTab({ refreshToken = 0 }: StatisticsTabProps) {
 
   const streak = useMemo(() => computeStreak(points), [points])
   const weightTrendline = useMemo(() => movingAvg(points), [points])
+  const effectiveDays = rangeMode === 'custom' && customRange
+    ? Math.max(1, Math.ceil((new Date(customRange.to + 'T12:00:00').getTime() - new Date(customRange.from + 'T12:00:00').getTime()) / 86400000) + 1)
+    : rangeMode as number
+
   const insights = useMemo(
-    () => computeInsights(loggedPoints, points, data?.targetWeightKg ?? null, rangeDays),
-    [loggedPoints, points, data, rangeDays],
+    () => computeInsights(loggedPoints, points, data?.targetWeightKg ?? null, effectiveDays),
+    [loggedPoints, points, data, effectiveDays],
   )
   const calorieSuggestion = useMemo(
     () => computeCalorieSuggestion(loggedPoints, points, data?.targetWeightKg ?? null),
@@ -79,7 +93,12 @@ export function StatisticsTab({ refreshToken = 0 }: StatisticsTabProps) {
         </div>
         <div className="statistics-toolbar">
           <p className="screen-header__meta">Last 7, 30, or 90 days, including today.</p>
-          <RangeSelector value={rangeDays} onChange={setRangeDays} />
+          <RangeSelector
+            value={rangeMode}
+            onChange={setRangeMode}
+            customRange={customRange}
+            onCustomRange={setCustomRange}
+          />
         </div>
       </header>
 
@@ -120,6 +139,9 @@ export function StatisticsTab({ refreshToken = 0 }: StatisticsTabProps) {
 
       {!loading && !error && data && loggedPoints.length > 0 ? (
         <>
+          {/* ── Primary: always visible ── */}
+          {calorieSuggestion && <CalorieSuggestionCard suggestion={calorieSuggestion} />}
+
           <section className="stats-metric-grid">
             <MetricCard
               title="Avg calorie balance"
@@ -135,24 +157,7 @@ export function StatisticsTab({ refreshToken = 0 }: StatisticsTabProps) {
               tone={weightChange == null ? 'neutral' : weightChange <= 0 ? 'good' : 'bad'}
               emoji={weightChange == null ? '⚖️' : weightChange <= -0.2 ? '📉' : weightChange < 0.2 ? '➖' : '📈'}
             />
-            <MetricCard
-              title="On-target days"
-              value={loggedPoints.length === 0 ? '—' : `${onTargetDays} / ${loggedPoints.length}`}
-              detail={loggedPoints.length === 0 ? 'No logged days in this range' : 'Logged days at or under target'}
-              tone={loggedPoints.length === 0 ? 'neutral' : onTargetDays / loggedPoints.length >= 0.7 ? 'good' : onTargetDays / loggedPoints.length >= 0.4 ? 'neutral' : 'bad'}
-              emoji={loggedPoints.length === 0 ? '🎯' : onTargetDays / loggedPoints.length >= 0.7 ? '🎯' : onTargetDays / loggedPoints.length >= 0.4 ? '👀' : '⚠️'}
-            />
-            <MetricCard
-              title="Streak"
-              value={streak === 0 ? '—' : `${streak} day${streak === 1 ? '' : 's'}`}
-              detail={streak === 0 ? 'Log today to start a streak' : streak >= 7 ? 'Keep it up!' : 'Days logged in a row'}
-              tone={streak === 0 ? 'neutral' : streak >= 7 ? 'good' : 'neutral'}
-              emoji={streak === 0 ? '💤' : streak >= 14 ? '🔥' : streak >= 7 ? '⚡' : '📅'}
-            />
           </section>
-
-          <InsightsSection insights={insights} />
-          {calorieSuggestion && <CalorieSuggestionCard suggestion={calorieSuggestion} />}
 
           <LineChart
             title="Weight"
@@ -175,25 +180,46 @@ export function StatisticsTab({ refreshToken = 0 }: StatisticsTabProps) {
             <CalorieBarChart points={points} />
           </section>
 
-          <LineChart
-            title="Calories"
-            unit="kcal"
-            points={points}
-            valueKey="consumedCalories"
-            targetKey="calorieTarget"
-            colorClass="line-chart__path--calories"
-            gradColor="#f08a4b"
-          />
+          {/* ── Secondary: behind toggle ── */}
           <button
             type="button"
             className="stats-show-more-btn"
-            onClick={() => setShowAllCharts(v => !v)}
+            onClick={() => setShowDetails(v => !v)}
           >
-            {showAllCharts ? 'Show less ▲' : 'Show macros & table ▼'}
+            {showDetails ? 'Hide details ▲' : 'Show details ▼'}
           </button>
 
-          {showAllCharts && (
+          {showDetails && (
             <>
+              <section className="stats-metric-grid">
+                <MetricCard
+                  title="On-target days"
+                  value={loggedPoints.length === 0 ? '—' : `${onTargetDays} / ${loggedPoints.length}`}
+                  detail={loggedPoints.length === 0 ? 'No logged days in this range' : 'Logged days at or under target'}
+                  tone={loggedPoints.length === 0 ? 'neutral' : onTargetDays / loggedPoints.length >= 0.7 ? 'good' : onTargetDays / loggedPoints.length >= 0.4 ? 'neutral' : 'bad'}
+                  emoji={loggedPoints.length === 0 ? '🎯' : onTargetDays / loggedPoints.length >= 0.7 ? '🎯' : onTargetDays / loggedPoints.length >= 0.4 ? '👀' : '⚠️'}
+                />
+                <MetricCard
+                  title="Streak"
+                  value={streak === 0 ? '—' : `${streak} day${streak === 1 ? '' : 's'}`}
+                  detail={streak === 0 ? 'Log today to start a streak' : streak >= 7 ? 'Keep it up!' : 'Days logged in a row'}
+                  tone={streak === 0 ? 'neutral' : streak >= 7 ? 'good' : 'neutral'}
+                  emoji={streak === 0 ? '💤' : streak >= 14 ? '🔥' : streak >= 7 ? '⚡' : '📅'}
+                />
+              </section>
+
+              <LineChart
+                title="Calories"
+                unit="kcal"
+                points={points}
+                valueKey="consumedCalories"
+                targetKey="calorieTarget"
+                colorClass="line-chart__path--calories"
+                gradColor="#f08a4b"
+              />
+
+              <InsightsSection insights={insights} />
+
               <LineChart
                 title="Protein"
                 unit="g"

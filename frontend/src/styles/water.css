@@ -451,6 +451,52 @@
   color: #fff8f1;
 }
 
+.range-selector-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 8px;
+}
+
+.range-custom-inputs {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.range-custom-inputs__input {
+  background: #17191f;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 10px;
+  color: rgba(255, 255, 255, 0.85);
+  font-size: 0.8rem;
+  padding: 6px 10px;
+  outline: none;
+  cursor: pointer;
+  color-scheme: dark;
+}
+
+.range-custom-inputs__input:focus {
+  border-color: rgba(59, 125, 255, 0.6);
+}
+
+.range-custom-inputs__sep {
+  color: rgba(255, 255, 255, 0.35);
+  font-size: 0.85rem;
+  user-select: none;
+}
+
+[data-theme="light"] .range-custom-inputs__input {
+  background: #fff;
+  border-color: rgba(0, 0, 0, 0.12);
+  color: #1a1a1a;
+  color-scheme: light;
+}
+
+[data-theme="light"] .range-custom-inputs__sep {
+  color: #999;
+}
+
 .statistics-panel--interactive {
   cursor: default;
 }
