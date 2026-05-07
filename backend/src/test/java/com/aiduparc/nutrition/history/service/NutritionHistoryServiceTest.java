@@ -2,23 +2,21 @@ package com.aiduparc.nutrition.history.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import com.aiduparc.nutrition.history.api.NutritionStatisticsResponse;
-import com.aiduparc.nutrition.history.api.TodaySummaryResponse;
 import com.aiduparc.nutrition.history.model.DailyNutritionEntryEntity;
-import com.aiduparc.nutrition.history.model.MealLogEntryEntity;
 import com.aiduparc.nutrition.history.model.MealSlotEntity;
 import com.aiduparc.nutrition.history.repository.DailyNutritionEntryRepository;
-import com.aiduparc.nutrition.history.repository.MealLogEntryRepository;
-import com.aiduparc.nutrition.history.repository.MealSlotRepository;
 import com.aiduparc.nutrition.notifications.TelegramNotificationService;
-import com.aiduparc.nutrition.user.service.UserProfileService;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Optional;
 import java.util.UUID;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -26,117 +24,29 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.lenient;
-import static org.mockito.Mockito.when;
-
-import org.junit.jupiter.api.BeforeEach;
-
+/**
+ * Tests the daily-entry write operations owned by NutritionHistoryService:
+ * addToDailyTotals, upsert, updateWeight, updateNutritionTotals.
+ *
+ * Statistics tests live in NutritionStatisticsCalculatorTest; meal-log
+ * tests would live in MealLogServiceTest (not yet created — covered
+ * indirectly by integration tests via controllers).
+ */
 @ExtendWith(MockitoExtension.class)
 class NutritionHistoryServiceTest {
 
-    @Mock
-    private DailyNutritionEntryRepository repository;
+    @Mock private DailyNutritionEntryRepository repository;
+    @Mock private TelegramNotificationService telegramNotificationService;
+    @Mock private NutritionStatisticsCalculator statisticsCalculator;
+    @Mock private MealLogService mealLogService;
 
-    @Mock
-    private MealLogEntryRepository mealLogRepository;
-
-    @Mock
-    private MealSlotRepository mealSlotRepository;
-
-    @Mock
-    private UserProfileService userProfileService;
-
-    @Mock
-    private TelegramNotificationService telegramNotificationService;
-
-    @InjectMocks
-    private NutritionHistoryService service;
+    @InjectMocks private NutritionHistoryService service;
 
     @BeforeEach
-    void stubNoProfile() {
-        lenient().when(userProfileService.findByNutritionUserId(any())).thenReturn(Optional.empty());
-        lenient().when(userProfileService.getMacroTargets(any())).thenReturn(UserProfileService.MacroTargets.DEFAULT);
-        lenient().when(mealLogRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
-        lenient().when(mealSlotRepository.findByUserIdAndEntryDateAndSlotType(any(), any(), any()))
-            .thenReturn(Optional.empty());
-        lenient().when(mealSlotRepository.save(any(MealSlotEntity.class))).thenAnswer(inv -> inv.getArgument(0));
-    }
-
-    @Test
-    void getTodaySummaryReturnsPersistedValues() {
-        UUID userId = UUID.randomUUID();
-        LocalDate entryDate = LocalDate.of(2026, 4, 8);
-        DailyNutritionEntryEntity entity = new DailyNutritionEntryEntity();
-        entity.setId(UUID.randomUUID());
-        entity.setUserId(userId);
-        entity.setEntryDate(entryDate);
-        entity.setWeightKg(new BigDecimal("82.40"));
-        entity.setCaloriesConsumedKcal(new BigDecimal("1640.00"));
-        entity.setCalorieTargetKcal(BigDecimal.ZERO);
-        entity.setProteinGrams(new BigDecimal("108.00"));
-        entity.setFatGrams(new BigDecimal("52.00"));
-        entity.setFiberGrams(new BigDecimal("24.00"));
-
-        when(repository.findByUserIdAndEntryDate(userId, entryDate)).thenReturn(Optional.of(entity));
-
-        TodaySummaryResponse summary = service.getTodaySummary(userId, entryDate);
-
-        assertThat(summary.weightKg()).isEqualByComparingTo("82.40");
-        assertThat(summary.consumedCalories()).isEqualByComparingTo("1640.00");
-        assertThat(summary.dailyTargetCalories()).isEqualByComparingTo("2000.00");
-        assertThat(summary.remainingCalories()).isEqualByComparingTo("360.00");
-        assertThat(summary.proteinGrams()).isEqualByComparingTo("108.00");
-        assertThat(summary.fatGrams()).isEqualByComparingTo("52.00");
-        assertThat(summary.fiberGrams()).isEqualByComparingTo("24.00");
-    }
-
-    @Test
-    void getStatisticsReturnsDerivedBalanceForRange() {
-        UUID userId = UUID.randomUUID();
-        LocalDate fromDate = LocalDate.of(2026, 4, 1);
-        LocalDate toDate = LocalDate.of(2026, 4, 2);
-
-        DailyNutritionEntryEntity first = new DailyNutritionEntryEntity();
-        first.setId(UUID.randomUUID());
-        first.setUserId(userId);
-        first.setEntryDate(fromDate);
-        first.setWeightKg(new BigDecimal("82.34"));
-        first.setCaloriesConsumedKcal(new BigDecimal("1800.00"));
-        first.setCalorieTargetKcal(new BigDecimal("2000.00"));
-        first.setProteinGrams(new BigDecimal("110.00"));
-        first.setFatGrams(new BigDecimal("60.00"));
-        first.setFiberGrams(new BigDecimal("20.00"));
-
-        DailyNutritionEntryEntity second = new DailyNutritionEntryEntity();
-        second.setId(UUID.randomUUID());
-        second.setUserId(userId);
-        second.setEntryDate(toDate);
-        second.setWeightKg(new BigDecimal("81.86"));
-        second.setCaloriesConsumedKcal(new BigDecimal("2150.00"));
-        second.setCalorieTargetKcal(new BigDecimal("2000.00"));
-        second.setProteinGrams(new BigDecimal("125.00"));
-        second.setFatGrams(new BigDecimal("72.00"));
-        second.setFiberGrams(new BigDecimal("24.00"));
-
-        when(repository.findByUserIdAndEntryDateBetweenOrderByEntryDateAsc(userId, fromDate, toDate))
-            .thenReturn(java.util.List.of(first, second));
-        when(repository.findByUserIdAndEntryDateBetweenOrderByEntryDateAsc(userId, LocalDate.of(2026, 3, 27), toDate))
-            .thenReturn(java.util.List.of(first, second));
-        when(repository.findByUserIdAndEntryDateBetweenOrderByEntryDateAsc(userId, LocalDate.of(2026, 4, 1), toDate))
-            .thenReturn(java.util.List.of(first, second));
-
-        NutritionStatisticsResponse response = service.getStatistics(userId, fromDate, toDate);
-
-        assertThat(response.points()).hasSize(2);
-        assertThat(response.points().get(0).weightKg()).isEqualByComparingTo("82.3");
-        assertThat(response.points().get(1).weightKg()).isEqualByComparingTo("81.9");
-        assertThat(response.points().get(0).calorieBalance()).isEqualByComparingTo("-200.00");
-        assertThat(response.points().get(1).calorieBalance()).isEqualByComparingTo("150.00");
-        assertThat(response.weeklyAverageWeightKg()).isEqualByComparingTo("82.1");
-        assertThat(response.monthlyAverageWeightKg()).isEqualByComparingTo("82.1");
-        assertThat(response.weeklySummary().calorieBalance()).isEqualByComparingTo("-10050.00");
-        assertThat(response.monthlySummary().calorieBalance()).isEqualByComparingTo("-50.00");
+    void stubMealLog() {
+        // addToDailyTotals invokes mealLogService — return a stub slot so the
+        // test focuses on the totals computation. Slot.id auto-generated; null is fine here.
+        lenient().when(mealLogService.getOrCreateSlot(any(), any(), anyString())).thenReturn(new MealSlotEntity());
     }
 
     @Test
@@ -155,11 +65,10 @@ class NutritionHistoryServiceTest {
         existing.setNotes("breakfast");
 
         when(repository.findByUserIdAndEntryDate(userId, entryDate)).thenReturn(Optional.of(existing));
-        when(repository.save(any(DailyNutritionEntryEntity.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        when(repository.save(any(DailyNutritionEntryEntity.class))).thenAnswer(inv -> inv.getArgument(0));
 
         var saved = service.addToDailyTotals(new NutritionHistoryService.AddToDailyTotalsCommand(
-            userId,
-            entryDate,
+            userId, entryDate,
             new BigDecimal("560.00"),
             new BigDecimal("30.00"),
             new BigDecimal("17.00"),
@@ -181,15 +90,14 @@ class NutritionHistoryServiceTest {
         LocalDate entryDate = LocalDate.of(2026, 4, 5);
 
         when(repository.findByUserIdAndEntryDate(userId, entryDate)).thenReturn(Optional.empty());
-        when(repository.save(any(DailyNutritionEntryEntity.class))).thenAnswer(invocation -> {
-            DailyNutritionEntryEntity entity = invocation.getArgument(0);
+        when(repository.save(any(DailyNutritionEntryEntity.class))).thenAnswer(inv -> {
+            DailyNutritionEntryEntity entity = inv.getArgument(0);
             entity.setId(UUID.randomUUID());
             return entity;
         });
 
         NutritionHistoryService.UpsertDailyNutritionEntryCommand command = new NutritionHistoryService.UpsertDailyNutritionEntryCommand(
-            userId,
-            entryDate,
+            userId, entryDate,
             new BigDecimal("2200.00"),
             new BigDecimal("2500.00"),
             new BigDecimal("82.10"),
@@ -228,7 +136,7 @@ class NutritionHistoryServiceTest {
         existing.setNotes("old");
 
         when(repository.findByUserIdAndEntryDate(userId, entryDate)).thenReturn(Optional.of(existing));
-        when(repository.save(any(DailyNutritionEntryEntity.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        when(repository.save(any(DailyNutritionEntryEntity.class))).thenAnswer(inv -> inv.getArgument(0));
 
         var saved = service.updateWeight(userId, entryDate, new BigDecimal("81.74"));
 
@@ -236,38 +144,6 @@ class NutritionHistoryServiceTest {
         assertThat(saved.caloriesConsumedKcal()).isEqualByComparingTo("1800.00");
         assertThat(saved.proteinGrams()).isEqualByComparingTo("120.00");
         assertThat(saved.notes()).isEqualTo("old");
-    }
-
-    @Test
-    void getStatisticsIncludesTodayEvenWhenEntryIsMissing() {
-        UUID userId = UUID.randomUUID();
-        LocalDate today = LocalDate.of(2026, 4, 9);
-        LocalDate yesterday = today.minusDays(1);
-
-        DailyNutritionEntryEntity yesterdayEntry = new DailyNutritionEntryEntity();
-        yesterdayEntry.setId(UUID.randomUUID());
-        yesterdayEntry.setUserId(userId);
-        yesterdayEntry.setEntryDate(yesterday);
-        yesterdayEntry.setCaloriesConsumedKcal(new BigDecimal("1800.00"));
-        yesterdayEntry.setCalorieTargetKcal(new BigDecimal("2000.00"));
-        yesterdayEntry.setProteinGrams(new BigDecimal("120.00"));
-        yesterdayEntry.setFatGrams(new BigDecimal("60.00"));
-        yesterdayEntry.setFiberGrams(new BigDecimal("20.00"));
-
-        when(repository.findByUserIdAndEntryDateBetweenOrderByEntryDateAsc(userId, yesterday, today))
-            .thenReturn(java.util.List.of(yesterdayEntry));
-        when(repository.findByUserIdAndEntryDateBetweenOrderByEntryDateAsc(userId, today.minusDays(6), today))
-            .thenReturn(java.util.List.of(yesterdayEntry));
-        when(repository.findByUserIdAndEntryDateBetweenOrderByEntryDateAsc(userId, LocalDate.of(2026, 4, 1), today))
-            .thenReturn(java.util.List.of(yesterdayEntry));
-
-        NutritionStatisticsResponse response = service.getStatistics(userId, yesterday, today);
-
-        assertThat(response.points()).hasSize(2);
-        assertThat(response.points().get(0).entryDate()).isEqualTo(yesterday);
-        assertThat(response.points().get(1).entryDate()).isEqualTo(today);
-        assertThat(response.points().get(1).consumedCalories()).isEqualByComparingTo("0.00");
-        assertThat(response.points().get(1).calorieTarget()).isEqualByComparingTo("2000.00");
     }
 
     @Test
@@ -282,14 +158,12 @@ class NutritionHistoryServiceTest {
         existing.setNotes("old");
 
         when(repository.findByUserIdAndEntryDate(userId, entryDate)).thenReturn(Optional.of(existing));
-        when(repository.save(any(DailyNutritionEntryEntity.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        when(repository.save(any(DailyNutritionEntryEntity.class))).thenAnswer(inv -> inv.getArgument(0));
 
         NutritionHistoryService.UpsertDailyNutritionEntryCommand command = new NutritionHistoryService.UpsertDailyNutritionEntryCommand(
-            userId,
-            entryDate,
+            userId, entryDate,
             new BigDecimal("2050.00"),
-            null,
-            null,
+            null, null,
             new BigDecimal("140.00"),
             null,
             new BigDecimal("24.00"),
@@ -321,7 +195,7 @@ class NutritionHistoryServiceTest {
         existing.setNotes("breakfast");
 
         when(repository.findByUserIdAndEntryDate(userId, entryDate)).thenReturn(Optional.of(existing));
-        when(repository.save(any(DailyNutritionEntryEntity.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        when(repository.save(any(DailyNutritionEntryEntity.class))).thenAnswer(inv -> inv.getArgument(0));
 
         var saved = service.updateNutritionTotals(
             userId, entryDate,
@@ -346,8 +220,8 @@ class NutritionHistoryServiceTest {
         LocalDate entryDate = LocalDate.of(2026, 4, 5);
 
         when(repository.findByUserIdAndEntryDate(userId, entryDate)).thenReturn(Optional.empty());
-        when(repository.save(any(DailyNutritionEntryEntity.class))).thenAnswer(invocation -> {
-            DailyNutritionEntryEntity entity = invocation.getArgument(0);
+        when(repository.save(any(DailyNutritionEntryEntity.class))).thenAnswer(inv -> {
+            DailyNutritionEntryEntity entity = inv.getArgument(0);
             entity.setId(UUID.randomUUID());
             return entity;
         });
