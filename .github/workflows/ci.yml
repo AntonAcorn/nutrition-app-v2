@@ -36,3 +36,12 @@ jobs:
       - name: Build frontend
         working-directory: frontend
         run: npm run build
+      - name: Unit tests
+        working-directory: frontend
+        run: npm test
+      - name: Smoke tests (puppeteer + Chrome)
+        working-directory: frontend
+        env:
+          # Pre-installed on GitHub Actions ubuntu-latest runners
+          CHROME_PATH: /usr/bin/google-chrome-stable
+        run: npm run test:smoke:ci

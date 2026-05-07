@@ -21,7 +21,7 @@ async function expect(label, fn) {
   const browser = await puppeteer.launch({
     executablePath: CHROME,
     headless: 'new',
-    args: ['--no-sandbox', '--user-data-dir=/tmp/puppeteer-chrome-profile-' + Date.now()],
+    args: ['--no-sandbox', '--disable-dev-shm-usage', '--user-data-dir=/tmp/puppeteer-chrome-profile-' + Date.now()],
   })
   const page = await browser.newPage()
   await page.setViewport({ width: 390, height: 844 }) // iPhone-ish
