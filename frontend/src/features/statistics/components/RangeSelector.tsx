@@ -1,5 +1,5 @@
 import { useRef } from 'react'
-import { RANGE_OPTIONS, type RangeDays, type CustomRange } from '../model/formatters'
+import { RANGE_OPTIONS, localDateString, type RangeDays, type CustomRange } from '../model/formatters'
 
 interface RangeSelectorProps {
   value: RangeDays | 'custom'
@@ -11,7 +11,7 @@ interface RangeSelectorProps {
 export function RangeSelector({ value, onChange, customRange, onCustomRange }: RangeSelectorProps) {
   const fromRef = useRef<HTMLInputElement>(null)
   const toRef = useRef<HTMLInputElement>(null)
-  const today = new Date().toISOString().slice(0, 10)
+  const today = localDateString(new Date())
 
   function tryEmit() {
     const from = fromRef.current?.value ?? ''

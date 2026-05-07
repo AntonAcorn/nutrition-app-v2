@@ -110,14 +110,14 @@ export function LineChart({
                 Weight
               </span>
               <span className="chart-legend__item">
-                <span className="chart-legend__line chart-legend__line--dashed" />
+                <span className="chart-legend__line chart-legend__line--dashed" style={{ borderTopColor: 'rgba(168,85,247,0.75)' }} />
                 5-day trend
               </span>
             </>
           ) : null}
           {goalLine != null ? (
             <span className="chart-legend__item">
-              <span className="chart-legend__line chart-legend__line--dashed" style={{ background: 'rgba(251,191,36,0.7)' }} />
+              <span className="chart-legend__line chart-legend__line--dashed" style={{ borderTopColor: 'rgba(251,191,36,0.7)' }} />
               Goal: {goalLine} kg
             </span>
           ) : null}

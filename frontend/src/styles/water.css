@@ -415,8 +415,7 @@
   background: rgba(255, 250, 244, 0.82);
   border: 1px solid rgba(211, 195, 177, 0.9);
   max-width: 100%;
-  overflow-x: auto;
-  scrollbar-width: none;
+  overflow: visible;
 }
 
 .screen-section--statistics-dark .range-selector {
@@ -750,7 +749,7 @@
 
 .chart-legend__line--dashed {
   background: transparent !important;
-  border-top: 2.5px dashed rgba(168, 85, 247, 0.75);
+  border-top: 2.5px dashed;
 }
 
 /* Period summary row */
