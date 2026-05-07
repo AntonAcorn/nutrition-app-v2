@@ -112,6 +112,24 @@
   box-shadow: none;
 }
 
+.profile-tool-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  background: transparent;
+  border: none;
+  padding: 12px 0;
+  cursor: pointer;
+  color: var(--text-primary);
+  font-size: 0.95rem;
+}
+
+.profile-tool-row__chevron {
+  font-size: 1.2rem;
+  opacity: 0.4;
+}
+
 .profile-actions {
   display: grid;
   gap: 10px;

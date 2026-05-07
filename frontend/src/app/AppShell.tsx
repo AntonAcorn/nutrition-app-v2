@@ -6,7 +6,7 @@ import { fetchNutritionStatistics } from '../features/statistics/model/statistic
 import { CurrentDayTab } from '../features/current-day/components/CurrentDayTab'
 import type { AuthUser } from '../features/auth/model/authApi'
 import type { MealTemplateItem } from '../shared/types/nutrition'
-import { SunIcon, MoonIcon, TabIconToday, TabIconStats, TabIconFast, TabIconLibrary, TabIconMe } from './icons'
+import { SunIcon, MoonIcon, TabIconToday, TabIconStats, TabIconLibrary, TabIconMe } from './icons'
 
 const PhotoAnalyzerTab = lazy(() => import('../features/photo-analyzer/components/PhotoAnalyzerTab').then(m => ({ default: m.PhotoAnalyzerTab })))
 const StatisticsTab    = lazy(() => import('../features/statistics/components/StatisticsTab').then(m => ({ default: m.StatisticsTab })))
@@ -155,7 +155,6 @@ export function AppShell({ authUser, theme, onToggleTheme, onLogout, onDeleteAcc
         {([
           { route: ROUTES.today,   label: 'Today',   Icon: TabIconToday   },
           { route: ROUTES.stats,   label: 'Stats',   Icon: TabIconStats   },
-          { route: ROUTES.fasting, label: 'Fast',    Icon: TabIconFast    },
           { route: ROUTES.library, label: 'Library', Icon: TabIconLibrary },
           { route: ROUTES.profile, label: 'Me',      Icon: TabIconMe      },
         ] as const).map(({ route, label, Icon }) => (

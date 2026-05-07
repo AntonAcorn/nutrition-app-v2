@@ -1,4 +1,5 @@
 import { CSSProperties, FormEvent, useEffect, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { fetchProfile, updateProfile, type UserProfile } from '../model/profileApi'
 import type { OnboardingPayload } from '../../onboarding/model/profileApi'
@@ -38,6 +39,7 @@ interface Props {
 }
 
 export function ProfileTab({ displayName, email, onLogout, onDeleteAccount }: Props) {
+  const navigate = useNavigate()
   const queryClient = useQueryClient()
   const profileQuery = useQuery<UserProfile>({
     queryKey: ['profile'],
@@ -384,6 +386,18 @@ export function ProfileTab({ displayName, email, onLogout, onDeleteAccount }: Pr
 
       <div className="panel">
         <NotificationSettings />
+      </div>
+
+      <div className="panel">
+        <p className="profile-section-title">Tools</p>
+        <button
+          type="button"
+          className="profile-tool-row"
+          onClick={() => navigate('/fasting')}
+        >
+          <span>⏱ Intermittent fasting</span>
+          <span className="profile-tool-row__chevron">›</span>
+        </button>
       </div>
 
       <div className="panel profile-actions">
