@@ -145,6 +145,27 @@
   -webkit-appearance: none;
 }
 
+.day-nav__today-chip {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: #3b7dff;
+  background: rgba(59, 125, 255, 0.12);
+  border: none;
+  border-radius: 999px;
+  padding: 4px 10px;
+  cursor: pointer;
+  white-space: nowrap;
+  flex-shrink: 0;
+  transition: background 0.15s;
+}
+.day-nav__today-chip:hover {
+  background: rgba(59, 125, 255, 0.2);
+}
+[data-theme="light"] .day-nav__today-chip {
+  color: #1a4fc4;
+  background: rgba(26, 79, 196, 0.1);
+}
+
 /* ── Day nav light mode ── */
 [data-theme="light"] .day-nav__btn { color: rgba(20, 33, 61, 0.45); }
 [data-theme="light"] .day-nav__btn:hover:not(:disabled) {

@@ -366,7 +366,7 @@ export function CurrentDayTab({ refreshToken = 0, successMessage = '', onDayUpda
             min={minDate}
             max={today}
             value={selectedDate}
-            onChange={e => { if (e.target.value) setSelectedDate(e.target.value) }}
+            onChange={e => { if (e.target.value && e.target.value <= today) setSelectedDate(e.target.value) }}
           />
         </div>
         <button
@@ -378,6 +378,16 @@ export function CurrentDayTab({ refreshToken = 0, successMessage = '', onDayUpda
         >
           →
         </button>
+        {!isToday && (
+          <button
+            type="button"
+            className="day-nav__today-chip"
+            onClick={() => setSelectedDate(today)}
+            aria-label="Go to today"
+          >
+            Today
+          </button>
+        )}
       </div>
 
       {isToday && (

@@ -119,10 +119,13 @@
   width: 100%;
   background: transparent;
   border: none;
-  padding: 12px 0;
+  padding: 13px 20px;
   cursor: pointer;
   color: var(--text-primary);
   font-size: 0.95rem;
+}
+.profile-tool-row + .profile-tool-row {
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
 }
 
 .profile-tool-row__chevron {
@@ -134,7 +137,7 @@
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
-  padding: 10px 0 14px;
+  padding: 4px 20px 18px;
 }
 
 .export-range-picker__btn {
@@ -322,6 +325,12 @@
 [data-theme="light"] .profile-stat__value,
 [data-theme="light"] .profile-calorie-badge__number { color: #14213d; }
 [data-theme="light"] .profile-calorie-badge__unit { color: rgba(20, 33, 61, 0.45); }
+[data-theme="light"] .profile-tool-row { color: #14213d; }
+[data-theme="light"] .profile-tool-row + .profile-tool-row { border-top-color: rgba(20, 33, 61, 0.07); }
+[data-theme="light"] .export-range-picker__btn {
+  background: rgba(59, 125, 255, 0.08);
+  border-color: rgba(59, 125, 255, 0.2);
+}
 [data-theme="light"] .profile-logout-btn {
   border-color: rgba(203, 187, 167, 0.6);
   color: #6b5b4b;
