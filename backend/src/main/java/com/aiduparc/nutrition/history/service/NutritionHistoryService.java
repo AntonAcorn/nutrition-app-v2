@@ -90,18 +90,22 @@ public class NutritionHistoryService {
         return mealLogService.getMealLog(userId, date);
     }
 
+    @Transactional
     public MealSlotEntity getOrCreateSlot(UUID userId, LocalDate date, String slotType) {
         return mealLogService.getOrCreateSlot(userId, date, slotType);
     }
 
+    @Transactional
     public MealLogEntryResponse updateMealLogEntry(UUID userId, UUID entryId, UpdateMealLogEntryRequest req) {
         return mealLogService.updateMealLogEntry(userId, entryId, req);
     }
 
+    @Transactional
     public void deleteMealLogEntry(UUID userId, UUID entryId) {
         mealLogService.deleteMealLogEntry(userId, entryId);
     }
 
+    @Transactional
     public void deleteLatestMealLogEntryByName(UUID userId, LocalDate entryDate, String name) {
         mealLogService.deleteLatestMealLogEntryByName(userId, entryDate, name);
     }
