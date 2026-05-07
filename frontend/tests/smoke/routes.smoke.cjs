@@ -81,14 +81,10 @@ const fakeSummary = {
     }, { timeout: 3000 })
   })
 
-  await expect('clicking Library → URL becomes #/library', async () => {
-    await Promise.all([
-      page.waitForFunction(() => location.hash === '#/library', { timeout: 3000 }),
-      page.evaluate(() => {
-        const link = [...document.querySelectorAll('.bottom-tab-item')].find(a => a.textContent.includes('Library'))
-        link?.click()
-      }),
-    ])
+  // Library is no longer a tab — accessible via direct navigation
+  await page.goto(`${URL}/#/library`, { waitUntil: 'networkidle2', timeout: 10000 })
+  await expect('direct /#/library → library route loads', async () => {
+    await page.waitForFunction(() => location.hash === '#/library', { timeout: 3000 })
   })
 
   // Direct navigation via hash
@@ -100,21 +96,16 @@ const fakeSummary = {
     }, { timeout: 5000 })
   })
 
+  // Fasting is no longer a tab — accessible from Profile → Tools
   await page.goto(`${URL}/#/fasting`, { waitUntil: 'networkidle2', timeout: 10000 })
-  await expect('direct /#/fasting → Fast tab active', async () => {
-    await page.waitForFunction(() => {
-      const a = document.querySelector('.bottom-tab-item--active .bottom-tab-item__label')
-      return a?.textContent.trim() === 'Fast'
-    }, { timeout: 3000 })
+  await expect('direct /#/fasting → fasting route loads', async () => {
+    await page.waitForFunction(() => location.hash === '#/fasting', { timeout: 3000 })
   })
 
   // Critical: page reload preserves hash route (the WHOLE point of HashRouter)
   await page.reload({ waitUntil: 'networkidle2' })
-  await expect('reload on /#/fasting still shows Fast', async () => {
-    await page.waitForFunction(() => {
-      const a = document.querySelector('.bottom-tab-item--active .bottom-tab-item__label')
-      return a?.textContent.trim() === 'Fast'
-    }, { timeout: 5000 })
+  await expect('reload on /#/fasting → still on fasting route', async () => {
+    await page.waitForFunction(() => location.hash === '#/fasting', { timeout: 5000 })
   })
 
   // Browser back
