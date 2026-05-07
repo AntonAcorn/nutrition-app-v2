@@ -479,7 +479,8 @@ export function CurrentDayTab({ refreshToken = 0, successMessage = '', onDayUpda
 
       {!loading && summary ? (
         <button type="button" className="quick-add-fab" onClick={() => { hapticLight(); openQuickAdd() }} aria-label="Quick add food">
-          +
+          <span className="quick-add-fab__icon">+</span>
+          <span className="quick-add-fab__label">Add food</span>
         </button>
       ) : null}
 
