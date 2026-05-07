@@ -121,7 +121,7 @@
   border: none;
   padding: 13px 20px;
   cursor: pointer;
-  color: var(--text-primary);
+  color: #ffffff;
   font-size: 0.95rem;
 }
 .profile-tool-row + .profile-tool-row {

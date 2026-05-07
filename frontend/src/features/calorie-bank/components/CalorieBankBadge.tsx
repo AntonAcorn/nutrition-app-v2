@@ -15,17 +15,17 @@ interface BadgeContent {
 
 function pickBadgeContent(snapshot: CalorieBankSnapshot, consumedRatio: number): BadgeContent | null {
   if (snapshot.isRelaxToday) {
-    return { emoji: '🎂', text: 'сегодня без правил' }
+    return { emoji: '🎂', text: 'free pass today' }
   }
   if (snapshot.bankUsedToday > 0) {
     const heavy = snapshot.bankUsedToday > 200
     return {
       emoji: heavy ? '🍔' : '🍺',
-      text: `−${snapshot.bankUsedToday} из запаса`,
+      text: `−${snapshot.bankUsedToday} from bank`,
     }
   }
   if (snapshot.bank > 0 && consumedRatio >= 0.85) {
-    return { emoji: '🏦', text: `+${snapshot.bank} в запасе` }
+    return { emoji: '🏦', text: `+${snapshot.bank} in bank` }
   }
   return null
 }

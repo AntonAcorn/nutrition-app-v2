@@ -4,17 +4,17 @@ interface FoodItem {
 }
 
 const FOODS: FoodItem[] = [
-  { name: 'пиво 0.5л', kcal: 200 },
-  { name: 'бокал вина', kcal: 125 },
-  { name: 'кусок пиццы', kcal: 290 },
-  { name: 'бургер', kcal: 550 },
-  { name: 'картошка фри', kcal: 350 },
-  { name: 'шоколадка', kcal: 230 },
-  { name: 'пончик', kcal: 250 },
-  { name: 'мороженое', kcal: 140 },
-  { name: 'кусок торта', kcal: 350 },
-  { name: 'круассан', kcal: 270 },
-  { name: 'коктейль', kcal: 220 },
+  { name: 'pint of beer', kcal: 200 },
+  { name: 'glass of wine', kcal: 125 },
+  { name: 'slice of pizza', kcal: 290 },
+  { name: 'burger', kcal: 550 },
+  { name: 'fries', kcal: 350 },
+  { name: 'chocolate bar', kcal: 230 },
+  { name: 'donut', kcal: 250 },
+  { name: 'ice cream', kcal: 140 },
+  { name: 'slice of cake', kcal: 350 },
+  { name: 'croissant', kcal: 270 },
+  { name: 'cocktail', kcal: 220 },
 ]
 
 function hashSeed(s: string): number {

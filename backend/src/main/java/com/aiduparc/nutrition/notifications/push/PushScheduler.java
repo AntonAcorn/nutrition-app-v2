@@ -59,8 +59,8 @@ public class PushScheduler {
                     int deposit = calorieBankService.getTodayDeposit(sub.getUserId(), today);
                     if (deposit >= 100) {
                         pushNotificationService.send(sub,
-                                "🏦 +" + deposit + " в банке",
-                                "Сегодня съел меньше — копится на пир.");
+                                "🏦 +" + deposit + " in bank",
+                                "Stayed under target today — saving up for the weekend.");
                     } else {
                         int streak = calculateStreak(sub.getUserId(), today);
                         if (streak >= 3) {

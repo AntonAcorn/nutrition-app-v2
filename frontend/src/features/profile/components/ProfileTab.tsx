@@ -293,18 +293,18 @@ export function ProfileTab({ displayName, email, onLogout, onDeleteAccount }: Pr
             </label>
 
             <div>
-              <label style={{ display: 'block', marginBottom: '6px' }}>Калорийный банк</label>
+              <label style={{ display: 'block', marginBottom: '6px' }}>Calorie bank</label>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem' }}>
                 <label>
-                  В банк / день (ккал)
+                  Per day cap (kcal)
                   <input type="number" min={0} max={2000} value={dailyBankCapKcal} onChange={(e) => setDailyBankCapKcal(e.target.value)} />
                 </label>
                 <label>
-                  Потолок банка (ккал)
+                  Bank ceiling (kcal)
                   <input type="number" min={0} max={10000} value={bankMaxKcal} onChange={(e) => setBankMaxKcal(e.target.value)} />
                 </label>
                 <label style={{ gridColumn: '1 / -1' }}>
-                  Релакс-дней в месяц
+                  Relax days per month
                   <input type="number" min={0} max={31} value={relaxDaysPerMonth} onChange={(e) => setRelaxDaysPerMonth(e.target.value)} />
                 </label>
               </div>
@@ -415,18 +415,18 @@ export function ProfileTab({ displayName, email, onLogout, onDeleteAccount }: Pr
       </div>
 
       <div className="panel">
-        <p className="profile-section-title">Калорийный банк</p>
+        <p className="profile-section-title">Calorie bank</p>
         <div className="profile-stats-grid">
           <div className="profile-stat">
-            <span className="profile-stat__label">В банк / день</span>
+            <span className="profile-stat__label">Per day cap</span>
             <span className="profile-stat__value">{profile.dailyBankCapKcal ?? 300} kcal</span>
           </div>
           <div className="profile-stat">
-            <span className="profile-stat__label">Потолок</span>
+            <span className="profile-stat__label">Ceiling</span>
             <span className="profile-stat__value">{profile.bankMaxKcal ?? 2000} kcal</span>
           </div>
           <div className="profile-stat profile-stat--full">
-            <span className="profile-stat__label">Релакс-дней / месяц</span>
+            <span className="profile-stat__label">Relax days / month</span>
             <span className="profile-stat__value">{profile.relaxDaysPerMonth ?? 2}</span>
           </div>
         </div>

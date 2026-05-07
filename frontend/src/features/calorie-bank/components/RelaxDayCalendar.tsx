@@ -7,12 +7,12 @@ interface Props {
   relaxDaysAllowedPerMonth: number
 }
 
-const RU_MONTHS = [
-  'январь', 'февраль', 'март', 'апрель', 'май', 'июнь',
-  'июль', 'август', 'сентябрь', 'октябрь', 'ноябрь', 'декабрь',
+const MONTHS = [
+  'January', 'February', 'March', 'April', 'May', 'June',
+  'July', 'August', 'September', 'October', 'November', 'December',
 ]
 
-const RU_WEEKDAYS = ['пн', 'вт', 'ср', 'чт', 'пт', 'сб', 'вс']
+const WEEKDAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
 
 function pad(n: number): string {
   return n < 10 ? `0${n}` : String(n)
@@ -97,16 +97,16 @@ export function RelaxDayCalendar({ today, relaxDaysAllowedPerMonth }: Props) {
     <div className="relax-calendar">
       <div className="relax-calendar__header">
         <button type="button" className="relax-calendar__nav" onClick={() => shiftMonth(-1)} aria-label="Previous month">‹</button>
-        <span className="relax-calendar__title">{RU_MONTHS[viewMonth]} {viewYear}</span>
+        <span className="relax-calendar__title">{MONTHS[viewMonth]} {viewYear}</span>
         <button type="button" className="relax-calendar__nav" onClick={() => shiftMonth(1)} aria-label="Next month">›</button>
       </div>
 
       <div className="relax-calendar__counter">
-        {usedThisMonth} из {relaxDaysAllowedPerMonth} использовано
+        {usedThisMonth} of {relaxDaysAllowedPerMonth} used
       </div>
 
       <div className="relax-calendar__weekdays">
-        {RU_WEEKDAYS.map(d => <span key={d}>{d}</span>)}
+        {WEEKDAYS.map(d => <span key={d}>{d}</span>)}
       </div>
 
       <div className="relax-calendar__grid">

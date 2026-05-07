@@ -28,35 +28,35 @@ export function CalorieBankSheet({ snapshot: initial, date, onClose }: CalorieBa
       <div
         className="calorie-bank-sheet"
         role="dialog"
-        aria-label="Калорийный банк"
+        aria-label="Calorie bank"
         onClick={e => e.stopPropagation()}
       >
         <button type="button" className="calorie-bank-sheet__close" onClick={onClose} aria-label="Close">✕</button>
 
         <header className="calorie-bank-sheet__header">
           <span className="calorie-bank-sheet__emoji" aria-hidden>🏦</span>
-          <h2>Калорийный банк</h2>
-          <p>Накопленные калории за последние 7 дней — на пир в пятницу.</p>
+          <h2>Calorie bank</h2>
+          <p>Calories saved over the past 7 days — for that Friday feast.</p>
         </header>
 
         <div className="calorie-bank-sheet__stats">
           <div className="calorie-bank-sheet__stat">
-            <span className="calorie-bank-sheet__stat-label">В банке</span>
+            <span className="calorie-bank-sheet__stat-label">In bank</span>
             <strong className="calorie-bank-sheet__stat-value">+{data.bank}</strong>
-            <span className="calorie-bank-sheet__stat-unit">ккал</span>
+            <span className="calorie-bank-sheet__stat-unit">kcal</span>
           </div>
           {data.bankUsedToday > 0 && (
             <div className="calorie-bank-sheet__stat calorie-bank-sheet__stat--spent">
-              <span className="calorie-bank-sheet__stat-label">Потрачено сегодня</span>
+              <span className="calorie-bank-sheet__stat-label">Spent today</span>
               <strong className="calorie-bank-sheet__stat-value">−{data.bankUsedToday}</strong>
-              <span className="calorie-bank-sheet__stat-unit">ккал</span>
+              <span className="calorie-bank-sheet__stat-unit">kcal</span>
             </div>
           )}
           {data.bankRemainingAfterToday !== data.bank && (
             <div className="calorie-bank-sheet__stat">
-              <span className="calorie-bank-sheet__stat-label">Останется</span>
+              <span className="calorie-bank-sheet__stat-label">Left</span>
               <strong className="calorie-bank-sheet__stat-value">{data.bankRemainingAfterToday}</strong>
-              <span className="calorie-bank-sheet__stat-unit">ккал</span>
+              <span className="calorie-bank-sheet__stat-unit">kcal</span>
             </div>
           )}
         </div>
@@ -75,9 +75,9 @@ export function CalorieBankSheet({ snapshot: initial, date, onClose }: CalorieBa
           >
             <span className="calorie-bank-sheet__relax-emoji" aria-hidden>🎂</span>
             <div className="calorie-bank-sheet__relax-text">
-              <strong>Релакс-день{data.isRelaxToday ? ' — сегодня' : ''}</strong>
+              <strong>Relax day{data.isRelaxToday ? ' — today' : ''}</strong>
               <span>
-                {data.relaxDaysUsedThisMonth} из {data.relaxDaysAllowedPerMonth} в этом месяце
+                {data.relaxDaysUsedThisMonth} of {data.relaxDaysAllowedPerMonth} this month
               </span>
             </div>
             <span className={`calorie-bank-sheet__chevron${showCalendar ? ' calorie-bank-sheet__chevron--open' : ''}`}>›</span>
@@ -86,14 +86,14 @@ export function CalorieBankSheet({ snapshot: initial, date, onClose }: CalorieBa
             <RelaxDayCalendar today={date} relaxDaysAllowedPerMonth={data.relaxDaysAllowedPerMonth} />
           ) : (
             <p className="calorie-bank-sheet__relax-note">
-              В релакс-день переедание не идёт в долг и не ломает стрик.
+              On a relax day, overeating doesn't drain the bank or break your streak.
             </p>
           )}
         </section>
 
         <footer className="calorie-bank-sheet__footer">
-          Лимиты: до {data.dailyBankCap} ккал/день в банк, потолок {data.bankMax} ккал.
-          Меняются в профиле.
+          Limits: up to {data.dailyBankCap} kcal/day deposited, {data.bankMax} kcal ceiling.
+          Edit in profile.
         </footer>
       </div>
     </div>
