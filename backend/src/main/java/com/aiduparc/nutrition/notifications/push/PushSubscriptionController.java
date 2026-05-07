@@ -26,8 +26,8 @@ public class PushSubscriptionController {
     public PushSubscriptionResponse getSubscription(HttpSession session) {
         UUID userId = currentNutritionUserResolver.resolve(session, null);
         return repository.findByUserId(userId).stream().findFirst()
-                .map(s -> new PushSubscriptionResponse(true, s.isEnabled(), s.getReminderHour()))
-                .orElse(new PushSubscriptionResponse(false, false, 20));
+                .map(s -> new PushSubscriptionResponse(true, s.isEnabled(), s.getReminderHour(), s.getTimezone()))
+                .orElse(new PushSubscriptionResponse(false, false, 20, null));
     }
 
     @PostMapping("/subscribe")
@@ -55,19 +55,39 @@ public class PushSubscriptionController {
         sub.setReminderHour(request.reminderHour() != null ? request.reminderHour() : 20);
         sub.setEnabled(true);
         repository.save(sub);
-        return new PushSubscriptionResponse(true, true, sub.getReminderHour());
+        return new PushSubscriptionResponse(true, true, sub.getReminderHour(), sub.getTimezone());
     }
 
     @PutMapping("/settings")
     public PushSubscriptionResponse updateSettings(@RequestBody PushSettingsRequest request, HttpSession session) {
         UUID userId = currentNutritionUserResolver.resolve(session, null);
-        repository.findByUserId(userId).forEach(sub -> {
+        var subs = repository.findByUserId(userId);
+        subs.forEach(sub -> {
             sub.setEnabled(request.enabled());
             sub.setReminderHour(request.reminderHour());
             repository.save(sub);
         });
-        return new PushSubscriptionResponse(true, request.enabled(), request.reminderHour());
+        String tz = subs.stream().findFirst().map(PushSubscriptionEntity::getTimezone).orElse(null);
+        return new PushSubscriptionResponse(true, request.enabled(), request.reminderHour(), tz);
     }
+
+    @PutMapping("/timezone")
+    public PushSubscriptionResponse updateTimezone(@RequestBody TimezoneRequest request, HttpSession session) {
+        UUID userId = currentNutritionUserResolver.resolve(session, null);
+        if (request.timezone() == null || request.timezone().isBlank()) {
+            return getSubscription(session);
+        }
+        var subs = repository.findByUserId(userId);
+        subs.forEach(sub -> {
+            sub.setTimezone(request.timezone());
+            repository.save(sub);
+        });
+        return subs.stream().findFirst()
+                .map(s -> new PushSubscriptionResponse(true, s.isEnabled(), s.getReminderHour(), s.getTimezone()))
+                .orElse(new PushSubscriptionResponse(false, false, 20, request.timezone()));
+    }
+
+    public record TimezoneRequest(String timezone) {}
 
     @DeleteMapping("/unsubscribe")
     @ResponseStatus(HttpStatus.NO_CONTENT)

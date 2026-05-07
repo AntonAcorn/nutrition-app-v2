@@ -6,6 +6,7 @@ export interface PushSubscriptionStatus {
   subscribed: boolean
   enabled: boolean
   reminderHour: number
+  timezone?: string | null
 }
 
 async function isNativePlatform(): Promise<boolean> {
@@ -86,6 +87,18 @@ export async function subscribePush(reminderHour: number): Promise<PushSubscript
 
 export function updatePushSettings(enabled: boolean, reminderHour: number): Promise<PushSubscriptionStatus> {
   return apiClient.put<PushSubscriptionStatus>('/api/push/settings', { enabled, reminderHour })
+}
+
+export function updatePushTimezone(timezone: string): Promise<PushSubscriptionStatus> {
+  return apiClient.put<PushSubscriptionStatus>('/api/push/timezone', { timezone })
+}
+
+export function getCurrentTimezone(): string {
+  try {
+    return Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC'
+  } catch {
+    return 'UTC'
+  }
 }
 
 export async function unsubscribePush(): Promise<void> {

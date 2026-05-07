@@ -9,6 +9,7 @@ import type { MealTemplateItem } from '../shared/types/nutrition'
 import { SunIcon, MoonIcon, TabIconToday, TabIconStats, TabIconMe } from './icons'
 import { WellbeingPrompt } from '../features/wellbeing/components/WellbeingPrompt'
 import { getWellbeingPending } from '../features/wellbeing/model/wellbeingApi'
+import { getSubscriptionStatus, getCurrentTimezone, updatePushTimezone } from '../features/notifications/model/pushApi'
 
 const PhotoAnalyzerTab = lazy(() => import('../features/photo-analyzer/components/PhotoAnalyzerTab').then(m => ({ default: m.PhotoAnalyzerTab })))
 const StatisticsTab    = lazy(() => import('../features/statistics/components/StatisticsTab').then(m => ({ default: m.StatisticsTab })))
@@ -66,6 +67,7 @@ export function AppShell({ authUser, theme, onToggleTheme, onLogout, onDeleteAcc
     getWellbeingPending()
       .then(r => { if (r.pending) { setWellbeingMealName(r.lastMealName); setShowWellbeing(true) } })
       .catch(() => {})
+    syncPushTimezone()
   }, [])
 
   useEffect(() => {
@@ -81,6 +83,7 @@ export function AppShell({ authUser, theme, onToggleTheme, onLogout, onDeleteAcc
             getWellbeingPending()
               .then(r => { if (r.pending) { setWellbeingMealName(r.lastMealName); setShowWellbeing(true) } })
               .catch(() => {})
+            syncPushTimezone()
           }
         })
         cleanup = () => { listener.remove() }
@@ -90,6 +93,18 @@ export function AppShell({ authUser, theme, onToggleTheme, onLogout, onDeleteAcc
     setup()
     return () => { cleanup?.() }
   }, [])
+
+  async function syncPushTimezone() {
+    try {
+      const status = await getSubscriptionStatus()
+      if (!status.subscribed) return
+      const current = getCurrentTimezone()
+      if (status.timezone && status.timezone === current) return
+      await updatePushTimezone(current)
+    } catch {
+      // silent — tz sync is best-effort
+    }
+  }
 
   function handleDayUpdated() {
     setSummaryRefreshToken(prev => prev + 1)
