@@ -542,8 +542,8 @@ export function CurrentDayTab({ refreshToken = 0, successMessage = '', onDayUpda
           onAdd={handleMealAdd}
           onLogTemplate={handleTemplateLog}
           onClose={() => setShowQuickAdd(false)}
-          onOpenAnalyzer={onOpenAnalyzer ? (mode) => onOpenAnalyzer(mode, quickAddSlot) : undefined}
-          onOpenAnalyzerWithPhoto={onOpenAnalyzerWithPhoto ? (file) => onOpenAnalyzerWithPhoto(file, quickAddSlot) : undefined}
+          onOpenAnalyzer={onOpenAnalyzer}
+          onOpenAnalyzerWithPhoto={onOpenAnalyzerWithPhoto}
           onOpenLibrary={onOpenLibrary}
         />
       )}
