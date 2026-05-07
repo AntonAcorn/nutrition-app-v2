@@ -647,6 +647,12 @@
   margin: 4px 0 0;
 }
 
+.today-ring__caption--over {
+  color: rgba(239, 68, 68, 0.75);
+  font-style: normal;
+  font-weight: 600;
+}
+
 .activity-row {
   display: flex;
   gap: 10px;
