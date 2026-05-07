@@ -72,9 +72,8 @@ export function TodaySummaryBlock({
 
   const consumed = Math.round(summary.consumedCalories)
   const target = Math.max(1, Math.round(summary.dailyTargetCalories))
-  const netGoal = target + activeCalories
-  const remaining = netGoal - consumed
-  const ratio = consumed / (netGoal || 1)
+  const remaining = target - consumed
+  const ratio = consumed / (target || 1)
   const ringProgress = Math.min(100, Math.max(0, Math.round(ratio * 100)))
   const circumference = 2 * Math.PI * 64
   const dashOffset = circumference - (circumference * ringProgress) / 100
@@ -137,23 +136,18 @@ export function TodaySummaryBlock({
               />
             </svg>
             <div className="today-ring__center">
-              <strong>{Math.abs(remaining)}</strong>
-              <span>{remaining >= 0 ? 'kcal left' : 'kcal over'}</span>
+              <strong>{Math.max(0, remaining)}</strong>
+              <span>kcal left</span>
             </div>
           </div>
 
           <div className="today-side-stat">
-            <strong>{netGoal}</strong>
-            <span>{activeCalories > 0 ? 'NET GOAL' : 'TARGET'}</span>
+            <strong>{target}</strong>
+            <span>TARGET</span>
           </div>
         </div>
 
-        <div className="today-ring__center-meta">
-          {remaining >= 0
-            ? <p className="today-ring__caption">{getCaptionText(consumed, netGoal, remaining)}</p>
-            : <p className="today-ring__caption today-ring__caption--over">Over by {Math.abs(remaining)} kcal</p>
-          }
-        </div>
+        <p className="today-ring__caption">{getCaptionText(consumed, target, Math.max(0, remaining))}</p>
 
         {(steps > 0 || activeCalories > 0) && (
           <div className="activity-row">
@@ -167,8 +161,8 @@ export function TodaySummaryBlock({
             {activeCalories > 0 && (
               <div className="activity-chip activity-chip--earned">
                 <span className="activity-chip__icon">🔥</span>
-                <span className="activity-chip__value">+{activeCalories}</span>
-                <span className="activity-chip__label">burned · added to goal</span>
+                <span className="activity-chip__value">{activeCalories}</span>
+                <span className="activity-chip__label">kcal burned</span>
               </div>
             )}
           </div>
