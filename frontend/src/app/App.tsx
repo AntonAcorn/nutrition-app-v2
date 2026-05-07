@@ -1,5 +1,6 @@
 import { lazy, Suspense, useEffect, useState } from 'react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import { HashRouter } from 'react-router-dom'
 import * as Sentry from '@sentry/react'
 import { SunIcon, MoonIcon } from './icons'
 import { AuthShell } from './AuthShell'
@@ -45,7 +46,9 @@ const queryClient = new QueryClient({
 export default function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <AppInner />
+      <HashRouter>
+        <AppInner />
+      </HashRouter>
     </QueryClientProvider>
   )
 }

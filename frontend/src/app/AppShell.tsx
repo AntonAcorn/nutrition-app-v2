@@ -1,4 +1,5 @@
 import { lazy, Suspense, useState } from 'react'
+import { Routes, Route, NavLink, Navigate, useNavigate, useLocation } from 'react-router-dom'
 import { useQueryClient } from '@tanstack/react-query'
 import { listTemplates } from '../features/food-library/model/mealTemplateApi'
 import { fetchNutritionStatistics } from '../features/statistics/model/statisticsApi'
@@ -13,17 +14,20 @@ const ProfileTab       = lazy(() => import('../features/profile/components/Profi
 const FoodLibraryTab   = lazy(() => import('../features/food-library/components/FoodLibraryTab').then(m => ({ default: m.FoodLibraryTab })))
 const FastingTab       = lazy(() => import('../features/fasting/components/FastingTab').then(m => ({ default: m.FastingTab })))
 
-const tabs = {
-  currentDay: 'current-day',
-  statistics: 'statistics',
-  photoAnalyzer: 'photo-analyzer',
-  fasting: 'fasting',
-  library: 'library',
-  profile: 'profile',
+type Theme = 'dark' | 'light'
+
+const ROUTES = {
+  today: '/',
+  stats: '/stats',
+  fasting: '/fasting',
+  library: '/library',
+  profile: '/profile',
+  analyze: '/analyze',
 } as const
 
-type TabKey = (typeof tabs)[keyof typeof tabs]
-type Theme = 'dark' | 'light'
+type AnalyzeNavState = { mode?: 'photo' | 'voice' | 'barcode'; photo?: File | null }
+type LibraryNavState = { pendingSave?: { name: string; items: MealTemplateItem[] } }
+type TodayNavState   = { successMessage?: string }
 
 function TabLoadingSkeleton() {
   return (
@@ -50,48 +54,38 @@ interface AppShellProps {
 
 export function AppShell({ authUser, theme, onToggleTheme, onLogout, onDeleteAccount }: AppShellProps) {
   const qc = useQueryClient()
-  const [activeTab, setActiveTab] = useState<TabKey>(tabs.currentDay)
+  const navigate = useNavigate()
   const [summaryRefreshToken, setSummaryRefreshToken] = useState(0)
   const [statisticsRefreshToken, setStatisticsRefreshToken] = useState(0)
-  const [pendingLibrarySave, setPendingLibrarySave] = useState<{ name: string; items: MealTemplateItem[] } | null>(null)
-  const [daySuccessMessage, setDaySuccessMessage] = useState('')
-  const [analyzerMode, setAnalyzerMode] = useState<'photo' | 'voice' | 'barcode'>('photo')
-  const [initialAnalyzerPhoto, setInitialAnalyzerPhoto] = useState<File | null>(null)
 
   function handleDayUpdated() {
     setSummaryRefreshToken(prev => prev + 1)
     setStatisticsRefreshToken(prev => prev + 1)
   }
 
-  function prefetchForTab(key: TabKey) {
-    if (key === tabs.library) {
+  function prefetchForRoute(route: string) {
+    if (route === ROUTES.library) {
       qc.prefetchQuery({ queryKey: ['meal-templates'], queryFn: () => listTemplates(), staleTime: 60_000 })
-    } else if (key === tabs.statistics) {
+    } else if (route === ROUTES.stats) {
       qc.prefetchQuery({ queryKey: ['statistics', 30], queryFn: () => fetchNutritionStatistics(30), staleTime: 60_000 })
     }
   }
 
   function openAnalyzer(mode: 'photo' | 'voice' | 'barcode') {
-    setAnalyzerMode(mode)
-    setActiveTab(tabs.photoAnalyzer)
+    navigate(ROUTES.analyze, { state: { mode } satisfies AnalyzeNavState })
   }
 
   function openAnalyzerWithPhoto(file: File) {
-    setInitialAnalyzerPhoto(file)
-    setAnalyzerMode('photo')
-    setActiveTab(tabs.photoAnalyzer)
+    navigate(ROUTES.analyze, { state: { mode: 'photo', photo: file } satisfies AnalyzeNavState })
   }
 
   function handleDraftConfirmed() {
-    setInitialAnalyzerPhoto(null)
-    setActiveTab(tabs.currentDay)
     handleDayUpdated()
-    setDaySuccessMessage('Analysis saved, daily summary is updating.')
+    navigate(ROUTES.today, { state: { successMessage: 'Analysis saved, daily summary is updating.' } satisfies TodayNavState })
   }
 
   function handleSaveToLibrary(data: { name: string; items: MealTemplateItem[] }) {
-    setPendingLibrarySave(data)
-    setActiveTab(tabs.library)
+    navigate(ROUTES.library, { state: { pendingSave: data } satisfies LibraryNavState })
   }
 
   return (
@@ -112,72 +106,159 @@ export function AppShell({ authUser, theme, onToggleTheme, onLogout, onDeleteAcc
 
       <section className="tabs-shell tabs-shell--dark">
         <div className="tabs-body tabs-body--dark">
-          <div className="tab-content" key={activeTab}>
-            {activeTab === tabs.currentDay ? (
-              <CurrentDayTab
-                refreshToken={summaryRefreshToken}
-                successMessage={daySuccessMessage}
-                onDayUpdated={handleDayUpdated}
-                displayName={authUser.displayName}
-                onOpenAnalyzer={openAnalyzer}
-                onOpenAnalyzerWithPhoto={openAnalyzerWithPhoto}
+          <Suspense fallback={<TabLoadingSkeleton />}>
+            <Routes>
+              <Route
+                path={ROUTES.today}
+                element={
+                  <TodayScreen
+                    authUser={authUser}
+                    refreshToken={summaryRefreshToken}
+                    onDayUpdated={handleDayUpdated}
+                    openAnalyzer={openAnalyzer}
+                    openAnalyzerWithPhoto={openAnalyzerWithPhoto}
+                  />
+                }
               />
-            ) : null}
-            <Suspense fallback={<TabLoadingSkeleton />}>
-              {activeTab === tabs.statistics ? <StatisticsTab refreshToken={statisticsRefreshToken} /> : null}
-              {activeTab === tabs.photoAnalyzer ? (
-                <PhotoAnalyzerTab
-                  onConfirmed={handleDraftConfirmed}
-                  onSaveToLibrary={handleSaveToLibrary}
-                  initialMode={analyzerMode}
-                  initialPhoto={initialAnalyzerPhoto}
-                  onBack={() => { setInitialAnalyzerPhoto(null); setActiveTab(tabs.currentDay) }}
-                />
-              ) : null}
-              {activeTab === tabs.fasting ? <FastingTab /> : null}
-              {activeTab === tabs.library ? (
-                <FoodLibraryTab
-                  onLogged={handleDayUpdated}
-                  initialSave={pendingLibrarySave}
-                  onInitialSaveDone={() => setPendingLibrarySave(null)}
-                />
-              ) : null}
-              {activeTab === tabs.profile ? (
-                <ProfileTab
-                  displayName={authUser.displayName}
-                  email={authUser.email}
-                  onLogout={onLogout}
-                  onDeleteAccount={onDeleteAccount}
-                />
-              ) : null}
-            </Suspense>
-          </div>
+              <Route path={ROUTES.stats}    element={<StatsScreen refreshToken={statisticsRefreshToken} />} />
+              <Route path={ROUTES.fasting}  element={<FastingScreen />} />
+              <Route
+                path={ROUTES.library}
+                element={<LibraryScreen onLogged={handleDayUpdated} />}
+              />
+              <Route
+                path={ROUTES.profile}
+                element={
+                  <ProfileScreen
+                    authUser={authUser}
+                    onLogout={onLogout}
+                    onDeleteAccount={onDeleteAccount}
+                  />
+                }
+              />
+              <Route
+                path={ROUTES.analyze}
+                element={
+                  <AnalyzeScreen
+                    onConfirmed={handleDraftConfirmed}
+                    onSaveToLibrary={handleSaveToLibrary}
+                  />
+                }
+              />
+              <Route path="*" element={<Navigate to={ROUTES.today} replace />} />
+            </Routes>
+          </Suspense>
         </div>
       </section>
 
       <nav className="bottom-tab-bar" role="tablist" aria-label="App sections">
         {([
-          { key: tabs.currentDay, label: 'Today',   Icon: TabIconToday   },
-          { key: tabs.statistics, label: 'Stats',   Icon: TabIconStats   },
-          { key: tabs.fasting,    label: 'Fast',    Icon: TabIconFast    },
-          { key: tabs.library,    label: 'Library', Icon: TabIconLibrary },
-          { key: tabs.profile,    label: 'Me',      Icon: TabIconMe      },
-        ] as const).map(({ key, label, Icon }) => (
-          <button
-            key={key}
-            type="button"
+          { route: ROUTES.today,   label: 'Today',   Icon: TabIconToday   },
+          { route: ROUTES.stats,   label: 'Stats',   Icon: TabIconStats   },
+          { route: ROUTES.fasting, label: 'Fast',    Icon: TabIconFast    },
+          { route: ROUTES.library, label: 'Library', Icon: TabIconLibrary },
+          { route: ROUTES.profile, label: 'Me',      Icon: TabIconMe      },
+        ] as const).map(({ route, label, Icon }) => (
+          <NavLink
+            key={route}
+            to={route}
+            end={route === ROUTES.today}
             role="tab"
-            className={`bottom-tab-item${activeTab === key ? ' bottom-tab-item--active' : ''}`}
-            aria-selected={activeTab === key}
-            onTouchStart={() => prefetchForTab(key)}
-            onMouseEnter={() => prefetchForTab(key)}
-            onClick={() => setActiveTab(key)}
+            className={({ isActive }) => `bottom-tab-item${isActive ? ' bottom-tab-item--active' : ''}`}
+            onTouchStart={() => prefetchForRoute(route)}
+            onMouseEnter={() => prefetchForRoute(route)}
           >
             <Icon />
             <span className="bottom-tab-item__label">{label}</span>
-          </button>
+          </NavLink>
         ))}
       </nav>
     </main>
+  )
+}
+
+// ── Screen wrappers — read navigate state from useLocation ───────────────────
+
+interface TodayScreenProps {
+  authUser: AuthUser
+  refreshToken: number
+  onDayUpdated: () => void
+  openAnalyzer: (mode: 'photo' | 'voice' | 'barcode') => void
+  openAnalyzerWithPhoto: (file: File) => void
+}
+
+function TodayScreen({ authUser, refreshToken, onDayUpdated, openAnalyzer, openAnalyzerWithPhoto }: TodayScreenProps) {
+  const location = useLocation()
+  const successMessage = (location.state as TodayNavState | null)?.successMessage ?? ''
+  return (
+    <CurrentDayTab
+      refreshToken={refreshToken}
+      successMessage={successMessage}
+      onDayUpdated={onDayUpdated}
+      displayName={authUser.displayName}
+      onOpenAnalyzer={openAnalyzer}
+      onOpenAnalyzerWithPhoto={openAnalyzerWithPhoto}
+    />
+  )
+}
+
+function StatsScreen({ refreshToken }: { refreshToken: number }) {
+  return <StatisticsTab refreshToken={refreshToken} />
+}
+
+function FastingScreen() {
+  return <FastingTab />
+}
+
+function LibraryScreen({ onLogged }: { onLogged: () => void }) {
+  const location = useLocation()
+  const [pendingSave, setPendingSave] = useState<LibraryNavState['pendingSave']>(
+    (location.state as LibraryNavState | null)?.pendingSave,
+  )
+  return (
+    <FoodLibraryTab
+      onLogged={onLogged}
+      initialSave={pendingSave ?? null}
+      onInitialSaveDone={() => setPendingSave(undefined)}
+    />
+  )
+}
+
+function ProfileScreen({
+  authUser,
+  onLogout,
+  onDeleteAccount,
+}: {
+  authUser: AuthUser
+  onLogout: () => Promise<void> | void
+  onDeleteAccount: () => Promise<void> | void
+}) {
+  return (
+    <ProfileTab
+      displayName={authUser.displayName}
+      email={authUser.email}
+      onLogout={onLogout}
+      onDeleteAccount={onDeleteAccount}
+    />
+  )
+}
+
+interface AnalyzeScreenProps {
+  onConfirmed: () => void
+  onSaveToLibrary: (data: { name: string; items: MealTemplateItem[] }) => void
+}
+
+function AnalyzeScreen({ onConfirmed, onSaveToLibrary }: AnalyzeScreenProps) {
+  const location = useLocation()
+  const navigate = useNavigate()
+  const state = location.state as AnalyzeNavState | null
+  return (
+    <PhotoAnalyzerTab
+      onConfirmed={onConfirmed}
+      onSaveToLibrary={onSaveToLibrary}
+      initialMode={state?.mode ?? 'photo'}
+      initialPhoto={state?.photo ?? null}
+      onBack={() => navigate(ROUTES.today)}
+    />
   )
 }
