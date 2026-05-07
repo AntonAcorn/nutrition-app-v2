@@ -638,3 +638,83 @@
 [data-theme="light"] .meal-log-move__cancel { color: rgba(20, 33, 61, 0.3); }
 [data-theme="light"] .meal-log-move__cancel:hover { color: rgba(20, 33, 61, 0.6); }
 
+
+/* ── Weekly Bank Card ── */
+.weekly-bank-card {
+  margin: 0 16px 12px;
+  background: #17191f;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 18px;
+  padding: 14px 16px 12px;
+}
+
+.weekly-bank-card__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.weekly-bank-card__title {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.45);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.weekly-bank-card__avg {
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+.weekly-bank-card__avg--good { color: #4ade80; }
+.weekly-bank-card__avg--over { color: #f87171; }
+
+.weekly-bank-card__days {
+  display: flex;
+  justify-content: space-between;
+}
+
+.weekly-bank-card__day {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+}
+
+.weekly-bank-card__dot {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+}
+
+.weekly-bank-card__dot--good    { background: #4ade80; }
+.weekly-bank-card__dot--over    { background: #f87171; }
+.weekly-bank-card__dot--unlogged { background: transparent; border: 1.5px solid rgba(255,255,255,0.18); }
+.weekly-bank-card__dot--today   { background: transparent; border: 2px solid rgba(255,255,255,0.7); }
+.weekly-bank-card__dot--future  { background: rgba(255,255,255,0.06); }
+
+.weekly-bank-card__dow {
+  font-size: 0.68rem;
+  color: rgba(255, 255, 255, 0.3);
+  font-weight: 600;
+}
+
+.weekly-bank-card__warning {
+  margin: 10px 0 0;
+  font-size: 0.72rem;
+  color: rgba(255, 200, 80, 0.75);
+}
+
+[data-theme="light"] .weekly-bank-card {
+  background: #fff;
+  border-color: rgba(0, 0, 0, 0.07);
+}
+
+[data-theme="light"] .weekly-bank-card__title { color: rgba(0, 0, 0, 0.4); }
+[data-theme="light"] .weekly-bank-card__dot--unlogged { border-color: rgba(0,0,0,0.15); }
+[data-theme="light"] .weekly-bank-card__dot--today { border-color: rgba(0,0,0,0.5); }
+[data-theme="light"] .weekly-bank-card__dot--future { background: rgba(0,0,0,0.05); }
+[data-theme="light"] .weekly-bank-card__dow { color: rgba(0,0,0,0.3); }
+[data-theme="light"] .weekly-bank-card__warning { color: #b45309; }
