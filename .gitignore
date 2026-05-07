@@ -1,6 +1,9 @@
 # wiki (local only)
 wiki/
 
+# memory compiler (local only)
+memory-compiler/
+
 # OS / editors
 .DS_Store
 .idea/
