@@ -7,6 +7,7 @@ import { MealsLogCard } from './MealsLogCard'
 import { fetchTodaySummary } from '../model/todaySummaryApi'
 import { updateTodayWeight } from '../model/weightApi'
 import { addMealManually, resetToday } from '../model/nutritionTotalsApi'
+import { listMealLog } from '../model/mealLogApi'
 import { logTemplate, listTemplates } from '../../food-library/model/mealTemplateApi'
 import { fetchNutritionStatistics } from '../../statistics/model/statisticsApi'
 import { getTodayLocalDateInputValue, offsetDate, formatNavDateLabel } from '../../../shared/lib/date'
@@ -259,6 +260,26 @@ export function CurrentDayTab({ refreshToken = 0, successMessage = '', onDayUpda
     setShowQuickAdd(true)
   }
 
+  async function handleCopyFromYesterday() {
+    const yesterday = offsetDate(selectedDate, -1)
+    const slots = await listMealLog(yesterday)
+    const items = slots.flatMap(slot =>
+      slot.items.map(item => ({
+        caloriesConsumedKcal: item.caloriesKcal,
+        proteinGrams: item.proteinG,
+        fatGrams: item.fatG,
+        fiberGrams: item.fiberG,
+        carbsGrams: item.carbsG,
+        mealName: item.name,
+        slotType: slot.slotType,
+      }))
+    )
+    if (items.length === 0) return
+    await Promise.all(items.map(item => addMealManually(item, selectedDate)))
+    await refetchSummary()
+    onDayUpdated?.()
+  }
+
   async function handleResetDay() {
     if (!window.confirm('Reset this day\'s nutrition totals to zero?')) return
     setResettingDay(true)
@@ -436,6 +457,7 @@ export function CurrentDayTab({ refreshToken = 0, successMessage = '', onDayUpda
               onAddToSlot={openQuickAdd}
               onDeleted={() => { refetchSummary() }}
               onUpdated={() => { refetchSummary(); onDayUpdated?.() }}
+              onCopyFromYesterday={isToday ? handleCopyFromYesterday : undefined}
             />
           </div>
           <div className="content-fade-in" style={{ animationDelay: '80ms' }}>

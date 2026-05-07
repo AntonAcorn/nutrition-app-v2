@@ -166,6 +166,44 @@
   color: rgba(255, 255, 255, 0.4);
 }
 
+.copy-yesterday-row {
+  padding: 4px 0 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.copy-yesterday-btn {
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 20px;
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 0.8rem;
+  padding: 6px 16px;
+  cursor: pointer;
+  transition: border-color 0.15s, color 0.15s;
+}
+
+.copy-yesterday-btn:hover:not(:disabled) {
+  border-color: rgba(255, 255, 255, 0.25);
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.copy-yesterday-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+[data-theme="light"] .copy-yesterday-btn {
+  border-color: rgba(20, 33, 61, 0.15);
+  color: rgba(20, 33, 61, 0.45);
+}
+
+[data-theme="light"] .copy-yesterday-btn:hover:not(:disabled) {
+  border-color: rgba(20, 33, 61, 0.3);
+  color: rgba(20, 33, 61, 0.7);
+}
+
 .meals-log-list {
   display: flex;
   flex-direction: column;

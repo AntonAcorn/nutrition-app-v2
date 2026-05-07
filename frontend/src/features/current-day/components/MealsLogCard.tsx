@@ -108,13 +108,14 @@ interface Props {
   onAddToSlot: (slotType: string) => void
   onDeleted: () => void
   onUpdated?: () => void
+  onCopyFromYesterday?: () => Promise<void>
 }
 
 function slotsWithItems(slots: MealSlot[]): Set<MealSlot['slotType']> {
   return new Set(slots.filter(s => s.items.length > 0).map(s => s.slotType))
 }
 
-export function MealsLogCard({ date, refreshToken = 0, onAddToSlot, onDeleted, onUpdated }: Props) {
+export function MealsLogCard({ date, refreshToken = 0, onAddToSlot, onDeleted, onUpdated, onCopyFromYesterday }: Props) {
   const [slots, setSlots] = useState<MealSlot[]>(SLOT_ORDER.map(makeEmptySlot))
   const [showSlots, setShowSlots] = useState(true)
   const [expandedSlots, setExpandedSlots] = useState<Set<MealSlot['slotType']>>(new Set())
@@ -126,6 +127,8 @@ export function MealsLogCard({ date, refreshToken = 0, onAddToSlot, onDeleted, o
   const [savingId, setSavingId] = useState<string | null>(null)
   const [editError, setEditError] = useState('')
   const [moveError, setMoveError] = useState('')
+  const [copying, setCopying] = useState(false)
+  const [copyError, setCopyError] = useState('')
 
   // Drag-and-drop
   const [isDragging, setIsDragging] = useState(false)
@@ -360,6 +363,26 @@ export function MealsLogCard({ date, refreshToken = 0, onAddToSlot, onDeleted, o
             })}
           </div>
         </>
+      )}
+
+      {totalKcal === 0 && onCopyFromYesterday && (
+        <div className="copy-yesterday-row">
+          <button
+            type="button"
+            className="copy-yesterday-btn"
+            disabled={copying}
+            onClick={async () => {
+              setCopying(true)
+              setCopyError('')
+              try { await onCopyFromYesterday() }
+              catch { setCopyError('Nothing to copy or an error occurred') }
+              finally { setCopying(false) }
+            }}
+          >
+            {copying ? 'Copying…' : '↩ Copy from yesterday'}
+          </button>
+          {copyError && <p className="error-text" style={{ fontSize: '0.78rem', margin: '4px 0 0' }}>{copyError}</p>}
+        </div>
       )}
 
       {deleteError ? <p className="error-text" style={{ marginBottom: '0.5rem' }}>{deleteError}</p> : null}
