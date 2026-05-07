@@ -680,6 +680,23 @@
   background: rgba(111, 76, 255, 0.08);
 }
 
+.qs-recent {
+  margin-bottom: 4px;
+}
+
+.qs-recent__label {
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.3);
+  padding: 4px 0 6px;
+}
+
+[data-theme="light"] .qs-recent__label {
+  color: rgba(20, 33, 61, 0.35);
+}
+
 .qs-search-results {
   display: flex;
   flex-direction: column;

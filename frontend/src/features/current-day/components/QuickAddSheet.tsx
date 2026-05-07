@@ -3,6 +3,8 @@ import { useQuery } from '@tanstack/react-query'
 import { listTemplates } from '../../food-library/model/mealTemplateApi'
 import { searchFood } from '../../barcode/model/barcodeApi'
 import type { FoodProduct } from '../../barcode/model/barcodeApi'
+import { getRecentFoods, saveRecentFood } from '../../barcode/model/recentFoods'
+import type { RecentFood } from '../../barcode/model/recentFoods'
 import type { MealTemplate } from '../../../shared/types/nutrition'
 import { SLOT_LABELS, defaultSlotByTime } from '../model/mealLogApi'
 import type { MealSlot } from '../model/mealLogApi'
@@ -80,6 +82,7 @@ export function QuickAddSheet({ initialSlot, onAdd, onLogTemplate, onClose, onOp
   const [grams, setGrams] = useState('100')
   const [addingSearch, setAddingSearch] = useState(false)
   const searchTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const [recentFoods, setRecentFoods] = useState<RecentFood[]>(() => getRecentFoods())
 
   // manual
   const [mealName, setMealName] = useState('')
@@ -168,6 +171,8 @@ export function QuickAddSheet({ initialSlot, onAdd, onLogTemplate, onClose, onOp
       const fib   = calcMacro(selectedProduct.fiberPer100g)
       const carbs = calcMacro(selectedProduct.carbsPer100g)
       await onAdd(kcal, prot, fat, fib, carbs, selectedProduct.name, slot)
+      saveRecentFood(selectedProduct, g)
+      setRecentFoods(getRecentFoods())
       setLoggedName(`${selectedProduct.name} · ${kcal} kcal`)
       setTimeout(() => onClose(), 1400)
     } catch {
@@ -424,6 +429,26 @@ export function QuickAddSheet({ initialSlot, onAdd, onLogTemplate, onClose, onOp
                 />
                 {searchLoading && <p className="qs-library-empty">Searching...</p>}
                 {!searchLoading && searchError && <p className="qs-library-empty">{searchError}</p>}
+                {!searchLoading && !searchQuery && recentFoods.length > 0 && (
+                  <div className="qs-recent">
+                    <p className="qs-recent__label">Recent</p>
+                    <div className="qs-search-results">
+                      {recentFoods.map((r, i) => (
+                        <button
+                          key={i}
+                          type="button"
+                          className="qs-search-result"
+                          onClick={() => { selectProduct(r.product); setGrams(String(r.lastGrams)) }}
+                        >
+                          <span className="qs-search-result__name">{r.product.name}</span>
+                          <span className="qs-search-result__kcal">
+                            {r.lastGrams}g · {r.product.caloriesPer100g != null ? `${Math.round(r.product.caloriesPer100g * r.lastGrams / 100)} kcal` : '—'}
+                          </span>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
                 {!searchLoading && searchResults.length > 0 && (
                   <div className="qs-search-results">
                     {searchResults.map((p, i) => (
