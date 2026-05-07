@@ -22,6 +22,12 @@
   box-shadow: 0 22px 60px rgba(89, 72, 54, 0.08);
 }
 
+/* Range selector: stats section always uses --statistics-dark class, but
+   overflow:visible is only needed for glow in dark mode */
+[data-theme="light"] .screen-section--statistics-dark .range-selector {
+  overflow: hidden;
+}
+
 /* Statistics chart panels in light mode */
 [data-theme="light"] .statistics-panel--dark {
   background: rgba(255, 252, 247, 0.9);

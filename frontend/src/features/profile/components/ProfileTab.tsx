@@ -408,16 +408,14 @@ export function ProfileTab({ displayName, email, onLogout, onDeleteAccount }: Pr
           className="profile-tool-row"
           onClick={() => navigate('/fasting')}
         >
-          <span>⏱ Intermittent fasting</span>
-          <span className="profile-tool-row__chevron">›</span>
+          ⏱ Intermittent fasting
         </button>
         <button
           type="button"
           className="profile-tool-row"
           onClick={() => setShowExport(v => !v)}
         >
-          <span>📤 Export data</span>
-          <span className="profile-tool-row__chevron">{showExport ? '▴' : '▾'}</span>
+          📤 Export data
         </button>
         {showExport && (
           <div className="export-range-picker">
