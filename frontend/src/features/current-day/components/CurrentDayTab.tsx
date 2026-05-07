@@ -17,6 +17,8 @@ import { MascotSvg } from './MascotSvg'
 import { getMascotMood } from '../model/getMascotMood'
 import { getTodaySteps, getTodayActiveCalories, getLatestWeightFromHealth, isHealthKitSupported, requestHealthPermissions } from '../../../shared/lib/healthKit'
 import { hapticLight, hapticMedium } from '../../../shared/lib/haptic'
+import { WellbeingRetrospectiveModal } from '../../wellbeing/components/WellbeingRetrospectiveModal'
+import { WellbeingProfileReadyCard } from '../../wellbeing/components/WellbeingProfileReadyCard'
 
 const PTR_THRESHOLD = 56
 
@@ -67,6 +69,8 @@ export function CurrentDayTab({ refreshToken = 0, successMessage = '', onDayUpda
   const [quickAddSlot, setQuickAddSlot] = useState<string | undefined>(undefined)
   const [pullDist, setPullDist] = useState(0)
   const [ptrRefreshing, setPtrRefreshing] = useState(false)
+  const [showWellbeingIntro, setShowWellbeingIntro] = useState(false)
+  const [showWellbeingRetro, setShowWellbeingRetro] = useState(false)
 
   const summaryQuery = useQuery<TodaySummary>({
     queryKey: ['today-summary', selectedDate],
@@ -120,6 +124,29 @@ export function CurrentDayTab({ refreshToken = 0, successMessage = '', onDayUpda
   const today = getTodayLocalDateInputValue()
   const isToday = selectedDate === today
   const minDate = offsetDate(today, -MAX_PAST_DAYS)
+
+  useEffect(() => {
+    if (!summary || summary.consumedCalories <= 0) return
+    try {
+      if (!localStorage.getItem('wellbeing-intro-shown')) setShowWellbeingIntro(true)
+    } catch {}
+  }, [summary?.consumedCalories]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  function dismissWellbeingIntro() {
+    setShowWellbeingIntro(false)
+    try { localStorage.setItem('wellbeing-intro-shown', '1') } catch {}
+  }
+
+  function startWellbeingRetro() {
+    setShowWellbeingIntro(false)
+    try { localStorage.setItem('wellbeing-intro-shown', '1') } catch {}
+    setShowWellbeingRetro(true)
+  }
+
+  function finishWellbeingRetro() {
+    setShowWellbeingRetro(false)
+    try { localStorage.setItem('wellbeing-retro-done', '1') } catch {}
+  }
 
   // Sync weight input from summary + HealthKit
   useEffect(() => {
@@ -402,6 +429,28 @@ export function CurrentDayTab({ refreshToken = 0, successMessage = '', onDayUpda
           </div>
         </div>
       )}
+
+      {showWellbeingIntro && isToday && (
+        <div className="wellbeing-intro-banner">
+          <div className="wellbeing-intro-banner__content">
+            <span className="wellbeing-intro-banner__icon">⚡</span>
+            <div>
+              <p className="wellbeing-intro-banner__title">Food &amp; Energy tracking</p>
+              <p className="wellbeing-intro-banner__body">After meals we'll check how you feel. In a week we'll show which foods boost your energy.</p>
+              <button type="button" className="wellbeing-intro-banner__cta" onClick={startWellbeingRetro}>
+                Quick start — tell us about 3 recent days →
+              </button>
+            </div>
+          </div>
+          <button type="button" className="wellbeing-intro-banner__close" onClick={dismissWellbeingIntro} aria-label="Dismiss">✕</button>
+        </div>
+      )}
+
+      {showWellbeingRetro && (
+        <WellbeingRetrospectiveModal onDone={finishWellbeingRetro} />
+      )}
+
+      {isToday && !showWellbeingIntro && <WellbeingProfileReadyCard />}
 
       {successMessage ? <section className="panel detail-panel"><p className="success-text">{successMessage}</p></section> : null}
       {loading ? (

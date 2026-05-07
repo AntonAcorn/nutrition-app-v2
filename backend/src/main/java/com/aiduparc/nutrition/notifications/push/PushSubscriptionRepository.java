@@ -10,4 +10,5 @@ public interface PushSubscriptionRepository extends JpaRepository<PushSubscripti
     Optional<PushSubscriptionEntity> findByUserIdAndDeviceToken(UUID userId, String deviceToken);
     List<PushSubscriptionEntity> findByEnabled(boolean enabled);
     List<PushSubscriptionEntity> findByUserId(UUID userId);
+    List<PushSubscriptionEntity> findByUserIdAndEnabled(UUID userId, boolean enabled);
 }

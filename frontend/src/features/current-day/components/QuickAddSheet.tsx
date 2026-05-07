@@ -8,6 +8,7 @@ import type { RecentFood } from '../../barcode/model/recentFoods'
 import type { MealTemplate } from '../../../shared/types/nutrition'
 import { SLOT_LABELS, defaultSlotByTime } from '../model/mealLogApi'
 import type { MealSlot } from '../model/mealLogApi'
+import { FoodEnergyHint } from '../../wellbeing/components/FoodEnergyHint'
 
 const SLOT_TYPES: MealSlot['slotType'][] = ['BREAKFAST', 'LUNCH', 'DINNER', 'SNACK']
 
@@ -477,6 +478,8 @@ export function QuickAddSheet({ initialSlot, onAdd, onLogTemplate, onClose, onOp
                   </p>
                 </div>
 
+                <FoodEnergyHint name={selectedProduct.name} />
+
                 <div className="barcode-portion-section">
                   <p className="barcode-portion-label">How much did you eat?</p>
                   <div className="barcode-portion-row">
@@ -557,6 +560,7 @@ export function QuickAddSheet({ initialSlot, onAdd, onLogTemplate, onClose, onOp
               value={mealName}
               onChange={e => setMealName(e.target.value)}
             />
+            <FoodEnergyHint name={mealName} />
             <label className="barcode-macro-chip barcode-macro-chip--calories qs-chip qs-chip--calories">
               <span className="barcode-macro-chip__value">{Number(calories) || 0}</span>
               <span className="barcode-macro-chip__label">kcal</span>

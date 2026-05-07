@@ -2,6 +2,7 @@ package com.aiduparc.nutrition.history.repository;
 
 import com.aiduparc.nutrition.history.model.MealLogEntryEntity;
 import java.time.LocalDate;
+import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -18,4 +19,8 @@ public interface MealLogEntryRepository extends JpaRepository<MealLogEntryEntity
     );
 
     void deleteByUserIdAndEntryDate(UUID userId, LocalDate entryDate);
+
+    List<MealLogEntryEntity> findByUserIdAndCreatedAtAfter(UUID userId, OffsetDateTime after);
+
+    Optional<MealLogEntryEntity> findTopByUserIdAndCreatedAtBeforeOrderByCreatedAtDesc(UUID userId, OffsetDateTime before);
 }
