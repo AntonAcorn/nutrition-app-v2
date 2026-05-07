@@ -1,3 +1,6 @@
+# wiki (local only)
+wiki/
+
 # OS / editors
 .DS_Store
 .idea/
