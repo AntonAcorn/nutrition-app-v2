@@ -72,6 +72,9 @@ public class UserProfileEntity {
     @Column(name = "relax_days_per_month", nullable = false)
     private Integer relaxDaysPerMonth = 2;
 
+    @Column(name = "coach_focus", length = 120)
+    private String coachFocus;
+
     @Column(name = "created_at", nullable = false, updatable = false)
     private OffsetDateTime createdAt;
 
@@ -134,6 +137,9 @@ public class UserProfileEntity {
 
     public Integer getRelaxDaysPerMonth() { return relaxDaysPerMonth != null ? relaxDaysPerMonth : 2; }
     public void setRelaxDaysPerMonth(Integer relaxDaysPerMonth) { this.relaxDaysPerMonth = relaxDaysPerMonth != null ? relaxDaysPerMonth : 2; }
+
+    public String getCoachFocus() { return coachFocus; }
+    public void setCoachFocus(String coachFocus) { this.coachFocus = coachFocus; }
 
     public OffsetDateTime getCreatedAt() { return createdAt; }
     public OffsetDateTime getUpdatedAt() { return updatedAt; }

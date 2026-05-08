@@ -17,6 +17,7 @@ export interface OnboardingPayload {
   dailyBankCapKcal?: number
   bankMaxKcal?: number
   relaxDaysPerMonth?: number
+  coachFocus?: string
 }
 
 export function submitProfile(payload: OnboardingPayload): Promise<void> {

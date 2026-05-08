@@ -288,8 +288,19 @@ public class CoachSnapshotService {
                 toIntOrNull(p.getFiberTargetG())
             ),
             toDoubleOrNull(p.getStartingWeightKg()),
-            toDoubleOrNull(p.getTargetWeightKg())
+            toDoubleOrNull(p.getTargetWeightKg()),
+            parseFocus(p.getCoachFocus())
         );
+    }
+
+    private static List<String> parseFocus(String raw) {
+        if (raw == null || raw.isBlank()) return List.of();
+        List<String> out = new ArrayList<>();
+        for (String part : raw.split(",")) {
+            String t = part.trim().toLowerCase();
+            if (!t.isEmpty()) out.add(t);
+        }
+        return out;
     }
 
     private Totals buildTotals(

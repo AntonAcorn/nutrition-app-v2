@@ -22,5 +22,7 @@ public record CreateProfileRequest(
     Integer waterGoalGlasses,
     @Min(0) @Max(2000) Integer dailyBankCapKcal,
     @Min(0) @Max(10000) Integer bankMaxKcal,
-    @Min(0) @Max(31) Integer relaxDaysPerMonth
+    @Min(0) @Max(31) Integer relaxDaysPerMonth,
+    /** Comma-separated list: energy, mood, weight, performance. Empty = all. */
+    String coachFocus
 ) {}

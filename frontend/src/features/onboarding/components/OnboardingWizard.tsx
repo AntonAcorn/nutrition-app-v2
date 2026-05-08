@@ -1,6 +1,7 @@
 import { CSSProperties, FormEvent, useState } from 'react'
 import { submitProfile, type OnboardingPayload } from '../model/profileApi'
 import { MascotCameraSvg } from '../../current-day/components/MascotCameraSvg'
+import { COACH_FOCUS_TAGS, type CoachFocusTag, serializeCoachFocus } from '../../profile/model/profileApi'
 
 interface Props {
   onComplete: () => void
@@ -25,8 +26,13 @@ export function OnboardingWizard({ onComplete }: Props) {
   const [activityLevel, setActivityLevel] = useState<OnboardingPayload['activityLevel'] | ''>('')
   const [goal, setGoal] = useState<OnboardingPayload['goal'] | ''>('')
   const [weightLossStrategy, setWeightLossStrategy] = useState<OnboardingPayload['weightLossStrategy'] | ''>('')
+  const [coachFocus, setCoachFocus] = useState<CoachFocusTag[]>([])
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState('')
+
+  function toggleFocus(tag: CoachFocusTag) {
+    setCoachFocus(prev => prev.includes(tag) ? prev.filter(t => t !== tag) : [...prev, tag])
+  }
 
   function canAdvanceStep1() {
     return ageYears && gender && heightCm
@@ -72,6 +78,7 @@ export function OnboardingWizard({ onComplete }: Props) {
         activityLevel: activityLevel as OnboardingPayload['activityLevel'],
         goal: goal as OnboardingPayload['goal'],
         weightLossStrategy: goal === 'lose' ? weightLossStrategy as OnboardingPayload['weightLossStrategy'] : undefined,
+        coachFocus: serializeCoachFocus(coachFocus) ?? undefined,
       })
       setStep(4)
     } catch (err) {
@@ -271,6 +278,32 @@ export function OnboardingWizard({ onComplete }: Props) {
               )}
             </>
           )}
+
+          <label style={{ marginTop: '0.25rem' }}>What should Coach focus on?</label>
+          <p className="onboarding-hint" style={{ margin: '-4px 0 4px', fontSize: '0.8rem' }}>
+            Pick what matters most. You can change this anytime.
+          </p>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem' }}>
+            {COACH_FOCUS_TAGS.map(({ tag, emoji, label, hint }) => {
+              const active = coachFocus.includes(tag)
+              return (
+                <button
+                  key={tag}
+                  type="button"
+                  className="tab-button tab-button--dark"
+                  style={optionStyle(active)}
+                  onClick={() => toggleFocus(tag)}
+                >
+                  <span style={{ display: 'block', fontWeight: 600 }}>
+                    {emoji} {label}
+                  </span>
+                  <span style={{ display: 'block', fontSize: '0.75rem', opacity: 0.65, marginTop: 2 }}>
+                    {hint}
+                  </span>
+                </button>
+              )
+            })}
+          </div>
 
           <div style={{ display: 'flex', gap: '0.5rem' }}>
             <button type="button" className="tab-button tab-button--dark" onClick={() => setStep(2)}>

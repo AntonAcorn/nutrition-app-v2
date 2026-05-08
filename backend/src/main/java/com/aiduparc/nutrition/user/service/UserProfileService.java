@@ -105,8 +105,17 @@ public class UserProfileService {
         if (command.relaxDaysPerMonth() != null) {
             entity.setRelaxDaysPerMonth(command.relaxDaysPerMonth());
         }
+        // coach_focus is intentionally always assignable, including to null/blank,
+        // so the user can clear it and fall back to the 'all' default.
+        entity.setCoachFocus(normalizeFocus(command.coachFocus()));
 
         return repository.save(entity);
+    }
+
+    private static String normalizeFocus(String raw) {
+        if (raw == null) return null;
+        String trimmed = raw.trim().toLowerCase();
+        return trimmed.isBlank() ? null : trimmed;
     }
 
     public int getWaterGoal(UUID userId) {
@@ -199,6 +208,7 @@ public class UserProfileService {
         Integer waterGoalGlasses,
         Integer dailyBankCapKcal,
         Integer bankMaxKcal,
-        Integer relaxDaysPerMonth
+        Integer relaxDaysPerMonth,
+        String coachFocus
     ) {}
 }

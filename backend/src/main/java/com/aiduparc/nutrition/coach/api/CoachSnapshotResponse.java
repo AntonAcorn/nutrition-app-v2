@@ -38,7 +38,8 @@ public record CoachSnapshotResponse(
         Integer dailyTargetKcal,
         MacroTargets macroTargets,
         Double startingWeightKg,
-        Double targetWeightKg
+        Double targetWeightKg,
+        java.util.List<String> coachFocus
     ) {}
 
     public record MacroTargets(

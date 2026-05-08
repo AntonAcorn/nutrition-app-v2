@@ -111,7 +111,7 @@ class StubCoachInsightProviderTest {
     private static CoachSnapshotResponse snapshot(Totals totals) {
         return new CoachSnapshotResponse(
             new Profile("Anton", "lose", "optimal", "moderately_active", 30, "male",
-                1800, new MacroTargets(120, 60, 200, 30), 82.0, 75.0),
+                1800, new MacroTargets(120, 60, 200, 30), 82.0, 75.0, List.of()),
             new Window(7, LocalDate.of(2026, 5, 1), LocalDate.of(2026, 5, 7)),
             totals,
             new PriorWindow(0, null, new MacroAvg(null, null, null, null), 0),

@@ -1,7 +1,7 @@
 import { CSSProperties, FormEvent, useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
-import { fetchProfile, updateProfile, type UserProfile } from '../model/profileApi'
+import { fetchProfile, updateProfile, type UserProfile, COACH_FOCUS_TAGS, type CoachFocusTag, parseCoachFocus, serializeCoachFocus } from '../model/profileApi'
 import type { OnboardingPayload } from '../../onboarding/model/profileApi'
 import { NotificationSettings } from '../../notifications/components/NotificationSettings'
 import { exportNutritionCsv } from '../model/exportData'
@@ -88,6 +88,7 @@ export function ProfileTab({ displayName, email, onLogout, onDeleteAccount }: Pr
   const [dailyBankCapKcal, setDailyBankCapKcal] = useState('')
   const [bankMaxKcal, setBankMaxKcal] = useState('')
   const [relaxDaysPerMonth, setRelaxDaysPerMonth] = useState('')
+  const [coachFocus, setCoachFocus] = useState<CoachFocusTag[]>([])
   const [saving, setSaving] = useState(false)
   const [saveError, setSaveError] = useState('')
 
@@ -110,8 +111,13 @@ export function ProfileTab({ displayName, email, onLogout, onDeleteAccount }: Pr
     setDailyBankCapKcal(String(profile.dailyBankCapKcal ?? 300))
     setBankMaxKcal(String(profile.bankMaxKcal ?? 2000))
     setRelaxDaysPerMonth(String(profile.relaxDaysPerMonth ?? 2))
+    setCoachFocus(parseCoachFocus(profile.coachFocus))
     setSaveError('')
     setEditing(true)
+  }
+
+  function toggleFocus(tag: CoachFocusTag) {
+    setCoachFocus(prev => prev.includes(tag) ? prev.filter(t => t !== tag) : [...prev, tag])
   }
 
   async function handleSave(event: FormEvent) {
@@ -137,6 +143,7 @@ export function ProfileTab({ displayName, email, onLogout, onDeleteAccount }: Pr
         dailyBankCapKcal: dailyBankCapKcal === '' ? undefined : Number(dailyBankCapKcal),
         bankMaxKcal: bankMaxKcal === '' ? undefined : Number(bankMaxKcal),
         relaxDaysPerMonth: relaxDaysPerMonth === '' ? undefined : Number(relaxDaysPerMonth),
+        coachFocus: serializeCoachFocus(coachFocus) ?? undefined,
       })
       setProfile(updated)
       setEditing(false)
@@ -313,6 +320,34 @@ export function ProfileTab({ displayName, email, onLogout, onDeleteAccount }: Pr
                   Relax days per month
                   <input type="number" min={0} max={31} value={relaxDaysPerMonth} onChange={(e) => setRelaxDaysPerMonth(e.target.value)} />
                 </label>
+              </div>
+            </div>
+
+            <div>
+              <label style={{ display: 'block', marginBottom: '6px' }}>What does Coach focus on?</label>
+              <p className="profile-hint" style={{ marginTop: 0, fontSize: '0.8rem', opacity: 0.6 }}>
+                Pick any combination. Empty = balanced across all.
+              </p>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem' }}>
+                {COACH_FOCUS_TAGS.map(({ tag, emoji, label, hint }) => {
+                  const active = coachFocus.includes(tag)
+                  return (
+                    <button
+                      key={tag}
+                      type="button"
+                      className="tab-button tab-button--dark"
+                      style={optionStyle(active)}
+                      onClick={() => toggleFocus(tag)}
+                    >
+                      <span style={{ display: 'block', fontWeight: 600 }}>
+                        {emoji} {label}
+                      </span>
+                      <span style={{ display: 'block', fontSize: '0.78rem', opacity: 0.65, marginTop: 2 }}>
+                        {hint}
+                      </span>
+                    </button>
+                  )
+                })}
               </div>
             </div>
 

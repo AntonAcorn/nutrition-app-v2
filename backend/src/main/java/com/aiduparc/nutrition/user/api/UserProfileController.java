@@ -82,7 +82,8 @@ public class UserProfileController {
             request.waterGoalGlasses(),
             request.dailyBankCapKcal(),
             request.bankMaxKcal(),
-            request.relaxDaysPerMonth()
+            request.relaxDaysPerMonth(),
+            request.coachFocus()
         ));
 
         return UserProfileResponse.from(entity);

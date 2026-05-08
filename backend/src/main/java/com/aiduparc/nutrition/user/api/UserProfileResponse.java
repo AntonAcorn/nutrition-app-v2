@@ -24,7 +24,8 @@ public record UserProfileResponse(
     int waterGoalGlasses,
     int dailyBankCapKcal,
     int bankMaxKcal,
-    int relaxDaysPerMonth
+    int relaxDaysPerMonth,
+    String coachFocus
 ) {
     static UserProfileResponse from(UserProfileEntity entity) {
         BigDecimal proteinTarget = entity.getProteinTargetG();
@@ -59,7 +60,8 @@ public record UserProfileResponse(
             entity.getWaterGoalGlasses(),
             entity.getDailyBankCapKcal(),
             entity.getBankMaxKcal(),
-            entity.getRelaxDaysPerMonth()
+            entity.getRelaxDaysPerMonth(),
+            entity.getCoachFocus()
         );
     }
 }
