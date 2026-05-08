@@ -8,7 +8,6 @@ import { exportNutritionCsv } from '../model/exportData'
 import { useCalorieBank } from '../../calorie-bank/model/useCalorieBank'
 import { CalorieBankSheet } from '../../calorie-bank/components/CalorieBankSheet'
 import { localDateString } from '../../statistics/model/formatters'
-import { CoachTour } from '../../coach/components/CoachTour'
 
 const ACTIVITY_LABELS: Record<string, string> = {
   sedentary: 'Sedentary',
@@ -60,7 +59,6 @@ export function ProfileTab({ displayName, email, onLogout, onDeleteAccount }: Pr
   const [showExport, setShowExport] = useState(false)
   const [exporting, setExporting] = useState(false)
   const [showBank, setShowBank] = useState(false)
-  const [showTour, setShowTour] = useState(false)
   const todayStr = localDateString(new Date())
   const { snapshot: bankSnapshot } = useCalorieBank(todayStr)
 
@@ -514,13 +512,6 @@ export function ProfileTab({ displayName, email, onLogout, onDeleteAccount }: Pr
         <button
           type="button"
           className="profile-tool-row"
-          onClick={() => setShowTour(true)}
-        >
-          🧠 How Coach works
-        </button>
-        <button
-          type="button"
-          className="profile-tool-row"
           onClick={() => setShowExport(v => !v)}
         >
           📤 Export data
@@ -566,8 +557,6 @@ export function ProfileTab({ displayName, email, onLogout, onDeleteAccount }: Pr
           onClose={() => setShowBank(false)}
         />
       )}
-
-      {showTour && <CoachTour onClose={() => setShowTour(false)} />}
     </section>
   )
 }
