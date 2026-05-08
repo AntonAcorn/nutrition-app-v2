@@ -8,6 +8,7 @@ import type { AuthUser } from '../features/auth/model/authApi'
 import type { MealTemplateItem } from '../shared/types/nutrition'
 import { SunIcon, MoonIcon, TabIconToday, TabIconStats, TabIconMe } from './icons'
 import { getSubscriptionStatus, getCurrentTimezone, updatePushTimezone } from '../features/notifications/model/pushApi'
+import { syncHealthDataIfDue } from '../features/health/healthSyncApi'
 
 const PhotoAnalyzerTab = lazy(() => import('../features/photo-analyzer/components/PhotoAnalyzerTab').then(m => ({ default: m.PhotoAnalyzerTab })))
 const StatisticsTab    = lazy(() => import('../features/statistics/components/StatisticsTab').then(m => ({ default: m.StatisticsTab })))
@@ -61,6 +62,7 @@ export function AppShell({ authUser, theme, onToggleTheme, onLogout, onDeleteAcc
 
   useEffect(() => {
     syncPushTimezone()
+    syncHealthDataIfDue().catch(() => {})
   }, [])
 
   useEffect(() => {
@@ -74,6 +76,7 @@ export function AppShell({ authUser, theme, onToggleTheme, onLogout, onDeleteAcc
         const listener = await CapApp.addListener('appStateChange', state => {
           if (state.isActive) {
             syncPushTimezone()
+            syncHealthDataIfDue().catch(() => {})
           }
         })
         cleanup = () => { listener.remove() }

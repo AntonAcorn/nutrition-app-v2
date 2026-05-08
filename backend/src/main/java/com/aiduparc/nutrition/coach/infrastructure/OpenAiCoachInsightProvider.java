@@ -87,7 +87,18 @@ public class OpenAiCoachInsightProvider implements CoachInsightProvider {
         "  - When you talk about a specific day (bestDay / worstDay), name",
         "    its day-of-week, not just the date.",
         "  - Echo the user's vocabulary: if they log 'Овсянка с курагой',",
-        "    write 'Овсянка с курагой', not 'oatmeal'."
+        "    write 'Овсянка с курагой', not 'oatmeal'.",
+        "",
+        "HealthKit signals (in `health` block, all optional):",
+        "  - avgSteps, avgActiveKcal, avgSleepMinutes — daily averages",
+        "  - workoutDays / totalWorkoutMinutes — exercise volume",
+        "  - stepsByDayOfWeek, sleepMinByDayOfWeek — DOW splits",
+        "  Cross-domain insights using these are highly valuable when supported:",
+        "    'Sleep <360 min Tue/Thu — both nights you ate +400 kcal vs other days.'",
+        "    'No-workout days run 290 kcal higher than training days.'",
+        "    'Steps below 4000 → next-day kcal up by ~250 (3 cases).'",
+        "  Only use health signals when present. If health is null, ignore it",
+        "  silently — never invent activity/sleep numbers."
     );
 
     private static final String USER_INSTRUCTION = String.join("\n",

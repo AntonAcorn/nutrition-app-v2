@@ -25,7 +25,8 @@ public record CoachSnapshotResponse(
     List<TopMeal> topMeals,
     DayHighlight bestDay,
     DayHighlight worstDay,
-    List<RecentMeal> recentMeals
+    List<RecentMeal> recentMeals,
+    HealthAggregate health
 ) {
     public record Profile(
         String displayName,
@@ -166,5 +167,22 @@ public record CoachSnapshotResponse(
         String name,
         Integer kcal,
         Integer hour
+    ) {}
+
+    /**
+     * Aggregated HealthKit data over the same window. Lets the model spot
+     * cross-domain patterns: poor sleep → late dinners, low steps → cravings,
+     * workout days holding zone, etc. Any field is null when the user
+     * either hasn't synced HealthKit or doesn't have that metric.
+     */
+    public record HealthAggregate(
+        int loggedDays,
+        Integer avgSteps,
+        Integer avgActiveKcal,
+        Integer avgSleepMinutes,
+        Integer workoutDays,
+        Integer totalWorkoutMinutes,
+        java.util.Map<String, Integer> stepsByDayOfWeek,
+        java.util.Map<String, Integer> sleepMinByDayOfWeek
     ) {}
 }

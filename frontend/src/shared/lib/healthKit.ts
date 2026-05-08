@@ -12,7 +12,7 @@ export async function requestHealthPermissions(): Promise<boolean> {
     if (!available.available) return false
 
     await Health.requestAuthorization({
-      read: ['steps', 'calories', 'weight'],
+      read: ['steps', 'calories', 'weight', 'sleep', 'workouts'],
       write: ['weight'],
     })
     return true
@@ -82,6 +82,93 @@ export async function getLatestWeightFromHealth(): Promise<HealthWeightSample | 
   } catch {
     return null
   }
+}
+
+export interface DailyHealthSample {
+  date: string // YYYY-MM-DD
+  steps?: number
+  activeKcal?: number
+  sleepMinutes?: number
+  workoutMinutes?: number
+  workoutCount?: number
+}
+
+function dayBoundsLocal(d: Date): { start: Date; end: Date } {
+  const start = new Date(d.getFullYear(), d.getMonth(), d.getDate(), 0, 0, 0, 0)
+  const end = new Date(d.getFullYear(), d.getMonth(), d.getDate(), 23, 59, 59, 999)
+  return { start, end }
+}
+
+function ymd(d: Date): string {
+  const y = d.getFullYear()
+  const m = String(d.getMonth() + 1).padStart(2, '0')
+  const day = String(d.getDate()).padStart(2, '0')
+  return `${y}-${m}-${day}`
+}
+
+async function readSampleSum(dataType: 'steps' | 'calories' | 'sleep', start: Date, end: Date): Promise<number> {
+  try {
+    const { samples } = await Health.readSamples({
+      dataType,
+      startDate: start.toISOString(),
+      endDate: end.toISOString(),
+    })
+    return Math.round(samples.reduce((sum, s) => sum + (s.value ?? 0), 0))
+  } catch {
+    return 0
+  }
+}
+
+async function readWorkoutsCount(start: Date, end: Date): Promise<{ count: number; minutes: number }> {
+  try {
+    const { samples } = await Health.readSamples({
+      dataType: 'workouts',
+      startDate: start.toISOString(),
+      endDate: end.toISOString(),
+    })
+    let minutes = 0
+    for (const s of samples) {
+      const a = new Date(s.startDate).getTime()
+      const b = new Date(s.endDate).getTime()
+      if (Number.isFinite(a) && Number.isFinite(b) && b > a) {
+        minutes += Math.round((b - a) / 60000)
+      }
+    }
+    return { count: samples.length, minutes }
+  } catch {
+    return { count: 0, minutes: 0 }
+  }
+}
+
+/**
+ * Pulls a per-day rollup of HealthKit metrics for the last `days` days
+ * (including today). Each metric is independent — if HealthKit refuses
+ * one type, others still come back. Used by the health-sync hook.
+ */
+export async function collectDailyHealth(days: number = 14): Promise<DailyHealthSample[]> {
+  if (!isHealthKitSupported()) return []
+  const out: DailyHealthSample[] = []
+  const today = new Date()
+  for (let i = 0; i < days; i++) {
+    const d = new Date(today)
+    d.setDate(today.getDate() - i)
+    const { start, end } = dayBoundsLocal(d)
+    const [steps, kcal, sleep, workouts] = await Promise.all([
+      readSampleSum('steps', start, end),
+      readSampleSum('calories', start, end),
+      readSampleSum('sleep', start, end),
+      readWorkoutsCount(start, end),
+    ])
+    out.push({
+      date: ymd(d),
+      steps: steps || undefined,
+      activeKcal: kcal || undefined,
+      sleepMinutes: sleep || undefined,
+      workoutMinutes: workouts.minutes || undefined,
+      workoutCount: workouts.count || undefined,
+    })
+  }
+  return out
 }
 
 export async function writeWeightToHealth(weightKg: number, date: string): Promise<void> {

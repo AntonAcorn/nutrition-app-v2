@@ -125,7 +125,8 @@ class StubCoachInsightProviderTest {
             List.of(),
             null,
             null,
-            List.of()
+            List.of(),
+            null
         );
     }
 
@@ -136,7 +137,8 @@ class StubCoachInsightProviderTest {
             new MealTiming(8, 22, lateCount, 0),
             base.weightTrend(), base.bank(),
             base.relaxDays(), base.wellbeing(), base.topMeals(),
-            base.bestDay(), base.worstDay(), base.recentMeals()
+            base.bestDay(), base.worstDay(), base.recentMeals(),
+            base.health()
         );
     }
 }

@@ -3,12 +3,15 @@ package com.aiduparc.nutrition.coach.service;
 import com.aiduparc.nutrition.calorieBank.api.CalorieBankSnapshotResponse;
 import com.aiduparc.nutrition.calorieBank.repository.RelaxDayRepository;
 import com.aiduparc.nutrition.calorieBank.service.CalorieBankService;
+import com.aiduparc.nutrition.health.model.HealthMetricsEntity;
+import com.aiduparc.nutrition.health.service.HealthMetricsService;
 import com.aiduparc.nutrition.coach.api.CoachSnapshotResponse;
 import com.aiduparc.nutrition.coach.api.CoachSnapshotResponse.BankStat;
 import com.aiduparc.nutrition.coach.api.CoachSnapshotResponse.DayOfWeekStat;
 import com.aiduparc.nutrition.coach.api.CoachSnapshotResponse.MacroAvg;
 import com.aiduparc.nutrition.coach.api.CoachSnapshotResponse.MacroTargets;
 import com.aiduparc.nutrition.coach.api.CoachSnapshotResponse.DayHighlight;
+import com.aiduparc.nutrition.coach.api.CoachSnapshotResponse.HealthAggregate;
 import com.aiduparc.nutrition.coach.api.CoachSnapshotResponse.MealTiming;
 import com.aiduparc.nutrition.coach.api.CoachSnapshotResponse.PriorWindow;
 import com.aiduparc.nutrition.coach.api.CoachSnapshotResponse.Profile;
@@ -71,6 +74,7 @@ public class CoachSnapshotService {
     private final WellbeingEntryRepository wellbeingEntryRepository;
     private final RelaxDayRepository relaxDayRepository;
     private final CalorieBankService calorieBankService;
+    private final HealthMetricsService healthMetricsService;
 
     public CoachSnapshotService(
         UserProfileRepository userProfileRepository,
@@ -80,7 +84,8 @@ public class CoachSnapshotService {
         MealSlotRepository mealSlotRepository,
         WellbeingEntryRepository wellbeingEntryRepository,
         RelaxDayRepository relaxDayRepository,
-        CalorieBankService calorieBankService
+        CalorieBankService calorieBankService,
+        HealthMetricsService healthMetricsService
     ) {
         this.userProfileRepository = userProfileRepository;
         this.userRepository = userRepository;
@@ -90,6 +95,7 @@ public class CoachSnapshotService {
         this.wellbeingEntryRepository = wellbeingEntryRepository;
         this.relaxDayRepository = relaxDayRepository;
         this.calorieBankService = calorieBankService;
+        this.healthMetricsService = healthMetricsService;
     }
 
     public CoachSnapshotResponse buildSnapshot(UUID userId, LocalDate today, int days) {
@@ -138,7 +144,75 @@ public class CoachSnapshotService {
             buildTopMeals(meals),
             bestDay,
             worstDay,
-            buildRecentMeals(userId, meals, from, to, zone)
+            buildRecentMeals(userId, meals, from, to, zone),
+            buildHealth(userId, from, to)
+        );
+    }
+
+    /**
+     * Aggregates HealthKit data over the same window. Returns null if there's
+     * no row in health_metrics for any day — saves the model from
+     * hallucinating numbers when the user hasn't synced yet.
+     */
+    private HealthAggregate buildHealth(UUID userId, LocalDate from, LocalDate to) {
+        List<HealthMetricsEntity> rows = healthMetricsService.findRange(userId, from, to);
+        if (rows.isEmpty()) return null;
+
+        long sumSteps = 0, sumActive = 0, sumSleep = 0;
+        int stepDays = 0, activeDays = 0, sleepDays = 0;
+        int workoutDays = 0;
+        long totalWorkoutMin = 0;
+        Map<DayOfWeek, long[]> stepsByDow = new HashMap<>();
+        Map<DayOfWeek, long[]> sleepByDow = new HashMap<>();
+
+        for (HealthMetricsEntity r : rows) {
+            DayOfWeek dow = r.getMetricDate().getDayOfWeek();
+            if (r.getSteps() != null) {
+                sumSteps += r.getSteps();
+                stepDays++;
+                long[] s = stepsByDow.computeIfAbsent(dow, k -> new long[2]);
+                s[0] += r.getSteps();
+                s[1] += 1;
+            }
+            if (r.getActiveKcal() != null) {
+                sumActive += r.getActiveKcal();
+                activeDays++;
+            }
+            if (r.getSleepMinutes() != null) {
+                sumSleep += r.getSleepMinutes();
+                sleepDays++;
+                long[] s = sleepByDow.computeIfAbsent(dow, k -> new long[2]);
+                s[0] += r.getSleepMinutes();
+                s[1] += 1;
+            }
+            if (r.getWorkoutMinutes() != null && r.getWorkoutMinutes() > 0) {
+                workoutDays++;
+                totalWorkoutMin += r.getWorkoutMinutes();
+            }
+        }
+
+        Map<String, Integer> stepsDow = new LinkedHashMap<>();
+        for (DayOfWeek d : DayOfWeek.values()) {
+            long[] s = stepsByDow.get(d);
+            if (s != null) stepsDow.put(d.name().toLowerCase(Locale.ROOT),
+                (int) Math.round((double) s[0] / s[1]));
+        }
+        Map<String, Integer> sleepDow = new LinkedHashMap<>();
+        for (DayOfWeek d : DayOfWeek.values()) {
+            long[] s = sleepByDow.get(d);
+            if (s != null) sleepDow.put(d.name().toLowerCase(Locale.ROOT),
+                (int) Math.round((double) s[0] / s[1]));
+        }
+
+        return new HealthAggregate(
+            rows.size(),
+            stepDays > 0   ? (int) Math.round((double) sumSteps / stepDays)   : null,
+            activeDays > 0 ? (int) Math.round((double) sumActive / activeDays) : null,
+            sleepDays > 0  ? (int) Math.round((double) sumSleep / sleepDays)  : null,
+            workoutDays > 0 ? workoutDays : null,
+            workoutDays > 0 ? (int) totalWorkoutMin : null,
+            stepsDow,
+            sleepDow
         );
     }
 
