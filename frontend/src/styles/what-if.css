@@ -1,0 +1,150 @@
+.what-if-card {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.what-if-card__brand {
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  color: rgba(255, 255, 255, 0.55);
+}
+
+.what-if-card__row {
+  display: flex;
+  flex-direction: column;
+}
+
+.what-if-card__field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.what-if-card__label {
+  font-size: 0.78rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.55);
+}
+
+.what-if-card__slider {
+  width: 100%;
+  accent-color: #7b61ff;
+}
+
+.what-if-card__delta {
+  font-size: 1.05rem;
+  font-weight: 600;
+  text-align: center;
+}
+
+.what-if-card__delta--cut { color: #86efac; }
+.what-if-card__delta--add { color: #fca5a5; }
+.what-if-card__delta--flat { color: rgba(255, 255, 255, 0.65); }
+
+.what-if-card__chips {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.what-if-card__chip {
+  flex: 1;
+  min-width: 70px;
+  padding: 8px 10px;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  background: transparent;
+  color: rgba(255, 255, 255, 0.65);
+  font-size: 0.85rem;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: background 0.12s;
+}
+
+.what-if-card__chip--active {
+  background: rgba(123, 97, 255, 0.18);
+  border-color: rgba(123, 97, 255, 0.5);
+  color: #ddd6fe;
+}
+
+.what-if-card__result {
+  border-radius: 14px;
+  padding: 14px 16px;
+  border: 1px solid;
+}
+
+.what-if-card__result--good {
+  background: rgba(34, 197, 94, 0.10);
+  border-color: rgba(34, 197, 94, 0.28);
+}
+
+.what-if-card__result--over {
+  background: rgba(239, 68, 68, 0.10);
+  border-color: rgba(239, 68, 68, 0.30);
+}
+
+.what-if-card__result--muted {
+  background: rgba(255, 255, 255, 0.04);
+  border-color: rgba(255, 255, 255, 0.10);
+}
+
+.what-if-card__result-main {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  margin-bottom: 4px;
+}
+
+.what-if-card__arrow {
+  font-size: 1.35rem;
+  font-weight: 700;
+}
+
+.what-if-card__weight {
+  font-size: 1.7rem;
+  font-weight: 700;
+  color: #ffffff;
+}
+
+.what-if-card__result-sub {
+  margin: 0 0 8px;
+  font-size: 0.88rem;
+  color: rgba(255, 255, 255, 0.78);
+}
+
+.what-if-card__result-fine {
+  margin: 0;
+  font-size: 0.72rem;
+  color: rgba(255, 255, 255, 0.45);
+  line-height: 1.4;
+}
+
+[data-theme="light"] .what-if-card__brand,
+[data-theme="light"] .what-if-card__label {
+  color: rgba(20, 33, 61, 0.55);
+}
+
+[data-theme="light"] .what-if-card__chip {
+  border-color: rgba(20, 33, 61, 0.12);
+  color: rgba(20, 33, 61, 0.65);
+}
+
+[data-theme="light"] .what-if-card__chip--active {
+  background: rgba(123, 97, 255, 0.10);
+  color: #6d28d9;
+}
+
+[data-theme="light"] .what-if-card__weight {
+  color: #14213d;
+}
+
+[data-theme="light"] .what-if-card__result-sub {
+  color: rgba(20, 33, 61, 0.78);
+}
+
+[data-theme="light"] .what-if-card__result-fine {
+  color: rgba(20, 33, 61, 0.5);
+}

@@ -12,6 +12,7 @@ import { CalorieBarChart } from './CalorieBarChart'
 import { LineChart } from './LineChart'
 import { InsightsSection, CalorieSuggestionCard } from './InsightsSection'
 import { StatisticsTable } from './StatisticsTable'
+import { WhatIfSimulator } from '../../coach/components/WhatIfSimulator'
 
 interface StatisticsTabProps {
   refreshToken?: number
@@ -253,6 +254,7 @@ export function StatisticsTab({ refreshToken = 0 }: StatisticsTabProps) {
                 gradColor="#38a169"
               />
               <StatisticsTable points={points} />
+              <WhatIfSimulator />
             </>
           )}
         </>
