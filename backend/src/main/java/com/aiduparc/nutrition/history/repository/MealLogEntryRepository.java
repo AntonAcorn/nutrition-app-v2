@@ -22,5 +22,8 @@ public interface MealLogEntryRepository extends JpaRepository<MealLogEntryEntity
 
     List<MealLogEntryEntity> findByUserIdAndCreatedAtAfter(UUID userId, OffsetDateTime after);
 
+    List<MealLogEntryEntity> findByUserIdAndEntryDateBetweenOrderByCreatedAtAsc(
+        UUID userId, LocalDate fromInclusive, LocalDate toInclusive);
+
     Optional<MealLogEntryEntity> findTopByUserIdAndCreatedAtBeforeOrderByCreatedAtDesc(UUID userId, OffsetDateTime before);
 }
