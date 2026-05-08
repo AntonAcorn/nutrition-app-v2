@@ -11,6 +11,7 @@ import com.aiduparc.nutrition.history.model.DailyNutritionEntryEntity;
 import com.aiduparc.nutrition.history.model.MealSlotEntity;
 import com.aiduparc.nutrition.history.repository.DailyNutritionEntryRepository;
 import com.aiduparc.nutrition.notifications.TelegramNotificationService;
+import com.aiduparc.nutrition.user.repository.UserProfileRepository;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Optional;
@@ -38,6 +39,7 @@ class NutritionHistoryServiceTest {
     @Mock private TelegramNotificationService telegramNotificationService;
     @Mock private NutritionStatisticsCalculator statisticsCalculator;
     @Mock private MealLogService mealLogService;
+    @Mock private UserProfileRepository userProfileRepository;
 
     @InjectMocks private NutritionHistoryService service;
 

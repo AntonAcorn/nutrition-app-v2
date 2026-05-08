@@ -10,6 +10,8 @@ import com.aiduparc.nutrition.history.model.DailyNutritionEntrySnapshot;
 import com.aiduparc.nutrition.history.model.MealSlotEntity;
 import com.aiduparc.nutrition.history.repository.DailyNutritionEntryRepository;
 import com.aiduparc.nutrition.notifications.TelegramNotificationService;
+import com.aiduparc.nutrition.user.model.UserProfileEntity;
+import com.aiduparc.nutrition.user.repository.UserProfileRepository;
 import jakarta.validation.constraints.NotNull;
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -47,17 +49,20 @@ public class NutritionHistoryService {
     private final TelegramNotificationService telegramNotificationService;
     private final NutritionStatisticsCalculator statisticsCalculator;
     private final MealLogService mealLogService;
+    private final UserProfileRepository userProfileRepository;
 
     public NutritionHistoryService(
             DailyNutritionEntryRepository repository,
             TelegramNotificationService telegramNotificationService,
             NutritionStatisticsCalculator statisticsCalculator,
-            MealLogService mealLogService
+            MealLogService mealLogService,
+            UserProfileRepository userProfileRepository
     ) {
         this.repository = repository;
         this.telegramNotificationService = telegramNotificationService;
         this.statisticsCalculator = statisticsCalculator;
         this.mealLogService = mealLogService;
+        this.userProfileRepository = userProfileRepository;
     }
 
     // ── Read-through: snapshots ──────────────────────────────────────────────
@@ -129,6 +134,7 @@ public class NutritionHistoryService {
             entity.setWaterGlasses(0);
         }
 
+        entity.setCalorieTargetKcal(resolveTarget(userId, entity.getCalorieTargetKcal()));
         entity.setWeightKg(weightKg);
         entity.setWeightUpdatedAt(OffsetDateTime.now(ZoneOffset.UTC));
 
@@ -228,7 +234,7 @@ public class NutritionHistoryService {
         entity.setEntryDate(command.entryDate());
         entity.setWeightKg(command.weightKg());
         entity.setCaloriesConsumedKcal(command.caloriesConsumedKcal());
-        entity.setCalorieTargetKcal(command.calorieTargetKcal());
+        entity.setCalorieTargetKcal(resolveTarget(command.userId(), command.calorieTargetKcal()));
         entity.setProteinGrams(command.proteinGrams());
         entity.setFatGrams(command.fatGrams());
         entity.setFiberGrams(command.fiberGrams());
@@ -266,6 +272,21 @@ public class NutritionHistoryService {
 
     private static BigDecimal defaultBigDecimal(BigDecimal value) {
         return value != null ? value : BigDecimal.ZERO;
+    }
+
+    /**
+     * Pin the calorie target on a daily entry: keep what's already there if
+     * it's a sane positive number, otherwise pull the live target from the
+     * user's profile. Prevents bank/badge calculations from misfiring when
+     * an entry was created via a code path that didn't pass a target
+     * (e.g. early water-only or weight-only writes), or when an entry got
+     * persisted with a stale 0 from an earlier bug.
+     */
+    private BigDecimal resolveTarget(UUID userId, BigDecimal current) {
+        if (current != null && current.signum() > 0) return current;
+        return userProfileRepository.findByNutritionUserId(userId)
+            .map(UserProfileEntity::getDailyCalorieTargetKcal)
+            .orElse(current);
     }
 
     private static String mergeNotes(String currentNotes, String incomingNotes) {
