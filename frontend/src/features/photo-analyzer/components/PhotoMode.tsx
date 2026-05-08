@@ -32,21 +32,30 @@ export function PhotoMode({
   onVoiceError,
 }: PhotoModeProps) {
   const [photoDrafts, setPhotoDrafts] = useState<DraftEntry[]>([])
+  const [pendingPhotos, setPendingPhotos] = useState<{ file: File; thumb: string }[]>([])
   const [userNote, setUserNote] = useState('')
   const [noteExpanded, setNoteExpanded] = useState(false)
   const [noteRecording, setNoteRecording] = useState(false)
   const noteRecognitionRef = useRef<SpeechRecognition | null>(null)
   const noteBaseRef = useRef<string>('')
   const fileInputRef = useRef<HTMLInputElement | null>(null)
-  const galleryInputRef = useRef<HTMLInputElement | null>(null)
   const initialPhotoUsed = useRef(false)
 
   useEffect(() => {
     if (initialPhoto && !initialPhotoUsed.current) {
       initialPhotoUsed.current = true
-      analyzePhoto(initialPhoto, '')
+      // Stage the initial photo for preview + note instead of analyzing
+      // it immediately. The user can add a note before tapping Analyze.
+      setPendingPhotos([{ file: initialPhoto, thumb: URL.createObjectURL(initialPhoto) }])
     }
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Free blob URLs of pending photos when they leave the staging area.
+  useEffect(() => {
+    return () => {
+      pendingPhotos.forEach(p => URL.revokeObjectURL(p.thumb))
+    }
+  }, [pendingPhotos])
 
   async function analyzePhoto(file: File, note: string) {
     const thumbnail = URL.createObjectURL(file)
@@ -82,7 +91,7 @@ export function PhotoMode({
   async function handleTakePhoto() {
     if (await isNativePlatform()) {
       const file = await pickPhotoNative()
-      if (file) analyzePhoto(file, userNote)
+      if (file) stagePhoto(file)
     } else {
       fileInputRef.current?.click()
     }
@@ -91,9 +100,35 @@ export function PhotoMode({
   function handleFilesSelected(event: ChangeEvent<HTMLInputElement>) {
     const files = Array.from(event.target.files ?? [])
     if (files.length === 0) return
-    const note = userNote
-    files.forEach(file => analyzePhoto(file, note))
+    files.forEach(stagePhoto)
     if (event.target) event.target.value = ''
+  }
+
+  /** Add a photo to the pre-analyze staging area instead of running it
+   *  through the LLM right away. The user gets to optionally add a note
+   *  and only then taps "Analyze". */
+  function stagePhoto(file: File) {
+    setPendingPhotos(prev => [...prev, { file, thumb: URL.createObjectURL(file) }])
+  }
+
+  function removePending(index: number) {
+    setPendingPhotos(prev => {
+      const next = [...prev]
+      const [removed] = next.splice(index, 1)
+      if (removed) URL.revokeObjectURL(removed.thumb)
+      return next
+    })
+  }
+
+  function analyzePending() {
+    if (pendingPhotos.length === 0) return
+    const note = userNote
+    const batch = pendingPhotos
+    setPendingPhotos([])
+    batch.forEach(({ file }) => analyzePhoto(file, note))
+    // Keep the note around so 'Add another photo' below remembers it,
+    // but collapse the editor so it doesn't crowd the drafts.
+    setNoteExpanded(false)
   }
 
   async function savePhotoDraft(localId: string) {
@@ -259,8 +294,63 @@ export function PhotoMode({
     )
   }, [photoDrafts]) // eslint-disable-line react-hooks/exhaustive-deps
 
-  if (initialPhoto && photoDrafts.length === 0) {
-    return <p className="subtle-text" style={{ textAlign: 'center', padding: '2rem 0' }}>Analyzing…</p>
+  // Pre-analyze staging: photo(s) chosen but not yet sent to the LLM.
+  // The user can attach a note here and only then tap Analyze.
+  if (pendingPhotos.length > 0) {
+    return (
+      <div className="photo-staging">
+        <p className="photo-staging__title">
+          {pendingPhotos.length === 1 ? 'Ready to analyze' : `${pendingPhotos.length} photos ready`}
+        </p>
+
+        <div className="photo-staging__thumbs">
+          {pendingPhotos.map((p, i) => (
+            <div key={p.thumb} className="photo-staging__thumb">
+              <img src={p.thumb} alt={`pending ${i + 1}`} />
+              <button
+                type="button"
+                className="photo-staging__remove"
+                onClick={() => removePending(i)}
+                aria-label="Remove photo"
+              >✕</button>
+            </div>
+          ))}
+          <button type="button" className="photo-staging__add" onClick={handleTakePhoto}>+</button>
+        </div>
+
+        <div className="photo-staging__note-row">
+          <span className="photo-staging__note-label">Note (optional)</span>
+          {speechSupported && (
+            <MicButton
+              active={noteRecording}
+              onClick={noteRecording ? stopNoteRecording : startNoteRecording}
+              ariaLabelStart="Dictate note"
+            />
+          )}
+        </div>
+        <textarea
+          value={userNote}
+          onChange={(e) => setUserNote(e.target.value)}
+          rows={2}
+          placeholder="e.g. small portion, no oil, with feta"
+          className={`photo-staging__textarea${noteRecording ? ' note-textarea--recording' : ''}`}
+        />
+
+        <button type="button" className="photo-staging__analyze" onClick={analyzePending}>
+          Analyze {pendingPhotos.length > 1 ? `${pendingPhotos.length} photos` : 'photo'}
+        </button>
+
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept="image/*"
+          capture="environment"
+          multiple
+          onChange={handleFilesSelected}
+          hidden
+        />
+      </div>
+    )
   }
 
   return (
@@ -299,17 +389,6 @@ export function PhotoMode({
         <button type="button" className="upload-button" onClick={handleTakePhoto}>
           <span>{photoDrafts.length > 0 ? 'Add another photo' : 'Take photo'}</span>
         </button>
-        <label className="upload-button upload-button--secondary">
-          <input
-            ref={galleryInputRef}
-            type="file"
-            accept="image/*"
-            multiple
-            onChange={handleFilesSelected}
-            hidden
-          />
-          <span>Choose from gallery</span>
-        </label>
         <input
           ref={fileInputRef}
           type="file"
