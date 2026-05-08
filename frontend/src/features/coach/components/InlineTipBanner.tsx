@@ -49,7 +49,10 @@ export function InlineTipBanner({ kcal, slotType, debounceMs = 700 }: Props) {
     }
   }, [kcal, slotType, debounceMs])
 
-  if (!tip || tip.tone === 'muted' || !tip.text) return null
+  // Silent on 'good': we only surface the tip when there's something to flag.
+  // Constant green pats-on-the-back train users to ignore the banner, which
+  // ruins the signal when caution/over actually appears.
+  if (!tip || tip.tone === 'muted' || tip.tone === 'good' || !tip.text) return null
 
   return (
     <div className={`inline-tip inline-tip--${tip.tone}${loading ? ' inline-tip--loading' : ''}`} aria-live="polite">
