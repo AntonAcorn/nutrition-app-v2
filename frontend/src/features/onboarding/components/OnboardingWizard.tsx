@@ -280,7 +280,7 @@ export function OnboardingWizard({ onComplete }: Props) {
           )}
 
           <label style={{ marginTop: '0.25rem' }}>What should Coach focus on?</label>
-          <p className="onboarding-hint" style={{ margin: '-4px 0 4px', fontSize: '0.8rem' }}>
+          <p className="coach-focus-help">
             Pick what matters most. You can change this anytime.
           </p>
           <div className="coach-focus-grid">

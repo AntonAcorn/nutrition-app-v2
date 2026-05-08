@@ -325,7 +325,7 @@ export function ProfileTab({ displayName, email, onLogout, onDeleteAccount }: Pr
 
             <div>
               <label style={{ display: 'block', marginBottom: '6px' }}>What does Coach focus on?</label>
-              <p className="profile-hint" style={{ marginTop: 0, fontSize: '0.8rem', opacity: 0.6 }}>
+              <p className="coach-focus-help">
                 Pick any combination. Empty = balanced across all.
               </p>
               <div className="coach-focus-grid">
