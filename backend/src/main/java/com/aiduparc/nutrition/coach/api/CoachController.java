@@ -1,5 +1,6 @@
 package com.aiduparc.nutrition.coach.api;
 
+import com.aiduparc.nutrition.coach.service.CoachGoalAdjustmentService;
 import com.aiduparc.nutrition.coach.service.CoachInlineTipService;
 import com.aiduparc.nutrition.coach.service.CoachInsightService;
 import com.aiduparc.nutrition.coach.service.CoachRateLimitService;
@@ -35,6 +36,7 @@ public class CoachController {
     private final CoachRateLimitService rateLimitService;
     private final WeeklyRecapService weeklyRecapService;
     private final CoachInlineTipService inlineTipService;
+    private final CoachGoalAdjustmentService goalAdjustmentService;
     private final CurrentNutritionUserResolver userResolver;
 
     public CoachController(
@@ -43,6 +45,7 @@ public class CoachController {
         CoachRateLimitService rateLimitService,
         WeeklyRecapService weeklyRecapService,
         CoachInlineTipService inlineTipService,
+        CoachGoalAdjustmentService goalAdjustmentService,
         CurrentNutritionUserResolver userResolver
     ) {
         this.coachSnapshotService = coachSnapshotService;
@@ -50,6 +53,7 @@ public class CoachController {
         this.rateLimitService = rateLimitService;
         this.weeklyRecapService = weeklyRecapService;
         this.inlineTipService = inlineTipService;
+        this.goalAdjustmentService = goalAdjustmentService;
         this.userResolver = userResolver;
     }
 
@@ -134,6 +138,13 @@ public class CoachController {
         UUID userId = userResolver.resolve(session, null);
         ZoneId zone = CoachSnapshotService.resolveZone(tz);
         return inlineTipService.compute(userId, request.kcal(), request.slotType(), zone);
+    }
+
+    @PostMapping("/escalation/accept")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void acceptEscalation(@RequestParam String strategy, HttpSession session) {
+        UUID userId = userResolver.resolve(session, null);
+        goalAdjustmentService.applyWeightLossStrategy(userId, strategy);
     }
 
     private LocalDate today(LocalDate provided) {

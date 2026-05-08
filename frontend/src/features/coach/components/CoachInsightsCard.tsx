@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import {
+  acceptEscalation,
   dismissCoachInsight,
   fetchCoachInsights,
   refreshCoachInsights,
@@ -17,6 +18,13 @@ const KIND_ICON: Record<InsightKind, string> = {
   wellbeing: '⚡',
   weight: '⚖️',
   other: '💡',
+  escalation: '🚀',
+}
+
+function parseStrategyFromAnchor(anchor: string | null): string | null {
+  if (!anchor) return null
+  const match = /strategy:([a-z]+)/i.exec(anchor)
+  return match ? match[1].toLowerCase() : null
 }
 
 interface Props {
@@ -64,6 +72,34 @@ export function CoachInsightsCard({ date, days = 7 }: Props) {
     },
   })
 
+  const escalate = useMutation({
+    mutationFn: ({ id, strategy }: { id: string; strategy: string }) => {
+      void id
+      return acceptEscalation(strategy)
+    },
+    onMutate: ({ id }) => {
+      hapticLight()
+      const prev = queryClient.getQueryData<CoachInsightsResponse>(['coach-insights', date, days])
+      if (prev) {
+        queryClient.setQueryData<CoachInsightsResponse>(
+          ['coach-insights', date, days],
+          { ...prev, cards: prev.cards.filter(c => c.id !== id) }
+        )
+      }
+      return { prev }
+    },
+    onSuccess: (_, { id }) => {
+      // The card stays gone; backend marks the underlying insight by absence
+      // (it'll regenerate next cycle if the user backslides). Also dismiss
+      // it server-side so it doesn't reappear on re-fetch.
+      dismissCoachInsight(id).catch(() => {})
+      queryClient.invalidateQueries({ queryKey: ['profile'] })
+    },
+    onError: (_err, _vars, ctx) => {
+      if (ctx?.prev) queryClient.setQueryData(['coach-insights', date, days], ctx.prev)
+    },
+  })
+
   const data = query.data
   if (!data || data.cards.length === 0) return null
 
@@ -87,24 +123,40 @@ export function CoachInsightsCard({ date, days = 7 }: Props) {
         </button>
       </header>
       <ul className="coach-card__list">
-        {data.cards.map(card => (
-          <li key={card.id} className="coach-card__item">
-            <span className="coach-card__icon" aria-hidden>{KIND_ICON[card.kind] ?? '💡'}</span>
-            <div className="coach-card__body">
-              <p className="coach-card__title">{card.title}</p>
-              <p className="coach-card__text">{card.body}</p>
-            </div>
-            <button
-              type="button"
-              className="coach-card__dismiss"
-              onClick={() => dismiss.mutate(card.id)}
-              aria-label="Dismiss insight"
-              title="Dismiss"
+        {data.cards.map(card => {
+          const escalationStrategy = card.kind === 'escalation' ? parseStrategyFromAnchor(card.anchor) : null
+          return (
+            <li
+              key={card.id}
+              className={`coach-card__item${card.kind === 'escalation' ? ' coach-card__item--escalation' : ''}`}
             >
-              ✕
-            </button>
-          </li>
-        ))}
+              <span className="coach-card__icon" aria-hidden>{KIND_ICON[card.kind] ?? '💡'}</span>
+              <div className="coach-card__body">
+                <p className="coach-card__title">{card.title}</p>
+                <p className="coach-card__text">{card.body}</p>
+                {escalationStrategy && (
+                  <button
+                    type="button"
+                    className="coach-card__cta"
+                    disabled={escalate.isPending}
+                    onClick={() => escalate.mutate({ id: card.id, strategy: escalationStrategy })}
+                  >
+                    {escalate.isPending ? 'Applying…' : `Switch to ${escalationStrategy}`}
+                  </button>
+                )}
+              </div>
+              <button
+                type="button"
+                className="coach-card__dismiss"
+                onClick={() => dismiss.mutate(card.id)}
+                aria-label="Dismiss insight"
+                title="Dismiss"
+              >
+                ✕
+              </button>
+            </li>
+          )
+        })}
       </ul>
     </section>
   )

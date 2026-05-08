@@ -1,6 +1,6 @@
 import { apiClient } from '../../../shared/lib/apiClient'
 
-export type InsightKind = 'behavioral' | 'macro' | 'timing' | 'wellbeing' | 'weight' | 'other'
+export type InsightKind = 'behavioral' | 'macro' | 'timing' | 'wellbeing' | 'weight' | 'other' | 'escalation'
 
 export interface CoachInsightCard {
   id: string
@@ -58,6 +58,13 @@ export function refreshCoachInsights(date?: string, days?: number): Promise<Coac
 
 export function dismissCoachInsight(id: string): Promise<void> {
   return apiClient.delete<void>(`/api/coach/insights/${encodeURIComponent(id)}`)
+}
+
+export function acceptEscalation(strategy: string): Promise<void> {
+  return apiClient.post<void>(
+    `/api/coach/escalation/accept?strategy=${encodeURIComponent(strategy)}`,
+    {}
+  )
 }
 
 export type InlineTipTone = 'good' | 'caution' | 'over' | 'muted'

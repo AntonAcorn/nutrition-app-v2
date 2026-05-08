@@ -35,17 +35,20 @@ public class CoachInsightService {
     private final CoachInsightProvider provider;
     private final UserInsightRepository repository;
     private final CoachInsightProperties properties;
+    private final CoachGoalAdjustmentService goalAdjustmentService;
 
     public CoachInsightService(
         CoachSnapshotService snapshotService,
         CoachInsightProvider provider,
         UserInsightRepository repository,
-        CoachInsightProperties properties
+        CoachInsightProperties properties,
+        CoachGoalAdjustmentService goalAdjustmentService
     ) {
         this.snapshotService = snapshotService;
         this.provider = provider;
         this.repository = repository;
         this.properties = properties;
+        this.goalAdjustmentService = goalAdjustmentService;
     }
 
     @Transactional
@@ -119,6 +122,26 @@ public class CoachInsightService {
             e.setSource(provider.sourceTag());
             saved.add(repository.save(e));
         }
+
+        // Append a goal-escalation card on top of regular insights when the
+        // user has clearly earned it. Stored as kind=escalation with the
+        // suggested strategy in the anchor so the frontend can render an
+        // Apply button.
+        goalAdjustmentService.evaluate(userId, snapshot).ifPresent(esc -> {
+            UserInsightEntity e = new UserInsightEntity();
+            e.setUserId(userId);
+            e.setGeneratedAt(now);
+            e.setValidUntil(validUntil);
+            e.setSnapshotWindowDays(days);
+            e.setKind("escalation");
+            e.setTitle("Ready to step up?");
+            e.setBody(esc.rationale() + " You can move from " + esc.currentStrategy()
+                + " to " + esc.suggestedStrategy() + " — Coach will lower your target accordingly.");
+            e.setAnchor("strategy:" + esc.suggestedStrategy());
+            e.setSource("rule:goal-escalation");
+            saved.add(repository.save(e));
+        });
+
         return toResponse(saved);
     }
 
