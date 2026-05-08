@@ -1016,3 +1016,109 @@
   color: #14213d;
 }
 
+
+/* ── Slot prompt before global Add Food ─────────────────────────── */
+.slot-picker-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.78);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 20px;
+}
+
+.slot-picker {
+  width: 100%;
+  max-width: 360px;
+  background: #1a1f2e;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 20px;
+  padding: 22px 20px;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.55);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.slot-picker__title {
+  margin: 0;
+  text-align: center;
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #ffffff;
+}
+
+.slot-picker__grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.slot-picker__btn {
+  appearance: none;
+  -webkit-appearance: none;
+  font: inherit;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  padding: 14px 12px;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  background: rgba(255, 255, 255, 0.04);
+  color: rgba(255, 255, 255, 0.85);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  transition: background 0.12s, border-color 0.12s, transform 0.12s;
+}
+
+.slot-picker__btn:active {
+  transform: scale(0.97);
+}
+
+.slot-picker__btn--suggested {
+  border-color: rgba(123, 97, 255, 0.55);
+  background: rgba(123, 97, 255, 0.16);
+}
+
+.slot-picker__emoji {
+  font-size: 1.5rem;
+  line-height: 1;
+}
+
+.slot-picker__label {
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+
+.slot-picker__hint {
+  font-size: 0.68rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: #c4b5fd;
+  font-weight: 700;
+}
+
+[data-theme="light"] .slot-picker {
+  background: #ffffff;
+  border-color: rgba(20, 33, 61, 0.10);
+}
+
+[data-theme="light"] .slot-picker__title { color: #14213d; }
+
+[data-theme="light"] .slot-picker__btn {
+  border-color: rgba(20, 33, 61, 0.14);
+  background: rgba(20, 33, 61, 0.03);
+  color: rgba(20, 33, 61, 0.85);
+}
+
+[data-theme="light"] .slot-picker__btn--suggested {
+  border-color: rgba(123, 97, 255, 0.55);
+  background: rgba(123, 97, 255, 0.10);
+}
+
+[data-theme="light"] .slot-picker__hint { color: #6d28d9; }

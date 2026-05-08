@@ -8,6 +8,8 @@ import { WellbeingDailyPrompt } from '../../wellbeing/components/WellbeingDailyP
 import { WeeklyBankCard } from './WeeklyBankCard'
 import { WaterIntakeCard } from './WaterIntakeCard'
 import { QuickAddSheet } from './QuickAddSheet'
+import { MealSlotPickerPopup } from './MealSlotPickerPopup'
+import { defaultSlotByTime, type MealSlot } from '../model/mealLogApi'
 import { MealsLogCard } from './MealsLogCard'
 import { fetchTodaySummary } from '../model/todaySummaryApi'
 import { updateTodayWeight } from '../model/weightApi'
@@ -72,6 +74,7 @@ export function CurrentDayTab({ refreshToken = 0, successMessage = '', onDayUpda
   const [resettingDay, setResettingDay] = useState(false)
   const [showQuickAdd, setShowQuickAdd] = useState(false)
   const [quickAddSlot, setQuickAddSlot] = useState<string | undefined>(undefined)
+  const [slotPickerVisible, setSlotPickerVisible] = useState(false)
   const [pullDist, setPullDist] = useState(0)
   const [ptrRefreshing, setPtrRefreshing] = useState(false)
   const [showCoachTour, setShowCoachTour] = useState(() => shouldShowCoachTourOnce())
@@ -264,7 +267,19 @@ export function CurrentDayTab({ refreshToken = 0, successMessage = '', onDayUpda
   }
 
   function openQuickAdd(slotType?: string) {
-    setQuickAddSlot(slotType)
+    if (slotType) {
+      // Explicit entry from a slot row — slot is unambiguous.
+      setQuickAddSlot(slotType)
+      setShowQuickAdd(true)
+    } else {
+      // Global entry — ask the user which meal before opening the sheet.
+      setSlotPickerVisible(true)
+    }
+  }
+
+  function handleSlotPicked(slot: MealSlot['slotType']) {
+    setSlotPickerVisible(false)
+    setQuickAddSlot(slot)
     setShowQuickAdd(true)
   }
 
@@ -510,6 +525,14 @@ export function CurrentDayTab({ refreshToken = 0, successMessage = '', onDayUpda
           onOpenAnalyzer={onOpenAnalyzer}
           onOpenAnalyzerWithPhoto={onOpenAnalyzerWithPhoto}
           onOpenLibrary={onOpenLibrary}
+        />
+      )}
+
+      {slotPickerVisible && (
+        <MealSlotPickerPopup
+          suggested={defaultSlotByTime()}
+          onPick={handleSlotPicked}
+          onCancel={() => setSlotPickerVisible(false)}
         />
       )}
 
