@@ -10,6 +10,7 @@ import com.aiduparc.nutrition.coach.model.UserInsightEntity;
 import com.aiduparc.nutrition.coach.repository.UserInsightRepository;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
+import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -49,28 +50,28 @@ public class CoachInsightService {
     }
 
     @Transactional
-    public CoachInsightResponse getOrGenerate(UUID userId, LocalDate today, int days) {
+    public CoachInsightResponse getOrGenerate(UUID userId, LocalDate today, int days, ZoneId zone) {
         OffsetDateTime now = OffsetDateTime.now(ZoneOffset.UTC);
         List<UserInsightEntity> fresh = repository
             .findByUserIdAndValidUntilAfterOrderByGeneratedAtDesc(userId, now);
         if (!fresh.isEmpty()) {
             return toResponse(fresh);
         }
-        return generateAndStore(userId, today, days, now);
+        return generateAndStore(userId, today, days, zone, now);
     }
 
     @Transactional
-    public CoachInsightResponse refresh(UUID userId, LocalDate today, int days) {
+    public CoachInsightResponse refresh(UUID userId, LocalDate today, int days, ZoneId zone) {
         OffsetDateTime now = OffsetDateTime.now(ZoneOffset.UTC);
-        return generateAndStore(userId, today, days, now);
+        return generateAndStore(userId, today, days, zone, now);
     }
 
-    private CoachInsightResponse generateAndStore(UUID userId, LocalDate today, int days, OffsetDateTime now) {
+    private CoachInsightResponse generateAndStore(UUID userId, LocalDate today, int days, ZoneId zone, OffsetDateTime now) {
         if (!properties.enabled()) {
             return emptyResponse(now, days);
         }
 
-        CoachSnapshotResponse snapshot = snapshotService.buildSnapshot(userId, today, days);
+        CoachSnapshotResponse snapshot = snapshotService.buildSnapshot(userId, today, days, zone);
         if (snapshot.totals().loggedDays() < minLoggedDays()) {
             return emptyResponse(now, days);
         }

@@ -18,18 +18,28 @@ export interface CoachInsightsResponse {
   cards: CoachInsightCard[]
 }
 
-export function fetchCoachInsights(date?: string, days?: number): Promise<CoachInsightsResponse> {
+function browserTz(): string | null {
+  try {
+    return Intl.DateTimeFormat().resolvedOptions().timeZone || null
+  } catch {
+    return null
+  }
+}
+
+function buildQuery(date?: string, days?: number): string {
   const params = new URLSearchParams()
   if (date) params.set('date', date)
   if (days != null) params.set('days', String(days))
+  const tz = browserTz()
+  if (tz) params.set('tz', tz)
   const qs = params.toString()
-  return apiClient.get<CoachInsightsResponse>(`/api/coach/insights${qs ? `?${qs}` : ''}`)
+  return qs ? `?${qs}` : ''
+}
+
+export function fetchCoachInsights(date?: string, days?: number): Promise<CoachInsightsResponse> {
+  return apiClient.get<CoachInsightsResponse>(`/api/coach/insights${buildQuery(date, days)}`)
 }
 
 export function refreshCoachInsights(date?: string, days?: number): Promise<CoachInsightsResponse> {
-  const params = new URLSearchParams()
-  if (date) params.set('date', date)
-  if (days != null) params.set('days', String(days))
-  const qs = params.toString()
-  return apiClient.post<CoachInsightsResponse>(`/api/coach/insights/refresh${qs ? `?${qs}` : ''}`, {})
+  return apiClient.post<CoachInsightsResponse>(`/api/coach/insights/refresh${buildQuery(date, days)}`, {})
 }

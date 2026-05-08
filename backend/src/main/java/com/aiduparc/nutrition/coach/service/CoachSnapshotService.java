@@ -28,8 +28,11 @@ import com.aiduparc.nutrition.user.repository.UserProfileRepository;
 import com.aiduparc.nutrition.wellbeing.model.WellbeingEntryEntity;
 import com.aiduparc.nutrition.wellbeing.repository.WellbeingEntryRepository;
 import java.math.BigDecimal;
+import java.time.DateTimeException;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
+import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -82,6 +85,10 @@ public class CoachSnapshotService {
     }
 
     public CoachSnapshotResponse buildSnapshot(UUID userId, LocalDate today, int days) {
+        return buildSnapshot(userId, today, days, ZoneOffset.UTC);
+    }
+
+    public CoachSnapshotResponse buildSnapshot(UUID userId, LocalDate today, int days, ZoneId zone) {
         UserProfileEntity profile = userProfileRepository.findByNutritionUserId(userId)
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Profile not found"));
 
@@ -102,13 +109,22 @@ public class CoachSnapshotService {
             buildTotals(dailyByDate, profile, from, to),
             buildByDayOfWeek(dailyEntries),
             buildBySlot(userId, meals, from, to),
-            buildMealTiming(meals),
+            buildMealTiming(meals, zone),
             buildWeightTrend(dailyEntries, profile),
             buildBank(userId, today),
             buildRelaxDays(userId, today, from, to, profile.getRelaxDaysPerMonth()),
             buildWellbeing(userId, from, to),
             buildTopMeals(meals)
         );
+    }
+
+    public static ZoneId resolveZone(String tz) {
+        if (tz == null || tz.isBlank()) return ZoneOffset.UTC;
+        try {
+            return ZoneId.of(tz);
+        } catch (DateTimeException ignored) {
+            return ZoneOffset.UTC;
+        }
     }
 
     private Profile buildProfile(UserProfileEntity p) {
@@ -261,11 +277,11 @@ public class CoachSnapshotService {
         return out;
     }
 
-    private MealTiming buildMealTiming(List<MealLogEntryEntity> meals) {
+    private MealTiming buildMealTiming(List<MealLogEntryEntity> meals, ZoneId zone) {
         Integer earliest = null, latest = null;
         int late = 0, early = 0;
         for (MealLogEntryEntity m : meals) {
-            int hour = m.getCreatedAt().getHour();
+            int hour = m.getCreatedAt().atZoneSameInstant(zone).getHour();
             earliest = earliest == null ? hour : Math.min(earliest, hour);
             latest = latest == null ? hour : Math.max(latest, hour);
             if (hour >= LATE_HOUR_THRESHOLD) late++;
