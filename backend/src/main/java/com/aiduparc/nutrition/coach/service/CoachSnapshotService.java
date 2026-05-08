@@ -41,7 +41,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import org.springframework.http.HttpStatus;
@@ -403,10 +402,5 @@ public class CoachSnapshotService {
 
     private long valueOrZero(BigDecimal v) {
         return v == null ? 0L : v.longValue();
-    }
-
-    @SuppressWarnings("unused")
-    private Optional<Integer> avgInt(long sum, long count) {
-        return count > 0 ? Optional.of((int) Math.round((double) sum / count)) : Optional.empty();
     }
 }

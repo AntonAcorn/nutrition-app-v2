@@ -15,7 +15,6 @@ import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -150,7 +149,4 @@ public class CoachInsightService {
         int v = properties.minLoggedDays();
         return v > 0 ? v : DEFAULT_MIN_LOGGED_DAYS;
     }
-
-    @SuppressWarnings("unused")
-    private Optional<Integer> noop() { return Optional.empty(); }
 }
