@@ -19,10 +19,8 @@ import java.util.Optional;
 import java.util.UUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.server.ResponseStatusException;
 
 @Service
 @Transactional(readOnly = true)
@@ -79,11 +77,13 @@ public class CoachInsightService {
         List<InsightDraft> drafts;
         try {
             drafts = provider.generate(snapshot, locale);
-        } catch (ResponseStatusException ex) {
-            throw ex;
         } catch (RuntimeException ex) {
-            log.warn("Coach insight provider failed userId={}", userId, ex);
-            throw new ResponseStatusException(HttpStatus.BAD_GATEWAY, "Coach provider failed", ex);
+            // Graceful fallback: never propagate LLM/provider failures to the user
+            // (rate-limit, network, unparsable JSON, missing API key, etc).
+            // The card just won't appear; we log so we can debug from server logs.
+            log.warn("Coach insight provider failed userId={} ({}): returning empty",
+                userId, ex.getClass().getSimpleName(), ex);
+            return emptyResponse(now, days);
         }
 
         if (drafts.isEmpty()) {
