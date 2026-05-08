@@ -9,10 +9,14 @@ import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.UUID;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -76,6 +80,13 @@ public class CoachController {
         rateLimitService.checkRefreshLimit(userId);
         ZoneId zone = CoachSnapshotService.resolveZone(tz);
         return coachInsightService.refresh(userId, today(date), windowDays(days), zone, locale);
+    }
+
+    @DeleteMapping("/insights/{id}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void dismissInsight(@PathVariable UUID id, HttpSession session) {
+        UUID userId = userResolver.resolve(session, null);
+        coachInsightService.dismiss(userId, id);
     }
 
     private LocalDate today(LocalDate provided) {

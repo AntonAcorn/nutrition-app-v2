@@ -55,3 +55,7 @@ export function fetchCoachInsights(date?: string, days?: number): Promise<CoachI
 export function refreshCoachInsights(date?: string, days?: number): Promise<CoachInsightsResponse> {
   return apiClient.post<CoachInsightsResponse>(`/api/coach/insights/refresh${buildQuery(date, days)}`, {})
 }
+
+export function dismissCoachInsight(id: string): Promise<void> {
+  return apiClient.delete<void>(`/api/coach/insights/${encodeURIComponent(id)}`)
+}

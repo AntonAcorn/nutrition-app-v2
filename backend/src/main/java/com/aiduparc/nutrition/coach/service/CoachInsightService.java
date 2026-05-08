@@ -51,11 +51,21 @@ public class CoachInsightService {
     public CoachInsightResponse getOrGenerate(UUID userId, LocalDate today, int days, ZoneId zone, String locale) {
         OffsetDateTime now = OffsetDateTime.now(ZoneOffset.UTC);
         List<UserInsightEntity> fresh = repository
-            .findByUserIdAndValidUntilAfterOrderByGeneratedAtDesc(userId, now);
+            .findByUserIdAndValidUntilAfterAndDismissedAtIsNullOrderByGeneratedAtDesc(userId, now);
         if (!fresh.isEmpty()) {
             return toResponse(fresh);
         }
         return generateAndStore(userId, today, days, zone, locale, now);
+    }
+
+    @Transactional
+    public void dismiss(UUID userId, UUID insightId) {
+        UserInsightEntity entity = repository.findByIdAndUserId(insightId, userId)
+            .orElseThrow(() -> new org.springframework.web.server.ResponseStatusException(
+                org.springframework.http.HttpStatus.NOT_FOUND, "Insight not found"));
+        if (entity.getDismissedAt() != null) return;
+        entity.setDismissedAt(OffsetDateTime.now(ZoneOffset.UTC));
+        repository.save(entity);
     }
 
     @Transactional

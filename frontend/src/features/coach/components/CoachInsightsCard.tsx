@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import {
+  dismissCoachInsight,
   fetchCoachInsights,
   refreshCoachInsights,
   type CoachInsightsResponse,
@@ -45,6 +46,24 @@ export function CoachInsightsCard({ date, days = 7 }: Props) {
     },
   })
 
+  const dismiss = useMutation({
+    mutationFn: (id: string) => dismissCoachInsight(id),
+    onMutate: (id) => {
+      hapticLight()
+      const prev = queryClient.getQueryData<CoachInsightsResponse>(['coach-insights', date, days])
+      if (prev) {
+        queryClient.setQueryData<CoachInsightsResponse>(
+          ['coach-insights', date, days],
+          { ...prev, cards: prev.cards.filter(c => c.id !== id) }
+        )
+      }
+      return { prev }
+    },
+    onError: (_err, _id, ctx) => {
+      if (ctx?.prev) queryClient.setQueryData(['coach-insights', date, days], ctx.prev)
+    },
+  })
+
   const data = query.data
   if (!data || data.cards.length === 0) return null
 
@@ -71,6 +90,15 @@ export function CoachInsightsCard({ date, days = 7 }: Props) {
               <p className="coach-card__title">{card.title}</p>
               <p className="coach-card__text">{card.body}</p>
             </div>
+            <button
+              type="button"
+              className="coach-card__dismiss"
+              onClick={() => dismiss.mutate(card.id)}
+              aria-label="Dismiss insight"
+              title="Dismiss"
+            >
+              ✕
+            </button>
           </li>
         ))}
       </ul>

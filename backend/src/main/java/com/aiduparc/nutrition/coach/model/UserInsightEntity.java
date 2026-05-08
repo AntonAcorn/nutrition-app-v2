@@ -43,6 +43,9 @@ public class UserInsightEntity {
     @Column(name = "source", nullable = false, length = 64)
     private String source;
 
+    @Column(name = "dismissed_at")
+    private OffsetDateTime dismissedAt;
+
     @PrePersist
     void onCreate() {
         if (id == null) id = UUID.randomUUID();
@@ -69,4 +72,6 @@ public class UserInsightEntity {
     public void setAnchor(String anchor) { this.anchor = anchor; }
     public String getSource() { return source; }
     public void setSource(String source) { this.source = source; }
+    public OffsetDateTime getDismissedAt() { return dismissedAt; }
+    public void setDismissedAt(OffsetDateTime dismissedAt) { this.dismissedAt = dismissedAt; }
 }
