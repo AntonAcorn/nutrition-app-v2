@@ -5,6 +5,7 @@ import com.aiduparc.nutrition.coach.api.WeeklyRecapResponse;
 import com.aiduparc.nutrition.coach.api.WeeklyRecapResponse.Section;
 import com.aiduparc.nutrition.coach.config.CoachInsightProperties;
 import com.aiduparc.nutrition.coach.infrastructure.CoachInsightProvider;
+import com.aiduparc.nutrition.coach.infrastructure.CoachInsightProvider.PastInsight;
 import com.aiduparc.nutrition.coach.infrastructure.CoachInsightProvider.WeeklyRecapDraft;
 import com.aiduparc.nutrition.coach.model.CoachWeeklyRecapEntity;
 import com.aiduparc.nutrition.coach.repository.CoachWeeklyRecapRepository;
@@ -35,19 +36,22 @@ public class WeeklyRecapService {
     private final CoachWeeklyRecapRepository repository;
     private final CoachInsightProperties properties;
     private final ObjectMapper objectMapper;
+    private final CoachInsightService insightService;
 
     public WeeklyRecapService(
         CoachSnapshotService snapshotService,
         CoachInsightProvider provider,
         CoachWeeklyRecapRepository repository,
         CoachInsightProperties properties,
-        ObjectMapper objectMapper
+        ObjectMapper objectMapper,
+        CoachInsightService insightService
     ) {
         this.snapshotService = snapshotService;
         this.provider = provider;
         this.repository = repository;
         this.properties = properties;
         this.objectMapper = objectMapper;
+        this.insightService = insightService;
     }
 
     /**
@@ -77,9 +81,12 @@ public class WeeklyRecapService {
             return null;
         }
 
+        java.util.List<PastInsight> history = insightService.loadHistory(userId,
+            java.time.OffsetDateTime.now(java.time.ZoneOffset.UTC));
+
         WeeklyRecapDraft draft;
         try {
-            draft = provider.generateWeeklyRecap(snapshot, locale);
+            draft = provider.generateWeeklyRecap(snapshot, history, locale);
         } catch (RuntimeException ex) {
             log.warn("Weekly recap provider failed userId={} ({}): skipping",
                 userId, ex.getClass().getSimpleName(), ex);

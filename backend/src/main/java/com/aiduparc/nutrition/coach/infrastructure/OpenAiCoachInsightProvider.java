@@ -87,7 +87,7 @@ public class OpenAiCoachInsightProvider implements CoachInsightProvider {
     }
 
     @Override
-    public List<InsightDraft> generate(CoachSnapshotResponse snapshot, String locale) {
+    public List<InsightDraft> generate(CoachSnapshotResponse snapshot, List<PastInsight> history, String locale) {
         String apiKey = properties.openai().apiKey();
         if (apiKey == null || apiKey.isBlank()) {
             throw new ResponseStatusException(
@@ -97,13 +97,15 @@ public class OpenAiCoachInsightProvider implements CoachInsightProvider {
         }
 
         String snapshotJson;
+        String historyJson;
         try {
             snapshotJson = objectMapper.writeValueAsString(snapshot);
+            historyJson = objectMapper.writeValueAsString(history != null ? history : List.of());
         } catch (IOException e) {
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Failed to serialize snapshot", e);
         }
 
-        String rawContent = invokeOpenAi(apiKey.trim(), snapshotJson, normalizeLocale(locale));
+        String rawContent = invokeOpenAi(apiKey.trim(), snapshotJson, historyJson, normalizeLocale(locale));
         return parseInsights(rawContent);
     }
 
@@ -114,7 +116,7 @@ public class OpenAiCoachInsightProvider implements CoachInsightProvider {
     }
 
     @Override
-    public WeeklyRecapDraft generateWeeklyRecap(CoachSnapshotResponse snapshot, String locale) {
+    public WeeklyRecapDraft generateWeeklyRecap(CoachSnapshotResponse snapshot, List<PastInsight> history, String locale) {
         String apiKey = properties.openai().apiKey();
         if (apiKey == null || apiKey.isBlank()) {
             throw new ResponseStatusException(
@@ -124,13 +126,15 @@ public class OpenAiCoachInsightProvider implements CoachInsightProvider {
         }
 
         String snapshotJson;
+        String historyJson;
         try {
             snapshotJson = objectMapper.writeValueAsString(snapshot);
+            historyJson = objectMapper.writeValueAsString(history != null ? history : List.of());
         } catch (IOException e) {
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Failed to serialize snapshot", e);
         }
 
-        String rawContent = invokeOpenAiForRecap(apiKey.trim(), snapshotJson, normalizeLocale(locale));
+        String rawContent = invokeOpenAiForRecap(apiKey.trim(), snapshotJson, historyJson, normalizeLocale(locale));
         return parseWeeklyRecap(rawContent);
     }
 
@@ -139,10 +143,10 @@ public class OpenAiCoachInsightProvider implements CoachInsightProvider {
         return "openai:" + properties.openai().model();
     }
 
-    private String invokeOpenAi(String apiKey, String snapshotJson, String locale) {
+    private String invokeOpenAi(String apiKey, String snapshotJson, String historyJson, String locale) {
         try {
             String endpoint = normalizeBaseUrl() + "/chat/completions";
-            String payload = objectMapper.writeValueAsString(buildRequestBody(snapshotJson, locale));
+            String payload = objectMapper.writeValueAsString(buildRequestBody(snapshotJson, historyJson, locale));
 
             HttpRequest request = HttpRequest.newBuilder(URI.create(endpoint))
                 .header("Authorization", "Bearer " + apiKey)
@@ -201,8 +205,15 @@ public class OpenAiCoachInsightProvider implements CoachInsightProvider {
         return value.length() <= max ? value : value.substring(0, max);
     }
 
-    private Object buildRequestBody(String snapshotJson, String locale) {
+    private Object buildRequestBody(String snapshotJson, String historyJson, String locale) {
         String localizedSystem = SYSTEM_PROMPT
+            + " You also receive an array `coachHistory` of your past insights"
+            + " (most recent first, with `daysAgo`). Use it to: (a) avoid repeating"
+            + " near-identical advice, and (b) when the latest snapshot shows the"
+            + " user moved on a past suggestion, briefly acknowledge it"
+            + " (e.g. \"Last week I asked you to add protein at breakfast — you"
+            + " went from 96g to 134g\"). Don't force a follow-up if there's"
+            + " no real change."
             + " Reply in language tag '" + locale + "' for the title, body and anchor fields.";
         return Map.of(
             "model", properties.openai().model(),
@@ -217,7 +228,8 @@ public class OpenAiCoachInsightProvider implements CoachInsightProvider {
             ),
             "messages", List.of(
                 Map.of("role", "system", "content", localizedSystem),
-                Map.of("role", "user", "content", USER_INSTRUCTION + "\n" + snapshotJson)
+                Map.of("role", "user", "content",
+                    USER_INSTRUCTION + "\nCoach history:\n" + historyJson + "\nSnapshot:\n" + snapshotJson)
             )
         );
     }
@@ -303,10 +315,10 @@ public class OpenAiCoachInsightProvider implements CoachInsightProvider {
         "Snapshot:"
     );
 
-    private String invokeOpenAiForRecap(String apiKey, String snapshotJson, String locale) {
+    private String invokeOpenAiForRecap(String apiKey, String snapshotJson, String historyJson, String locale) {
         try {
             String endpoint = normalizeBaseUrl() + "/chat/completions";
-            String payload = objectMapper.writeValueAsString(buildRecapRequestBody(snapshotJson, locale));
+            String payload = objectMapper.writeValueAsString(buildRecapRequestBody(snapshotJson, historyJson, locale));
 
             HttpRequest request = HttpRequest.newBuilder(URI.create(endpoint))
                 .header("Authorization", "Bearer " + apiKey)
@@ -336,8 +348,12 @@ public class OpenAiCoachInsightProvider implements CoachInsightProvider {
         }
     }
 
-    private Object buildRecapRequestBody(String snapshotJson, String locale) {
+    private Object buildRecapRequestBody(String snapshotJson, String historyJson, String locale) {
         String localizedSystem = RECAP_SYSTEM_PROMPT
+            + " You also receive `coachHistory` — your past insights and recap"
+            + " entries with `daysAgo`. If the snapshot shows movement on a"
+            + " past suggestion, weave one acknowledgement into the highlight"
+            + " or trend section."
             + " Reply in language tag '" + locale + "' for the title, body and shareLine fields.";
         return Map.of(
             "model", properties.openai().model(),
@@ -352,7 +368,8 @@ public class OpenAiCoachInsightProvider implements CoachInsightProvider {
             ),
             "messages", List.of(
                 Map.of("role", "system", "content", localizedSystem),
-                Map.of("role", "user", "content", RECAP_USER_INSTRUCTION + "\n" + snapshotJson)
+                Map.of("role", "user", "content",
+                    RECAP_USER_INSTRUCTION + "\nCoach history:\n" + historyJson + "\nSnapshot:\n" + snapshotJson)
             )
         );
     }

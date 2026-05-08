@@ -6,8 +6,10 @@ import com.aiduparc.nutrition.coach.api.CoachSnapshotResponse;
 import com.aiduparc.nutrition.coach.config.CoachInsightProperties;
 import com.aiduparc.nutrition.coach.infrastructure.CoachInsightProvider;
 import com.aiduparc.nutrition.coach.infrastructure.CoachInsightProvider.InsightDraft;
+import com.aiduparc.nutrition.coach.infrastructure.CoachInsightProvider.PastInsight;
 import com.aiduparc.nutrition.coach.model.UserInsightEntity;
 import com.aiduparc.nutrition.coach.repository.UserInsightRepository;
+import java.time.Duration;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.time.ZoneId;
@@ -84,9 +86,11 @@ public class CoachInsightService {
             return emptyResponse(now, days);
         }
 
+        List<PastInsight> history = loadHistory(userId, now);
+
         List<InsightDraft> drafts;
         try {
-            drafts = provider.generate(snapshot, locale);
+            drafts = provider.generate(snapshot, history, locale);
         } catch (RuntimeException ex) {
             // Graceful fallback: never propagate LLM/provider failures to the user
             // (rate-limit, network, unparsable JSON, missing API key, etc).
@@ -149,5 +153,26 @@ public class CoachInsightService {
     private int minLoggedDays() {
         int v = properties.minLoggedDays();
         return v > 0 ? v : DEFAULT_MIN_LOGGED_DAYS;
+    }
+
+    /**
+     * Last ~4 weeks of insights, mapped into the compact PastInsight shape
+     * the provider is happy to ingest. Cap at 20 so we don't bloat the LLM
+     * prompt with a year of history once the data builds up.
+     */
+    public List<PastInsight> loadHistory(UUID userId, OffsetDateTime now) {
+        OffsetDateTime cutoff = now.minusDays(28);
+        return repository
+            .findTop20ByUserIdAndGeneratedAtAfterOrderByGeneratedAtDesc(userId, cutoff)
+            .stream()
+            .map(e -> new PastInsight(
+                e.getKind(),
+                e.getTitle(),
+                e.getBody(),
+                e.getAnchor(),
+                (int) Duration.between(e.getGeneratedAt(), now).toDays(),
+                e.getDismissedAt() != null
+            ))
+            .toList();
     }
 }

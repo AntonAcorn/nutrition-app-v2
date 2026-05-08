@@ -26,7 +26,7 @@ class StubCoachInsightProviderTest {
     void returnsEmptyWhenLoggedDaysBelowMinimum() {
         var snapshot = snapshot(totals(2, 0, 0, 0, 0));
 
-        var result = provider.generate(snapshot, "en");
+        var result = provider.generate(snapshot, List.of(), "en");
 
         assertThat(result).isEmpty();
     }
@@ -35,7 +35,7 @@ class StubCoachInsightProviderTest {
     void emitsStreakInsightWhenNoOverrunStreakIsHealthy() {
         var snapshot = snapshot(totals(7, 5, 0, 0, 0)); // 7 logged days, streak=5
 
-        var result = provider.generate(snapshot, "en");
+        var result = provider.generate(snapshot, List.of(), "en");
 
         assertThat(result).extracting(CoachInsightProvider.InsightDraft::title)
             .anyMatch(t -> t.toLowerCase().contains("streak"));
@@ -57,7 +57,7 @@ class StubCoachInsightProviderTest {
             0         // noOverrunStreak
         ));
 
-        var result = provider.generate(snapshot, "en");
+        var result = provider.generate(snapshot, List.of(), "en");
 
         assertThat(result).extracting(CoachInsightProvider.InsightDraft::title)
             .anyMatch(t -> t.toLowerCase().contains("overrun"));
@@ -67,7 +67,7 @@ class StubCoachInsightProviderTest {
     void emitsTimingInsightWhenLateMealsPileUp() {
         var snapshot = withTiming(snapshot(totals(5, 0, 0, 0, 0)), 4);
 
-        var result = provider.generate(snapshot, "en");
+        var result = provider.generate(snapshot, List.of(), "en");
 
         assertThat(result).extracting(CoachInsightProvider.InsightDraft::kind)
             .anyMatch("timing"::equals);
@@ -84,7 +84,7 @@ class StubCoachInsightProviderTest {
             0, 4
         )), 5);
 
-        var result = provider.generate(snapshot, "en");
+        var result = provider.generate(snapshot, List.of(), "en");
 
         assertThat(result).hasSizeLessThanOrEqualTo(3);
     }

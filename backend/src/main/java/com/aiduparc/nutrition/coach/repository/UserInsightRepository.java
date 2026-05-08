@@ -14,5 +14,8 @@ public interface UserInsightRepository extends JpaRepository<UserInsightEntity, 
 
     Optional<UserInsightEntity> findByIdAndUserId(UUID id, UUID userId);
 
+    List<UserInsightEntity> findTop20ByUserIdAndGeneratedAtAfterOrderByGeneratedAtDesc(
+        UUID userId, OffsetDateTime cutoff);
+
     long countByUserIdAndGeneratedAtAfter(UUID userId, OffsetDateTime cutoff);
 }

@@ -17,7 +17,7 @@ import org.springframework.stereotype.Component;
 public class StubCoachInsightProvider implements CoachInsightProvider {
 
     @Override
-    public List<InsightDraft> generate(CoachSnapshotResponse snapshot, String locale) {
+    public List<InsightDraft> generate(CoachSnapshotResponse snapshot, List<PastInsight> history, String locale) {
         List<InsightDraft> out = new ArrayList<>();
         var totals = snapshot.totals();
         if (totals.loggedDays() < 3) {
@@ -56,7 +56,7 @@ public class StubCoachInsightProvider implements CoachInsightProvider {
     }
 
     @Override
-    public WeeklyRecapDraft generateWeeklyRecap(CoachSnapshotResponse snapshot, String locale) {
+    public WeeklyRecapDraft generateWeeklyRecap(CoachSnapshotResponse snapshot, List<PastInsight> history, String locale) {
         var totals = snapshot.totals();
         if (totals.loggedDays() < 3) return null;
 
