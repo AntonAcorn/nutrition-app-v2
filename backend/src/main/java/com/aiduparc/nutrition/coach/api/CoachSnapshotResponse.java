@@ -107,7 +107,13 @@ public record CoachSnapshotResponse(
     public record WellbeingStat(
         int ratingsCount,
         Double avgRating,
-        Map<String, Double> avgByDayOfWeek
+        Map<String, Double> avgByDayOfWeek,
+        Map<String, SlotWellbeing> bySlot
+    ) {}
+
+    public record SlotWellbeing(
+        Double avgRating,
+        int samples
     ) {}
 
     public record TopMeal(

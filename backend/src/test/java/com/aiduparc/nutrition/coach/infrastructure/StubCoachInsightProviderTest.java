@@ -119,7 +119,7 @@ class StubCoachInsightProviderTest {
             new WeightTrend(82.0, 81.5, -0.5, 6.5),
             new BankStat(0, 0, 0),
             new RelaxDayStat(0, 0, 2),
-            new WellbeingStat(0, null, Map.of()),
+            new WellbeingStat(0, null, Map.of(), Map.of()),
             List.of()
         );
     }

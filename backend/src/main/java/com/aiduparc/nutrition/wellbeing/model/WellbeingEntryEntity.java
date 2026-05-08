@@ -26,6 +26,9 @@ public class WellbeingEntryEntity {
     @Column(name = "entry_date", nullable = false)
     private LocalDate entryDate;
 
+    @Column(name = "meal_slot", length = 20)
+    private String mealSlot;
+
     @Column(name = "created_at", nullable = false, updatable = false)
     private OffsetDateTime createdAt;
 
@@ -46,6 +49,9 @@ public class WellbeingEntryEntity {
 
     public LocalDate getEntryDate() { return entryDate; }
     public void setEntryDate(LocalDate entryDate) { this.entryDate = entryDate; }
+
+    public String getMealSlot() { return mealSlot; }
+    public void setMealSlot(String mealSlot) { this.mealSlot = mealSlot; }
 
     public OffsetDateTime getCreatedAt() { return createdAt; }
     public void setCreatedAt(OffsetDateTime createdAt) { this.createdAt = createdAt; }

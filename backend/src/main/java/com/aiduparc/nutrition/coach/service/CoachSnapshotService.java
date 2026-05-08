@@ -12,6 +12,7 @@ import com.aiduparc.nutrition.coach.api.CoachSnapshotResponse.MealTiming;
 import com.aiduparc.nutrition.coach.api.CoachSnapshotResponse.Profile;
 import com.aiduparc.nutrition.coach.api.CoachSnapshotResponse.RelaxDayStat;
 import com.aiduparc.nutrition.coach.api.CoachSnapshotResponse.SlotStat;
+import com.aiduparc.nutrition.coach.api.CoachSnapshotResponse.SlotWellbeing;
 import com.aiduparc.nutrition.coach.api.CoachSnapshotResponse.TopMeal;
 import com.aiduparc.nutrition.coach.api.CoachSnapshotResponse.Totals;
 import com.aiduparc.nutrition.coach.api.CoachSnapshotResponse.WeightTrend;
@@ -330,16 +331,22 @@ public class CoachSnapshotService {
         List<WellbeingEntryEntity> entries = wellbeingEntryRepository
             .findByUserIdAndEntryDateBetweenOrderByEntryDateAsc(userId, from, to);
         if (entries.isEmpty()) {
-            return new WellbeingStat(0, null, Map.of());
+            return new WellbeingStat(0, null, Map.of(), Map.of());
         }
         double sum = 0;
         Map<DayOfWeek, long[]> dowSums = new HashMap<>();
+        Map<String, long[]> slotSums = new HashMap<>();
         for (WellbeingEntryEntity e : entries) {
             sum += e.getRating();
             DayOfWeek dow = e.getEntryDate().getDayOfWeek();
             long[] s = dowSums.computeIfAbsent(dow, k -> new long[2]);
             s[0] += e.getRating();
             s[1] += 1;
+            if (e.getMealSlot() != null) {
+                long[] ss = slotSums.computeIfAbsent(e.getMealSlot(), k -> new long[2]);
+                ss[0] += e.getRating();
+                ss[1] += 1;
+            }
         }
         Map<String, Double> avgByDow = new LinkedHashMap<>();
         for (DayOfWeek dow : DayOfWeek.values()) {
@@ -347,8 +354,15 @@ public class CoachSnapshotService {
             if (s == null) continue;
             avgByDow.put(dow.name().toLowerCase(Locale.ROOT), round1((double) s[0] / s[1]));
         }
+        Map<String, SlotWellbeing> bySlot = new LinkedHashMap<>();
+        for (String slot : List.of("BREAKFAST", "LUNCH", "DINNER", "SNACK")) {
+            long[] ss = slotSums.get(slot);
+            if (ss == null) continue;
+            bySlot.put(slot.toLowerCase(Locale.ROOT),
+                new SlotWellbeing(round1((double) ss[0] / ss[1]), (int) ss[1]));
+        }
         double avg = sum / entries.size();
-        return new WellbeingStat(entries.size(), round1(avg), avgByDow);
+        return new WellbeingStat(entries.size(), round1(avg), avgByDow, bySlot);
     }
 
     private List<TopMeal> buildTopMeals(List<MealLogEntryEntity> meals) {
