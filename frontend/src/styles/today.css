@@ -24,11 +24,13 @@
 }
 
 .mascot-hero-card__greeting {
-  font-size: clamp(1.35rem, 4.5vw, 1.75rem);
+  font-size: clamp(1.05rem, 3.6vw, 1.35rem);
   font-weight: 700;
   color: #ffffff;
-  line-height: 1.2;
-  white-space: pre-line;
+  line-height: 1.3;
+  /* Allow long single-word URLs / names to break instead of overflowing,
+     but normal sentences wrap at spaces. */
+  overflow-wrap: anywhere;
 }
 
 .mascot-hero-card__name {

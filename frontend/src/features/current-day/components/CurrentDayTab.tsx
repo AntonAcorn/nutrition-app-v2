@@ -26,24 +26,27 @@ const PTR_THRESHOLD = 56
 
 const MAX_PAST_DAYS = 90
 
-function getGreeting(summary?: TodaySummary | null): string {
+function getGreeting(summary?: TodaySummary | null, name?: string | null): string {
   const hour = new Date().getHours()
+  const first = (name && name.trim()) ? name.trim().split(/\s+/)[0] : null
+  const opener = first ? `${first}, ` : ''
+  const cap = (s: string) => first ? s : s.charAt(0).toUpperCase() + s.slice(1)
 
   if (summary) {
     const { weightTrend7d, targetWeightKg, remainingCalories, dailyTargetCalories, loggingStreakDays } = summary
     if (weightTrend7d != null && targetWeightKg != null) {
-      if (weightTrend7d < -0.1) return `Down ${Math.abs(weightTrend7d).toFixed(1)} kg vs last week.\nKeep it up.`
-      if (weightTrend7d > 0.1)  return `Up ${weightTrend7d.toFixed(1)} kg vs last week.\nStay under your calorie target today.`
+      if (weightTrend7d < -0.1) return opener + cap(`down ${Math.abs(weightTrend7d).toFixed(1)} kg vs last week — keep it up.`)
+      if (weightTrend7d > 0.1)  return opener + cap(`up ${weightTrend7d.toFixed(1)} kg vs last week — stay under target today.`)
     }
-    if (loggingStreakDays >= 7) return `${loggingStreakDays} days logged in a row.\nConsistency wins.`
+    if (loggingStreakDays >= 7) return opener + cap(`${loggingStreakDays} days logged in a row — consistency wins.`)
     const ratio = remainingCalories / Math.max(1, dailyTargetCalories)
-    if (hour >= 19 && ratio > 0.4) return `${Math.round(remainingCalories)} kcal left for today.\nStill room to eat.`
+    if (hour >= 19 && ratio > 0.4) return opener + cap(`${Math.round(remainingCalories)} kcal left for today — still room to eat.`)
   }
 
-  if (hour >= 5  && hour < 12) return 'Good morning,\nfuture athlete 👀'
-  if (hour >= 12 && hour < 17) return 'Good afternoon.\nStill going? Impressive.'
-  if (hour >= 17 && hour < 22) return 'Survived another day.\nRespect.'
-  return 'Still awake?\nBold choice.'
+  if (hour >= 5  && hour < 12) return first ? `Good morning, ${first}.` : 'Good morning, future athlete 👀'
+  if (hour >= 12 && hour < 17) return first ? `Good afternoon, ${first}.` : 'Good afternoon. Still going? Impressive.'
+  if (hour >= 17 && hour < 22) return first ? `Evening, ${first}.` : 'Survived another day. Respect.'
+  return first ? `Still up, ${first}?` : 'Still awake? Bold choice.'
 }
 
 interface CurrentDayTabProps {
@@ -399,8 +402,7 @@ export function CurrentDayTab({ refreshToken = 0, successMessage = '', onDayUpda
         <div className="mascot-hero-card">
           <MascotSvg mood={getMascotMood(summary)} size={100} className="mascot-hero-card__image" />
           <div className="mascot-hero-card__text">
-            <p className="mascot-hero-card__greeting">{getGreeting(summary)}</p>
-            {displayName ? <p className="mascot-hero-card__name">{displayName}</p> : null}
+            <p className="mascot-hero-card__greeting">{getGreeting(summary, displayName)}</p>
             {summary && summary.loggingStreakDays >= 2 && (
               <span className="streak-badge">🔥 {summary.loggingStreakDays} days</span>
             )}
