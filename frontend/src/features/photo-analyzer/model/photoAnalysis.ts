@@ -59,7 +59,7 @@ export function normalizeDraft(payload: DraftPayload): PhotoAnalysisDraft {
 }
 
 export function calculateTotals(items: DraftItem[]): DraftTotals {
-  return items.reduce<DraftTotals>(
+  const raw = items.reduce<DraftTotals>(
     (acc, item) => {
       acc.calories += toNumber(item.calories)
       acc.protein += toNumber(item.protein)
@@ -70,4 +70,14 @@ export function calculateTotals(items: DraftItem[]): DraftTotals {
     },
     { calories: 0, protein: 0, fat: 0, carbs: 0, fiber: 0 },
   )
+  // Round to 1 decimal so IEEE-float drift like 8.999999999998 from
+  // accumulated additions doesn't reach the UI.
+  const r1 = (n: number) => Math.round(n * 10) / 10
+  return {
+    calories: Math.round(raw.calories),
+    protein: r1(raw.protein),
+    fat: r1(raw.fat),
+    carbs: r1(raw.carbs),
+    fiber: r1(raw.fiber),
+  }
 }
