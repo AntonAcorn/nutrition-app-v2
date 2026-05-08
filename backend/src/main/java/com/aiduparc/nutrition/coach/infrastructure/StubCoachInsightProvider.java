@@ -17,7 +17,7 @@ import org.springframework.stereotype.Component;
 public class StubCoachInsightProvider implements CoachInsightProvider {
 
     @Override
-    public List<InsightDraft> generate(CoachSnapshotResponse snapshot) {
+    public List<InsightDraft> generate(CoachSnapshotResponse snapshot, String locale) {
         List<InsightDraft> out = new ArrayList<>();
         var totals = snapshot.totals();
         if (totals.loggedDays() < 3) {

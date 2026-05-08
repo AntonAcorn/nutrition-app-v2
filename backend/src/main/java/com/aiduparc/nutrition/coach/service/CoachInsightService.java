@@ -50,23 +50,23 @@ public class CoachInsightService {
     }
 
     @Transactional
-    public CoachInsightResponse getOrGenerate(UUID userId, LocalDate today, int days, ZoneId zone) {
+    public CoachInsightResponse getOrGenerate(UUID userId, LocalDate today, int days, ZoneId zone, String locale) {
         OffsetDateTime now = OffsetDateTime.now(ZoneOffset.UTC);
         List<UserInsightEntity> fresh = repository
             .findByUserIdAndValidUntilAfterOrderByGeneratedAtDesc(userId, now);
         if (!fresh.isEmpty()) {
             return toResponse(fresh);
         }
-        return generateAndStore(userId, today, days, zone, now);
+        return generateAndStore(userId, today, days, zone, locale, now);
     }
 
     @Transactional
-    public CoachInsightResponse refresh(UUID userId, LocalDate today, int days, ZoneId zone) {
+    public CoachInsightResponse refresh(UUID userId, LocalDate today, int days, ZoneId zone, String locale) {
         OffsetDateTime now = OffsetDateTime.now(ZoneOffset.UTC);
-        return generateAndStore(userId, today, days, zone, now);
+        return generateAndStore(userId, today, days, zone, locale, now);
     }
 
-    private CoachInsightResponse generateAndStore(UUID userId, LocalDate today, int days, ZoneId zone, OffsetDateTime now) {
+    private CoachInsightResponse generateAndStore(UUID userId, LocalDate today, int days, ZoneId zone, String locale, OffsetDateTime now) {
         if (!properties.enabled()) {
             return emptyResponse(now, days);
         }
@@ -78,7 +78,7 @@ public class CoachInsightService {
 
         List<InsightDraft> drafts;
         try {
-            drafts = provider.generate(snapshot);
+            drafts = provider.generate(snapshot, locale);
         } catch (ResponseStatusException ex) {
             throw ex;
         } catch (RuntimeException ex) {

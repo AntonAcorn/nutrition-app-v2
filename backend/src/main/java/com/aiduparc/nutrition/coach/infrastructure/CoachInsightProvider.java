@@ -8,9 +8,10 @@ public interface CoachInsightProvider {
     /**
      * Generate up to ~3 insight cards for the given snapshot. May return an
      * empty list when there is not enough signal in the snapshot to say
-     * anything useful.
+     * anything useful. The locale is a BCP-47 tag (e.g. "en", "ru") used
+     * to localize natural-language fields in the response.
      */
-    List<InsightDraft> generate(CoachSnapshotResponse snapshot);
+    List<InsightDraft> generate(CoachSnapshotResponse snapshot, String locale);
 
     /** Identifier of the underlying provider for telemetry (e.g. "openai:gpt-4o-mini" or "stub"). */
     String sourceTag();

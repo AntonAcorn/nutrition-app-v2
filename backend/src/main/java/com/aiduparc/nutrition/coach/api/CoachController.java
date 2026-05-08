@@ -56,11 +56,12 @@ public class CoachController {
         @RequestParam(required = false) Integer days,
         @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date,
         @RequestParam(required = false) String tz,
+        @RequestParam(required = false) String locale,
         HttpSession session
     ) {
         UUID userId = userResolver.resolve(session, null);
         ZoneId zone = CoachSnapshotService.resolveZone(tz);
-        return coachInsightService.getOrGenerate(userId, today(date), windowDays(days), zone);
+        return coachInsightService.getOrGenerate(userId, today(date), windowDays(days), zone, locale);
     }
 
     @PostMapping("/insights/refresh")
@@ -68,12 +69,13 @@ public class CoachController {
         @RequestParam(required = false) Integer days,
         @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date,
         @RequestParam(required = false) String tz,
+        @RequestParam(required = false) String locale,
         HttpSession session
     ) {
         UUID userId = userResolver.resolve(session, null);
         rateLimitService.checkRefreshLimit(userId);
         ZoneId zone = CoachSnapshotService.resolveZone(tz);
-        return coachInsightService.refresh(userId, today(date), windowDays(days), zone);
+        return coachInsightService.refresh(userId, today(date), windowDays(days), zone, locale);
     }
 
     private LocalDate today(LocalDate provided) {

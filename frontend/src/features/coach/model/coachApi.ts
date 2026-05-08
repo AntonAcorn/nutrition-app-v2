@@ -26,12 +26,24 @@ function browserTz(): string | null {
   }
 }
 
+function browserLocale(): string | null {
+  try {
+    const lang = navigator.language || (navigator.languages && navigator.languages[0])
+    if (!lang) return null
+    return lang.split('-')[0].toLowerCase() || null
+  } catch {
+    return null
+  }
+}
+
 function buildQuery(date?: string, days?: number): string {
   const params = new URLSearchParams()
   if (date) params.set('date', date)
   if (days != null) params.set('days', String(days))
   const tz = browserTz()
   if (tz) params.set('tz', tz)
+  const locale = browserLocale()
+  if (locale) params.set('locale', locale)
   const qs = params.toString()
   return qs ? `?${qs}` : ''
 }

@@ -61,7 +61,7 @@ public class OpenAiCoachInsightProvider implements CoachInsightProvider {
     }
 
     @Override
-    public List<InsightDraft> generate(CoachSnapshotResponse snapshot) {
+    public List<InsightDraft> generate(CoachSnapshotResponse snapshot, String locale) {
         String apiKey = properties.openai().apiKey();
         if (apiKey == null || apiKey.isBlank()) {
             throw new ResponseStatusException(
@@ -77,8 +77,14 @@ public class OpenAiCoachInsightProvider implements CoachInsightProvider {
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Failed to serialize snapshot", e);
         }
 
-        String rawContent = invokeOpenAi(apiKey.trim(), snapshotJson);
+        String rawContent = invokeOpenAi(apiKey.trim(), snapshotJson, normalizeLocale(locale));
         return parseInsights(rawContent);
+    }
+
+    private static String normalizeLocale(String locale) {
+        if (locale == null || locale.isBlank()) return "en";
+        String trimmed = locale.trim().toLowerCase();
+        return trimmed.length() > 8 ? trimmed.substring(0, 8) : trimmed;
     }
 
     @Override
@@ -86,10 +92,10 @@ public class OpenAiCoachInsightProvider implements CoachInsightProvider {
         return "openai:" + properties.openai().model();
     }
 
-    private String invokeOpenAi(String apiKey, String snapshotJson) {
+    private String invokeOpenAi(String apiKey, String snapshotJson, String locale) {
         try {
             String endpoint = normalizeBaseUrl() + "/chat/completions";
-            String payload = objectMapper.writeValueAsString(buildRequestBody(snapshotJson));
+            String payload = objectMapper.writeValueAsString(buildRequestBody(snapshotJson, locale));
 
             HttpRequest request = HttpRequest.newBuilder(URI.create(endpoint))
                 .header("Authorization", "Bearer " + apiKey)
@@ -148,7 +154,9 @@ public class OpenAiCoachInsightProvider implements CoachInsightProvider {
         return value.length() <= max ? value : value.substring(0, max);
     }
 
-    private Object buildRequestBody(String snapshotJson) {
+    private Object buildRequestBody(String snapshotJson, String locale) {
+        String localizedSystem = SYSTEM_PROMPT
+            + " Reply in language tag '" + locale + "' for the title, body and anchor fields.";
         return Map.of(
             "model", properties.openai().model(),
             "temperature", 0.4,
@@ -161,7 +169,7 @@ public class OpenAiCoachInsightProvider implements CoachInsightProvider {
                 )
             ),
             "messages", List.of(
-                Map.of("role", "system", "content", SYSTEM_PROMPT),
+                Map.of("role", "system", "content", localizedSystem),
                 Map.of("role", "user", "content", USER_INSTRUCTION + "\n" + snapshotJson)
             )
         );
