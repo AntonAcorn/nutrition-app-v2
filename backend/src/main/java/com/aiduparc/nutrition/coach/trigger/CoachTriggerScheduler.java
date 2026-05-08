@@ -2,6 +2,8 @@ package com.aiduparc.nutrition.coach.trigger;
 
 import com.aiduparc.nutrition.coach.model.CoachTriggerEntity;
 import com.aiduparc.nutrition.coach.repository.CoachTriggerRepository;
+import com.aiduparc.nutrition.coach.service.CoachSnapshotService;
+import com.aiduparc.nutrition.coach.trigger.CoachTriggerCopywriter.Copy;
 import com.aiduparc.nutrition.coach.trigger.TriggerDetector.TriggerPayload;
 import com.aiduparc.nutrition.notifications.push.PushNotificationService;
 import com.aiduparc.nutrition.notifications.push.PushSubscriptionEntity;
@@ -40,17 +42,23 @@ public class CoachTriggerScheduler {
     private final PushSubscriptionRepository subscriptionRepository;
     private final PushNotificationService pushNotificationService;
     private final CoachTriggerRepository triggerRepository;
+    private final CoachSnapshotService snapshotService;
+    private final CoachTriggerCopywriter copywriter;
 
     public CoachTriggerScheduler(
         List<TriggerDetector> detectors,
         PushSubscriptionRepository subscriptionRepository,
         PushNotificationService pushNotificationService,
-        CoachTriggerRepository triggerRepository
+        CoachTriggerRepository triggerRepository,
+        CoachSnapshotService snapshotService,
+        CoachTriggerCopywriter copywriter
     ) {
         this.detectors = detectors;
         this.subscriptionRepository = subscriptionRepository;
         this.pushNotificationService = pushNotificationService;
         this.triggerRepository = triggerRepository;
+        this.snapshotService = snapshotService;
+        this.copywriter = copywriter;
     }
 
     @Scheduled(cron = "0 0 * * * *")
@@ -72,7 +80,7 @@ public class CoachTriggerScheduler {
                     Optional<TriggerPayload> payload = detector.detect(sub.getUserId(), today, zone);
                     if (payload.isEmpty()) continue;
 
-                    fire(sub, detector, payload.get(), now);
+                    fire(sub, detector, payload.get(), today, zone, now);
                 } catch (Exception e) {
                     log.warn("trigger detector {} failed for sub {}: {}",
                         detector.kind(), sub.getId(), e.getMessage());
@@ -93,10 +101,29 @@ public class CoachTriggerScheduler {
         PushSubscriptionEntity sub,
         TriggerDetector detector,
         TriggerPayload payload,
+        LocalDate today,
+        ZoneId zone,
         OffsetDateTime now
     ) {
+        // Try LLM-personalized copy with the current snapshot. Fall back to
+        // the detector's hard-coded text on any failure path so the user
+        // still gets a useful nudge.
+        String title = payload.pushTitle();
+        String body = payload.pushBody();
         try {
-            pushNotificationService.send(sub, payload.pushTitle(), payload.pushBody());
+            var snapshot = snapshotService.buildSnapshot(sub.getUserId(), today, 14, zone);
+            Optional<Copy> personalized = copywriter.tryGenerate(
+                detector.kind(), payload.anchor(), snapshot, null);
+            if (personalized.isPresent()) {
+                title = personalized.get().title();
+                body = personalized.get().body();
+            }
+        } catch (Exception e) {
+            log.debug("copywriter failed kind={}, using fallback: {}", detector.kind(), e.getMessage());
+        }
+
+        try {
+            pushNotificationService.send(sub, title, body);
         } catch (Exception e) {
             log.warn("trigger push send failed kind={} sub={}: {}",
                 detector.kind(), sub.getId(), e.getMessage());
