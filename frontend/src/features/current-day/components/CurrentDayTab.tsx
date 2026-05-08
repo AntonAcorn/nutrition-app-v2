@@ -3,6 +3,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { TodaySummaryBlock } from './TodaySummaryBlock'
 import { CoachInsightsCard } from '../../coach/components/CoachInsightsCard'
 import { WeeklyRecapCard } from '../../coach/components/WeeklyRecapCard'
+import { CoachTour, shouldShowCoachTourOnce, markCoachTourSeen } from '../../coach/components/CoachTour'
 import { WellbeingDailyPrompt } from '../../wellbeing/components/WellbeingDailyPrompt'
 import { WeeklyBankCard } from './WeeklyBankCard'
 import { WaterIntakeCard } from './WaterIntakeCard'
@@ -70,6 +71,7 @@ export function CurrentDayTab({ refreshToken = 0, successMessage = '', onDayUpda
   const [quickAddSlot, setQuickAddSlot] = useState<string | undefined>(undefined)
   const [pullDist, setPullDist] = useState(0)
   const [ptrRefreshing, setPtrRefreshing] = useState(false)
+  const [showCoachTour, setShowCoachTour] = useState(() => shouldShowCoachTourOnce())
 
   const summaryQuery = useQuery<TodaySummary>({
     queryKey: ['today-summary', selectedDate],
@@ -461,6 +463,9 @@ export function CurrentDayTab({ refreshToken = 0, successMessage = '', onDayUpda
           {isToday && <WellbeingDailyPrompt date={selectedDate} />}
           {isToday && <WeeklyRecapCard />}
           {isToday && <CoachInsightsCard date={selectedDate} />}
+          {showCoachTour && (
+            <CoachTour onClose={() => { markCoachTourSeen(); setShowCoachTour(false) }} />
+          )}
           {isToday && (
             <div className="content-fade-in" style={{ animationDelay: '20ms' }}>
               <WeeklyBankCard refreshToken={refreshToken} />
