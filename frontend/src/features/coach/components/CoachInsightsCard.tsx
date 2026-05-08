@@ -10,7 +10,6 @@ import {
 } from '../model/coachApi'
 import { ApiError } from '../../../shared/lib/apiClient'
 import { hapticLight } from '../../../shared/lib/haptic'
-import { VoiceSummaryButton } from './VoiceSummaryButton'
 
 const KIND_ICON: Record<InsightKind, string> = {
   behavioral: '🎯',
@@ -135,7 +134,6 @@ export function CoachInsightsCard({ date, days = 7 }: Props) {
           )}
         </button>
         <div className="coach-card__header-actions">
-          {!collapsed && <VoiceSummaryButton />}
           {!collapsed && (
             <button
               type="button"
