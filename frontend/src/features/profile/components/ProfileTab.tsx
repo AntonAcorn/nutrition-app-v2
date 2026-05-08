@@ -5,6 +5,9 @@ import { fetchProfile, updateProfile, type UserProfile } from '../model/profileA
 import type { OnboardingPayload } from '../../onboarding/model/profileApi'
 import { NotificationSettings } from '../../notifications/components/NotificationSettings'
 import { exportNutritionCsv } from '../model/exportData'
+import { useCalorieBank } from '../../calorie-bank/model/useCalorieBank'
+import { CalorieBankSheet } from '../../calorie-bank/components/CalorieBankSheet'
+import { localDateString } from '../../statistics/model/formatters'
 
 const ACTIVITY_LABELS: Record<string, string> = {
   sedentary: 'Sedentary',
@@ -55,6 +58,9 @@ export function ProfileTab({ displayName, email, onLogout, onDeleteAccount }: Pr
   const [editing, setEditing] = useState(false)
   const [showExport, setShowExport] = useState(false)
   const [exporting, setExporting] = useState(false)
+  const [showBank, setShowBank] = useState(false)
+  const todayStr = localDateString(new Date())
+  const { snapshot: bankSnapshot } = useCalorieBank(todayStr)
 
   async function handleExport(days: number) {
     setExporting(true)
@@ -451,6 +457,19 @@ export function ProfileTab({ displayName, email, onLogout, onDeleteAccount }: Pr
         <button
           type="button"
           className="profile-tool-row"
+          onClick={() => setShowBank(true)}
+        >
+          <span>🏦 Calorie bank</span>
+          <span
+            className="profile-tool-row__chevron"
+            style={bankSnapshot ? { fontSize: '0.9rem', opacity: 0.6 } : undefined}
+          >
+            {bankSnapshot ? `+${bankSnapshot.bank} kcal` : '›'}
+          </span>
+        </button>
+        <button
+          type="button"
+          className="profile-tool-row"
           onClick={() => navigate('/fasting')}
         >
           ⏱ Intermittent fasting
@@ -495,6 +514,14 @@ export function ProfileTab({ displayName, email, onLogout, onDeleteAccount }: Pr
           Delete account
         </button>
       </div>
+
+      {showBank && bankSnapshot && (
+        <CalorieBankSheet
+          snapshot={bankSnapshot}
+          date={todayStr}
+          onClose={() => setShowBank(false)}
+        />
+      )}
     </section>
   )
 }
