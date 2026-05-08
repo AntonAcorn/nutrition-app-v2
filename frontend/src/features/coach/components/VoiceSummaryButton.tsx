@@ -47,6 +47,9 @@ export function VoiceSummaryButton() {
         headers: { Accept: 'audio/mpeg' },
       })
       if (!res.ok) {
+        const text = await res.text().catch(() => '')
+        // eslint-disable-next-line no-console
+        console.warn('voice summary failed', res.status, text)
         setState('error')
         setTimeout(() => setState('idle'), 1500)
         return

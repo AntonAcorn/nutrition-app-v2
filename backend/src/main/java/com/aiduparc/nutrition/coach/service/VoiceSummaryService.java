@@ -70,10 +70,9 @@ public class VoiceSummaryService {
     }
 
     public byte[] generate(UUID userId, LocalDate today, ZoneId zone) {
-        if (!"openai".equalsIgnoreCase(properties.provider())) {
-            throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE,
-                "Voice summary needs nutrition.coach.provider=openai");
-        }
+        // Voice summary needs an OpenAI key but does not require the coach
+        // provider itself to be openai — even with a stub coach we can speak
+        // the rule-based summary. Only the key matters here.
         String apiKey = properties.openai().apiKey();
         if (apiKey == null || apiKey.isBlank()) {
             throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE,

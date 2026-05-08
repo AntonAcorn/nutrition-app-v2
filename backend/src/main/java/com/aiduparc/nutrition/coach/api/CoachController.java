@@ -158,7 +158,8 @@ public class CoachController {
         HttpSession session
     ) {
         UUID userId = userResolver.resolve(session, null);
-        rateLimitService.checkRefreshLimit(userId);
+        // No rate-limit: TTS is ~$0.001 per call and the user explicitly tapped
+        // a play button, so we want it to be fast and predictable.
         ZoneId zone = CoachSnapshotService.resolveZone(tz);
         byte[] mp3 = voiceSummaryService.generate(userId, today(date), zone);
         return org.springframework.http.ResponseEntity.ok()
