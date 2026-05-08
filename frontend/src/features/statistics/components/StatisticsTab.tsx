@@ -5,12 +5,12 @@ import { MascotSvg } from '../../current-day/components/MascotSvg'
 import type { NutritionStatisticsResponse } from '../../../shared/types/nutrition'
 import { formatSigned, formatExpandedDate, type RangeDays, type CustomRange } from '../model/formatters'
 import { movingAvg } from '../model/chartGeometry'
-import { computeStreak, computeInsights, computeCalorieSuggestion } from '../model/insights'
+import { computeStreak, computeCalorieSuggestion } from '../model/insights'
 import { MetricCard } from './MetricCard'
 import { RangeSelector } from './RangeSelector'
 import { CalorieBarChart } from './CalorieBarChart'
 import { LineChart } from './LineChart'
-import { InsightsSection, CalorieSuggestionCard } from './InsightsSection'
+import { CalorieSuggestionCard } from './InsightsSection'
 import { StatisticsTable } from './StatisticsTable'
 import { WhatIfSimulator } from '../../coach/components/WhatIfSimulator'
 
@@ -72,14 +72,6 @@ export function StatisticsTab({ refreshToken = 0 }: StatisticsTabProps) {
 
   const streak = useMemo(() => computeStreak(points), [points])
   const weightTrendline = useMemo(() => movingAvg(points), [points])
-  const effectiveDays = rangeMode === 'custom' && customRange
-    ? Math.max(1, Math.ceil((new Date(customRange.to + 'T12:00:00').getTime() - new Date(customRange.from + 'T12:00:00').getTime()) / 86400000) + 1)
-    : rangeMode as number
-
-  const insights = useMemo(
-    () => computeInsights(loggedPoints, points, data?.targetWeightKg ?? null, effectiveDays),
-    [loggedPoints, points, data, effectiveDays],
-  )
   const calorieSuggestion = useMemo(
     () => computeCalorieSuggestion(loggedPoints, points, data?.targetWeightKg ?? null),
     [loggedPoints, points, data],
@@ -181,6 +173,8 @@ export function StatisticsTab({ refreshToken = 0 }: StatisticsTabProps) {
             <CalorieBarChart points={points} />
           </section>
 
+          <WhatIfSimulator />
+
           {/* ── Secondary: behind toggle ── */}
           <button
             type="button"
@@ -219,8 +213,6 @@ export function StatisticsTab({ refreshToken = 0 }: StatisticsTabProps) {
                 gradColor="#f08a4b"
               />
 
-              <InsightsSection insights={insights} />
-
               <LineChart
                 title="Protein"
                 unit="g"
@@ -254,7 +246,6 @@ export function StatisticsTab({ refreshToken = 0 }: StatisticsTabProps) {
                 gradColor="#38a169"
               />
               <StatisticsTable points={points} />
-              <WhatIfSimulator />
             </>
           )}
         </>
