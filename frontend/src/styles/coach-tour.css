@@ -66,6 +66,232 @@
   margin-bottom: 6px;
 }
 
+/* ── Per-slide animations ────────────────────────────────────────── */
+
+.tour-anim {
+  width: 100%;
+  height: 130px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  margin-bottom: 6px;
+}
+
+/* 1) Week scan — seven days lighting up before a brain reveals */
+.tour-anim--week {
+  gap: 8px;
+}
+
+.tour-anim__day {
+  width: 16px;
+  height: 36px;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.10);
+  opacity: 0.4;
+  animation: tour-day-pulse 1.6s ease-in-out infinite;
+}
+
+@keyframes tour-day-pulse {
+  0%   { opacity: 0.2; transform: scaleY(0.7); background: rgba(255,255,255,0.10); }
+  20%  { opacity: 1;   transform: scaleY(1.05); background: #c4b5fd; }
+  60%  { opacity: 0.6; transform: scaleY(1);    background: rgba(196,181,253,0.4); }
+  100% { opacity: 0.2; transform: scaleY(0.7); background: rgba(255,255,255,0.10); }
+}
+
+.tour-anim__brain {
+  position: absolute;
+  font-size: 2.4rem;
+  opacity: 0;
+  transform: scale(0.6);
+  animation: tour-brain-in 0.6s ease 0.9s forwards;
+}
+
+@keyframes tour-brain-in {
+  to { opacity: 1; transform: scale(1); }
+}
+
+/* 2) Pattern card — bars scaling up, with a 'hot' day standing out */
+.tour-anim--pattern {
+  perspective: 600px;
+}
+
+.tour-anim__card {
+  width: 240px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.07);
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  opacity: 0;
+  transform: translateY(8px) rotateX(8deg);
+  animation: tour-card-in 0.45s ease forwards;
+}
+
+@keyframes tour-card-in {
+  to { opacity: 1; transform: translateY(0) rotateX(0); }
+}
+
+.tour-anim__card-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.tour-anim__card-emoji {
+  font-size: 1.1rem;
+}
+
+.tour-anim__card-title {
+  color: #ffffff;
+  font-size: 0.88rem;
+  font-weight: 600;
+}
+
+.tour-anim__card-bars {
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+  height: 56px;
+}
+
+.tour-anim__bar {
+  flex: 1;
+  border-radius: 4px;
+  background: linear-gradient(to top, rgba(123, 97, 255, 0.55), rgba(123, 97, 255, 0.18));
+  transform: scaleY(0);
+  transform-origin: bottom;
+  animation: tour-bar-grow 0.5s ease forwards;
+}
+
+.tour-anim__bar--hot {
+  background: linear-gradient(to top, #f87171, #fbbf24);
+  box-shadow: 0 0 12px rgba(248, 113, 113, 0.45);
+}
+
+@keyframes tour-bar-grow {
+  to { transform: scaleY(1); }
+}
+
+/* 3) Push — banner sliding into a phone frame */
+.tour-anim--push {
+  align-items: flex-start;
+}
+
+.tour-anim__phone {
+  width: 200px;
+  height: 130px;
+  border-radius: 22px;
+  border: 2px solid rgba(255, 255, 255, 0.16);
+  background: rgba(0, 0, 0, 0.28);
+  position: relative;
+  overflow: hidden;
+  margin-top: -4px;
+}
+
+.tour-anim__notch {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 70px;
+  height: 14px;
+  background: rgba(0, 0, 0, 0.6);
+  border-bottom-left-radius: 10px;
+  border-bottom-right-radius: 10px;
+}
+
+.tour-anim__push {
+  position: absolute;
+  top: 22px;
+  left: 8px;
+  right: 8px;
+  background: rgba(255, 255, 255, 0.96);
+  border-radius: 12px;
+  padding: 8px 10px;
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.35);
+  transform: translateY(-160%);
+  animation: tour-push-in 0.6s cubic-bezier(0.2, 0.9, 0.3, 1.2) 0.25s forwards;
+}
+
+@keyframes tour-push-in {
+  to { transform: translateY(0); }
+}
+
+.tour-anim__push-icon {
+  font-size: 1.05rem;
+  flex-shrink: 0;
+}
+
+.tour-anim__push-body {
+  flex: 1;
+  min-width: 0;
+}
+
+.tour-anim__push-title {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #14213d;
+  line-height: 1.2;
+}
+
+.tour-anim__push-text {
+  font-size: 0.65rem;
+  color: rgba(20, 33, 61, 0.7);
+  margin-top: 2px;
+  line-height: 1.25;
+}
+
+/* 4) Focus tags — four chips, two light up to show selection */
+.tour-anim--focus {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px 10px;
+  width: 240px;
+  height: auto;
+}
+
+.tour-anim__tag {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 10px;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: transparent;
+  opacity: 0;
+  transform: translateY(6px);
+  animation: tour-tag-in 0.45s ease forwards;
+}
+
+@keyframes tour-tag-in {
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.tour-anim__tag--picked {
+  border-color: rgba(123, 97, 255, 0.55);
+  background: rgba(123, 97, 255, 0.18);
+}
+
+.tour-anim__tag-emoji {
+  font-size: 0.95rem;
+}
+
+.tour-anim__tag-label {
+  font-size: 0.78rem;
+  color: rgba(255, 255, 255, 0.78);
+}
+
+.tour-anim__tag--picked .tour-anim__tag-label {
+  color: #ddd6fe;
+  font-weight: 600;
+}
+
 .coach-tour__title {
   margin: 0;
   font-size: 1.25rem;

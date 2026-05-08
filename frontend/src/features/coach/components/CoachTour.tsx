@@ -1,30 +1,36 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, type ReactNode } from 'react'
 import { hapticLight } from '../../../shared/lib/haptic'
+import {
+  WeekScanAnimation,
+  PatternCardAnimation,
+  PushAnimation,
+  FocusTagsAnimation,
+} from './CoachTourAnimations'
 
 interface Slide {
-  emoji: string
+  visual: ReactNode
   title: string
   body: string
 }
 
 const SLIDES: Slide[] = [
   {
-    emoji: '🧠',
+    visual: <WeekScanAnimation />,
     title: 'Coach watches your week',
     body: 'Every meal, weight, and rating you log feeds a snapshot of the last 14 days. Coach reads it the way a smart friend would — looking for patterns, not just totals.',
   },
   {
-    emoji: '🎯',
+    visual: <PatternCardAnimation />,
     title: 'It finds things you can\'t see',
     body: 'Like "Wednesdays you run 30% over target", or "after late dinners your wellbeing drops 1.5 stars". Patterns the dashboard alone won\'t show.',
   },
   {
-    emoji: '🔔',
+    visual: <PushAnimation />,
     title: 'It reaches out at the right time',
     body: 'When a streak breaks, when sleep was rough, when the week was strong — Coach pushes a quiet, specific note. No generic reminders, no daily spam.',
   },
   {
-    emoji: '⚡',
+    visual: <FocusTagsAnimation />,
     title: 'It adapts to you',
     body: 'You picked what to track in onboarding — energy, mood, weight, performance. Coach prioritizes those. Tap "Edit profile" anytime to change focus.',
   },
@@ -86,7 +92,7 @@ export function CoachTour({ onClose }: Props) {
         </button>
 
         <div className="coach-tour__body" key={index}>
-          <span className="coach-tour__emoji" aria-hidden>{slide.emoji}</span>
+          {slide.visual}
           <h2 className="coach-tour__title">{slide.title}</h2>
           <p className="coach-tour__text">{slide.body}</p>
         </div>
