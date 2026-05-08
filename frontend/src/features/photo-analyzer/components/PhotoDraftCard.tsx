@@ -2,7 +2,6 @@ import { useMemo } from 'react'
 import { DraftItemEditor } from './DraftItemEditor'
 import { calculateTotals } from '../model/photoAnalysis'
 import type { DraftItem, PhotoAnalysisDraft } from '../../../shared/types/nutrition'
-import { FoodEnergyHint } from '../../wellbeing/components/FoodEnergyHint'
 
 export type DraftEntryStatus = 'analyzing' | 'idle' | 'saving' | 'saved' | 'error'
 
@@ -107,8 +106,6 @@ export function PhotoDraftCard({ entry, onSave, onDiscard, onToggleExpand, onUpd
           </p>
         </div>
       </div>
-
-      <FoodEnergyHint name={mealName} />
 
       <div className="photo-draft-card__actions">
         <button

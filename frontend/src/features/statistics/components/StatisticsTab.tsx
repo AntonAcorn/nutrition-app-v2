@@ -12,7 +12,6 @@ import { CalorieBarChart } from './CalorieBarChart'
 import { LineChart } from './LineChart'
 import { InsightsSection, CalorieSuggestionCard } from './InsightsSection'
 import { StatisticsTable } from './StatisticsTable'
-import { WellbeingInsightsSection } from '../../wellbeing/components/WellbeingInsightsSection'
 
 interface StatisticsTabProps {
   refreshToken?: number
@@ -180,8 +179,6 @@ export function StatisticsTab({ refreshToken = 0 }: StatisticsTabProps) {
             </div>
             <CalorieBarChart points={points} />
           </section>
-
-          <WellbeingInsightsSection />
 
           {/* ── Secondary: behind toggle ── */}
           <button

@@ -7,8 +7,6 @@ import { CurrentDayTab } from '../features/current-day/components/CurrentDayTab'
 import type { AuthUser } from '../features/auth/model/authApi'
 import type { MealTemplateItem } from '../shared/types/nutrition'
 import { SunIcon, MoonIcon, TabIconToday, TabIconStats, TabIconMe } from './icons'
-import { WellbeingPrompt } from '../features/wellbeing/components/WellbeingPrompt'
-import { getWellbeingPending } from '../features/wellbeing/model/wellbeingApi'
 import { getSubscriptionStatus, getCurrentTimezone, updatePushTimezone } from '../features/notifications/model/pushApi'
 
 const PhotoAnalyzerTab = lazy(() => import('../features/photo-analyzer/components/PhotoAnalyzerTab').then(m => ({ default: m.PhotoAnalyzerTab })))
@@ -60,13 +58,8 @@ export function AppShell({ authUser, theme, onToggleTheme, onLogout, onDeleteAcc
   const navigate = useNavigate()
   const [summaryRefreshToken, setSummaryRefreshToken] = useState(0)
   const [statisticsRefreshToken, setStatisticsRefreshToken] = useState(0)
-  const [showWellbeing, setShowWellbeing] = useState(false)
-  const [wellbeingMealName, setWellbeingMealName] = useState<string | null>(null)
 
   useEffect(() => {
-    getWellbeingPending()
-      .then(r => { if (r.pending) { setWellbeingMealName(r.lastMealName); setShowWellbeing(true) } })
-      .catch(() => {})
     syncPushTimezone()
   }, [])
 
@@ -80,9 +73,6 @@ export function AppShell({ authUser, theme, onToggleTheme, onLogout, onDeleteAcc
         const { App: CapApp } = await import('@capacitor/app')
         const listener = await CapApp.addListener('appStateChange', state => {
           if (state.isActive) {
-            getWellbeingPending()
-              .then(r => { if (r.pending) { setWellbeingMealName(r.lastMealName); setShowWellbeing(true) } })
-              .catch(() => {})
             syncPushTimezone()
           }
         })
@@ -199,10 +189,6 @@ export function AppShell({ authUser, theme, onToggleTheme, onLogout, onDeleteAcc
           </Suspense>
         </div>
       </section>
-
-      {showWellbeing && (
-        <WellbeingPrompt onDismiss={() => setShowWellbeing(false)} mealName={wellbeingMealName} />
-      )}
 
       <nav className="bottom-tab-bar" role="tablist" aria-label="App sections">
         {([
