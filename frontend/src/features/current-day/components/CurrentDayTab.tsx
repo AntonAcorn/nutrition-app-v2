@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { TodaySummaryBlock } from './TodaySummaryBlock'
+import { CoachInsightsCard } from '../../coach/components/CoachInsightsCard'
 import { WeeklyBankCard } from './WeeklyBankCard'
 import { WaterIntakeCard } from './WaterIntakeCard'
 import { QuickAddSheet } from './QuickAddSheet'
@@ -455,6 +456,11 @@ export function CurrentDayTab({ refreshToken = 0, successMessage = '', onDayUpda
               onWeightSave={handleWeightSave}
             />
           </div>
+          {isToday && (
+            <div className="content-fade-in" style={{ animationDelay: '15ms' }}>
+              <CoachInsightsCard date={selectedDate} />
+            </div>
+          )}
           {isToday && (
             <div className="content-fade-in" style={{ animationDelay: '20ms' }}>
               <WeeklyBankCard refreshToken={refreshToken} />

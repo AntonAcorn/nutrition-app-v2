@@ -1,0 +1,82 @@
+.coach-card {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.coach-card__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.coach-card__brand {
+  font-size: 0.85rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: rgba(255, 255, 255, 0.65);
+  text-transform: uppercase;
+}
+
+.coach-card__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.coach-card__item {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  padding: 12px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.coach-card__icon {
+  font-size: 1.4rem;
+  line-height: 1;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.coach-card__body {
+  flex: 1;
+  min-width: 0;
+}
+
+.coach-card__title {
+  margin: 0 0 4px;
+  font-size: 0.98rem;
+  font-weight: 600;
+  color: #ffffff;
+  line-height: 1.25;
+}
+
+.coach-card__text {
+  margin: 0;
+  font-size: 0.88rem;
+  line-height: 1.4;
+  color: rgba(255, 255, 255, 0.78);
+}
+
+[data-theme="light"] .coach-card__brand {
+  color: rgba(20, 33, 61, 0.65);
+}
+
+[data-theme="light"] .coach-card__item {
+  background: rgba(20, 33, 61, 0.04);
+  border-color: rgba(20, 33, 61, 0.08);
+}
+
+[data-theme="light"] .coach-card__title {
+  color: #14213d;
+}
+
+[data-theme="light"] .coach-card__text {
+  color: rgba(20, 33, 61, 0.75);
+}
