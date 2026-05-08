@@ -328,23 +328,18 @@ export function ProfileTab({ displayName, email, onLogout, onDeleteAccount }: Pr
               <p className="profile-hint" style={{ marginTop: 0, fontSize: '0.8rem', opacity: 0.6 }}>
                 Pick any combination. Empty = balanced across all.
               </p>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem' }}>
+              <div className="coach-focus-grid">
                 {COACH_FOCUS_TAGS.map(({ tag, emoji, label, hint }) => {
                   const active = coachFocus.includes(tag)
                   return (
                     <button
                       key={tag}
                       type="button"
-                      className="tab-button tab-button--dark"
-                      style={optionStyle(active)}
+                      className={`coach-focus-tile${active ? ' coach-focus-tile--active' : ''}`}
                       onClick={() => toggleFocus(tag)}
                     >
-                      <span style={{ display: 'block', fontWeight: 600 }}>
-                        {emoji} {label}
-                      </span>
-                      <span style={{ display: 'block', fontSize: '0.78rem', opacity: 0.65, marginTop: 2 }}>
-                        {hint}
-                      </span>
+                      <span className="coach-focus-tile__label">{emoji} {label}</span>
+                      <span className="coach-focus-tile__hint">{hint}</span>
                     </button>
                   )
                 })}
