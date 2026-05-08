@@ -26,8 +26,8 @@ public class CoachRateLimitService {
 
     public CoachRateLimitService(
         UserInsightRepository repository,
-        @Value("${nutrition.coach.refresh-hourly-limit:5}") int hourlyLimit,
-        @Value("${nutrition.coach.refresh-daily-limit:20}") int dailyLimit
+        @Value("${nutrition.coach.refresh-hourly-limit:30}") int hourlyLimit,
+        @Value("${nutrition.coach.refresh-daily-limit:100}") int dailyLimit
     ) {
         this.repository = repository;
         this.hourlyLimit = hourlyLimit;
