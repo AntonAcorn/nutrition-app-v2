@@ -10,7 +10,6 @@ import com.aiduparc.nutrition.history.model.DailyNutritionEntrySnapshot;
 import com.aiduparc.nutrition.history.model.MealSlotEntity;
 import com.aiduparc.nutrition.history.repository.DailyNutritionEntryRepository;
 import com.aiduparc.nutrition.notifications.TelegramNotificationService;
-import com.aiduparc.nutrition.wellbeing.service.WellbeingService;
 import jakarta.validation.constraints.NotNull;
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -48,20 +47,17 @@ public class NutritionHistoryService {
     private final TelegramNotificationService telegramNotificationService;
     private final NutritionStatisticsCalculator statisticsCalculator;
     private final MealLogService mealLogService;
-    private final WellbeingService wellbeingService;
 
     public NutritionHistoryService(
             DailyNutritionEntryRepository repository,
             TelegramNotificationService telegramNotificationService,
             NutritionStatisticsCalculator statisticsCalculator,
-            MealLogService mealLogService,
-            WellbeingService wellbeingService
+            MealLogService mealLogService
     ) {
         this.repository = repository;
         this.telegramNotificationService = telegramNotificationService;
         this.statisticsCalculator = statisticsCalculator;
         this.mealLogService = mealLogService;
-        this.wellbeingService = wellbeingService;
     }
 
     // ── Read-through: snapshots ──────────────────────────────────────────────
@@ -212,7 +208,6 @@ public class NutritionHistoryService {
             result.caloriesConsumedKcal(), result.proteinGrams(), result.fatGrams(), result.fiberGrams()
         );
         telegramNotificationService.notifyActivity(command.userId(), "added calories");
-        wellbeingService.scheduleCheckAfterMeal(command.userId());
         return result;
     }
 
