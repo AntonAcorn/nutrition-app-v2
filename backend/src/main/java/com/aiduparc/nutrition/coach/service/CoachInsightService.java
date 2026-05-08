@@ -50,7 +50,8 @@ public class CoachInsightService {
     public CoachInsightResponse getOrGenerate(UUID userId, LocalDate today, int days, ZoneId zone, String locale) {
         OffsetDateTime now = OffsetDateTime.now(ZoneOffset.UTC);
         List<UserInsightEntity> fresh = repository
-            .findByUserIdAndValidUntilAfterAndDismissedAtIsNullOrderByGeneratedAtDesc(userId, now);
+            .findByUserIdAndSnapshotWindowDaysAndValidUntilAfterAndDismissedAtIsNullOrderByGeneratedAtDesc(
+                userId, days, now);
         if (!fresh.isEmpty()) {
             return toResponse(fresh);
         }

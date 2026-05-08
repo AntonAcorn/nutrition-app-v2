@@ -9,8 +9,8 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface UserInsightRepository extends JpaRepository<UserInsightEntity, UUID> {
 
-    List<UserInsightEntity> findByUserIdAndValidUntilAfterAndDismissedAtIsNullOrderByGeneratedAtDesc(
-        UUID userId, OffsetDateTime now);
+    List<UserInsightEntity> findByUserIdAndSnapshotWindowDaysAndValidUntilAfterAndDismissedAtIsNullOrderByGeneratedAtDesc(
+        UUID userId, int snapshotWindowDays, OffsetDateTime now);
 
     Optional<UserInsightEntity> findByIdAndUserId(UUID id, UUID userId);
 
