@@ -11,7 +11,12 @@ const TONE_ICON: Record<InlineTipTone, string> = {
 interface Props {
   kcal: number
   slotType?: string
-  /** ms to wait after the last change before re-querying. Lower = snappier, higher = fewer requests. */
+  /**
+   * ms to wait after the last change before re-querying. Higher debounce now
+   * because the backend may make an LLM call on top of the rule-based pass.
+   * The result is cached server-side per kcal-bucket, so repeated tweaks
+   * around the same value don't burn tokens.
+   */
   debounceMs?: number
 }
 
@@ -20,7 +25,7 @@ interface Props {
  * QuickAdd / photo confirm. Refreshes (debounced) as the user types kcal.
  * Hides itself for sub-50 kcal entries (probably not done typing).
  */
-export function InlineTipBanner({ kcal, slotType, debounceMs = 350 }: Props) {
+export function InlineTipBanner({ kcal, slotType, debounceMs = 700 }: Props) {
   const [tip, setTip] = useState<InlineTip | null>(null)
   const [loading, setLoading] = useState(false)
 
