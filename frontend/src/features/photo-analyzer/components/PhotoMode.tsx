@@ -299,9 +299,23 @@ export function PhotoMode({
   if (pendingPhotos.length > 0) {
     return (
       <div className="photo-staging">
-        <p className="photo-staging__title">
-          {pendingPhotos.length === 1 ? 'Ready to analyze' : `${pendingPhotos.length} photos ready`}
-        </p>
+        <div className="photo-staging__topbar">
+          <button
+            type="button"
+            className="photo-staging__back"
+            onClick={() => {
+              pendingPhotos.forEach(p => URL.revokeObjectURL(p.thumb))
+              setPendingPhotos([])
+              setUserNote('')
+            }}
+            aria-label="Discard photos and go back"
+          >
+            ← Back
+          </button>
+          <p className="photo-staging__title">
+            {pendingPhotos.length === 1 ? 'Ready to analyze' : `${pendingPhotos.length} photos ready`}
+          </p>
+        </div>
 
         <div className="photo-staging__thumbs">
           {pendingPhotos.map((p, i) => (
@@ -355,57 +369,30 @@ export function PhotoMode({
 
   return (
     <>
-      {!noteExpanded ? (
-        <button type="button" className="add-note-btn" onClick={() => setNoteExpanded(true)}>
-          + Add note
-        </button>
-      ) : (
-        <div className="upload-panel__note photo-upload-hero__note">
-          <div className="note-label-row">
-            <span>{photoDrafts.length > 0 ? 'Note for next photo' : 'Note'}</span>
-            <div className="note-mic-controls">
-              {speechSupported && (
-                <MicButton
-                  active={noteRecording}
-                  onClick={noteRecording ? stopNoteRecording : startNoteRecording}
-                  ariaLabelStart="Dictate note"
-                />
-              )}
-              <button type="button" className="add-note-btn add-note-btn--dismiss" onClick={() => { setNoteExpanded(false); setUserNote('') }}>✕</button>
-            </div>
-          </div>
-          <textarea
-            value={userNote}
-            onChange={(e) => setUserNote(e.target.value)}
-            rows={2}
-            placeholder="e.g. chicken, rice, salad"
-            className={noteRecording ? 'note-textarea--recording' : ''}
-            autoFocus
-          />
-        </div>
-      )}
-
-      <div className="upload-button-group">
-        <button type="button" className="upload-button" onClick={handleTakePhoto}>
-          <span>{photoDrafts.length > 0 ? 'Add another photo' : 'Take photo'}</span>
-        </button>
-        <input
-          ref={fileInputRef}
-          type="file"
-          accept="image/*"
-          capture="environment"
-          multiple
-          onChange={handleFilesSelected}
-          hidden
-        />
-      </div>
-
-      {photoDrafts.length === 0 && (
+      {photoDrafts.length === 0 ? (
         <div className="photo-upload-hero">
           <MascotCameraSvg size={120} className="photo-upload-hero__mascot" />
           <h2 className="photo-upload-hero__title">Take a photo of your meal</h2>
+          <p className="photo-upload-hero__sub">Coach will read it for you.</p>
+          <button type="button" className="upload-button photo-upload-hero__cta" onClick={handleTakePhoto}>
+            <span>📸  Open camera</span>
+          </button>
         </div>
+      ) : (
+        <button type="button" className="upload-button upload-button--compact" onClick={handleTakePhoto}>
+          <span>+ Add another photo</span>
+        </button>
       )}
+
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept="image/*"
+        capture="environment"
+        multiple
+        onChange={handleFilesSelected}
+        hidden
+      />
 
       {photoDrafts.length > 0 && (
         <div className="photo-draft-queue">
