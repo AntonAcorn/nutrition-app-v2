@@ -68,7 +68,11 @@ export function CoachInsightsCard({ date, days = 7 }: Props) {
   if (!data || data.cards.length === 0) return null
 
   return (
-    <section className="panel coach-card" aria-label="Coach insights">
+    <section
+      className="panel coach-card content-fade-in"
+      style={{ animationDelay: '15ms' }}
+      aria-label="Coach insights"
+    >
       <header className="coach-card__header">
         <span className="coach-card__brand">🧠 Coach</span>
         <button

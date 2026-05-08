@@ -47,7 +47,11 @@ export function WellbeingDailyPrompt({ date }: Props) {
   }
 
   return (
-    <section className="panel wellbeing-prompt-card" aria-label="How are you feeling?">
+    <section
+      className="panel wellbeing-prompt-card content-fade-in"
+      style={{ animationDelay: '12ms' }}
+      aria-label="How are you feeling?"
+    >
       <p className="wellbeing-prompt-card__title">How are you feeling today?</p>
       <div className="wellbeing-prompt-card__row">
         {RATING_OPTIONS.map(({ rating, emoji, label }) => (

@@ -457,16 +457,8 @@ export function CurrentDayTab({ refreshToken = 0, successMessage = '', onDayUpda
               onWeightSave={handleWeightSave}
             />
           </div>
-          {isToday && (
-            <div className="content-fade-in" style={{ animationDelay: '12ms' }}>
-              <WellbeingDailyPrompt date={selectedDate} />
-            </div>
-          )}
-          {isToday && (
-            <div className="content-fade-in" style={{ animationDelay: '15ms' }}>
-              <CoachInsightsCard date={selectedDate} />
-            </div>
-          )}
+          {isToday && <WellbeingDailyPrompt date={selectedDate} />}
+          {isToday && <CoachInsightsCard date={selectedDate} />}
           {isToday && (
             <div className="content-fade-in" style={{ animationDelay: '20ms' }}>
               <WeeklyBankCard refreshToken={refreshToken} />

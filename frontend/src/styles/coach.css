@@ -106,6 +106,7 @@
 .coach-card__body {
   flex: 1;
   min-width: 0;
+  padding-right: 22px;
 }
 
 .coach-card__title {
