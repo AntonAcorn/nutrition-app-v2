@@ -69,7 +69,7 @@ nutrition:
     enabled: ${PHOTO_ANALYSIS_ENABLED:true}
     provider: ${PHOTO_ANALYSIS_PROVIDER:openai-stub}
     openai:
-      api-key: ${OPENAI_API_KEY:}
+      api-key: ${PHOTO_OPENAI_API_KEY:${OPENAI_API_KEY:}}
       model: ${OPENAI_MODEL:gpt-4.1-mini}
       base-url: ${OPENAI_BASE_URL:https://api.openai.com/v1}
       timeout-ms: ${OPENAI_TIMEOUT_MS:25000}
@@ -79,7 +79,7 @@ nutrition:
     validity-hours: ${COACH_VALIDITY_HOURS:72}
     min-logged-days: ${COACH_MIN_LOGGED_DAYS:3}
     openai:
-      api-key: ${OPENAI_API_KEY:}
+      api-key: ${COACH_OPENAI_API_KEY:${OPENAI_API_KEY:}}
       model: ${COACH_MODEL:gpt-4o-mini}
       base-url: ${OPENAI_BASE_URL:https://api.openai.com/v1}
       timeout-ms: ${COACH_TIMEOUT_MS:30000}
