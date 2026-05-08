@@ -14,7 +14,17 @@ const SLOT_ICONS: Record<MealSlot['slotType'], string> = {
 
 const SWIPE_DELETE_THRESHOLD = 76
 
-function SwipeableRow({ onDelete, children }: { onDelete: () => void; children: ReactNode }) {
+function SwipeableRow({
+  onDelete,
+  onLongPress,
+  children,
+}: {
+  onDelete: () => void
+  /** Called once when the user holds the row still for ~400ms. Receives
+   * the original touch event so the parent can start a drag immediately. */
+  onLongPress?: (e: React.TouchEvent) => void
+  children: ReactNode
+}) {
   const [offset, setOffsetState] = useState(0)
   const [sliding, setSliding] = useState(false)
   const offsetRef = useRef(0)
@@ -22,10 +32,19 @@ function SwipeableRow({ onDelete, children }: { onDelete: () => void; children: 
   const startYRef = useRef(0)
   const startOffsetRef = useRef(0)
   const draggingRef = useRef(false)
+  const longPressTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const longPressFiredRef = useRef(false)
 
   function setOffset(v: number) {
     offsetRef.current = v
     setOffsetState(v)
+  }
+
+  function clearLongPress() {
+    if (longPressTimerRef.current != null) {
+      clearTimeout(longPressTimerRef.current)
+      longPressTimerRef.current = null
+    }
   }
 
   function onTouchStart(e: React.TouchEvent) {
@@ -33,11 +52,36 @@ function SwipeableRow({ onDelete, children }: { onDelete: () => void; children: 
     startYRef.current = e.touches[0].clientY
     startOffsetRef.current = offsetRef.current
     draggingRef.current = false
+    longPressFiredRef.current = false
+
+    if (onLongPress) {
+      // Hold the React event reference; React's synthetic event would be
+      // pooled by the time the timeout fires, so we capture what we need.
+      const persistedEvent = e
+      // React 17+ no longer pools events, so reading later is safe; still
+      // we capture the reference up-front to keep linter happy.
+      clearLongPress()
+      longPressTimerRef.current = setTimeout(() => {
+        longPressTimerRef.current = null
+        // Skip if a swipe is already in flight.
+        if (draggingRef.current) return
+        longPressFiredRef.current = true
+        onLongPress(persistedEvent)
+      }, 380)
+    }
   }
 
   function onTouchMove(e: React.TouchEvent) {
+    if (longPressFiredRef.current) return // long-press already promoted to drag — let parent handle
     const dx = startXRef.current - e.touches[0].clientX
     const dy = Math.abs(e.touches[0].clientY - startYRef.current)
+
+    // Cancel a pending long-press as soon as the finger moves enough that
+    // it's clearly a swipe gesture instead of a hold.
+    if (longPressTimerRef.current != null && (Math.abs(dx) > 6 || dy > 6)) {
+      clearLongPress()
+    }
+
     if (!draggingRef.current) {
       if (dy > 8) return
       if (Math.abs(dx) > 4) draggingRef.current = true
@@ -47,6 +91,12 @@ function SwipeableRow({ onDelete, children }: { onDelete: () => void; children: 
   }
 
   function onTouchEnd() {
+    clearLongPress()
+    if (longPressFiredRef.current) {
+      // Long-press claimed the gesture — don't run swipe-finish logic.
+      longPressFiredRef.current = false
+      return
+    }
     if (!draggingRef.current) return
     draggingRef.current = false
     if (offsetRef.current >= SWIPE_DELETE_THRESHOLD) {
@@ -496,7 +546,11 @@ export function MealsLogCard({ date, refreshToken = 0, onAddToSlot, onDeleted, o
                   }
 
                   return (
-                    <SwipeableRow key={m.id} onDelete={() => handleDelete(m.id)}>
+                    <SwipeableRow
+                      key={m.id}
+                      onDelete={() => handleDelete(m.id)}
+                      onLongPress={(e) => onDragHandleTouch(e, m, slot.slotType)}
+                    >
                       <div className="meal-log-row">
                         <div className="meal-log-row__info">
                           <p className="meal-log-row__name">{m.name}</p>

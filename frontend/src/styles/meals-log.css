@@ -632,6 +632,13 @@
   color: rgba(20, 33, 61, 0.4);
 }
 
+[data-theme="light"] .meal-log-row__drag-handle {
+  color: rgba(20, 33, 61, 0.32);
+}
+[data-theme="light"] .meal-log-row__drag-handle:active {
+  color: rgba(20, 33, 61, 0.65);
+}
+
 
 /* ── Meal log move between slots ── */
 [data-theme="light"] .meal-log-row__move {
