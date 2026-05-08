@@ -144,12 +144,16 @@ export function BarcodeScannerMode({ onAdded, onCancel }: Props) {
     setAddError('')
     try {
       const f = grams / 100
+      const productName = product.name && product.name.trim()
+        ? `${product.name.trim()} (${grams}g)`
+        : undefined
       await addMealManually({
         caloriesConsumedKcal: Math.round((product.caloriesPer100g ?? 0) * f),
         proteinGrams: round1((product.proteinPer100g ?? 0) * f),
         fatGrams: round1((product.fatPer100g ?? 0) * f),
         fiberGrams: round1((product.fiberPer100g ?? 0) * f),
         carbsGrams: round1((product.carbsPer100g ?? 0) * f),
+        mealName: productName,
       }, getTodayLocalDateInputValue())
       onAdded()
     } catch {
