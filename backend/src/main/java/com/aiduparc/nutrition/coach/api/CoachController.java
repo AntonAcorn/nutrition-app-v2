@@ -5,6 +5,7 @@ import com.aiduparc.nutrition.coach.service.CoachInlineTipService;
 import com.aiduparc.nutrition.coach.service.CoachInsightService;
 import com.aiduparc.nutrition.coach.service.CoachRateLimitService;
 import com.aiduparc.nutrition.coach.service.CoachSnapshotService;
+import com.aiduparc.nutrition.coach.service.VoiceSummaryService;
 import com.aiduparc.nutrition.coach.service.WeeklyRecapService;
 import com.aiduparc.nutrition.security.service.CurrentNutritionUserResolver;
 import jakarta.servlet.http.HttpSession;
@@ -37,6 +38,7 @@ public class CoachController {
     private final WeeklyRecapService weeklyRecapService;
     private final CoachInlineTipService inlineTipService;
     private final CoachGoalAdjustmentService goalAdjustmentService;
+    private final VoiceSummaryService voiceSummaryService;
     private final CurrentNutritionUserResolver userResolver;
 
     public CoachController(
@@ -46,6 +48,7 @@ public class CoachController {
         WeeklyRecapService weeklyRecapService,
         CoachInlineTipService inlineTipService,
         CoachGoalAdjustmentService goalAdjustmentService,
+        VoiceSummaryService voiceSummaryService,
         CurrentNutritionUserResolver userResolver
     ) {
         this.coachSnapshotService = coachSnapshotService;
@@ -54,6 +57,7 @@ public class CoachController {
         this.weeklyRecapService = weeklyRecapService;
         this.inlineTipService = inlineTipService;
         this.goalAdjustmentService = goalAdjustmentService;
+        this.voiceSummaryService = voiceSummaryService;
         this.userResolver = userResolver;
     }
 
@@ -145,6 +149,22 @@ public class CoachController {
     public void acceptEscalation(@RequestParam String strategy, HttpSession session) {
         UUID userId = userResolver.resolve(session, null);
         goalAdjustmentService.applyWeightLossStrategy(userId, strategy);
+    }
+
+    @GetMapping(value = "/voice-summary", produces = "audio/mpeg")
+    public org.springframework.http.ResponseEntity<byte[]> voiceSummary(
+        @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date,
+        @RequestParam(required = false) String tz,
+        HttpSession session
+    ) {
+        UUID userId = userResolver.resolve(session, null);
+        rateLimitService.checkRefreshLimit(userId);
+        ZoneId zone = CoachSnapshotService.resolveZone(tz);
+        byte[] mp3 = voiceSummaryService.generate(userId, today(date), zone);
+        return org.springframework.http.ResponseEntity.ok()
+            .header("Content-Type", "audio/mpeg")
+            .header("Cache-Control", "private, max-age=300")
+            .body(mp3);
     }
 
     private LocalDate today(LocalDate provided) {

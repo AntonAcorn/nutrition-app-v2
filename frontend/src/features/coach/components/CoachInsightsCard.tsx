@@ -10,6 +10,7 @@ import {
 } from '../model/coachApi'
 import { ApiError } from '../../../shared/lib/apiClient'
 import { hapticLight } from '../../../shared/lib/haptic'
+import { VoiceSummaryButton } from './VoiceSummaryButton'
 
 const KIND_ICON: Record<InsightKind, string> = {
   behavioral: '🎯',
@@ -111,16 +112,19 @@ export function CoachInsightsCard({ date, days = 7 }: Props) {
     >
       <header className="coach-card__header">
         <span className="coach-card__brand">🧠 Coach</span>
-        <button
-          type="button"
-          className="coach-card__refresh"
-          onClick={() => refresh.mutate()}
-          disabled={refresh.isPending || rateLimited}
-          aria-label="Refresh coach insights"
-          title={rateLimited ? 'Try again later' : 'Refresh'}
-        >
-          {refresh.isPending ? '…' : '↻'}
-        </button>
+        <div className="coach-card__header-actions">
+          <VoiceSummaryButton />
+          <button
+            type="button"
+            className="coach-card__refresh"
+            onClick={() => refresh.mutate()}
+            disabled={refresh.isPending || rateLimited}
+            aria-label="Refresh coach insights"
+            title={rateLimited ? 'Try again later' : 'Refresh'}
+          >
+            {refresh.isPending ? '…' : '↻'}
+          </button>
+        </div>
       </header>
       <ul className="coach-card__list">
         {data.cards.map(card => {
