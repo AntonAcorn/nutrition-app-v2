@@ -1,7 +1,9 @@
 .coach-tour-backdrop {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.65);
+  background: rgba(0, 0, 0, 0.86);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -12,8 +14,12 @@
 .coach-tour {
   width: 100%;
   max-width: 420px;
-  background: linear-gradient(160deg, rgba(123, 97, 255, 0.16), rgba(34, 211, 238, 0.06));
-  border: 1px solid rgba(123, 97, 255, 0.32);
+  /* Solid base + gradient overlay so the dialog is fully opaque
+     even when the backdrop alone wouldn't hide what's underneath. */
+  background:
+    linear-gradient(160deg, rgba(123, 97, 255, 0.22), rgba(34, 211, 238, 0.10)),
+    #1a1f2e;
+  border: 1px solid rgba(123, 97, 255, 0.40);
   border-radius: 24px;
   padding: 28px 24px 22px;
   display: flex;
@@ -21,6 +27,7 @@
   gap: 22px;
   position: relative;
   overflow: hidden;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.55);
 }
 
 .coach-tour::before {
@@ -364,7 +371,10 @@
 }
 
 [data-theme="light"] .coach-tour {
-  background: linear-gradient(160deg, rgba(123, 97, 255, 0.10), rgba(34, 211, 238, 0.05));
+  background:
+    linear-gradient(160deg, rgba(123, 97, 255, 0.14), rgba(34, 211, 238, 0.06)),
+    #ffffff;
+  border-color: rgba(123, 97, 255, 0.30);
 }
 
 [data-theme="light"] .coach-tour__skip {
