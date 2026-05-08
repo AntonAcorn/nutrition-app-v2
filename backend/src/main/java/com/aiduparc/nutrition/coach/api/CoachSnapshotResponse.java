@@ -14,6 +14,7 @@ public record CoachSnapshotResponse(
     Profile profile,
     Window window,
     Totals totals,
+    PriorWindow priorWindow,
     Map<String, DayOfWeekStat> byDayOfWeek,
     Map<String, SlotStat> bySlot,
     MealTiming mealTiming,
@@ -59,6 +60,18 @@ public record CoachSnapshotResponse(
         Integer maxUnderrunKcal,
         int loggingStreakDays,
         int noOverrunStreakDays
+    ) {}
+
+    /**
+     * Same shape as Totals but for the window immediately before the
+     * current one (e.g. "last week" when window=7). Lets the model talk
+     * about week-over-week changes without inventing baselines.
+     */
+    public record PriorWindow(
+        int loggedDays,
+        Integer avgConsumedKcal,
+        MacroAvg avgMacros,
+        int daysOverTarget
     ) {}
 
     public record MacroAvg(

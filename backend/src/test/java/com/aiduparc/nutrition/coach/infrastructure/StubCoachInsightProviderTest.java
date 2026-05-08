@@ -7,6 +7,7 @@ import com.aiduparc.nutrition.coach.api.CoachSnapshotResponse.BankStat;
 import com.aiduparc.nutrition.coach.api.CoachSnapshotResponse.MacroAvg;
 import com.aiduparc.nutrition.coach.api.CoachSnapshotResponse.MacroTargets;
 import com.aiduparc.nutrition.coach.api.CoachSnapshotResponse.MealTiming;
+import com.aiduparc.nutrition.coach.api.CoachSnapshotResponse.PriorWindow;
 import com.aiduparc.nutrition.coach.api.CoachSnapshotResponse.Profile;
 import com.aiduparc.nutrition.coach.api.CoachSnapshotResponse.RelaxDayStat;
 import com.aiduparc.nutrition.coach.api.CoachSnapshotResponse.Totals;
@@ -113,6 +114,7 @@ class StubCoachInsightProviderTest {
                 1800, new MacroTargets(120, 60, 200, 30), 82.0, 75.0),
             new Window(7, LocalDate.of(2026, 5, 1), LocalDate.of(2026, 5, 7)),
             totals,
+            new PriorWindow(0, null, new MacroAvg(null, null, null, null), 0),
             Map.of(),
             Map.of(),
             new MealTiming(8, 19, 0, 0),
@@ -127,7 +129,7 @@ class StubCoachInsightProviderTest {
     private static CoachSnapshotResponse withTiming(CoachSnapshotResponse base, int lateCount) {
         return new CoachSnapshotResponse(
             base.profile(), base.window(), base.totals(),
-            base.byDayOfWeek(), base.bySlot(),
+            base.priorWindow(), base.byDayOfWeek(), base.bySlot(),
             new MealTiming(8, 22, lateCount, 0),
             base.weightTrend(), base.bank(),
             base.relaxDays(), base.wellbeing(), base.topMeals()

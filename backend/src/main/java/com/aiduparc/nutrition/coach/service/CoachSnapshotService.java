@@ -9,6 +9,7 @@ import com.aiduparc.nutrition.coach.api.CoachSnapshotResponse.DayOfWeekStat;
 import com.aiduparc.nutrition.coach.api.CoachSnapshotResponse.MacroAvg;
 import com.aiduparc.nutrition.coach.api.CoachSnapshotResponse.MacroTargets;
 import com.aiduparc.nutrition.coach.api.CoachSnapshotResponse.MealTiming;
+import com.aiduparc.nutrition.coach.api.CoachSnapshotResponse.PriorWindow;
 import com.aiduparc.nutrition.coach.api.CoachSnapshotResponse.Profile;
 import com.aiduparc.nutrition.coach.api.CoachSnapshotResponse.RelaxDayStat;
 import com.aiduparc.nutrition.coach.api.CoachSnapshotResponse.SlotStat;
@@ -103,10 +104,19 @@ public class CoachSnapshotService {
         List<MealLogEntryEntity> meals = mealLogEntryRepository
             .findByUserIdAndEntryDateBetweenOrderByCreatedAtAsc(userId, from, to);
 
+        // Prior window of the same length, immediately before the current one.
+        LocalDate priorTo = from.minusDays(1);
+        LocalDate priorFrom = priorTo.minusDays(days - 1L);
+        List<DailyNutritionEntryEntity> priorEntries = dailyEntryRepository
+            .findByUserIdAndEntryDateBetweenOrderByEntryDateAsc(userId, priorFrom, priorTo);
+        Map<LocalDate, DailyNutritionEntryEntity> priorByDate = priorEntries.stream()
+            .collect(Collectors.toMap(DailyNutritionEntryEntity::getEntryDate, e -> e, (a, b) -> a));
+
         return new CoachSnapshotResponse(
             buildProfile(profile),
             new Window(days, from, to),
             buildTotals(dailyByDate, profile, from, to),
+            buildPriorWindow(priorByDate, profile, priorFrom, priorTo),
             buildByDayOfWeek(dailyEntries),
             buildBySlot(userId, meals, from, to),
             buildMealTiming(meals, zone),
@@ -115,6 +125,48 @@ public class CoachSnapshotService {
             buildRelaxDays(userId, today, from, to, profile.getRelaxDaysPerMonth()),
             buildWellbeing(userId, from, to),
             buildTopMeals(meals)
+        );
+    }
+
+    private PriorWindow buildPriorWindow(
+        Map<LocalDate, DailyNutritionEntryEntity> byDate,
+        UserProfileEntity profile,
+        LocalDate from,
+        LocalDate to
+    ) {
+        int loggedDays = 0;
+        long sumKcal = 0, sumProtein = 0, sumFat = 0, sumCarbs = 0, sumFiber = 0;
+        int daysOver = 0;
+        int profileTarget = profile.getDailyCalorieTargetKcal().intValue();
+
+        for (LocalDate d = from; !d.isAfter(to); d = d.plusDays(1)) {
+            DailyNutritionEntryEntity e = byDate.get(d);
+            if (e == null) continue;
+            int consumed = e.getCaloriesConsumedKcal().intValue();
+            if (consumed <= 0) continue;
+            loggedDays++;
+            sumKcal += consumed;
+            sumProtein += valueOrZero(e.getProteinGrams());
+            sumFat += valueOrZero(e.getFatGrams());
+            sumCarbs += valueOrZero(e.getCarbsGrams());
+            sumFiber += valueOrZero(e.getFiberGrams());
+            int target = e.getCalorieTargetKcal() != null
+                ? e.getCalorieTargetKcal().intValue() : profileTarget;
+            if (target > 0 && consumed > target * IN_ZONE_OVER_TOLERANCE) daysOver++;
+        }
+        if (loggedDays == 0) {
+            return new PriorWindow(0, null,
+                new MacroAvg(null, null, null, null), 0);
+        }
+        return new PriorWindow(
+            loggedDays,
+            (int) Math.round((double) sumKcal / loggedDays),
+            new MacroAvg(
+                (int) Math.round((double) sumProtein / loggedDays),
+                (int) Math.round((double) sumFat / loggedDays),
+                (int) Math.round((double) sumCarbs / loggedDays),
+                (int) Math.round((double) sumFiber / loggedDays)),
+            daysOver
         );
     }
 
