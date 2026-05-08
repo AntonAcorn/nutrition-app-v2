@@ -22,9 +22,13 @@ public record CoachSnapshotResponse(
     BankStat bank,
     RelaxDayStat relaxDays,
     WellbeingStat wellbeing,
-    List<TopMeal> topMeals
+    List<TopMeal> topMeals,
+    DayHighlight bestDay,
+    DayHighlight worstDay,
+    List<RecentMeal> recentMeals
 ) {
     public record Profile(
+        String displayName,
         String goal,
         String weightLossStrategy,
         String activityLevel,
@@ -133,5 +137,34 @@ public record CoachSnapshotResponse(
         String name,
         int count,
         Integer avgKcal
+    ) {}
+
+    /**
+     * Full picture of one specific day — what made it stand out. Lets the
+     * model anchor an insight on a real moment ("Friday's dinner of Pasta
+     * +salad pushed the day to 2700 kcal") instead of a generic average.
+     */
+    public record DayHighlight(
+        LocalDate date,
+        String dayOfWeek,
+        Integer consumedKcal,
+        Integer targetKcal,
+        Integer overrunKcal,
+        Integer underrunKcal,
+        Integer wellbeingRating,
+        List<String> meals
+    ) {}
+
+    /**
+     * Concrete recent meal entries — raw names as the user (or analyzer)
+     * typed them, with timestamps. Lets the model talk about specific
+     * food without inventing names.
+     */
+    public record RecentMeal(
+        LocalDate date,
+        String slot,
+        String name,
+        Integer kcal,
+        Integer hour
     ) {}
 }

@@ -110,7 +110,7 @@ class StubCoachInsightProviderTest {
 
     private static CoachSnapshotResponse snapshot(Totals totals) {
         return new CoachSnapshotResponse(
-            new Profile("lose", "optimal", "moderately_active", 30, "male",
+            new Profile("Anton", "lose", "optimal", "moderately_active", 30, "male",
                 1800, new MacroTargets(120, 60, 200, 30), 82.0, 75.0),
             new Window(7, LocalDate.of(2026, 5, 1), LocalDate.of(2026, 5, 7)),
             totals,
@@ -122,6 +122,9 @@ class StubCoachInsightProviderTest {
             new BankStat(0, 0, 0),
             new RelaxDayStat(0, 0, 2),
             new WellbeingStat(0, null, Map.of(), Map.of()),
+            List.of(),
+            null,
+            null,
             List.of()
         );
     }
@@ -132,7 +135,8 @@ class StubCoachInsightProviderTest {
             base.priorWindow(), base.byDayOfWeek(), base.bySlot(),
             new MealTiming(8, 22, lateCount, 0),
             base.weightTrend(), base.bank(),
-            base.relaxDays(), base.wellbeing(), base.topMeals()
+            base.relaxDays(), base.wellbeing(), base.topMeals(),
+            base.bestDay(), base.worstDay(), base.recentMeals()
         );
     }
 }

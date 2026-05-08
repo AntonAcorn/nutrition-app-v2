@@ -8,9 +8,11 @@ import com.aiduparc.nutrition.coach.api.CoachSnapshotResponse.BankStat;
 import com.aiduparc.nutrition.coach.api.CoachSnapshotResponse.DayOfWeekStat;
 import com.aiduparc.nutrition.coach.api.CoachSnapshotResponse.MacroAvg;
 import com.aiduparc.nutrition.coach.api.CoachSnapshotResponse.MacroTargets;
+import com.aiduparc.nutrition.coach.api.CoachSnapshotResponse.DayHighlight;
 import com.aiduparc.nutrition.coach.api.CoachSnapshotResponse.MealTiming;
 import com.aiduparc.nutrition.coach.api.CoachSnapshotResponse.PriorWindow;
 import com.aiduparc.nutrition.coach.api.CoachSnapshotResponse.Profile;
+import com.aiduparc.nutrition.coach.api.CoachSnapshotResponse.RecentMeal;
 import com.aiduparc.nutrition.coach.api.CoachSnapshotResponse.RelaxDayStat;
 import com.aiduparc.nutrition.coach.api.CoachSnapshotResponse.SlotStat;
 import com.aiduparc.nutrition.coach.api.CoachSnapshotResponse.SlotWellbeing;
@@ -25,8 +27,10 @@ import com.aiduparc.nutrition.history.model.MealSlotEntity;
 import com.aiduparc.nutrition.history.repository.DailyNutritionEntryRepository;
 import com.aiduparc.nutrition.history.repository.MealLogEntryRepository;
 import com.aiduparc.nutrition.history.repository.MealSlotRepository;
+import com.aiduparc.nutrition.user.model.UserEntity;
 import com.aiduparc.nutrition.user.model.UserProfileEntity;
 import com.aiduparc.nutrition.user.repository.UserProfileRepository;
+import com.aiduparc.nutrition.user.repository.UserRepository;
 import com.aiduparc.nutrition.wellbeing.model.WellbeingEntryEntity;
 import com.aiduparc.nutrition.wellbeing.repository.WellbeingEntryRepository;
 import java.math.BigDecimal;
@@ -60,6 +64,7 @@ public class CoachSnapshotService {
     private static final int EARLY_HOUR_THRESHOLD = 6;
 
     private final UserProfileRepository userProfileRepository;
+    private final UserRepository userRepository;
     private final DailyNutritionEntryRepository dailyEntryRepository;
     private final MealLogEntryRepository mealLogEntryRepository;
     private final MealSlotRepository mealSlotRepository;
@@ -69,6 +74,7 @@ public class CoachSnapshotService {
 
     public CoachSnapshotService(
         UserProfileRepository userProfileRepository,
+        UserRepository userRepository,
         DailyNutritionEntryRepository dailyEntryRepository,
         MealLogEntryRepository mealLogEntryRepository,
         MealSlotRepository mealSlotRepository,
@@ -77,6 +83,7 @@ public class CoachSnapshotService {
         CalorieBankService calorieBankService
     ) {
         this.userProfileRepository = userProfileRepository;
+        this.userRepository = userRepository;
         this.dailyEntryRepository = dailyEntryRepository;
         this.mealLogEntryRepository = mealLogEntryRepository;
         this.mealSlotRepository = mealSlotRepository;
@@ -112,6 +119,10 @@ public class CoachSnapshotService {
         Map<LocalDate, DailyNutritionEntryEntity> priorByDate = priorEntries.stream()
             .collect(Collectors.toMap(DailyNutritionEntryEntity::getEntryDate, e -> e, (a, b) -> a));
 
+        // Best/worst day in the window for narrative anchors.
+        DayHighlight bestDay = pickHighlight(dailyEntries, meals, profile, true);
+        DayHighlight worstDay = pickHighlight(dailyEntries, meals, profile, false);
+
         return new CoachSnapshotResponse(
             buildProfile(profile),
             new Window(days, from, to),
@@ -124,7 +135,10 @@ public class CoachSnapshotService {
             buildBank(userId, today),
             buildRelaxDays(userId, today, from, to, profile.getRelaxDaysPerMonth()),
             buildWellbeing(userId, from, to),
-            buildTopMeals(meals)
+            buildTopMeals(meals),
+            bestDay,
+            worstDay,
+            buildRecentMeals(userId, meals, from, to, zone)
         );
     }
 
@@ -180,7 +194,13 @@ public class CoachSnapshotService {
     }
 
     private Profile buildProfile(UserProfileEntity p) {
+        String name = userRepository.findById(p.getNutritionUserId())
+            .map(UserEntity::getDisplayName)
+            .filter(s -> s != null && !s.isBlank())
+            .map(s -> s.split("\\s+")[0])
+            .orElse(null);
         return new Profile(
+            name,
             p.getGoal(),
             p.getWeightLossStrategy(),
             p.getActivityLevel(),
@@ -454,5 +474,91 @@ public class CoachSnapshotService {
 
     private long valueOrZero(BigDecimal v) {
         return v == null ? 0L : v.longValue();
+    }
+
+    /**
+     * Picks the day with the largest gap (best=biggest deficit, worst=biggest
+     * overrun) and reports its day-of-week, the gap and which meals landed
+     * that day. Returns null if no day in the window has data.
+     */
+    private DayHighlight pickHighlight(
+        List<DailyNutritionEntryEntity> dailyEntries,
+        List<MealLogEntryEntity> meals,
+        UserProfileEntity profile,
+        boolean best
+    ) {
+        int profileTarget = profile.getDailyCalorieTargetKcal().intValue();
+        DailyNutritionEntryEntity pick = null;
+        int extreme = 0;
+
+        for (DailyNutritionEntryEntity e : dailyEntries) {
+            int consumed = e.getCaloriesConsumedKcal().intValue();
+            if (consumed <= 0) continue;
+            int target = e.getCalorieTargetKcal() != null
+                ? e.getCalorieTargetKcal().intValue() : profileTarget;
+            int delta = consumed - target;
+            if (best) {
+                if (pick == null || delta < extreme) { pick = e; extreme = delta; }
+            } else {
+                if (pick == null || delta > extreme) { pick = e; extreme = delta; }
+            }
+        }
+        if (pick == null) return null;
+
+        LocalDate date = pick.getEntryDate();
+        List<String> mealNames = meals.stream()
+            .filter(m -> m.getEntryDate().equals(date))
+            .map(MealLogEntryEntity::getName)
+            .filter(s -> s != null && !s.isBlank())
+            .limit(8)
+            .toList();
+
+        int target = pick.getCalorieTargetKcal() != null
+            ? pick.getCalorieTargetKcal().intValue() : profileTarget;
+        int consumed = pick.getCaloriesConsumedKcal().intValue();
+        int delta = consumed - target;
+
+        return new DayHighlight(
+            date,
+            date.getDayOfWeek().name().toLowerCase(Locale.ROOT),
+            consumed,
+            target,
+            delta > 0 ? delta : 0,
+            delta < 0 ? -delta : 0,
+            null, // wellbeing rating tied to a day requires extra lookup; left null until we add it
+            mealNames
+        );
+    }
+
+    /**
+     * Last 12 meal entries with raw names + slot + hour. Lets the model
+     * cite specific recent food without inventing names. Slot is looked
+     * up only for entries that have a slot id; rest fall through.
+     */
+    private List<RecentMeal> buildRecentMeals(
+        UUID userId, List<MealLogEntryEntity> meals, LocalDate from, LocalDate to, java.time.ZoneId zone
+    ) {
+        Map<UUID, String> idToType = new HashMap<>();
+        for (LocalDate d = from; !d.isAfter(to); d = d.plusDays(1)) {
+            for (MealSlotEntity s : mealSlotRepository.findByUserIdAndEntryDateOrderBySortOrderAsc(userId, d)) {
+                idToType.put(s.getId(), s.getSlotType());
+            }
+        }
+        List<RecentMeal> out = new ArrayList<>();
+        meals.stream()
+            .sorted(Comparator.comparing(MealLogEntryEntity::getCreatedAt).reversed())
+            .limit(12)
+            .forEach(m -> {
+                String slot = m.getMealSlotId() != null ? idToType.get(m.getMealSlotId()) : null;
+                int hour = m.getCreatedAt().atZoneSameInstant(zone).getHour();
+                out.add(new RecentMeal(
+                    m.getEntryDate(),
+                    slot != null ? slot.toLowerCase(Locale.ROOT) : null,
+                    m.getName(),
+                    m.getCaloriesKcal() != null ? m.getCaloriesKcal().intValue() : null,
+                    hour
+                ));
+            });
+        return out;
     }
 }

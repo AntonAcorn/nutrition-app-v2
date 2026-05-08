@@ -29,8 +29,8 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/coach")
 public class CoachController {
 
-    private static final int DEFAULT_DAYS = 7;
-    private static final int MAX_DAYS = 30;
+    private static final int DEFAULT_DAYS = 14;
+    private static final int MAX_DAYS = 60;
 
     private final CoachSnapshotService coachSnapshotService;
     private final CoachInsightService coachInsightService;

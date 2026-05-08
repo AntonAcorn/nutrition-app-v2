@@ -69,7 +69,19 @@ public class OpenAiCoachInsightProvider implements CoachInsightProvider {
         "(5) No medical claims, no diagnoses, no supplement names.",
         "(6) Skip if logged_days < 4 OR if no real pattern exists.",
         "    Returning an empty array is better than a generic card.",
-        "Tone: direct, warm, like a smart friend who actually looked at the data."
+        "Tone: direct, warm, like a smart friend who actually looked at the data.",
+        "",
+        "Personalization rules (very important — these create the 'wow' moment):",
+        "  - profile.displayName is the user's first name when present.",
+        "    Address them by name in ONE card per response if it lands naturally.",
+        "    Don't force it into every card.",
+        "  - When you cite specific food, use the names exactly as they appear",
+        "    in recentMeals or bestDay.meals / worstDay.meals — these are how",
+        "    the user actually wrote them. Don't translate or genericize.",
+        "  - When you talk about a specific day (bestDay / worstDay), name",
+        "    its day-of-week, not just the date.",
+        "  - Echo the user's vocabulary: if they log 'Овсянка с курагой',",
+        "    write 'Овсянка с курагой', not 'oatmeal'."
     );
 
     private static final String USER_INSTRUCTION = String.join("\n",
