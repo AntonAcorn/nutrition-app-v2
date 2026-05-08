@@ -436,32 +436,59 @@
   font-size: 16px; /* prevents iOS zoom */
 }
 
-.qs-slot-row {
+/* Slot picker pill — compact summary that opens the slot grid below. */
+.qs-slot-pill-row {
   display: flex;
+  justify-content: flex-start;
+  margin: 4px 0;
+}
+
+.qs-slot-pill {
+  display: inline-flex;
   align-items: center;
-  justify-content: space-between;
-  padding: 6px 0 2px;
-  margin-bottom: 4px;
-}
-
-.qs-slot-row__label {
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.04);
+  color: rgba(255, 255, 255, 0.65);
   font-size: 0.82rem;
-  color: rgba(255, 255, 255, 0.5);
-}
-
-.qs-slot-row__label strong {
-  color: #fff;
-  font-weight: 600;
-}
-
-.qs-slot-row__change {
-  background: none;
-  border: none;
-  color: rgba(59, 125, 255, 0.85);
-  font-size: 0.78rem;
-  font-weight: 600;
   cursor: pointer;
-  padding: 2px 0;
+  -webkit-tap-highlight-color: transparent;
+  transition: background 0.12s, border-color 0.12s;
+}
+
+.qs-slot-pill strong {
+  color: #ffffff;
+  font-weight: 600;
+}
+
+.qs-slot-pill__chevron {
+  font-size: 0.7rem;
+  opacity: 0.6;
+  transition: transform 0.15s;
+}
+
+.qs-slot-pill--open .qs-slot-pill__chevron {
+  transform: rotate(180deg);
+}
+
+.qs-slot-pill--open {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.20);
+}
+
+[data-theme="light"] .qs-slot-pill {
+  border-color: rgba(20, 33, 61, 0.14);
+  background: rgba(20, 33, 61, 0.03);
+  color: rgba(20, 33, 61, 0.65);
+}
+
+[data-theme="light"] .qs-slot-pill strong { color: #14213d; }
+
+[data-theme="light"] .qs-slot-pill--open {
+  background: rgba(20, 33, 61, 0.08);
+  border-color: rgba(20, 33, 61, 0.25);
 }
 
 .qs-slot-toggle {
@@ -867,9 +894,6 @@
 
 
 /* ── QS slot row ── */
-[data-theme="light"] .qs-slot-row__label { color: rgba(20, 33, 61, 0.5); }
-[data-theme="light"] .qs-slot-row__label strong { color: #14213d; }
-[data-theme="light"] .qs-slot-row__change { color: #2060e8; }
 
 
 /* Quick-add trigger card */

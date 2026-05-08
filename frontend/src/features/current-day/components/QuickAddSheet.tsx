@@ -339,16 +339,23 @@ export function QuickAddSheet({ initialSlot, onAdd, onLogTemplate, onClose, onOp
         )}
 
         {!loggedName && (
-          <div className="qs-slot-row">
-            <span className="qs-slot-row__label">
-              Adding to: <strong>{SLOT_LABELS[slot]}</strong>
-            </span>
+          <div className="qs-mode-toggle">
+            <button type="button" className={`qs-mode-btn${mode === 'library' ? ' qs-mode-btn--active' : ''}`} onClick={() => setMode('library')}>Library</button>
+            <button type="button" className={`qs-mode-btn${mode === 'search'  ? ' qs-mode-btn--active' : ''}`} onClick={() => setMode('search')}>Search</button>
+            <button type="button" className={`qs-mode-btn${mode === 'manual'  ? ' qs-mode-btn--active' : ''}`} onClick={() => setMode('manual')}>Manual</button>
+          </div>
+        )}
+
+        {!loggedName && (
+          <div className="qs-slot-pill-row">
             <button
               type="button"
-              className="qs-slot-row__change"
+              className={`qs-slot-pill${slotPickerOpen ? ' qs-slot-pill--open' : ''}`}
               onClick={() => setSlotPickerOpen(p => !p)}
+              aria-expanded={slotPickerOpen}
             >
-              {slotPickerOpen ? 'Done' : 'Change'}
+              Saving to · <strong>{SLOT_LABELS[slot]}</strong>
+              <span className="qs-slot-pill__chevron" aria-hidden>▾</span>
             </button>
           </div>
         )}
@@ -365,14 +372,6 @@ export function QuickAddSheet({ initialSlot, onAdd, onLogTemplate, onClose, onOp
                 {SLOT_LABELS[s]}
               </button>
             ))}
-          </div>
-        )}
-
-        {!loggedName && (
-          <div className="qs-mode-toggle">
-            <button type="button" className={`qs-mode-btn${mode === 'library' ? ' qs-mode-btn--active' : ''}`} onClick={() => setMode('library')}>Library</button>
-            <button type="button" className={`qs-mode-btn${mode === 'search'  ? ' qs-mode-btn--active' : ''}`} onClick={() => setMode('search')}>Search</button>
-            <button type="button" className={`qs-mode-btn${mode === 'manual'  ? ' qs-mode-btn--active' : ''}`} onClick={() => setMode('manual')}>Manual</button>
           </div>
         )}
 
