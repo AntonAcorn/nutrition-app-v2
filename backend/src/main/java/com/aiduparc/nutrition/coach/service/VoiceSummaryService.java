@@ -80,16 +80,22 @@ public class VoiceSummaryService {
     }
 
     public byte[] generate(UUID userId, LocalDate today, ZoneId zone) {
-        // Voice summary needs an OpenAI key but does not require the coach
-        // provider itself to be openai — even with a stub coach we can speak
-        // the rule-based summary. Only the key matters here.
         String apiKey = properties.openai().apiKey();
         if (apiKey == null || apiKey.isBlank()) {
             throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE,
                 "OPENAI_API_KEY required for voice summary");
         }
 
-        String text = buildText(userId, today, zone);
+        // Try the LLM-generated personal script first; fall back to a tight
+        // rule-based template if the model call fails. The TTS step is the
+        // same in both cases.
+        String text;
+        try {
+            text = generateScriptViaLlm(apiKey.trim(), userId, today, zone);
+        } catch (RuntimeException ex) {
+            log.debug("voice summary llm script failed, falling back: {}", ex.getMessage());
+            text = buildText(userId, today, zone);
+        }
         return invokeTts(apiKey.trim(), text);
     }
 
@@ -166,6 +172,78 @@ public class VoiceSummaryService {
         if (hour < 17) return "Good afternoon";
         if (hour < 22) return "Good evening";
         return "Late check-in";
+    }
+
+    private static final String SCRIPT_SYSTEM_PROMPT = String.join(" ",
+        "You write a 25-30 second spoken brief for a nutrition coach app.",
+        "It is read aloud by a TTS — write it like a friend speaking, not like a written report.",
+        "",
+        "CRITICAL: the user already sees today's calories, target, remaining,",
+        "weight, streak, and bank balance on screen. Do NOT recite those numbers.",
+        "If you find yourself saying 'so far today you've had X calories' — delete it.",
+        "",
+        "What to say instead — pick ONE or TWO of these:",
+        "  - a multi-day pattern from the snapshot (week-over-week, day-of-week,",
+        "    sleep × meals, slot × wellbeing) the user wouldn't notice on their own",
+        "  - a specific food they actually logged (use the exact name from",
+        "    recentMeals — never invent dish names) tied to a result",
+        "  - a concrete action for the next meal/today",
+        "",
+        "Style:",
+        "  - 70-90 words total. ~25-30 seconds when spoken.",
+        "  - Address the user by first name once at the open if profile.displayName is set.",
+        "  - Conversational sentences, contractions ('you're', 'that's'), short clauses.",
+        "  - End on a single, concrete suggestion. Not 'consider' / 'try to' /",
+        "    'aim for' — use 'add', 'move', 'swap', 'cut'.",
+        "  - No emoji, no markdown, no asterisks, no list bullets — plain prose only.",
+        "  - Numbers should feel natural ('a hundred and eighty grams', not '180 g').",
+        "  - If the snapshot is too thin (logged_days < 4), produce a short single-sentence",
+        "    encouragement that names the user and asks them to log a couple more days."
+    );
+
+    private String generateScriptViaLlm(String apiKey, UUID userId, LocalDate today, ZoneId zone) {
+        var snapshot = snapshotService.buildSnapshot(userId, today, 14, zone);
+        String snapshotJson;
+        try {
+            snapshotJson = objectMapper.writeValueAsString(snapshot);
+        } catch (java.io.IOException e) {
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Failed to serialize snapshot", e);
+        }
+
+        try {
+            String endpoint = normalizeBaseUrl() + "/chat/completions";
+            String chatModel = properties.openai().model();
+            java.util.LinkedHashMap<String, Object> chatBody = new java.util.LinkedHashMap<>();
+            chatBody.put("model", chatModel);
+            chatBody.put("temperature", 0.55);
+            chatBody.put("messages", List.of(
+                Map.of("role", "system", "content", SCRIPT_SYSTEM_PROMPT),
+                Map.of("role", "user", "content", "Snapshot:\n" + snapshotJson)
+            ));
+
+            HttpRequest req = HttpRequest.newBuilder(URI.create(endpoint))
+                .header("Authorization", "Bearer " + apiKey)
+                .header("Content-Type", "application/json")
+                .timeout(Duration.ofMillis(timeoutMs()))
+                .POST(HttpRequest.BodyPublishers.ofString(objectMapper.writeValueAsString(chatBody)))
+                .build();
+
+            HttpResponse<String> res = httpClient.send(req, HttpResponse.BodyHandlers.ofString());
+            if (res.statusCode() >= 400) {
+                throw new ResponseStatusException(HttpStatus.BAD_GATEWAY, "OpenAI script error " + res.statusCode());
+            }
+            var root = objectMapper.readTree(res.body());
+            String content = root.path("choices").path(0).path("message").path("content").asText("").trim();
+            if (content.isBlank()) {
+                throw new ResponseStatusException(HttpStatus.BAD_GATEWAY, "Empty script");
+            }
+            return content;
+        } catch (java.io.IOException e) {
+            throw new ResponseStatusException(HttpStatus.BAD_GATEWAY, "Voice script request failed", e);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new ResponseStatusException(HttpStatus.BAD_GATEWAY, "Voice script interrupted", e);
+        }
     }
 
     private byte[] invokeTts(String apiKey, String text) {
