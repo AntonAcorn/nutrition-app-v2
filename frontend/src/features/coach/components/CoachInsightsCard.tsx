@@ -36,6 +36,16 @@ interface Props {
 export function CoachInsightsCard({ date, days = 7 }: Props) {
   const queryClient = useQueryClient()
   const [rateLimited, setRateLimited] = useState(false)
+  const [collapsed, setCollapsed] = useState<boolean>(() => {
+    try { return localStorage.getItem('coach-card-collapsed') === '1' } catch { return false }
+  })
+  function toggleCollapse() {
+    setCollapsed(c => {
+      const next = !c
+      try { localStorage.setItem('coach-card-collapsed', next ? '1' : '0') } catch {}
+      return next
+    })
+  }
   const query = useQuery<CoachInsightsResponse>({
     queryKey: ['coach-insights', date, days],
     queryFn: () => fetchCoachInsights(date, days),
@@ -106,27 +116,41 @@ export function CoachInsightsCard({ date, days = 7 }: Props) {
 
   return (
     <section
-      className="panel coach-card content-fade-in"
+      className={`panel coach-card content-fade-in${collapsed ? ' coach-card--collapsed' : ''}`}
       style={{ animationDelay: '15ms' }}
       aria-label="Coach insights"
     >
       <header className="coach-card__header">
-        <span className="coach-card__brand">🧠 Coach</span>
+        <button
+          type="button"
+          className="coach-card__brand-toggle"
+          onClick={toggleCollapse}
+          aria-expanded={!collapsed}
+          aria-label={collapsed ? 'Expand Coach' : 'Collapse Coach'}
+        >
+          <span className="coach-card__brand">🧠 Coach</span>
+          <span className={`coach-card__chevron${collapsed ? ' coach-card__chevron--collapsed' : ''}`} aria-hidden>▾</span>
+          {collapsed && (
+            <span className="coach-card__count">{data.cards.length}</span>
+          )}
+        </button>
         <div className="coach-card__header-actions">
-          <VoiceSummaryButton />
-          <button
-            type="button"
-            className="coach-card__refresh"
-            onClick={() => refresh.mutate()}
-            disabled={refresh.isPending || rateLimited}
-            aria-label="Refresh coach insights"
-            title={rateLimited ? 'Try again later' : 'Refresh'}
-          >
-            {refresh.isPending ? '…' : '↻'}
-          </button>
+          {!collapsed && <VoiceSummaryButton />}
+          {!collapsed && (
+            <button
+              type="button"
+              className="coach-card__refresh"
+              onClick={() => refresh.mutate()}
+              disabled={refresh.isPending || rateLimited}
+              aria-label="Refresh coach insights"
+              title={rateLimited ? 'Try again later' : 'Refresh'}
+            >
+              {refresh.isPending ? '…' : '↻'}
+            </button>
+          )}
         </div>
       </header>
-      <ul className="coach-card__list">
+      {!collapsed && <ul className="coach-card__list">
         {data.cards.map(card => {
           const escalationStrategy = card.kind === 'escalation' ? parseStrategyFromAnchor(card.anchor) : null
           return (
@@ -161,7 +185,7 @@ export function CoachInsightsCard({ date, days = 7 }: Props) {
             </li>
           )
         })}
-      </ul>
+      </ul>}
     </section>
   )
 }

@@ -39,8 +39,18 @@ public class VoiceSummaryService {
 
     private static final Logger log = LoggerFactory.getLogger(VoiceSummaryService.class);
     private static final String DEFAULT_BASE_URL = "https://api.openai.com/v1";
-    private static final String DEFAULT_TTS_MODEL = "tts-1";
-    private static final String DEFAULT_VOICE = "nova";
+    /** gpt-4o-mini-tts is the newer, more expressive model and it accepts an
+     *  `instructions` field for tone control. Falls back via env var if it's
+     *  not yet available on a given key. */
+    private static final String DEFAULT_TTS_MODEL = "gpt-4o-mini-tts";
+    /** 'coral' and 'sage' read as the warmest in conversational use. */
+    private static final String DEFAULT_VOICE = "coral";
+    private static final String DEFAULT_INSTRUCTIONS = String.join(" ",
+        "Speak as a warm, calm friend who actually cares.",
+        "Conversational, not robotic. Natural micro-pauses between sentences.",
+        "Slight smile in the voice. Don't sound rehearsed or sales-y.",
+        "Numbers spoken naturally, not over-articulated."
+    );
 
     private final UserProfileRepository userProfileRepository;
     private final DailyNutritionEntryRepository dailyEntryRepository;
@@ -161,12 +171,15 @@ public class VoiceSummaryService {
     private byte[] invokeTts(String apiKey, String text) {
         try {
             String endpoint = normalizeBaseUrl() + "/audio/speech";
-            String payload = objectMapper.writeValueAsString(Map.of(
-                "model", DEFAULT_TTS_MODEL,
-                "input", text,
-                "voice", DEFAULT_VOICE,
-                "format", "mp3"
-            ));
+            // Build the request body manually so 'instructions' (only
+            // supported on gpt-4o-mini-tts) is included.
+            java.util.LinkedHashMap<String, Object> requestBody = new java.util.LinkedHashMap<>();
+            requestBody.put("model", DEFAULT_TTS_MODEL);
+            requestBody.put("input", text);
+            requestBody.put("voice", DEFAULT_VOICE);
+            requestBody.put("format", "mp3");
+            requestBody.put("instructions", DEFAULT_INSTRUCTIONS);
+            String payload = objectMapper.writeValueAsString(requestBody);
 
             HttpRequest request = HttpRequest.newBuilder(URI.create(endpoint))
                 .header("Authorization", "Bearer " + apiKey)

@@ -5,6 +5,53 @@
   padding: 16px 18px;
 }
 
+.coach-card--collapsed {
+  gap: 0;
+  padding: 12px 18px;
+}
+
+.coach-card__brand-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: none;
+  border: none;
+  padding: 4px 0;
+  color: inherit;
+  cursor: pointer;
+  font: inherit;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.coach-card__chevron {
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.4);
+  transition: transform 0.2s ease;
+}
+
+.coach-card__chevron--collapsed {
+  transform: rotate(-90deg);
+}
+
+.coach-card__count {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: rgba(123, 97, 255, 0.22);
+  color: #c4b5fd;
+}
+
+[data-theme="light"] .coach-card__chevron {
+  color: rgba(20, 33, 61, 0.45);
+}
+
+[data-theme="light"] .coach-card__count {
+  background: rgba(123, 97, 255, 0.14);
+  color: #6d28d9;
+}
+
 .coach-card__header {
   display: flex;
   align-items: center;
