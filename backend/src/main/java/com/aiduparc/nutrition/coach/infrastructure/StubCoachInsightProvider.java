@@ -56,6 +56,46 @@ public class StubCoachInsightProvider implements CoachInsightProvider {
     }
 
     @Override
+    public WeeklyRecapDraft generateWeeklyRecap(CoachSnapshotResponse snapshot, String locale) {
+        var totals = snapshot.totals();
+        if (totals.loggedDays() < 3) return null;
+
+        Integer avg = totals.avgConsumedKcal();
+        int over = totals.daysOverTarget();
+        int zone = totals.daysInZone();
+        int streak = totals.noOverrunStreakDays();
+
+        var highlight = new WeeklyRecapDraft.Section(
+            "Logged " + totals.loggedDays() + "/7 days",
+            "Streak inside target: " + streak + " days. Average " + (avg != null ? avg : 0) + " kcal/day."
+        );
+
+        Double delta = snapshot.weightTrend() != null ? snapshot.weightTrend().deltaKg() : null;
+        var trend = new WeeklyRecapDraft.Section(
+            "Weight " + (delta != null && delta < 0 ? "down " + String.format("%.1f", Math.abs(delta)) + " kg" :
+                          delta != null && delta > 0 ? "up " + String.format("%.1f", delta) + " kg" : "steady"),
+            "In-zone days: " + zone + " of " + totals.loggedDays() + " logged."
+        );
+
+        var challenge = new WeeklyRecapDraft.Section(
+            over >= 2 ? "Over target on " + over + " days" : "Stayed under target",
+            over >= 2
+                ? "Max overrun was " + (totals.maxOverrunKcal() != null ? totals.maxOverrunKcal() : 0) + " kcal."
+                : "No big overruns. Keep this rhythm."
+        );
+
+        var nextGoal = new WeeklyRecapDraft.Section(
+            "Next week",
+            "Hit at least " + Math.min(7, totals.loggedDays() + 1) + " logged days."
+        );
+
+        String share = "📊 Coach week: " + totals.loggedDays() + " logged · streak " + streak + " · "
+            + (delta != null ? (delta < 0 ? Math.abs(delta) + " kg down" : delta > 0 ? delta + " kg up" : "steady") : "");
+
+        return new WeeklyRecapDraft(highlight, trend, challenge, nextGoal, share);
+    }
+
+    @Override
     public String sourceTag() {
         return "stub";
     }

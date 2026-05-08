@@ -3,6 +3,7 @@ package com.aiduparc.nutrition.coach.api;
 import com.aiduparc.nutrition.coach.service.CoachInsightService;
 import com.aiduparc.nutrition.coach.service.CoachRateLimitService;
 import com.aiduparc.nutrition.coach.service.CoachSnapshotService;
+import com.aiduparc.nutrition.coach.service.WeeklyRecapService;
 import com.aiduparc.nutrition.security.service.CurrentNutritionUserResolver;
 import jakarta.servlet.http.HttpSession;
 import java.time.LocalDate;
@@ -29,17 +30,20 @@ public class CoachController {
     private final CoachSnapshotService coachSnapshotService;
     private final CoachInsightService coachInsightService;
     private final CoachRateLimitService rateLimitService;
+    private final WeeklyRecapService weeklyRecapService;
     private final CurrentNutritionUserResolver userResolver;
 
     public CoachController(
         CoachSnapshotService coachSnapshotService,
         CoachInsightService coachInsightService,
         CoachRateLimitService rateLimitService,
+        WeeklyRecapService weeklyRecapService,
         CurrentNutritionUserResolver userResolver
     ) {
         this.coachSnapshotService = coachSnapshotService;
         this.coachInsightService = coachInsightService;
         this.rateLimitService = rateLimitService;
+        this.weeklyRecapService = weeklyRecapService;
         this.userResolver = userResolver;
     }
 
@@ -87,6 +91,32 @@ public class CoachController {
     public void dismissInsight(@PathVariable UUID id, HttpSession session) {
         UUID userId = userResolver.resolve(session, null);
         coachInsightService.dismiss(userId, id);
+    }
+
+    @GetMapping("/recap")
+    public WeeklyRecapResponse getRecap(HttpSession session) {
+        UUID userId = userResolver.resolve(session, null);
+        return weeklyRecapService.getLatest(userId).orElse(null);
+    }
+
+    @PostMapping("/recap/generate")
+    public WeeklyRecapResponse generateRecap(
+        @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date,
+        @RequestParam(required = false) String tz,
+        @RequestParam(required = false) String locale,
+        HttpSession session
+    ) {
+        UUID userId = userResolver.resolve(session, null);
+        rateLimitService.checkRefreshLimit(userId);
+        ZoneId zone = CoachSnapshotService.resolveZone(tz);
+        return weeklyRecapService.generateForCurrentWeek(userId, today(date), zone, locale);
+    }
+
+    @DeleteMapping("/recap/{id}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void dismissRecap(@PathVariable UUID id, HttpSession session) {
+        UUID userId = userResolver.resolve(session, null);
+        weeklyRecapService.dismiss(userId, id);
     }
 
     private LocalDate today(LocalDate provided) {

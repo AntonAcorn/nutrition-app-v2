@@ -114,6 +114,27 @@ public class OpenAiCoachInsightProvider implements CoachInsightProvider {
     }
 
     @Override
+    public WeeklyRecapDraft generateWeeklyRecap(CoachSnapshotResponse snapshot, String locale) {
+        String apiKey = properties.openai().apiKey();
+        if (apiKey == null || apiKey.isBlank()) {
+            throw new ResponseStatusException(
+                HttpStatus.SERVICE_UNAVAILABLE,
+                "OPENAI_API_KEY is required when nutrition.coach.provider=openai"
+            );
+        }
+
+        String snapshotJson;
+        try {
+            snapshotJson = objectMapper.writeValueAsString(snapshot);
+        } catch (IOException e) {
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Failed to serialize snapshot", e);
+        }
+
+        String rawContent = invokeOpenAiForRecap(apiKey.trim(), snapshotJson, normalizeLocale(locale));
+        return parseWeeklyRecap(rawContent);
+    }
+
+    @Override
     public String sourceTag() {
         return "openai:" + properties.openai().model();
     }
@@ -256,5 +277,130 @@ public class OpenAiCoachInsightProvider implements CoachInsightProvider {
     private int timeoutMs() {
         int configured = properties.openai().timeoutMs();
         return configured > 0 ? configured : 30_000;
+    }
+
+    // ── Weekly recap ─────────────────────────────────────────────────────────
+
+    private static final String RECAP_SYSTEM_PROMPT = String.join(" ",
+        "You are a sharp nutrition coach producing a Spotify-Wrapped style weekly recap.",
+        "Five fixed sections, each must reference real numbers from the snapshot.",
+        "Tone: warm, direct, like a smart friend who just looked at your week.",
+        "Forbidden filler: 'consider', 'try to', 'aim', 'be more consistent'.",
+        "Every body must contain at least one concrete number with a unit.",
+        "Keep titles short (≤6 words), bodies tight (≤140 chars).",
+        "Skip generic congratulations — celebrate concrete wins."
+    );
+
+    private static final String RECAP_USER_INSTRUCTION = String.join("\n",
+        "Build a five-section weekly recap from this snapshot.",
+        "Sections (all required, in this order):",
+        "  1. highlight — single best thing that happened (specific number).",
+        "  2. trend    — direction vs prior baseline (weight, calories, macros).",
+        "  3. challenge — biggest issue (multi-day pattern, never single day).",
+        "  4. nextWeekGoal — one concrete, measurable target (verb + number).",
+        "  5. shareLine — single tweet-length line (≤90 chars) safe to share publicly,",
+        "                 no PII, no medical claims, with one emoji at start.",
+        "Snapshot:"
+    );
+
+    private String invokeOpenAiForRecap(String apiKey, String snapshotJson, String locale) {
+        try {
+            String endpoint = normalizeBaseUrl() + "/chat/completions";
+            String payload = objectMapper.writeValueAsString(buildRecapRequestBody(snapshotJson, locale));
+
+            HttpRequest request = HttpRequest.newBuilder(URI.create(endpoint))
+                .header("Authorization", "Bearer " + apiKey)
+                .header("Content-Type", "application/json")
+                .timeout(Duration.ofMillis(timeoutMs()))
+                .POST(HttpRequest.BodyPublishers.ofString(payload))
+                .build();
+
+            HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+            if (response.statusCode() >= 400) {
+                throw mapHttpError(response.statusCode(), response.body());
+            }
+
+            JsonNode root = objectMapper.readTree(response.body());
+            JsonNode contentNode = root.path("choices").path(0).path("message").path("content");
+            if (contentNode.isMissingNode() || contentNode.asText().isBlank()) {
+                throw new ResponseStatusException(HttpStatus.BAD_GATEWAY, "OpenAI returned empty content");
+            }
+            return contentNode.asText();
+        } catch (HttpTimeoutException e) {
+            throw new ResponseStatusException(HttpStatus.GATEWAY_TIMEOUT, "OpenAI weekly recap request timed out", e);
+        } catch (IOException e) {
+            throw new ResponseStatusException(HttpStatus.BAD_GATEWAY, "OpenAI weekly recap request failed", e);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new ResponseStatusException(HttpStatus.BAD_GATEWAY, "OpenAI weekly recap interrupted", e);
+        }
+    }
+
+    private Object buildRecapRequestBody(String snapshotJson, String locale) {
+        String localizedSystem = RECAP_SYSTEM_PROMPT
+            + " Reply in language tag '" + locale + "' for the title, body and shareLine fields.";
+        return Map.of(
+            "model", properties.openai().model(),
+            "temperature", 0.5,
+            "response_format", Map.of(
+                "type", "json_schema",
+                "json_schema", Map.of(
+                    "name", "coach_weekly_recap",
+                    "schema", recapResponseSchema(),
+                    "strict", true
+                )
+            ),
+            "messages", List.of(
+                Map.of("role", "system", "content", localizedSystem),
+                Map.of("role", "user", "content", RECAP_USER_INSTRUCTION + "\n" + snapshotJson)
+            )
+        );
+    }
+
+    private Map<String, Object> recapResponseSchema() {
+        Map<String, Object> sectionSchema = new LinkedHashMap<>();
+        sectionSchema.put("type", "object");
+        sectionSchema.put("additionalProperties", false);
+        sectionSchema.put("required", List.of("title", "body"));
+        sectionSchema.put("properties", Map.of(
+            "title", Map.of("type", "string"),
+            "body", Map.of("type", "string")
+        ));
+
+        Map<String, Object> schema = new LinkedHashMap<>();
+        schema.put("type", "object");
+        schema.put("additionalProperties", false);
+        schema.put("required", List.of("highlight", "trend", "challenge", "nextWeekGoal", "shareLine"));
+        schema.put("properties", Map.of(
+            "highlight", sectionSchema,
+            "trend", sectionSchema,
+            "challenge", sectionSchema,
+            "nextWeekGoal", sectionSchema,
+            "shareLine", Map.of("type", "string")
+        ));
+        return schema;
+    }
+
+    private WeeklyRecapDraft parseWeeklyRecap(String rawContent) {
+        try {
+            JsonNode root = objectMapper.readTree(rawContent);
+            return new WeeklyRecapDraft(
+                parseSection(root.path("highlight")),
+                parseSection(root.path("trend")),
+                parseSection(root.path("challenge")),
+                parseSection(root.path("nextWeekGoal")),
+                trim(root.path("shareLine").asText(""), 140)
+            );
+        } catch (IOException e) {
+            log.warn("Coach LLM returned unparsable weekly recap JSON: {}", rawContent, e);
+            return null;
+        }
+    }
+
+    private static WeeklyRecapDraft.Section parseSection(JsonNode node) {
+        return new WeeklyRecapDraft.Section(
+            trim(node.path("title").asText(""), 160),
+            trim(node.path("body").asText(""), 600)
+        );
     }
 }

@@ -1,16 +1,16 @@
 package com.aiduparc.nutrition.coach.service;
 
-import com.aiduparc.nutrition.coach.api.CoachInsightResponse;
-import com.aiduparc.nutrition.coach.repository.UserInsightRepository;
+import com.aiduparc.nutrition.coach.api.WeeklyRecapResponse;
+import com.aiduparc.nutrition.coach.repository.CoachWeeklyRecapRepository;
 import com.aiduparc.nutrition.notifications.push.PushNotificationService;
 import com.aiduparc.nutrition.notifications.push.PushSubscriptionEntity;
 import com.aiduparc.nutrition.notifications.push.PushSubscriptionRepository;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
-import java.time.OffsetDateTime;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
+import java.time.temporal.TemporalAdjusters;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,12 +18,10 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 /**
- * Weekly job that auto-generates coach insights for active users and
- * pushes a notification when new cards are produced. Fires every hour
- * and emits to users whose local clock just passed Sunday 18:00.
- *
- * Each user gets at most one notification per ~23h window thanks to
- * the recency guard, so transient cron retries don't spam.
+ * Weekly job that generates Spotify-Wrapped style recaps for active users
+ * every Sunday at 18:00 local time and pushes a notification when a fresh
+ * recap is produced. Fires every hour and only acts at the user's local
+ * Sunday 18:00.
  */
 @Component
 public class CoachWeeklyScheduler {
@@ -34,28 +32,25 @@ public class CoachWeeklyScheduler {
 
     private final PushSubscriptionRepository subscriptionRepository;
     private final PushNotificationService pushNotificationService;
-    private final CoachInsightService coachInsightService;
-    private final UserInsightRepository insightRepository;
+    private final WeeklyRecapService weeklyRecapService;
+    private final CoachWeeklyRecapRepository recapRepository;
 
     public CoachWeeklyScheduler(
         PushSubscriptionRepository subscriptionRepository,
         PushNotificationService pushNotificationService,
-        CoachInsightService coachInsightService,
-        UserInsightRepository insightRepository
+        WeeklyRecapService weeklyRecapService,
+        CoachWeeklyRecapRepository recapRepository
     ) {
         this.subscriptionRepository = subscriptionRepository;
         this.pushNotificationService = pushNotificationService;
-        this.coachInsightService = coachInsightService;
-        this.insightRepository = insightRepository;
+        this.weeklyRecapService = weeklyRecapService;
+        this.recapRepository = recapRepository;
     }
 
     @Scheduled(cron = "0 0 * * * *")
-    public void sendWeeklyInsights() {
+    public void sendWeeklyRecaps() {
         List<PushSubscriptionEntity> active = subscriptionRepository.findByEnabled(true);
         if (active.isEmpty()) return;
-
-        OffsetDateTime now = OffsetDateTime.now(ZoneOffset.UTC);
-        OffsetDateTime recencyCutoff = now.minusHours(23);
 
         for (PushSubscriptionEntity sub : active) {
             try {
@@ -63,20 +58,23 @@ public class CoachWeeklyScheduler {
                 ZonedDateTime local = ZonedDateTime.now(zone);
                 if (local.getDayOfWeek() != FIRE_DAY || local.getHour() != FIRE_HOUR) continue;
 
-                long recent = insightRepository.countByUserIdAndGeneratedAtAfter(sub.getUserId(), recencyCutoff);
-                if (recent > 0) continue;
-
                 LocalDate today = LocalDate.now(zone);
-                CoachInsightResponse insights = coachInsightService.refresh(
-                    sub.getUserId(), today, 7, zone, null);
+                LocalDate weekStart = today.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY));
 
-                if (insights.cards().isEmpty()) continue;
+                // Idempotent: skip if a recap for this week already exists.
+                if (recapRepository.findByUserIdAndWeekStart(sub.getUserId(), weekStart).isPresent()) continue;
 
-                String title = "Coach has new insights";
-                String body = insights.cards().get(0).title();
+                WeeklyRecapResponse recap = weeklyRecapService.generateForCurrentWeek(
+                    sub.getUserId(), today, zone, null);
+                if (recap == null) continue;
+
+                String title = "Your weekly recap is ready";
+                String body = recap.shareLine() != null && !recap.shareLine().isBlank()
+                    ? recap.shareLine()
+                    : recap.highlight() != null ? recap.highlight().title() : "Tap to see your week.";
                 pushNotificationService.send(sub, title, body);
             } catch (Exception e) {
-                log.warn("Coach weekly scheduler error for subscription {}: {}", sub.getId(), e.getMessage());
+                log.warn("Coach weekly recap scheduler error for subscription {}: {}", sub.getId(), e.getMessage());
             }
         }
     }

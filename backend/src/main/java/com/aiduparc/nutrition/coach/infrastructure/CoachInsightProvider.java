@@ -13,6 +13,12 @@ public interface CoachInsightProvider {
      */
     List<InsightDraft> generate(CoachSnapshotResponse snapshot, String locale);
 
+    /**
+     * Generate a structured Spotify-Wrapped style weekly recap with five
+     * fixed sections. Returns null if there is not enough data to fill them.
+     */
+    WeeklyRecapDraft generateWeeklyRecap(CoachSnapshotResponse snapshot, String locale);
+
     /** Identifier of the underlying provider for telemetry (e.g. "openai:gpt-4o-mini" or "stub"). */
     String sourceTag();
 
@@ -22,4 +28,14 @@ public interface CoachInsightProvider {
         String body,
         String anchor
     ) {}
+
+    record WeeklyRecapDraft(
+        Section highlight,
+        Section trend,
+        Section challenge,
+        Section nextWeekGoal,
+        String shareLine
+    ) {
+        public record Section(String title, String body) {}
+    }
 }

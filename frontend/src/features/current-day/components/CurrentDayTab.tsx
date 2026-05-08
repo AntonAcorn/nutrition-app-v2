@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { TodaySummaryBlock } from './TodaySummaryBlock'
 import { CoachInsightsCard } from '../../coach/components/CoachInsightsCard'
+import { WeeklyRecapCard } from '../../coach/components/WeeklyRecapCard'
 import { WellbeingDailyPrompt } from '../../wellbeing/components/WellbeingDailyPrompt'
 import { WeeklyBankCard } from './WeeklyBankCard'
 import { WaterIntakeCard } from './WaterIntakeCard'
@@ -458,6 +459,7 @@ export function CurrentDayTab({ refreshToken = 0, successMessage = '', onDayUpda
             />
           </div>
           {isToday && <WellbeingDailyPrompt date={selectedDate} />}
+          {isToday && <WeeklyRecapCard />}
           {isToday && <CoachInsightsCard date={selectedDate} />}
           {isToday && (
             <div className="content-fade-in" style={{ animationDelay: '20ms' }}>
