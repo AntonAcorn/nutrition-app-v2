@@ -1,11 +1,13 @@
 package com.aiduparc.nutrition.coach.api;
 
+import com.aiduparc.nutrition.coach.service.CoachInlineTipService;
 import com.aiduparc.nutrition.coach.service.CoachInsightService;
 import com.aiduparc.nutrition.coach.service.CoachRateLimitService;
 import com.aiduparc.nutrition.coach.service.CoachSnapshotService;
 import com.aiduparc.nutrition.coach.service.WeeklyRecapService;
 import com.aiduparc.nutrition.security.service.CurrentNutritionUserResolver;
 import jakarta.servlet.http.HttpSession;
+import jakarta.validation.Valid;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.UUID;
@@ -15,6 +17,7 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -31,6 +34,7 @@ public class CoachController {
     private final CoachInsightService coachInsightService;
     private final CoachRateLimitService rateLimitService;
     private final WeeklyRecapService weeklyRecapService;
+    private final CoachInlineTipService inlineTipService;
     private final CurrentNutritionUserResolver userResolver;
 
     public CoachController(
@@ -38,12 +42,14 @@ public class CoachController {
         CoachInsightService coachInsightService,
         CoachRateLimitService rateLimitService,
         WeeklyRecapService weeklyRecapService,
+        CoachInlineTipService inlineTipService,
         CurrentNutritionUserResolver userResolver
     ) {
         this.coachSnapshotService = coachSnapshotService;
         this.coachInsightService = coachInsightService;
         this.rateLimitService = rateLimitService;
         this.weeklyRecapService = weeklyRecapService;
+        this.inlineTipService = inlineTipService;
         this.userResolver = userResolver;
     }
 
@@ -117,6 +123,17 @@ public class CoachController {
     public void dismissRecap(@PathVariable UUID id, HttpSession session) {
         UUID userId = userResolver.resolve(session, null);
         weeklyRecapService.dismiss(userId, id);
+    }
+
+    @PostMapping("/inline-tip")
+    public InlineTipResponse inlineTip(
+        @Valid @RequestBody InlineTipRequest request,
+        @RequestParam(required = false) String tz,
+        HttpSession session
+    ) {
+        UUID userId = userResolver.resolve(session, null);
+        ZoneId zone = CoachSnapshotService.resolveZone(tz);
+        return inlineTipService.compute(userId, request.kcal(), request.slotType(), zone);
     }
 
     private LocalDate today(LocalDate provided) {

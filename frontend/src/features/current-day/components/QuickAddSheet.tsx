@@ -8,6 +8,7 @@ import type { RecentFood } from '../../barcode/model/recentFoods'
 import type { MealTemplate } from '../../../shared/types/nutrition'
 import { SLOT_LABELS, defaultSlotByTime } from '../model/mealLogApi'
 import type { MealSlot } from '../model/mealLogApi'
+import { InlineTipBanner } from '../../coach/components/InlineTipBanner'
 
 const SLOT_TYPES: MealSlot['slotType'][] = ['BREAKFAST', 'LUNCH', 'DINNER', 'SNACK']
 
@@ -535,6 +536,13 @@ export function QuickAddSheet({ initialSlot, onAdd, onLogTemplate, onClose, onOp
                   </div>
                 )}
 
+                {gramsNum > 0 && (
+                  <InlineTipBanner
+                    kcal={calcMacro(selectedProduct.caloriesPer100g)}
+                    slotType={slot}
+                  />
+                )}
+
                 <button
                   type="button"
                   className="profile-edit-btn"
@@ -575,6 +583,8 @@ export function QuickAddSheet({ initialSlot, onAdd, onLogTemplate, onClose, onOp
               <ChipInput label="carbs"   value={carbs}   onChange={setCarbs}   colorClass="barcode-macro-chip--carbs"   unit="g" />
               <ChipInput label="fiber"   value={fiber}   onChange={setFiber}   colorClass="barcode-macro-chip--carbs"   unit="g" />
             </div>
+
+            <InlineTipBanner kcal={Number(calories) || 0} slotType={slot} />
 
             {error && <p className="error-text">{error}</p>}
 

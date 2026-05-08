@@ -1,0 +1,63 @@
+.inline-tip {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  font-size: 0.85rem;
+  line-height: 1.35;
+  margin: 8px 0 0;
+  border: 1px solid transparent;
+  transition: opacity 0.15s;
+}
+
+.inline-tip--loading {
+  opacity: 0.6;
+}
+
+.inline-tip__icon {
+  font-size: 0.95rem;
+  line-height: 1.2;
+  flex-shrink: 0;
+}
+
+.inline-tip__text {
+  flex: 1;
+  min-width: 0;
+}
+
+.inline-tip--good {
+  background: rgba(34, 197, 94, 0.10);
+  border-color: rgba(34, 197, 94, 0.25);
+  color: #86efac;
+}
+
+.inline-tip--caution {
+  background: rgba(234, 179, 8, 0.10);
+  border-color: rgba(234, 179, 8, 0.28);
+  color: #fde68a;
+}
+
+.inline-tip--over {
+  background: rgba(239, 68, 68, 0.10);
+  border-color: rgba(239, 68, 68, 0.30);
+  color: #fca5a5;
+}
+
+[data-theme="light"] .inline-tip--good {
+  background: rgba(34, 197, 94, 0.08);
+  border-color: rgba(34, 197, 94, 0.25);
+  color: #15803d;
+}
+
+[data-theme="light"] .inline-tip--caution {
+  background: rgba(234, 179, 8, 0.08);
+  border-color: rgba(234, 179, 8, 0.28);
+  color: #92400e;
+}
+
+[data-theme="light"] .inline-tip--over {
+  background: rgba(239, 68, 68, 0.08);
+  border-color: rgba(239, 68, 68, 0.30);
+  color: #b91c1c;
+}

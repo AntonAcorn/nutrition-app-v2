@@ -59,3 +59,23 @@ export function refreshCoachInsights(date?: string, days?: number): Promise<Coac
 export function dismissCoachInsight(id: string): Promise<void> {
   return apiClient.delete<void>(`/api/coach/insights/${encodeURIComponent(id)}`)
 }
+
+export type InlineTipTone = 'good' | 'caution' | 'over' | 'muted'
+
+export interface InlineTip {
+  tone: InlineTipTone
+  text: string | null
+  kcalAfter: number | null
+  kcalTarget: number | null
+}
+
+export function fetchInlineTip(kcal: number, slotType?: string): Promise<InlineTip> {
+  const params = new URLSearchParams()
+  const tz = browserTz()
+  if (tz) params.set('tz', tz)
+  const qs = params.toString()
+  return apiClient.post<InlineTip>(
+    `/api/coach/inline-tip${qs ? `?${qs}` : ''}`,
+    { kcal, slotType: slotType ?? null }
+  )
+}
