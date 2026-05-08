@@ -391,3 +391,49 @@
   border-color: rgba(20, 33, 61, 0.15);
   color: rgba(20, 33, 61, 0.78);
 }
+
+/* ── Light theme overrides for tour animations ─────────────────── */
+
+[data-theme="light"] .tour-anim__day {
+  background: rgba(20, 33, 61, 0.10);
+}
+
+[data-theme="light"] .tour-anim__card {
+  background: rgba(255, 252, 247, 0.85);
+  border-color: rgba(20, 33, 61, 0.10);
+}
+
+[data-theme="light"] .tour-anim__card-title {
+  color: #14213d;
+}
+
+[data-theme="light"] .tour-anim__bar {
+  background: linear-gradient(to top, rgba(123, 97, 255, 0.55), rgba(123, 97, 255, 0.18));
+}
+
+[data-theme="light"] .tour-anim__phone {
+  border-color: rgba(20, 33, 61, 0.20);
+  background: rgba(20, 33, 61, 0.06);
+}
+
+[data-theme="light"] .tour-anim__notch {
+  background: rgba(20, 33, 61, 0.6);
+}
+
+[data-theme="light"] .tour-anim__tag {
+  border-color: rgba(20, 33, 61, 0.15);
+  background: rgba(20, 33, 61, 0.03);
+}
+
+[data-theme="light"] .tour-anim__tag-label {
+  color: rgba(20, 33, 61, 0.78);
+}
+
+[data-theme="light"] .tour-anim__tag--picked {
+  border-color: rgba(123, 97, 255, 0.50);
+  background: rgba(123, 97, 255, 0.10);
+}
+
+[data-theme="light"] .tour-anim__tag--picked .tour-anim__tag-label {
+  color: #6d28d9;
+}
