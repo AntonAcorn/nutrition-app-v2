@@ -61,7 +61,7 @@ function resolveInitialSlot(s?: string): MealSlot['slotType'] {
 export function QuickAddSheet({ initialSlot, onAdd, onLogTemplate, onClose, onOpenAnalyzer, onOpenAnalyzerWithPhoto, onOpenLibrary }: Props) {
   const [slot, setSlot] = useState<MealSlot['slotType']>(() => resolveInitialSlot(initialSlot))
   const [slotPickerOpen, setSlotPickerOpen] = useState(false)
-  const [mode, setMode] = useState<'library' | 'search' | 'manual'>('library')
+  const [mode, setMode] = useState<'list' | 'manual'>('list')
 
   // library
   const templatesQuery = useQuery<MealTemplate[]>({
@@ -286,12 +286,7 @@ export function QuickAddSheet({ initialSlot, onAdd, onLogTemplate, onClose, onOp
     <div ref={backdropRef} className="qs-backdrop" onClick={handleBackdropClick}>
       <div className="qs-sheet">
         <div className="qs-header">
-          <div>
-            <p className="qs-title">Quick add</p>
-            <p className="qs-subtitle">
-              {mode === 'library' ? 'Tap Log to add a saved meal.' : mode === 'search' ? 'Search 3M+ products.' : 'Tap a chip to enter value.'}
-            </p>
-          </div>
+          <p className="qs-title">Quick add</p>
           <button type="button" className="qs-close" onClick={onClose}>✕</button>
         </div>
 
@@ -339,14 +334,6 @@ export function QuickAddSheet({ initialSlot, onAdd, onLogTemplate, onClose, onOp
         )}
 
         {!loggedName && (
-          <div className="qs-mode-toggle">
-            <button type="button" className={`qs-mode-btn${mode === 'library' ? ' qs-mode-btn--active' : ''}`} onClick={() => setMode('library')}>Library</button>
-            <button type="button" className={`qs-mode-btn${mode === 'search'  ? ' qs-mode-btn--active' : ''}`} onClick={() => setMode('search')}>Search</button>
-            <button type="button" className={`qs-mode-btn${mode === 'manual'  ? ' qs-mode-btn--active' : ''}`} onClick={() => setMode('manual')}>Manual</button>
-          </div>
-        )}
-
-        {!loggedName && (
           <div className="qs-slot-pill-row">
             <button
               type="button"
@@ -375,80 +362,108 @@ export function QuickAddSheet({ initialSlot, onAdd, onLogTemplate, onClose, onOp
           </div>
         )}
 
-        {!loggedName && mode === 'library' && (
-          loadingLib ? (
-            <p className="qs-library-empty">Loading...</p>
-          ) : templates.length === 0 ? (
-            <div className="qs-library-empty-state">
-              <p className="qs-library-empty">No saved meals yet.</p>
-              {onOpenLibrary && (
-                <button type="button" className="qs-library-manage-btn" onClick={() => { onClose(); onOpenLibrary() }}>
-                  Create a meal template →
-                </button>
-              )}
+        {!loggedName && mode === 'list' && selectedProduct && (
+          <div className="barcode-product-card">
+            <button type="button" className="qs-search-back" onClick={clearSelection}>← Back</button>
+            <div className="barcode-product-header">
+              <p className="barcode-product-name">{selectedProduct.name}</p>
+              <p className="barcode-product-per100">
+                {Math.round(selectedProduct.caloriesPer100g ?? 0)} kcal per 100 g
+              </p>
             </div>
-          ) : (
-            <>
-              {libError && <p className="error-text">{libError}</p>}
-              <div className="qs-library-list">
-                {templates.map(t => (
-                  <div key={t.id} className="qs-library-item">
-                    <span className="qs-library-item__name">{t.name}</span>
-                    <span className="qs-library-item__kcal">{Math.round(t.totalCalories)} kcal</span>
-                    <button
-                      type="button"
-                      className="qs-library-item__log-btn"
-                      onClick={() => handleLogTemplate(t.id)}
-                      disabled={loggingId !== null}
-                    >
-                      {loggingId === t.id ? '...' : 'Log'}
-                    </button>
-                  </div>
+
+            <div className="barcode-portion-section">
+              <p className="barcode-portion-label">How much did you eat?</p>
+              <div className="barcode-portion-row">
+                <button
+                  type="button"
+                  className="barcode-portion-btn"
+                  onClick={() => setGrams(String(Math.max(25, (Number(grams) || 100) - 25)))}
+                >−</button>
+                <div className="barcode-portion-input-wrap">
+                  <input
+                    type="number"
+                    min={1}
+                    max={2000}
+                    value={grams}
+                    onChange={e => setGrams(e.target.value)}
+                    className="barcode-portion-input"
+                  />
+                  <span className="barcode-portion-unit">g</span>
+                </div>
+                <button
+                  type="button"
+                  className="barcode-portion-btn"
+                  onClick={() => setGrams(String((Number(grams) || 100) + 25))}
+                >+</button>
+              </div>
+              <div className="barcode-quick-portions">
+                {[50, 100, 150, 200, 250].map(g => (
+                  <button
+                    key={g}
+                    type="button"
+                    className={`barcode-quick-btn${Number(grams) === g ? ' barcode-quick-btn--active' : ''}`}
+                    onClick={() => setGrams(String(g))}
+                  >{g}g</button>
                 ))}
               </div>
-              {onOpenLibrary && (
-                <button type="button" className="qs-library-manage-btn" onClick={() => { onClose(); onOpenLibrary() }}>
-                  Manage library →
-                </button>
-              )}
-            </>
-          )
+            </div>
+
+            {gramsNum > 0 && (
+              <div className="barcode-macros-grid">
+                <div className="barcode-macro-chip barcode-macro-chip--calories">
+                  <span className="barcode-macro-chip__value">{calcMacro(selectedProduct.caloriesPer100g)}</span>
+                  <span className="barcode-macro-chip__label">kcal</span>
+                </div>
+                <div className="barcode-macro-chip barcode-macro-chip--protein">
+                  <span className="barcode-macro-chip__value">{calcMacro(selectedProduct.proteinPer100g)}g</span>
+                  <span className="barcode-macro-chip__label">protein</span>
+                </div>
+                <div className="barcode-macro-chip barcode-macro-chip--fat">
+                  <span className="barcode-macro-chip__value">{calcMacro(selectedProduct.fatPer100g)}g</span>
+                  <span className="barcode-macro-chip__label">fat</span>
+                </div>
+                <div className="barcode-macro-chip barcode-macro-chip--carbs">
+                  <span className="barcode-macro-chip__value">{calcMacro(selectedProduct.carbsPer100g)}g</span>
+                  <span className="barcode-macro-chip__label">carbs</span>
+                </div>
+              </div>
+            )}
+
+            {gramsNum > 0 && (
+              <InlineTipBanner
+                kcal={calcMacro(selectedProduct.caloriesPer100g)}
+                slotType={slot}
+              />
+            )}
+
+            <button
+              type="button"
+              className="profile-edit-btn"
+              onClick={handleAddFromSearch}
+              disabled={addingSearch || gramsNum <= 0}
+            >
+              {addingSearch ? 'Adding…' : 'Add to today'}
+            </button>
+          </div>
         )}
 
-        {!loggedName && mode === 'search' && (
-          <div className="qs-search">
-            {!selectedProduct ? (
+        {!loggedName && mode === 'list' && !selectedProduct && (
+          <>
+            <div className="qs-search">
+              <input
+                className="qs-search__input"
+                type="text"
+                placeholder="Search saved or 3M+ products..."
+                value={searchQuery}
+                onChange={e => setSearchQuery(e.target.value)}
+              />
+            </div>
+
+            {searchQuery.trim().length >= 2 ? (
               <>
-                <input
-                  className="qs-search__input"
-                  type="text"
-                  placeholder="e.g. Greek yogurt, oatmeal..."
-                  value={searchQuery}
-                  onChange={e => setSearchQuery(e.target.value)}
-                  autoFocus
-                />
                 {searchLoading && <p className="qs-library-empty">Searching...</p>}
                 {!searchLoading && searchError && <p className="qs-library-empty">{searchError}</p>}
-                {!searchLoading && !searchQuery && recentFoods.length > 0 && (
-                  <div className="qs-recent">
-                    <p className="qs-recent__label">Recent</p>
-                    <div className="qs-search-results">
-                      {recentFoods.map((r, i) => (
-                        <button
-                          key={i}
-                          type="button"
-                          className="qs-search-result"
-                          onClick={() => { selectProduct(r.product); setGrams(String(r.lastGrams)) }}
-                        >
-                          <span className="qs-search-result__name">{r.product.name}</span>
-                          <span className="qs-search-result__kcal">
-                            {r.lastGrams}g · {r.product.caloriesPer100g != null ? `${Math.round(r.product.caloriesPer100g * r.lastGrams / 100)} kcal` : '—'}
-                          </span>
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                )}
                 {!searchLoading && searchResults.length > 0 && (
                   <div className="qs-search-results">
                     {searchResults.map((p, i) => (
@@ -468,95 +483,74 @@ export function QuickAddSheet({ initialSlot, onAdd, onLogTemplate, onClose, onOp
                 )}
               </>
             ) : (
-              <div className="barcode-product-card">
-                <button type="button" className="qs-search-back" onClick={clearSelection}>← Back</button>
-                <div className="barcode-product-header">
-                  <p className="barcode-product-name">{selectedProduct.name}</p>
-                  <p className="barcode-product-per100">
-                    {Math.round(selectedProduct.caloriesPer100g ?? 0)} kcal per 100 g
-                  </p>
-                </div>
-
-                <div className="barcode-portion-section">
-                  <p className="barcode-portion-label">How much did you eat?</p>
-                  <div className="barcode-portion-row">
-                    <button
-                      type="button"
-                      className="barcode-portion-btn"
-                      onClick={() => setGrams(String(Math.max(25, (Number(grams) || 100) - 25)))}
-                    >−</button>
-                    <div className="barcode-portion-input-wrap">
-                      <input
-                        type="number"
-                        min={1}
-                        max={2000}
-                        value={grams}
-                        onChange={e => setGrams(e.target.value)}
-                        className="barcode-portion-input"
-                      />
-                      <span className="barcode-portion-unit">g</span>
-                    </div>
-                    <button
-                      type="button"
-                      className="barcode-portion-btn"
-                      onClick={() => setGrams(String((Number(grams) || 100) + 25))}
-                    >+</button>
-                  </div>
-                  <div className="barcode-quick-portions">
-                    {[50, 100, 150, 200, 250].map(g => (
-                      <button
-                        key={g}
-                        type="button"
-                        className={`barcode-quick-btn${Number(grams) === g ? ' barcode-quick-btn--active' : ''}`}
-                        onClick={() => setGrams(String(g))}
-                      >{g}g</button>
-                    ))}
-                  </div>
-                </div>
-
-                {gramsNum > 0 && (
-                  <div className="barcode-macros-grid">
-                    <div className="barcode-macro-chip barcode-macro-chip--calories">
-                      <span className="barcode-macro-chip__value">{calcMacro(selectedProduct.caloriesPer100g)}</span>
-                      <span className="barcode-macro-chip__label">kcal</span>
-                    </div>
-                    <div className="barcode-macro-chip barcode-macro-chip--protein">
-                      <span className="barcode-macro-chip__value">{calcMacro(selectedProduct.proteinPer100g)}g</span>
-                      <span className="barcode-macro-chip__label">protein</span>
-                    </div>
-                    <div className="barcode-macro-chip barcode-macro-chip--fat">
-                      <span className="barcode-macro-chip__value">{calcMacro(selectedProduct.fatPer100g)}g</span>
-                      <span className="barcode-macro-chip__label">fat</span>
-                    </div>
-                    <div className="barcode-macro-chip barcode-macro-chip--carbs">
-                      <span className="barcode-macro-chip__value">{calcMacro(selectedProduct.carbsPer100g)}g</span>
-                      <span className="barcode-macro-chip__label">carbs</span>
+              <>
+                {recentFoods.length > 0 && (
+                  <div className="qs-recent">
+                    <p className="qs-recent__label">Recent</p>
+                    <div className="qs-search-results">
+                      {recentFoods.map((r, i) => (
+                        <button
+                          key={i}
+                          type="button"
+                          className="qs-search-result"
+                          onClick={() => { selectProduct(r.product); setGrams(String(r.lastGrams)) }}
+                        >
+                          <span className="qs-search-result__name">{r.product.name}</span>
+                          <span className="qs-search-result__kcal">
+                            {r.lastGrams}g · {r.product.caloriesPer100g != null ? `${Math.round(r.product.caloriesPer100g * r.lastGrams / 100)} kcal` : '—'}
+                          </span>
+                        </button>
+                      ))}
                     </div>
                   </div>
                 )}
 
-                {gramsNum > 0 && (
-                  <InlineTipBanner
-                    kcal={calcMacro(selectedProduct.caloriesPer100g)}
-                    slotType={slot}
-                  />
+                {loadingLib ? (
+                  <p className="qs-library-empty">Loading...</p>
+                ) : templates.length === 0 ? (
+                  <div className="qs-library-empty-state">
+                    <p className="qs-library-empty">No saved meals yet.</p>
+                  </div>
+                ) : (
+                  <>
+                    {libError && <p className="error-text">{libError}</p>}
+                    <div className="qs-library-list">
+                      {templates.map(t => (
+                        <div key={t.id} className="qs-library-item">
+                          <span className="qs-library-item__name">{t.name}</span>
+                          <span className="qs-library-item__kcal">{Math.round(t.totalCalories)} kcal</span>
+                          <button
+                            type="button"
+                            className="qs-library-item__log-btn"
+                            onClick={() => handleLogTemplate(t.id)}
+                            disabled={loggingId !== null}
+                          >
+                            {loggingId === t.id ? '...' : 'Log'}
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  </>
                 )}
 
-                <button
-                  type="button"
-                  className="profile-edit-btn"
-                  onClick={handleAddFromSearch}
-                  disabled={addingSearch || gramsNum <= 0}
-                >
-                  {addingSearch ? 'Adding…' : 'Add to today'}
-                </button>
-              </div>
+                <div className="qs-bottom-links">
+                  <button type="button" className="qs-library-manage-btn" onClick={() => setMode('manual')}>
+                    + Custom entry
+                  </button>
+                  {onOpenLibrary && (
+                    <button type="button" className="qs-library-manage-btn" onClick={() => { onClose(); onOpenLibrary() }}>
+                      Manage library →
+                    </button>
+                  )}
+                </div>
+              </>
             )}
-          </div>
+          </>
         )}
 
         {!loggedName && mode === 'manual' && (
           <>
+            <button type="button" className="qs-search-back" onClick={() => { setMode('list'); setError('') }}>← Back</button>
             <input
               className="qs-name-input"
               type="text"

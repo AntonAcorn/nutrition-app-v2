@@ -623,6 +623,20 @@
   text-align: center;
 }
 
+.qs-bottom-links {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding-top: 4px;
+}
+
+.qs-bottom-links .qs-library-manage-btn {
+  width: auto;
+  padding: 8px 12px;
+  flex: 0 1 auto;
+}
+
 .qs-logged-confirm {
   display: flex;
   align-items: center;
