@@ -254,6 +254,61 @@
   line-height: 1.25;
 }
 
+/* 5) Bank — deposits and a withdrawal floating around the bank emoji */
+.tour-anim--bank {
+  flex-direction: column;
+  gap: 10px;
+}
+
+.tour-anim__bank-deltas {
+  display: flex;
+  gap: 10px;
+  height: 32px;
+  align-items: center;
+}
+
+.tour-anim__bank-delta {
+  font-size: 0.85rem;
+  font-weight: 600;
+  padding: 4px 12px;
+  border-radius: 999px;
+  opacity: 0;
+  transform: translateY(8px);
+  animation: tour-bank-delta-in 0.4s ease forwards;
+}
+
+.tour-anim__bank-delta--in {
+  background: rgba(76, 217, 100, 0.15);
+  color: #4cd964;
+  border: 1px solid rgba(76, 217, 100, 0.3);
+}
+
+.tour-anim__bank-delta--out {
+  background: rgba(255, 165, 80, 0.18);
+  color: #ffb066;
+  border: 1px solid rgba(255, 165, 80, 0.35);
+}
+
+@keyframes tour-bank-delta-in {
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.tour-anim__bank-emoji {
+  font-size: 2.6rem;
+  filter: drop-shadow(0 4px 14px rgba(123, 97, 255, 0.25));
+}
+
+[data-theme="light"] .tour-anim__bank-delta--in {
+  background: rgba(34, 160, 70, 0.12);
+  color: #1f8a40;
+  border-color: rgba(34, 160, 70, 0.3);
+}
+[data-theme="light"] .tour-anim__bank-delta--out {
+  background: rgba(220, 130, 30, 0.12);
+  color: #b06a18;
+  border-color: rgba(220, 130, 30, 0.3);
+}
+
 /* 4) Focus tags — four chips, two light up to show selection */
 .tour-anim--focus {
   display: grid;

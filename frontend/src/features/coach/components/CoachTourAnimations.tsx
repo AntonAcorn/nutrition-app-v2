@@ -56,6 +56,19 @@ export function PushAnimation() {
   )
 }
 
+export function BankAnimation() {
+  return (
+    <div className="tour-anim tour-anim--bank">
+      <div className="tour-anim__bank-deltas">
+        <span className="tour-anim__bank-delta tour-anim__bank-delta--in" style={{ animationDelay: '120ms' }}>+50</span>
+        <span className="tour-anim__bank-delta tour-anim__bank-delta--in" style={{ animationDelay: '320ms' }}>+120</span>
+        <span className="tour-anim__bank-delta tour-anim__bank-delta--out" style={{ animationDelay: '520ms' }}>−200</span>
+      </div>
+      <div className="tour-anim__bank-emoji">🏦</div>
+    </div>
+  )
+}
+
 export function FocusTagsAnimation() {
   const tags = [
     { emoji: '⚡', label: 'Energy', delay: 100, picked: true },

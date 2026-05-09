@@ -77,13 +77,19 @@ export function CurrentDayTab({ refreshToken = 0, successMessage = '', onDayUpda
   const [slotPickerVisible, setSlotPickerVisible] = useState(false)
   const [pullDist, setPullDist] = useState(0)
   const [ptrRefreshing, setPtrRefreshing] = useState(false)
-  const [showCoachTour, setShowCoachTour] = useState(() => shouldShowCoachTourOnce())
+  const [showCoachTour, setShowCoachTour] = useState(false)
 
   const summaryQuery = useQuery<TodaySummary>({
     queryKey: ['today-summary', selectedDate],
     queryFn: () => fetchTodaySummary(selectedDate),
   })
   const summary = summaryQuery.data ?? null
+
+  useEffect(() => {
+    if (summary && summary.consumedCalories > 0 && shouldShowCoachTourOnce()) {
+      setShowCoachTour(true)
+    }
+  }, [summary?.consumedCalories])
   const loading = summaryQuery.isLoading
   const error = actionError || (summaryQuery.error instanceof Error ? summaryQuery.error.message : '')
 

@@ -5,6 +5,7 @@ import {
   PatternCardAnimation,
   PushAnimation,
   FocusTagsAnimation,
+  BankAnimation,
 } from './CoachTourAnimations'
 
 interface Slide {
@@ -14,6 +15,11 @@ interface Slide {
 }
 
 const SLIDES: Slide[] = [
+  {
+    visual: <BankAnimation />,
+    title: 'Your bank is open',
+    body: 'Every kcal under target deposits. Bad day? Withdraw up to 200 — your streak holds. Plus 3 free-pass relax days a month for real life.',
+  },
   {
     visual: <WeekScanAnimation />,
     title: 'Coach watches your week',
