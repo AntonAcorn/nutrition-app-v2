@@ -2,12 +2,31 @@ import { CSSProperties, FormEvent, useState } from 'react'
 import { submitProfile, type OnboardingPayload } from '../model/profileApi'
 import { MascotCameraSvg } from '../../current-day/components/MascotCameraSvg'
 import { COACH_FOCUS_TAGS, type CoachFocusTag, serializeCoachFocus } from '../../profile/model/profileApi'
+import { WeekScanAnimation } from '../../coach/components/CoachTourAnimations'
 
 interface Props {
   onComplete: () => void
 }
 
-type Step = 1 | 2 | 3 | 4
+type Step = 'welcome' | 1 | 2 | 3 | 4
+
+const WELCOME_SLIDES: Array<{ visual: React.ReactNode; title: string; body: string }> = [
+  {
+    visual: <div className="onboarding-welcome__hero">🏦</div>,
+    title: 'Bad days happen.\nYour coach gets it.',
+    body: 'Most apps make you feel guilty for going over. Yours gives you a calorie bank instead — every day under target deposits, bad days withdraw, your streak holds.',
+  },
+  {
+    visual: <div className="onboarding-welcome__hero">🎂</div>,
+    title: 'Relax days for real life',
+    body: 'Three free-pass days every month. Birthdays, weddings, sick weeks — they don\'t count against you. The streak holds. Built for actual humans.',
+  },
+  {
+    visual: <WeekScanAnimation />,
+    title: 'Coach watches your week',
+    body: 'Patterns the dashboard hides. "Wednesdays you go 30% over." "Late dinners drop your energy." Quiet pushes when something matters, not three reminders a day.',
+  },
+]
 
 const optionStyle = (selected: boolean): CSSProperties => ({
   border: selected ? '1.5px solid var(--opt-border-on)' : '1px solid var(--opt-border-off)',
@@ -17,7 +36,8 @@ const optionStyle = (selected: boolean): CSSProperties => ({
 })
 
 export function OnboardingWizard({ onComplete }: Props) {
-  const [step, setStep] = useState<Step>(1)
+  const [step, setStep] = useState<Step>('welcome')
+  const [welcomeIndex, setWelcomeIndex] = useState(0)
   const [ageYears, setAgeYears] = useState('')
   const [gender, setGender] = useState<'male' | 'female' | ''>('')
   const [heightCm, setHeightCm] = useState('')
@@ -88,11 +108,62 @@ export function OnboardingWizard({ onComplete }: Props) {
     }
   }
 
+  const welcomeSlide = step === 'welcome' ? WELCOME_SLIDES[welcomeIndex] : null
+  const isLastWelcome = welcomeIndex === WELCOME_SLIDES.length - 1
+
+  function nextWelcome() {
+    if (isLastWelcome) {
+      setStep(1)
+    } else {
+      setWelcomeIndex(welcomeIndex + 1)
+    }
+  }
+
+  function prevWelcome() {
+    if (welcomeIndex > 0) setWelcomeIndex(welcomeIndex - 1)
+  }
+
   return (
     <section className="auth-panel auth-panel--dark">
-      <p className="app-header__eyebrow" style={{ marginBottom: '0.5rem' }}>
-        {step < 4 ? `Step ${step} of 3` : 'How it works'}
-      </p>
+      {step !== 'welcome' && (
+        <p className="app-header__eyebrow" style={{ marginBottom: '0.5rem' }}>
+          {step !== 4 ? `Step ${step} of 3` : 'How it works'}
+        </p>
+      )}
+
+      {step === 'welcome' && welcomeSlide && (
+        <div className="onboarding-welcome">
+          <div className="onboarding-welcome__slide" key={welcomeIndex}>
+            <div className="onboarding-welcome__visual">{welcomeSlide.visual}</div>
+            <h2 className="onboarding-welcome__title">{welcomeSlide.title}</h2>
+            <p className="onboarding-welcome__body">{welcomeSlide.body}</p>
+          </div>
+
+          <div className="onboarding-welcome__dots" aria-hidden>
+            {WELCOME_SLIDES.map((_, i) => (
+              <span
+                key={i}
+                className={`onboarding-welcome__dot${i === welcomeIndex ? ' onboarding-welcome__dot--active' : ''}`}
+              />
+            ))}
+          </div>
+
+          <div className="onboarding-welcome__nav">
+            {welcomeIndex > 0 ? (
+              <button type="button" className="tab-button tab-button--dark" onClick={prevWelcome}>
+                Back
+              </button>
+            ) : (
+              <button type="button" className="tab-button tab-button--dark" onClick={() => setStep(1)}>
+                Skip
+              </button>
+            )}
+            <button type="button" onClick={nextWelcome} style={{ flex: 1 }}>
+              {isLastWelcome ? 'Get started' : 'Next'}
+            </button>
+          </div>
+        </div>
+      )}
 
       {step === 1 && (
         <div className="auth-form-grid">
@@ -335,36 +406,22 @@ export function OnboardingWizard({ onComplete }: Props) {
             <div className="onboarding-feature-card">
               <span className="onboarding-feature-card__icon">📸</span>
               <div>
-                <p className="onboarding-feature-card__title">Take a photo</p>
-                <p className="onboarding-feature-card__desc">Snap your meal — AI recognises ingredients and estimates calories automatically.</p>
+                <p className="onboarding-feature-card__title">Snap a photo</p>
+                <p className="onboarding-feature-card__desc">AI recognises the meal and estimates calories. Glance at the numbers, fix anything off.</p>
               </div>
             </div>
             <div className="onboarding-feature-card">
               <span className="onboarding-feature-card__icon">🎤</span>
               <div>
-                <p className="onboarding-feature-card__title">Describe it</p>
-                <p className="onboarding-feature-card__desc">Say or type what you ate. "Chicken rice and salad" is enough.</p>
-              </div>
-            </div>
-            <div className="onboarding-feature-card">
-              <span className="onboarding-feature-card__icon">✏️</span>
-              <div>
-                <p className="onboarding-feature-card__title">Review before saving</p>
-                <p className="onboarding-feature-card__desc">AI makes mistakes. Always glance at the numbers and fix anything off before saving.</p>
+                <p className="onboarding-feature-card__title">Say or type it</p>
+                <p className="onboarding-feature-card__desc">"Chicken rice and salad" is enough. Faster than searching a database.</p>
               </div>
             </div>
             <div className="onboarding-feature-card">
               <span className="onboarding-feature-card__icon">🔍</span>
               <div>
                 <p className="onboarding-feature-card__title">Scan a barcode</p>
-                <p className="onboarding-feature-card__desc">Point your camera at any packaged food — calories and macros fill in instantly.</p>
-              </div>
-            </div>
-            <div className="onboarding-feature-card">
-              <span className="onboarding-feature-card__icon">⚖️</span>
-              <div>
-                <p className="onboarding-feature-card__title">Log your weight daily</p>
-                <p className="onboarding-feature-card__desc">Even one reading a day builds a trend you can actually act on.</p>
+                <p className="onboarding-feature-card__desc">Point at any packaged food. Calories and macros fill in instantly.</p>
               </div>
             </div>
           </div>
