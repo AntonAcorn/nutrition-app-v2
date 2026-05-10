@@ -9,7 +9,6 @@ import com.aiduparc.nutrition.history.model.DailyNutritionEntryEntity;
 import com.aiduparc.nutrition.history.model.DailyNutritionEntrySnapshot;
 import com.aiduparc.nutrition.history.model.MealSlotEntity;
 import com.aiduparc.nutrition.history.repository.DailyNutritionEntryRepository;
-import com.aiduparc.nutrition.notifications.TelegramNotificationService;
 import com.aiduparc.nutrition.user.model.UserProfileEntity;
 import com.aiduparc.nutrition.user.repository.UserProfileRepository;
 import jakarta.validation.constraints.NotNull;
@@ -46,20 +45,17 @@ public class NutritionHistoryService {
     public static final String SLOT_SNACK     = MealLogService.SLOT_SNACK;
 
     private final DailyNutritionEntryRepository repository;
-    private final TelegramNotificationService telegramNotificationService;
     private final NutritionStatisticsCalculator statisticsCalculator;
     private final MealLogService mealLogService;
     private final UserProfileRepository userProfileRepository;
 
     public NutritionHistoryService(
             DailyNutritionEntryRepository repository,
-            TelegramNotificationService telegramNotificationService,
             NutritionStatisticsCalculator statisticsCalculator,
             MealLogService mealLogService,
             UserProfileRepository userProfileRepository
     ) {
         this.repository = repository;
-        this.telegramNotificationService = telegramNotificationService;
         this.statisticsCalculator = statisticsCalculator;
         this.mealLogService = mealLogService;
         this.userProfileRepository = userProfileRepository;
@@ -139,7 +135,6 @@ public class NutritionHistoryService {
         entity.setWeightUpdatedAt(OffsetDateTime.now(ZoneOffset.UTC));
 
         DailyNutritionEntryEntity saved = repository.save(entity);
-        telegramNotificationService.notifyActivity(userId, "weight update");
         return DailyNutritionEntrySnapshot.fromEntity(saved);
     }
 
@@ -155,14 +150,12 @@ public class NutritionHistoryService {
     ) {
         DailyNutritionEntrySnapshot current = getOrCreateEmptySnapshot(userId, entryDate);
 
-        DailyNutritionEntrySnapshot result = upsert(new UpsertDailyNutritionEntryCommand(
+        return upsert(new UpsertDailyNutritionEntryCommand(
             userId, entryDate, caloriesConsumedKcal,
             current.calorieTargetKcal(), current.weightKg(),
             proteinGrams, fatGrams, fiberGrams, carbsGrams,
             current.notes(), current.waterGlasses()
         ));
-        telegramNotificationService.notifyActivity(userId, "nutrition totals update");
-        return result;
     }
 
     @Transactional
@@ -213,7 +206,6 @@ public class NutritionHistoryService {
             result.userId(), result.entryDate(),
             result.caloriesConsumedKcal(), result.proteinGrams(), result.fatGrams(), result.fiberGrams()
         );
-        telegramNotificationService.notifyActivity(command.userId(), "added calories");
         return result;
     }
 

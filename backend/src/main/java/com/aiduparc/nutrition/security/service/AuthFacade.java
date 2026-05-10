@@ -1,6 +1,5 @@
 package com.aiduparc.nutrition.security.service;
 
-import com.aiduparc.nutrition.notifications.TelegramNotificationService;
 import com.aiduparc.nutrition.security.api.AuthResponse;
 import com.aiduparc.nutrition.security.api.LoginRequest;
 import com.aiduparc.nutrition.security.api.RegisterRequest;
@@ -21,7 +20,6 @@ public class AuthFacade {
     private final AuthAccountService authAccountService;
     private final NutritionUserService nutritionUserService;
     private final UserProfileService userProfileService;
-    private final TelegramNotificationService telegramNotificationService;
     private final EmailVerificationService emailVerificationService;
     private final PasswordResetService passwordResetService;
     private final AppleSignInService appleSignInService;
@@ -30,7 +28,6 @@ public class AuthFacade {
             AuthAccountService authAccountService,
             NutritionUserService nutritionUserService,
             UserProfileService userProfileService,
-            TelegramNotificationService telegramNotificationService,
             EmailVerificationService emailVerificationService,
             PasswordResetService passwordResetService,
             AppleSignInService appleSignInService
@@ -38,7 +35,6 @@ public class AuthFacade {
         this.authAccountService = authAccountService;
         this.nutritionUserService = nutritionUserService;
         this.userProfileService = userProfileService;
-        this.telegramNotificationService = telegramNotificationService;
         this.emailVerificationService = emailVerificationService;
         this.passwordResetService = passwordResetService;
         this.appleSignInService = appleSignInService;
@@ -53,7 +49,6 @@ public class AuthFacade {
             request.displayName(),
             nutritionUser.getId()
         );
-        telegramNotificationService.notifyNewUser(account.getEmail(), account.getDisplayName());
         emailVerificationService.sendVerificationEmail(account);
         return new AuthenticatedSession(
             account.getId(),
@@ -141,7 +136,6 @@ public class AuthFacade {
                 AuthAccountEntity newAccount = authAccountService.createGoogleAccount(
                     googleUser.id(), googleUser.email(), googleUser.name(), user.getId()
                 );
-                telegramNotificationService.notifyNewUser(newAccount.getEmail(), newAccount.getDisplayName());
                 return newAccount;
             });
 
@@ -172,7 +166,6 @@ public class AuthFacade {
                 AuthAccountEntity newAccount = authAccountService.createAppleAccount(
                     appleUser.appleId(), appleUser.email(), name, user.getId()
                 );
-                telegramNotificationService.notifyNewUser(newAccount.getEmail(), newAccount.getDisplayName());
                 return newAccount;
             });
 

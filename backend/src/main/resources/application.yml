@@ -55,10 +55,6 @@ nutrition:
     google-client-id: ${GOOGLE_CLIENT_ID:}
     google-client-secret: ${GOOGLE_CLIENT_SECRET:}
     google-redirect-uri: ${GOOGLE_REDIRECT_URI:${nutrition.app.base-url}/api/auth/google/callback}
-  telegram:
-    enabled: ${TELEGRAM_ENABLED:false}
-    bot-token: ${TELEGRAM_BOT_TOKEN:}
-    chat-id: ${TELEGRAM_CHAT_ID:}
   ai-analysis:
     daily-limit: ${AI_ANALYSIS_DAILY_LIMIT:30}
   push:

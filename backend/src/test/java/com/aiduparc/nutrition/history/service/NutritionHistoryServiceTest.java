@@ -10,7 +10,6 @@ import static org.mockito.Mockito.when;
 import com.aiduparc.nutrition.history.model.DailyNutritionEntryEntity;
 import com.aiduparc.nutrition.history.model.MealSlotEntity;
 import com.aiduparc.nutrition.history.repository.DailyNutritionEntryRepository;
-import com.aiduparc.nutrition.notifications.TelegramNotificationService;
 import com.aiduparc.nutrition.user.repository.UserProfileRepository;
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -36,7 +35,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 class NutritionHistoryServiceTest {
 
     @Mock private DailyNutritionEntryRepository repository;
-    @Mock private TelegramNotificationService telegramNotificationService;
     @Mock private NutritionStatisticsCalculator statisticsCalculator;
     @Mock private MealLogService mealLogService;
     @Mock private UserProfileRepository userProfileRepository;
