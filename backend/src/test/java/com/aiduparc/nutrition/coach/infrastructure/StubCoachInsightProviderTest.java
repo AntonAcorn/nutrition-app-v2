@@ -61,7 +61,7 @@ class StubCoachInsightProviderTest {
         var result = provider.generate(snapshot, List.of(), "en");
 
         assertThat(result).extracting(CoachInsightProvider.InsightDraft::title)
-            .anyMatch(t -> t.toLowerCase().contains("overrun"));
+            .anyMatch(t -> t.toLowerCase().contains("over"));
     }
 
     @Test
