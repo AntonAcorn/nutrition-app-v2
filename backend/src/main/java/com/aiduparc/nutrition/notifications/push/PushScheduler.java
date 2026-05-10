@@ -1,5 +1,6 @@
 package com.aiduparc.nutrition.notifications.push;
 
+import com.aiduparc.nutrition.calorieBank.repository.RelaxDayRepository;
 import com.aiduparc.nutrition.calorieBank.service.CalorieBankService;
 import com.aiduparc.nutrition.history.repository.DailyNutritionEntryRepository;
 import org.slf4j.Logger;
@@ -11,7 +12,9 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Component
 public class PushScheduler {
@@ -22,25 +25,26 @@ public class PushScheduler {
     private final PushNotificationService pushNotificationService;
     private final DailyNutritionEntryRepository nutritionEntryRepository;
     private final CalorieBankService calorieBankService;
+    private final RelaxDayRepository relaxDayRepository;
 
     public PushScheduler(
             PushSubscriptionRepository subscriptionRepository,
             PushNotificationService pushNotificationService,
             DailyNutritionEntryRepository nutritionEntryRepository,
-            CalorieBankService calorieBankService
+            CalorieBankService calorieBankService,
+            RelaxDayRepository relaxDayRepository
     ) {
         this.subscriptionRepository = subscriptionRepository;
         this.pushNotificationService = pushNotificationService;
         this.nutritionEntryRepository = nutritionEntryRepository;
         this.calorieBankService = calorieBankService;
+        this.relaxDayRepository = relaxDayRepository;
     }
 
     @Scheduled(cron = "0 0 * * * *")
     public void sendReminders() {
         List<PushSubscriptionEntity> active = subscriptionRepository.findByEnabled(true);
         if (active.isEmpty()) return;
-
-        int currentUtcHour = ZonedDateTime.now(java.time.ZoneOffset.UTC).getHour();
 
         for (PushSubscriptionEntity sub : active) {
             try {
@@ -81,9 +85,21 @@ public class PushScheduler {
     }
 
     private int calculateStreak(java.util.UUID userId, LocalDate today) {
+        // Relax days count as "streak intact" even with no log — that's the promise.
+        LocalDate lookbackStart = today.minusDays(365);
+        Set<LocalDate> relaxDates = new HashSet<>();
+        relaxDayRepository.findByUserIdAndRelaxDateBetween(userId, lookbackStart, today)
+                .forEach(r -> relaxDates.add(r.getRelaxDate()));
+
         int streak = 0;
         LocalDate date = today;
         while (true) {
+            if (relaxDates.contains(date)) {
+                streak++;
+                date = date.minusDays(1);
+                if (streak > 365) break;
+                continue;
+            }
             boolean hasEntry = nutritionEntryRepository
                     .findByUserIdAndEntryDate(userId, date)
                     .map(e -> e.getCaloriesConsumedKcal() != null

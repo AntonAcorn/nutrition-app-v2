@@ -1,5 +1,7 @@
 package com.aiduparc.nutrition.history.service;
 
+import com.aiduparc.nutrition.calorieBank.model.RelaxDayEntity;
+import com.aiduparc.nutrition.calorieBank.repository.RelaxDayRepository;
 import com.aiduparc.nutrition.history.api.NutritionBalanceSummaryResponse;
 import com.aiduparc.nutrition.history.api.NutritionStatisticsPointResponse;
 import com.aiduparc.nutrition.history.api.NutritionStatisticsResponse;
@@ -14,6 +16,7 @@ import java.time.YearMonth;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -38,13 +41,16 @@ public class NutritionStatisticsCalculator {
 
     private final DailyNutritionEntryRepository repository;
     private final UserProfileService userProfileService;
+    private final RelaxDayRepository relaxDayRepository;
 
     public NutritionStatisticsCalculator(
             DailyNutritionEntryRepository repository,
-            UserProfileService userProfileService
+            UserProfileService userProfileService,
+            RelaxDayRepository relaxDayRepository
     ) {
         this.repository = repository;
         this.userProfileService = userProfileService;
+        this.relaxDayRepository = relaxDayRepository;
     }
 
     public TodaySummaryResponse getTodaySummary(UUID userId, LocalDate entryDate) {
@@ -175,14 +181,19 @@ public class NutritionStatisticsCalculator {
 
     private int calculateLoggingStreak(UUID userId, LocalDate today, BigDecimal todayCalories) {
         LocalDate endDate = todayCalories.compareTo(BigDecimal.ZERO) > 0 ? today : today.minusDays(1);
-        List<DailyNutritionEntrySnapshot> recent = findRange(userId, endDate.minusDays(89), endDate);
+        LocalDate windowStart = endDate.minusDays(89);
+        List<DailyNutritionEntrySnapshot> recent = findRange(userId, windowStart, endDate);
         Set<LocalDate> loggedDates = recent.stream()
             .filter(s -> s.caloriesConsumedKcal() != null && s.caloriesConsumedKcal().compareTo(BigDecimal.ZERO) > 0)
             .map(DailyNutritionEntrySnapshot::entryDate)
             .collect(Collectors.toSet());
+        // Relax days count as "streak holds" even with no log — the product promise.
+        Set<LocalDate> relaxDates = new HashSet<>();
+        relaxDayRepository.findByUserIdAndRelaxDateBetween(userId, windowStart, endDate)
+            .stream().map(RelaxDayEntity::getRelaxDate).forEach(relaxDates::add);
         int streak = 0;
         LocalDate current = endDate;
-        while (loggedDates.contains(current)) {
+        while (loggedDates.contains(current) || relaxDates.contains(current)) {
             streak++;
             current = current.minusDays(1);
         }
@@ -225,15 +236,15 @@ public class NutritionStatisticsCalculator {
             .map(snapshot -> defaultBigDecimal(snapshot.caloriesConsumedKcal()))
             .reduce(BigDecimal.ZERO, BigDecimal::add);
 
+        Map<LocalDate, DailyNutritionEntrySnapshot> byDate = new HashMap<>();
+        for (DailyNutritionEntrySnapshot s : snapshots) byDate.put(s.entryDate(), s);
         BigDecimal target = BigDecimal.ZERO;
+        BigDecimal defaultTarget = resolvedDefaultTarget(userId);
         for (LocalDate cursor = fromInclusive; !cursor.isAfter(toInclusive); cursor = cursor.plusDays(1)) {
-            BigDecimal dayTarget = resolvedDefaultTarget(userId);
-            for (DailyNutritionEntrySnapshot snapshot : snapshots) {
-                if (snapshot.entryDate().equals(cursor)) {
-                    dayTarget = defaultTarget(snapshot.calorieTargetKcal(), userId);
-                    break;
-                }
-            }
+            DailyNutritionEntrySnapshot snapshot = byDate.get(cursor);
+            BigDecimal dayTarget = snapshot != null
+                ? defaultTarget(snapshot.calorieTargetKcal(), userId)
+                : defaultTarget;
             target = target.add(dayTarget);
         }
 
