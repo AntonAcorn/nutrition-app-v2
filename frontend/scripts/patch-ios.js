@@ -17,7 +17,20 @@ if (existsSync(appleSignInSrc) && existsSync(join(root, 'node_modules/@capacitor
   console.log('⚠ Skipping apple-sign-in patch (not an iOS environment)')
 }
 
-// 2. Patch CapApp-SPM/Package.swift — add GoogleSignIn-iOS
+// 2. Patch capacitor.config.json — Capacitor iOS reads packageClassList ONLY from
+// the root, but `cap sync` overwrites it with auto-discovered npm plugins. Merge
+// our local plugin (GoogleSignInPlugin from CapApp-SPM) into the root list.
+const capConfigPath = join(root, 'ios/App/App/capacitor.config.json')
+if (existsSync(capConfigPath)) {
+  const cfg = JSON.parse(readFileSync(capConfigPath, 'utf8'))
+  const root_list = new Set(cfg.packageClassList ?? [])
+  root_list.add('GoogleSignInPlugin')
+  cfg.packageClassList = [...root_list]
+  writeFileSync(capConfigPath, JSON.stringify(cfg, null, 2) + '\n')
+  console.log('✓ Merged GoogleSignInPlugin into root packageClassList')
+}
+
+// 3. Patch CapApp-SPM/Package.swift — add GoogleSignIn-iOS
 const packagePath = join(root, 'ios/App/CapApp-SPM/Package.swift')
 if (!existsSync(packagePath)) {
   console.log('⚠ Skipping Package.swift patch (not an iOS environment)')

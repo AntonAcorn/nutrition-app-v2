@@ -1,5 +1,10 @@
 import UIKit
 import Capacitor
+import CapApp_SPM
+
+// Force-link CapApp_SPM plugin classes so the Obj-C runtime registers them; otherwise
+// Capacitor's NSClassFromString lookup returns nil and the JS bridge sees no plugin.
+private let _forceLinkGoogleSignInPlugin: AnyClass = GoogleSignInPlugin.self
 
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate {
@@ -7,6 +12,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     var window: UIWindow?
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
+        _ = _forceLinkGoogleSignInPlugin
         return true
     }
 

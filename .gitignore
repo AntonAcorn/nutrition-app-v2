@@ -51,3 +51,6 @@ storage/caddy_config/*
 # logs
 *.log
 frontend/ios/App/CapApp-SPM/.build/
+
+# local App Store screenshots
+Screens/
