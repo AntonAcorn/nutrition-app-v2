@@ -9,19 +9,27 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import javax.imageio.IIOImage;
 import javax.imageio.ImageIO;
+import javax.imageio.ImageReader;
 import javax.imageio.ImageWriteParam;
 import javax.imageio.ImageWriter;
+import javax.imageio.stream.ImageInputStream;
 import javax.imageio.stream.MemoryCacheImageOutputStream;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 @Service
 public class ImageNormalizationService {
 
     private static final int MAX_DIMENSION = 1600;
+    // Hard cap on declared image dimensions to defeat decompression-bomb uploads
+    // (a tiny PNG can declare 50000x50000 and force ImageIO to allocate ~9GB).
+    private static final long MAX_DECODE_PIXELS = 50_000_000L; // ~50 megapixels
     private static final float JPEG_QUALITY = 0.82f;
 
     public NormalizedImage normalize(byte[] originalBytes, String contentType) {
         try {
+            assertSafeDimensions(originalBytes);
             BufferedImage source = ImageIO.read(new ByteArrayInputStream(originalBytes));
             if (source == null) {
                 return new NormalizedImage(originalBytes, defaultContentType(contentType));
@@ -32,6 +40,28 @@ public class ImageNormalizationService {
             return new NormalizedImage(jpegBytes, "image/jpeg");
         } catch (IOException exception) {
             return new NormalizedImage(originalBytes, defaultContentType(contentType));
+        }
+    }
+
+    private static void assertSafeDimensions(byte[] bytes) throws IOException {
+        try (ImageInputStream input = ImageIO.createImageInputStream(new ByteArrayInputStream(bytes))) {
+            if (input == null) return;
+            var readers = ImageIO.getImageReaders(input);
+            if (!readers.hasNext()) return;
+            ImageReader reader = readers.next();
+            try {
+                reader.setInput(input);
+                long width = reader.getWidth(0);
+                long height = reader.getHeight(0);
+                if (width * height > MAX_DECODE_PIXELS) {
+                    throw new ResponseStatusException(
+                        HttpStatus.BAD_REQUEST,
+                        "Image dimensions too large"
+                    );
+                }
+            } finally {
+                reader.dispose();
+            }
         }
     }
 
