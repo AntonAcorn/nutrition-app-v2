@@ -52,8 +52,8 @@ public class StreakBreakDetector implements TriggerDetector {
         if (streak < MIN_STREAK) return Optional.empty();
 
         return Optional.of(new TriggerPayload(
-            "Yesterday slipped",
-            streak + "-day streak ended yesterday. What changed?",
+            "Quiet yesterday",
+            streak + "-day streak paused. What was different?",
             "streak_break.streak=" + streak
         ));
     }

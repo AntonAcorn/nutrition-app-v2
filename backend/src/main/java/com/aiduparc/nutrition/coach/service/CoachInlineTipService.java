@@ -145,8 +145,7 @@ public class CoachInlineTipService {
         else if (hour >= 21 && afterRatio > 0.7 && incoming > 400) {
             base = new InlineTipResponse(
                 "caution",
-                "Late dinner of " + incoming + " kcal lands you at " + Math.round(afterRatio * 100) + "% — " +
-                "consider lighter or earlier next time.",
+                "Late dinner of " + incoming + " kcal lands you at " + Math.round(afterRatio * 100) + "% of target.",
                 after, target
             );
         }
@@ -217,7 +216,12 @@ public class CoachInlineTipService {
         "  - a concrete next-step grounded in numbers (verb + number + unit).",
         "Never use filler verbs (consider, try to, aim, plan). Be direct and warm,",
         "like a friend looking over the shoulder. Echo the user's first name only",
-        "if it lands naturally, max once."
+        "if it lands naturally, max once.",
+        "This app's mechanic is anti-shame: under-target days deposit into a calorie",
+        "bank, over-target days can withdraw, plus relax days each month. When `bank`",
+        "or `relaxDays` is in the snapshot, you may reference them naturally",
+        "('bank covers it', 'this would draw +200 from bank', 'relax day handles it').",
+        "Never moralize about food choices. No 'too much', 'avoid', 'cut back'."
     );
 
     private String invokeOpenAi(

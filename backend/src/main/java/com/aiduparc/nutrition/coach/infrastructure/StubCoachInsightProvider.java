@@ -36,8 +36,8 @@ public class StubCoachInsightProvider implements CoachInsightProvider {
         if (totals.daysOverTarget() >= 3 && totals.daysOverTarget() > totals.daysInZone()) {
             out.add(new InsightDraft(
                 "behavioral",
-                "Overruns piling up",
-                "Over target on " + totals.daysOverTarget() + " of " + totals.loggedDays() + " logged days. Look at your dinners.",
+                "Over-target days adding up",
+                "Over target on " + totals.daysOverTarget() + " of " + totals.loggedDays() + " logged days. Worth a look at dinners.",
                 "totals.daysOverTarget = " + totals.daysOverTarget()
             ));
         }
@@ -46,8 +46,8 @@ public class StubCoachInsightProvider implements CoachInsightProvider {
         if (timing != null && timing.lateMealsCount() >= 3) {
             out.add(new InsightDraft(
                 "timing",
-                "Late-night eating pattern",
-                timing.lateMealsCount() + " meals after 21:00 this window. Eating earlier may help recovery.",
+                "Late dinners stacking up",
+                timing.lateMealsCount() + " meals after 21:00 this window. Pattern worth tracking against next-day energy.",
                 "mealTiming.lateMealsCount = " + timing.lateMealsCount()
             ));
         }

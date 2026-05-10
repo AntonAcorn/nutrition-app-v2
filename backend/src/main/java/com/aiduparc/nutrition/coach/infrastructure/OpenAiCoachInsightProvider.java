@@ -107,7 +107,24 @@ public class OpenAiCoachInsightProvider implements CoachInsightProvider {
         "    'No-workout days run 290 kcal higher than training days.'",
         "    'Steps below 4000 → next-day kcal up by ~250 (3 cases).'",
         "  Only use health signals when present. If health is null, ignore it",
-        "  silently — never invent activity/sleep numbers."
+        "  silently — never invent activity/sleep numbers.",
+        "",
+        "Calorie bank and relax days (in `bank` and `relaxDays` blocks):",
+        "  - bank.currentKcal — current bank balance (deposits minus withdrawals)",
+        "  - bank.usedThisWindowKcal — kcal withdrawn in the snapshot window",
+        "  - relaxDays.usedThisMonth / allowedPerMonth — free-pass days used / cap",
+        "  This app's core mechanic is anti-shame: under-target days deposit,",
+        "  over-target days can withdraw, plus N free-pass relax days a month.",
+        "  Weave these in naturally when relevant:",
+        "    'Bank's at +320 kcal — Saturday plans can absorb a 200-kcal hit.'",
+        "    'Two withdrawals this week, both Wednesdays — same as last week.'",
+        "    'Used 1 of 3 relax days. 2 left this month.'",
+        "  Hard constraints:",
+        "  - Never frame an overage as failure when bank/relax-day covers it.",
+        "  - Streaks count logging days, not perfection — never say a streak",
+        "    'ended' or 'broke' over a calorie overrun. It only ends if the",
+        "    user skipped logging.",
+        "  - No moralizing about food choices. Observe, don't judge."
     );
 
     private static final String USER_INSTRUCTION = String.join("\n",
@@ -129,7 +146,7 @@ public class OpenAiCoachInsightProvider implements CoachInsightProvider {
         "",
         "Good examples (each surfaces something the dashboard doesn't):",
         "  title: 'Wednesdays run 30% over target'",
-        "  body:  'Wed average 2400 kcal vs other weekdays at 1850 (4 weeks). Front-load protein at lunch — aim for 50g.'",
+        "  body:  'Wed average 2400 kcal vs other weekdays at 1850 (4 weeks). Front-load lunch with 50g protein.'",
         "  anchor:'byDayOfWeek.wed.avgKcal = 2400 vs other weekdays ≈ 1850'",
         "",
         "  title: 'Protein up 22g vs last week'",
@@ -369,7 +386,13 @@ public class OpenAiCoachInsightProvider implements CoachInsightProvider {
         "Forbidden filler: 'consider', 'try to', 'aim', 'be more consistent'.",
         "Every body must contain at least one concrete number with a unit.",
         "Keep titles short (≤6 words), bodies tight (≤140 chars).",
-        "Skip generic congratulations — celebrate concrete wins."
+        "Skip generic congratulations — celebrate concrete wins.",
+        "Bank/relax-day awareness: when the snapshot includes `bank.currentKcal`,",
+        "`bank.usedThisWindowKcal`, or `relaxDays.usedThisMonth`, weave them",
+        "into highlight (deposits, untouched bank) or challenge (recurring",
+        "withdrawals on the same day-of-week). Never frame a withdrawal as",
+        "failure — it is the mechanic, not the fall. No shame about over-",
+        "target days when the bank or a relax day absorbed them."
     );
 
     private static final String RECAP_USER_INSTRUCTION = String.join("\n",
