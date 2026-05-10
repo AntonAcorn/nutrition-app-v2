@@ -41,6 +41,15 @@ public class PasswordResetService {
     @Transactional
     public void sendPasswordResetEmail(AuthAccountEntity account) {
         try {
+            // 60s cooldown: derive last-sent from the existing 1h expiry column.
+            OffsetDateTime expiry = account.getPasswordResetTokenExpiresAt();
+            if (expiry != null) {
+                OffsetDateTime lastSent = expiry.minusHours(1);
+                if (lastSent.plusSeconds(60).isAfter(OffsetDateTime.now(ZoneOffset.UTC))) {
+                    log.debug("Password reset email throttled accountId={}", account.getId());
+                    return;
+                }
+            }
             String token = UUID.randomUUID().toString();
             account.setPasswordResetToken(token);
             account.setPasswordResetTokenExpiresAt(OffsetDateTime.now(ZoneOffset.UTC).plusHours(1));

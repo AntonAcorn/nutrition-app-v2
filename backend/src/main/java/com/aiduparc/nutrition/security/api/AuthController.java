@@ -179,9 +179,4 @@ public class AuthController {
         session.setAttribute(AUTH_SESSION_KEY, authSession);
         return authFacade.me(authSession);
     }
-
-    @GetMapping("/sentry-test")
-    public void sentryTest() {
-        throw new RuntimeException("Sentry test exception — can be deleted");
-    }
 }

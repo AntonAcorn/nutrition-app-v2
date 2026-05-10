@@ -38,6 +38,15 @@ public class EmailVerificationService {
     @Transactional
     public void sendVerificationEmail(AuthAccountEntity account) {
         try {
+            // 60s cooldown: derive last-sent from the existing 24h expiry column.
+            OffsetDateTime expiry = account.getVerificationTokenExpiresAt();
+            if (expiry != null) {
+                OffsetDateTime lastSent = expiry.minusHours(24);
+                if (lastSent.plusSeconds(60).isAfter(OffsetDateTime.now(ZoneOffset.UTC))) {
+                    log.debug("Verification email throttled accountId={}", account.getId());
+                    return;
+                }
+            }
             String token = UUID.randomUUID().toString();
             account.setVerificationToken(token);
             account.setVerificationTokenExpiresAt(OffsetDateTime.now(ZoneOffset.UTC).plusHours(24));
