@@ -17,6 +17,12 @@
 
     <properties>
         <java.version>21</java.version>
+        <!-- Override Spring Boot 3.3.2 defaults (Mockito 5.11 / ByteBuddy 1.14)
+             which can't instrument bytecode under Java 24+.
+             Symptom: "Could not modify all classes [class java.lang.Object]"
+             on context-loading tests. -->
+        <mockito.version>5.15.2</mockito.version>
+        <byte-buddy.version>1.15.11</byte-buddy.version>
     </properties>
 
     <dependencies>
