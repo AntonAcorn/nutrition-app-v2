@@ -55,7 +55,9 @@ nutrition:
     google-client-id: ${GOOGLE_CLIENT_ID:}
     google-client-secret: ${GOOGLE_CLIENT_SECRET:}
     google-redirect-uri: ${GOOGLE_REDIRECT_URI:${nutrition.app.base-url}/api/auth/google/callback}
-    google-native-client-ids: ${GOOGLE_NATIVE_CLIENT_IDS:}
+    # Default = iOS client ID currently shipped in the Capacitor app. Override
+    # via GOOGLE_NATIVE_CLIENT_IDS to add Android or a future rotated iOS client.
+    google-native-client-ids: ${GOOGLE_NATIVE_CLIENT_IDS:45553583079-uapqsj71o7kn3rr18op0feb4p1qdfnem.apps.googleusercontent.com}
   ai-analysis:
     daily-limit: ${AI_ANALYSIS_DAILY_LIMIT:30}
   push:
