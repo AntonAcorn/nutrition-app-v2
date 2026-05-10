@@ -6,6 +6,8 @@ interface CalorieBankBadgeProps {
   snapshot: CalorieBankSnapshot | null
   date: string
   consumedRatio?: number
+  remaining?: number
+  isToday?: boolean
 }
 
 interface BadgeContent {
@@ -13,7 +15,12 @@ interface BadgeContent {
   text: string
 }
 
-function pickBadgeContent(snapshot: CalorieBankSnapshot, consumedRatio: number): BadgeContent | null {
+function pickBadgeContent(
+  snapshot: CalorieBankSnapshot,
+  consumedRatio: number,
+  remaining: number,
+  isToday: boolean,
+): BadgeContent | null {
   if (snapshot.isRelaxToday) {
     return { emoji: '🎂', text: 'free pass today' }
   }
@@ -24,17 +31,26 @@ function pickBadgeContent(snapshot: CalorieBankSnapshot, consumedRatio: number):
       text: `−${snapshot.bankUsedToday} from bank`,
     }
   }
+  // Returning user: show existing balance once committed for the day.
   if (snapshot.bank > 0 && consumedRatio >= 0.85) {
     return { emoji: '🏦', text: `+${snapshot.bank} in bank` }
+  }
+  // Day-1 visibility: bank is empty, show what's about to deposit so the
+  // mechanic shows up immediately after the first log instead of at midnight.
+  if (isToday && snapshot.bank === 0 && consumedRatio > 0 && remaining > 0) {
+    const projected = Math.min(remaining, snapshot.dailyBankCap)
+    if (projected > 0) {
+      return { emoji: '🏦', text: `+${projected} to bank tonight` }
+    }
   }
   return null
 }
 
-export function CalorieBankBadge({ snapshot, date, consumedRatio = 0 }: CalorieBankBadgeProps) {
+export function CalorieBankBadge({ snapshot, date, consumedRatio = 0, remaining = 0, isToday = false }: CalorieBankBadgeProps) {
   const [open, setOpen] = useState(false)
 
   if (!snapshot) return null
-  const content = pickBadgeContent(snapshot, consumedRatio)
+  const content = pickBadgeContent(snapshot, consumedRatio, remaining, isToday)
   if (!content) return null
 
   return (
