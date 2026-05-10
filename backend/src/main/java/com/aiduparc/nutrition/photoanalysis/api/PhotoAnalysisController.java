@@ -12,8 +12,8 @@ import jakarta.validation.Valid;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.util.UUID;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
-import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -55,7 +55,7 @@ public class PhotoAnalysisController {
     @PostMapping(path = "/upload", consumes = "multipart/form-data")
     @ResponseStatus(HttpStatus.CREATED)
     public PhotoUploadAnalysisResponse uploadAndAnalyze(
-            @RequestParam(required = false) String entryDate,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate entryDate,
             @RequestParam(required = false) String userNote,
             @RequestParam(required = false) String locale,
             @RequestParam("file") MultipartFile file,
@@ -64,7 +64,7 @@ public class PhotoAnalysisController {
         validateUpload(file);
 
         try {
-            LocalDate safeEntryDate = StringUtils.hasText(entryDate) ? LocalDate.parse(entryDate) : LocalDate.now();
+            LocalDate safeEntryDate = entryDate != null ? entryDate : LocalDate.now();
             UUID resolvedUserId = currentNutritionUserResolver.resolve(session, null);
             rateLimitService.checkLimit(resolvedUserId);
             return new PhotoUploadAnalysisResponse(photoUploadAnalysisService.analyzeAndCreateDraft(

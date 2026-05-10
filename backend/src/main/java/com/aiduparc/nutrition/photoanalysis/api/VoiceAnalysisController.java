@@ -10,7 +10,6 @@ import java.time.LocalDate;
 import java.util.UUID;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.http.HttpStatus;
-import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -44,9 +43,7 @@ public class VoiceAnalysisController {
     ) {
         UUID userId = currentNutritionUserResolver.resolve(session, null);
         rateLimitService.checkLimit(userId);
-        LocalDate entryDate = StringUtils.hasText(request.entryDate())
-                ? LocalDate.parse(request.entryDate())
-                : LocalDate.now();
+        LocalDate entryDate = request.entryDate() != null ? request.entryDate() : LocalDate.now();
         return voiceAnalysisService.analyzeAndCreateDraft(userId, entryDate, request.description(), request.locale());
     }
 }
