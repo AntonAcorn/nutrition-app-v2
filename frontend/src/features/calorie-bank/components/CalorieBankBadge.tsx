@@ -37,10 +37,11 @@ function pickBadgeContent(
   }
   // Day-1 visibility: bank is empty, show what's about to deposit so the
   // mechanic shows up immediately after the first log instead of at midnight.
+  // "up to" framing — the number assumes the user eats nothing else today.
   if (isToday && snapshot.bank === 0 && consumedRatio > 0 && remaining > 0) {
     const projected = Math.min(remaining, snapshot.dailyBankCap)
     if (projected > 0) {
-      return { emoji: '🏦', text: `+${projected} to bank tonight` }
+      return { emoji: '🏦', text: `up to +${projected} to bank tonight` }
     }
   }
   return null
