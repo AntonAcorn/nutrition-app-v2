@@ -3,6 +3,7 @@ package com.aiduparc.nutrition.fasting.api;
 import com.aiduparc.nutrition.fasting.service.FastingService;
 import com.aiduparc.nutrition.security.service.CurrentNutritionUserResolver;
 import jakarta.servlet.http.HttpSession;
+import jakarta.validation.Valid;
 import java.util.List;
 import java.util.UUID;
 import org.springframework.http.HttpStatus;
@@ -35,7 +36,7 @@ public class FastingController {
 
     @PostMapping("/start")
     @ResponseStatus(HttpStatus.CREATED)
-    public FastingSessionResponse start(@RequestBody StartFastRequest request, HttpSession session) {
+    public FastingSessionResponse start(@Valid @RequestBody StartFastRequest request, HttpSession session) {
         UUID userId = resolver.resolve(session, null);
         return service.startFast(userId, request.targetHours());
     }

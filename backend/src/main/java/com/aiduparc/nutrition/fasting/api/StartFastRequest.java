@@ -1,3 +1,6 @@
 package com.aiduparc.nutrition.fasting.api;
 
-public record StartFastRequest(int targetHours) {}
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
+
+public record StartFastRequest(@Min(1) @Max(72) int targetHours) {}
