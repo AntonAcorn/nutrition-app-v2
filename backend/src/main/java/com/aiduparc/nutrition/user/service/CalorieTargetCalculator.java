@@ -45,6 +45,11 @@ class CalorieTargetCalculator {
             default -> tdee; // maintain
         };
 
+        // NIH safety floor: aggressive deficit applied to small users can push the
+        // target into eating-disorder territory. Cap at 1200 (women) / 1500 (men).
+        double floor = "male".equals(gender) ? 1500 : 1200;
+        if (adjusted < floor) adjusted = floor;
+
         return BigDecimal.valueOf(adjusted).setScale(0, RoundingMode.HALF_UP);
     }
 

@@ -74,7 +74,10 @@ public class CalorieBankService {
                 ? entry.getCalorieTargetKcal().intValue()
                 : profileTarget;
             int delta = target - consumed;
+            // Symmetric cap: a single bad day shouldn't wipe accumulated deposits.
+            // Anti-shame positioning — withdrawals are bounded just like deposits.
             if (delta > dailyCap) delta = dailyCap;
+            if (delta < -dailyCap) delta = -dailyCap;
             bank = Math.max(0, Math.min(bankMax, bank + delta));
         }
 
@@ -110,6 +113,13 @@ public class CalorieBankService {
     public RelaxDayEntity markRelaxDay(UUID userId, LocalDate date) {
         UserProfileEntity profile = userProfileRepository.findByNutritionUserId(userId)
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Profile not found"));
+
+        if (date.isAfter(LocalDate.now())) {
+            throw new ResponseStatusException(
+                HttpStatus.BAD_REQUEST,
+                "Cannot mark a future date as a relax day"
+            );
+        }
 
         Optional<RelaxDayEntity> existing = relaxDayRepository.findByUserIdAndRelaxDate(userId, date);
         if (existing.isPresent()) return existing.get();
@@ -166,7 +176,7 @@ public class CalorieBankService {
         int bank = 0;
         for (DailyDelta d : chronological) {
             if (d.isRelax() || !d.logged()) continue;
-            int delta = Math.min(dailyCap, d.target() - d.consumed());
+            int delta = Math.max(-dailyCap, Math.min(dailyCap, d.target() - d.consumed()));
             bank = Math.max(0, Math.min(bankMax, bank + delta));
         }
         return bank;

@@ -74,7 +74,27 @@ class CalorieTargetCalculatorTest {
     @Test
     void loseWithAggressiveStrategy() {
         BigDecimal result = CalorieTargetCalculator.calculate(30, "male", bd("180"), bd("80"), "sedentary", "lose", "aggressive");
-        assertThat(result).isEqualByComparingTo("1436"); // 2136 - 700
+        // 2136 - 700 = 1436, but clamped to male floor of 1500
+        assertThat(result).isEqualByComparingTo("1500");
+    }
+
+    // Small female, aggressive deficit — would land at ~944 kcal without the floor.
+    @Test
+    void aggressiveDeficitClampsToFemaleFloor() {
+        BigDecimal result = CalorieTargetCalculator.calculate(25, "female", bd("160"), bd("50"), "sedentary", "lose", "aggressive");
+        // BMR = 10*50 + 6.25*160 - 5*25 - 161 = 500+1000-125-161 = 1214
+        // TDEE = 1214 * 1.2 = 1456.8
+        // lose aggressive = 1456.8 - 700 = 756.8, clamped to 1200
+        assertThat(result).isEqualByComparingTo("1200");
+    }
+
+    @Test
+    void aggressiveDeficitClampsToMaleFloor() {
+        BigDecimal result = CalorieTargetCalculator.calculate(25, "male", bd("170"), bd("60"), "sedentary", "lose", "aggressive");
+        // BMR = 10*60 + 6.25*170 - 5*25 + 5 = 600+1062.5-125+5 = 1542.5
+        // TDEE = 1542.5 * 1.2 = 1851
+        // lose aggressive = 1851 - 700 = 1151, clamped to 1500
+        assertThat(result).isEqualByComparingTo("1500");
     }
 
     private static BigDecimal bd(String val) {

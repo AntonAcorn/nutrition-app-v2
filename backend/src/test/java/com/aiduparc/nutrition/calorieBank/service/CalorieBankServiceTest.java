@@ -76,9 +76,22 @@ class CalorieBankServiceTest {
     void hugeOverrunIsClampedAtZero() {
         List<DailyDelta> days = List.of(
             DailyDelta.logged(2000, 1800, false), // +200
-            DailyDelta.logged(2000, 4000, false)  // -2000 → 0, not negative
+            DailyDelta.logged(2000, 4000, false)  // capped to -300, bank goes -100 → 0
         );
         assertThat(CalorieBankService.simulateBank(days, DAILY_CAP, BANK_MAX)).isZero();
+    }
+
+    // Anti-shame guarantee: a savings buffer doesn't get wiped out by one bad day.
+    // Withdrawals are bounded by dailyCap the same way deposits are.
+    @Test
+    void singleBadDayCannotWipeAccumulatedBank() {
+        List<DailyDelta> days = List.of(
+            DailyDelta.logged(2000, 1700, false), // +300
+            DailyDelta.logged(2000, 1700, false), // +300 → 600
+            DailyDelta.logged(2000, 1700, false), // +300 → 900
+            DailyDelta.logged(2000, 4000, false)  // -2000 raw, capped to -300 → 600
+        );
+        assertThat(CalorieBankService.simulateBank(days, DAILY_CAP, BANK_MAX)).isEqualTo(600);
     }
 
     @Test
