@@ -26,13 +26,13 @@ First three lines are visible without tapping "more" — keep them load-bearing.
 ```
 One bad day shouldn't break your progress.
 
-Rumbly Eats is a food coach for people who keep quitting calorie apps after a bad meal. Built around a calorie bank: every day under target deposits, bad days withdraw, and three "relax days" a month let real life happen.
+Rumbly Eats is a food coach for people who keep quitting calorie apps after a bad meal. Built around a calorie bank: every day under target deposits, bad days withdraw, and two "relax days" a month let real life happen.
 
 🏦 CALORIE BANK
 Every day under target deposits calories into your bank. Going over? Withdraw up to 200 kcal. Your streak holds. Your deficit holds. You keep going.
 
 🎂 RELAX DAYS
-Three free-pass days every month. Birthdays, weddings, the week your kid was sick — they don't count against you. Built for actual humans.
+Two free-pass days every month. Birthdays, weddings, the week your kid was sick — they don't count against you. Built for actual humans.
 
 🧠 COACH WATCHES YOUR WEEK
 Patterns the dashboard hides. "Wednesdays you go 30% over target." "After late dinners your wellbeing drops 1.5 stars." Quiet pushes when something matters, not three reminders a day.
@@ -78,7 +78,7 @@ App Store shows the first 3 screenshots without scrolling. Lead with the differe
 | # | Screen | Caption (overlay text, ≤40 chars) |
 |---|--------|-----------------------------------|
 | 1 | Calorie Bank badge active ("−200 from bank") on dashboard | **Bad day? Withdraw, keep going.** |
-| 2 | Relax Day calendar with 🎂 marked | **3 free-pass days every month.** |
+| 2 | Relax Day calendar with 🎂 marked | **2 free-pass days every month.** |
 | 3 | Coach Insights card with pattern callout | **Coach finds what you can't see.** |
 | 4 | Quick Add (camera/voice/barcode + saved meals) | **Log in 2 seconds.** |
 | 5 | Weekly Recap card with share button | **Your week, in numbers worth sharing.** |
@@ -88,7 +88,7 @@ App Store shows the first 3 screenshots without scrolling. Lead with the differe
 ```
 Hi 👋 — Rumbly Eats is live.
 
-It's a food coach with a calorie bank: deposit on light days, withdraw on heavy ones, plus three free-pass relax days a month. No streak-breaking over one bad meal.
+It's a food coach with a calorie bank: deposit on light days, withdraw on heavy ones, plus two free-pass relax days a month. No streak-breaking over one bad meal.
 
 Comments and bug reports go to feedback@rumblyeats.org. We read everything.
 ```

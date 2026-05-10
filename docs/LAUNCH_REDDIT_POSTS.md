@@ -42,7 +42,7 @@ So I built what I actually wanted, called it **Rumbly Eats**:
 
 **Calorie bank.** Every day under target deposits calories. Going over? You withdraw up to 200 kcal — your streak holds, the deficit holds, you keep going.
 
-**Relax days.** Three per month. Birthdays don't count. Weddings don't count. The week your kid was sick doesn't count. Built for real life.
+**Relax days.** Two per month. Birthdays don't count. Weddings don't count. Sick days don't count. Built for real life.
 
 **Coach that finds patterns, not just totals.** "Wednesdays you go 30% over target." "After late dinners your wellbeing drops 1.5 stars." It pushes once when something matters, not three times a day.
 
@@ -68,7 +68,7 @@ It's called **Rumbly Eats**, and the core mechanic is a calorie bank:
 
 - Every day under your target = deposit (up to 200 kcal/day)
 - Going over your target? Withdraw from the bank — your streak holds
-- Three "relax days" every month for birthdays, weddings, sick weeks — they don't count
+- Two "relax days" every month for birthdays, weddings, sick days — they don't count
 
 Underneath the bank it's a normal tracker (photo logging, voice, barcode, macros, Apple Health sync). But the bank is the part that's different. The whole point is: bad days are part of life, the app shouldn't punish you for them.
 
@@ -78,7 +78,7 @@ iOS only at launch, free, Canada/US App Store.
 
 What I want feedback on:
 1. Does the bank mechanic make sense, or does "letting yourself off easy" feel wrong?
-2. Is 200 kcal/day the right withdrawal cap? 3 relax days/month the right number?
+2. Is 200 kcal/day the right withdrawal cap? 2 relax days/month the right number?
 3. Anyone else burned out from MFP that I should be talking to?
 
 [App Store link]
@@ -107,7 +107,7 @@ So I built **Rumbly Eats** with an explicit calorie bank:
 
 Mathematically it's the same CICO. UX-wise it stops treating one bad day as a catastrophe.
 
-There are also 3 "relax days" per month where overage doesn't withdraw at all — the equivalent of a planned diet break. The cap and rate are what keep this from being "just don't track."
+There are also 2 "relax days" per month where overage doesn't withdraw at all — the equivalent of a planned diet break. The cap and rate are what keep this from being "just don't track."
 
 iOS-only launch, free, Canadian.
 

@@ -19,7 +19,7 @@ const WELCOME_SLIDES: Array<{ visual: React.ReactNode; title: string; body: stri
   {
     visual: <div className="onboarding-welcome__hero">🎂</div>,
     title: 'Relax days for real life',
-    body: 'Three free-pass days every month. Birthdays, weddings, sick weeks — they don\'t count against you. The streak holds. Built for actual humans.',
+    body: 'Two free-pass days every month. Birthdays, weddings, sick days — they don\'t count against you. The streak holds. Built for actual humans.',
   },
   {
     visual: <WeekScanAnimation />,
