@@ -82,7 +82,7 @@ function AppInner() {
         if (!cancelled) {
           setAuthUser(me)
           if (me.authenticated && me.nutritionUserId) {
-            identifyUser(me.nutritionUserId, { email: me.email ?? undefined, name: me.displayName ?? undefined })
+            identifyUser(me.nutritionUserId)
             Sentry.setUser({ id: me.nutritionUserId, email: me.email ?? undefined })
             requestHealthPermissions()
           }

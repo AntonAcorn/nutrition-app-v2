@@ -30,7 +30,10 @@ interface AuthShellProps {
 
 function trackUser(user: AuthUser) {
   if (!user.nutritionUserId) return
-  identifyUser(user.nutritionUserId, { email: user.email ?? undefined, name: user.displayName ?? undefined })
+  // PostHog is declared as Analytics in PrivacyInfo.xcprivacy; email is only declared
+  // for AppFunctionality. Keep PostHog limited to the anonymous user id so we don't
+  // violate the manifest. Sentry (AppFunctionality) can still receive email.
+  identifyUser(user.nutritionUserId)
   Sentry.setUser({ id: user.nutritionUserId, email: user.email ?? undefined })
 }
 
