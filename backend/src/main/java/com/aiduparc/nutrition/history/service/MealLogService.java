@@ -9,6 +9,7 @@ import com.aiduparc.nutrition.history.model.MealSlotEntity;
 import com.aiduparc.nutrition.history.repository.DailyNutritionEntryRepository;
 import com.aiduparc.nutrition.history.repository.MealLogEntryRepository;
 import com.aiduparc.nutrition.history.repository.MealSlotRepository;
+import com.aiduparc.nutrition.user.repository.UserProfileRepository;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -49,15 +50,18 @@ public class MealLogService {
     private final MealLogEntryRepository mealLogRepository;
     private final MealSlotRepository mealSlotRepository;
     private final DailyNutritionEntryRepository dailyEntryRepository;
+    private final UserProfileRepository userProfileRepository;
 
     public MealLogService(
             MealLogEntryRepository mealLogRepository,
             MealSlotRepository mealSlotRepository,
-            DailyNutritionEntryRepository dailyEntryRepository
+            DailyNutritionEntryRepository dailyEntryRepository,
+            UserProfileRepository userProfileRepository
     ) {
         this.mealLogRepository = mealLogRepository;
         this.mealSlotRepository = mealSlotRepository;
         this.dailyEntryRepository = dailyEntryRepository;
+        this.userProfileRepository = userProfileRepository;
     }
 
     public List<MealSlotResponse> getMealLog(UUID userId, LocalDate date) {
@@ -195,6 +199,11 @@ public class MealLogService {
             entity.setUserId(userId);
             entity.setEntryDate(date);
             entity.setWaterGlasses(0);
+            // Snapshot the profile's daily target on creation so future profile
+            // changes don't retroactively rewrite history.
+            userProfileRepository.findByNutritionUserId(userId)
+                .map(p -> p.getDailyCalorieTargetKcal())
+                .ifPresent(entity::setCalorieTargetKcal);
         }
         entity.setCaloriesConsumedKcal(calories);
         entity.setProteinGrams(protein);

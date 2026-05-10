@@ -1,5 +1,7 @@
 package com.aiduparc.nutrition.user.api;
 
+import jakarta.validation.constraints.DecimalMax;
+import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
@@ -9,9 +11,9 @@ import java.math.BigDecimal;
 public record CreateProfileRequest(
     @NotNull @Min(10) @Max(120) Integer ageYears,
     @NotBlank String gender,
-    @NotNull BigDecimal heightCm,
-    @NotNull BigDecimal startingWeightKg,
-    BigDecimal targetWeightKg,
+    @NotNull @DecimalMin("100") @DecimalMax("250") BigDecimal heightCm,
+    @NotNull @DecimalMin("30") @DecimalMax("300") BigDecimal startingWeightKg,
+    @DecimalMin("30") @DecimalMax("300") BigDecimal targetWeightKg,
     @NotBlank String activityLevel,
     @NotBlank String goal,
     String weightLossStrategy,
