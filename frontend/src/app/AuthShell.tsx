@@ -102,6 +102,23 @@ export function AuthShell({ authUser, isNative, theme, onToggleTheme, onAuthenti
 
   async function handleAuthSubmit(event?: FormEvent<HTMLFormElement>) {
     event?.preventDefault()
+    const email = authEmail.trim()
+    if (!email) {
+      setAuthError('Please enter your email.')
+      return
+    }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      setAuthError('Please enter a valid email.')
+      return
+    }
+    if (!authPassword) {
+      setAuthError('Please enter your password.')
+      return
+    }
+    if (authMode === 'register' && !authDisplayName.trim()) {
+      setAuthError('Please enter your name.')
+      return
+    }
     if (authMode === 'register' && authPassword !== authConfirmPassword) {
       setAuthError('Passwords do not match')
       return
@@ -111,14 +128,14 @@ export function AuthShell({ authUser, isNative, theme, onToggleTheme, onAuthenti
 
     try {
       if (authMode === 'login') {
-        const nextUser = await login({ email: authEmail, password: authPassword })
+        const nextUser = await login({ email, password: authPassword })
         trackUser(nextUser)
         track('user_logged_in')
         onAuthenticated(nextUser)
         setAuthPassword('')
         setAuthConfirmPassword('')
       } else {
-        const nextUser = await register({ email: authEmail, password: authPassword, displayName: authDisplayName })
+        const nextUser = await register({ email, password: authPassword, displayName: authDisplayName.trim() })
         onAuthenticated(nextUser)
         setAuthMode('check-email')
         setResendSuccess(false)
