@@ -29,17 +29,24 @@ public class ApnsPushService {
             @Value("${nutrition.push.apns.key:}") String apnsKey,
             @Value("${nutrition.push.apns.key-id:}") String keyId,
             @Value("${nutrition.push.apns.team-id:}") String teamId,
-            @Value("${nutrition.push.apns.bundle-id:com.aiduparc.rumblyeats}") String bundleId
+            @Value("${nutrition.push.apns.bundle-id:com.aiduparc.rumblyeats}") String bundleId,
+            @Value("${nutrition.push.apns.environment:production}") String environment
     ) throws Exception {
         this.bundleId = bundleId;
         if (StringUtils.hasText(apnsKey) && StringUtils.hasText(keyId) && StringUtils.hasText(teamId)) {
+            // TestFlight + App Store use the production gateway; local Xcode dev
+            // installs use the sandbox gateway. The wrong gateway silently drops
+            // pushes with no error in our logs.
+            String host = "development".equalsIgnoreCase(environment)
+                    ? ApnsClientBuilder.DEVELOPMENT_APNS_HOST
+                    : ApnsClientBuilder.PRODUCTION_APNS_HOST;
             this.apnsClient = new ApnsClientBuilder()
-                    .setApnsServer(ApnsClientBuilder.PRODUCTION_APNS_HOST)
+                    .setApnsServer(host)
                     .setSigningKey(com.eatthepath.pushy.apns.auth.ApnsSigningKey.loadFromInputStream(
                             new ByteArrayInputStream(apnsKey.getBytes(StandardCharsets.UTF_8)),
                             teamId, keyId))
                     .build();
-            log.info("APNs client initialized for bundle: {}", bundleId);
+            log.info("APNs client initialized: bundle={} host={}", bundleId, host);
         } else {
             log.warn("APNs credentials not configured — native push notifications disabled");
             this.apnsClient = null;
