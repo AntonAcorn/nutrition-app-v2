@@ -2,7 +2,7 @@ self.addEventListener('install', () => self.skipWaiting())
 self.addEventListener('activate', () => self.clients.claim())
 
 self.addEventListener('push', (event) => {
-  let title = 'Puzometr'
+  let title = 'Rumbly Eats'
   let body = 'Time to log your meal!'
   try {
     const data = event.data?.json()

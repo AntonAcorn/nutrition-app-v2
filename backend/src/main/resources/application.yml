@@ -64,7 +64,7 @@ nutrition:
   push:
     vapid-public-key: ${VAPID_PUBLIC_KEY:}
     vapid-private-key: ${VAPID_PRIVATE_KEY:}
-    vapid-subject: ${VAPID_SUBJECT:mailto:admin@puzometr.org}
+    vapid-subject: ${VAPID_SUBJECT:mailto:admin@rumblyeats.org}
   photo-analysis:
     enabled: ${PHOTO_ANALYSIS_ENABLED:true}
     provider: ${PHOTO_ANALYSIS_PROVIDER:openai-stub}
