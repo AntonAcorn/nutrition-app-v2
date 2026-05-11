@@ -32,7 +32,7 @@ public class WellbeingController {
     @ResponseStatus(HttpStatus.CREATED)
     public void rate(@Valid @RequestBody WellbeingRateRequest request, HttpSession session) {
         UUID userId = userResolver.resolve(session, null);
-        log.info("wellbeing rate userId={} rating={}", userId, request.rating());
-        wellbeingService.saveRating(userId, request.rating());
+        log.info("wellbeing rate userId={} rating={} date={}", userId, request.rating(), request.entryDate());
+        wellbeingService.saveRating(userId, request.rating(), request.entryDate());
     }
 }

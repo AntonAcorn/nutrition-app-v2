@@ -37,7 +37,7 @@ export function WellbeingDailyPrompt({ date }: Props) {
     setSubmitting(true)
     hapticLight()
     try {
-      await submitWellbeingRating(rating)
+      await submitWellbeingRating(rating, date)
       try { localStorage.setItem(storageKey(date), String(rating)) } catch {}
       setRated(rating)
       queryClient.invalidateQueries({ queryKey: ['coach-insights'] })

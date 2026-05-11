@@ -41,19 +41,28 @@ public class WellbeingService {
     }
 
     @Transactional
-    public void saveRating(UUID userId, int rating) {
+    public void saveRating(UUID userId, int rating, LocalDate entryDate) {
         OffsetDateTime now = OffsetDateTime.now(ZoneOffset.UTC);
-        LocalDate today = now.toLocalDate();
-        String slot = inferSlot(userId, today, now);
+        LocalDate effectiveDate = entryDate != null ? entryDate : now.toLocalDate();
+        String slot = inferSlot(userId, effectiveDate, now);
 
-        WellbeingEntryEntity entry = new WellbeingEntryEntity();
-        entry.setUserId(userId);
+        // Idempotent per (user, day): if a rating already exists for this date,
+        // update it instead of writing another row. Without this, a client that
+        // re-submits (storage cleared, multi-device, server retry) inflates the
+        // wellbeing dataset and skews coach correlations.
+        WellbeingEntryEntity entry = entryRepository
+            .findFirstByUserIdAndEntryDateOrderByCreatedAtAsc(userId, effectiveDate)
+            .orElseGet(WellbeingEntryEntity::new);
+        if (entry.getUserId() == null) {
+            entry.setUserId(userId);
+            entry.setEntryDate(effectiveDate);
+        }
         entry.setRating(rating);
-        entry.setEntryDate(today);
         entry.setMealSlot(slot);
         entryRepository.save(entry);
 
-        log.info("wellbeing rating saved userId={} rating={} slot={}", userId, rating, slot);
+        log.info("wellbeing rating saved userId={} rating={} date={} slot={}",
+                userId, rating, effectiveDate, slot);
     }
 
     /**

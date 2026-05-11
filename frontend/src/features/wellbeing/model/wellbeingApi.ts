@@ -8,6 +8,6 @@ export const RATING_OPTIONS: { rating: number; emoji: string; label: string }[] 
   { rating: 5, emoji: '⚡', label: 'Energised' },
 ]
 
-export function submitWellbeingRating(rating: number): Promise<void> {
-  return apiClient.post('/api/wellbeing/rate', { rating })
+export function submitWellbeingRating(rating: number, entryDate: string): Promise<void> {
+  return apiClient.post('/api/wellbeing/rate', { rating, entryDate })
 }
