@@ -10,6 +10,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.aiduparc.nutrition.history.service.NutritionHistoryService;
 import com.aiduparc.nutrition.security.SecurityConfig;
+import com.aiduparc.nutrition.security.TestAuthSession;
 import com.aiduparc.nutrition.security.service.CurrentNutritionUserResolver;
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -23,7 +24,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.test.web.servlet.MockMvc;
 
 @WebMvcTest(NutritionStatisticsController.class)
-@Import(SecurityConfig.class)
+@Import({SecurityConfig.class, com.aiduparc.nutrition.security.AuthRateLimiter.class})
 class NutritionStatisticsControllerTest {
 
     @Autowired
@@ -38,7 +39,7 @@ class NutritionStatisticsControllerTest {
     @Test
     void returnsStatisticsPayload() throws Exception {
         UUID userId = UUID.fromString("00000000-0000-0000-0000-000000000001");
-        when(currentNutritionUserResolver.resolve(any(), eq(null))).thenReturn(userId);
+        when(currentNutritionUserResolver.resolve(any())).thenReturn(userId);
         when(nutritionHistoryService.getStatistics(userId, LocalDate.of(2026, 3, 26), LocalDate.of(2026, 4, 8)))
             .thenReturn(new NutritionStatisticsResponse(
                 userId,
@@ -76,6 +77,7 @@ class NutritionStatisticsControllerTest {
             ));
 
         mockMvc.perform(get("/api/history/statistics")
+                .session(TestAuthSession.of(userId))
                 .param("fromDate", "2026-03-26")
                 .param("toDate", "2026-04-08"))
             .andExpect(status().isOk())

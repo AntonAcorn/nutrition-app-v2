@@ -92,7 +92,7 @@ public class AuthAccountService {
     @Transactional
     public AuthAccountEntity createAppleAccount(String appleId, String email, String displayName, UUID nutritionUserId) {
         var account = new AuthAccountEntity();
-        account.setEmail(email != null ? email.trim().toLowerCase() : appleId + "@privaterelay.appleid.com");
+        account.setEmail(email != null ? email.trim().toLowerCase() : appleId + "@apple.local");
         account.setAppleId(appleId);
         account.setDisplayName(displayName == null || displayName.isBlank() ? null : displayName.trim());
         account.setNutritionUserId(nutritionUserId);

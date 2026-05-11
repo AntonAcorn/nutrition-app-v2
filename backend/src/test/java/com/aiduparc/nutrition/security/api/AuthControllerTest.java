@@ -4,7 +4,6 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.request;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.aiduparc.nutrition.security.AuthProperties;
@@ -24,7 +23,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
 @WebMvcTest(AuthController.class)
-@Import(SecurityConfig.class)
+@Import({SecurityConfig.class, com.aiduparc.nutrition.security.AuthRateLimiter.class})
 class AuthControllerTest {
 
     @Autowired
@@ -46,7 +45,7 @@ class AuthControllerTest {
     private CurrentNutritionUserResolver currentNutritionUserResolver;
 
     @Test
-    void registerShouldCreateAuthenticatedSession() throws Exception {
+    void registerShouldNotCreateSession() throws Exception {
         AuthenticatedSession authenticatedSession = new AuthenticatedSession(
                 UUID.randomUUID(),
                 "new@example.com",
@@ -55,15 +54,6 @@ class AuthControllerTest {
         );
 
         when(authFacade.register(any())).thenReturn(authenticatedSession);
-        when(authFacade.me(authenticatedSession)).thenReturn(new AuthResponse(
-                authenticatedSession.accountId(),
-                authenticatedSession.email(),
-                authenticatedSession.displayName(),
-                authenticatedSession.nutritionUserId(),
-                true,
-                false,
-                false
-        ));
 
         mockMvc.perform(post("/api/auth/register")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -75,8 +65,8 @@ class AuthControllerTest {
                                 }
                                 """))
                 .andExpect(status().isCreated())
-                .andExpect(request().sessionAttribute("nutrition.auth.session", authenticatedSession))
-                .andExpect(jsonPath("$.authenticated").value(true))
+                .andExpect(jsonPath("$.authenticated").value(false))
+                .andExpect(jsonPath("$.emailVerified").value(false))
                 .andExpect(jsonPath("$.email").value("new@example.com"));
     }
 }

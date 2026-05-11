@@ -11,18 +11,13 @@ public class CurrentNutritionUserResolver {
 
     private static final String AUTH_SESSION_KEY = "nutrition.auth.session";
 
-    public UUID resolve(HttpSession session, UUID fallbackUserId) {
+    public UUID resolve(HttpSession session) {
         if (session != null) {
             Object value = session.getAttribute(AUTH_SESSION_KEY);
             if (value instanceof AuthenticatedSession authenticatedSession && authenticatedSession.nutritionUserId() != null) {
                 return authenticatedSession.nutritionUserId();
             }
         }
-
-        if (fallbackUserId != null) {
-            return fallbackUserId;
-        }
-
         throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Authentication required");
     }
 }

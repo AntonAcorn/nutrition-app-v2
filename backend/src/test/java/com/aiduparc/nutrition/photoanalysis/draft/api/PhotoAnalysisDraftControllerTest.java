@@ -11,6 +11,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.aiduparc.nutrition.photoanalysis.application.dto.AnalyzedFoodItem;
 import com.aiduparc.nutrition.security.SecurityConfig;
+import com.aiduparc.nutrition.security.TestAuthSession;
 import com.aiduparc.nutrition.security.service.CurrentNutritionUserResolver;
 import com.aiduparc.nutrition.photoanalysis.application.dto.PhotoAnalysisResponse;
 import com.aiduparc.nutrition.photoanalysis.application.dto.PhotoAnalysisTotals;
@@ -31,7 +32,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.test.web.servlet.MockMvc;
 
 @WebMvcTest(PhotoAnalysisDraftController.class)
-@Import(SecurityConfig.class)
+@Import({SecurityConfig.class, com.aiduparc.nutrition.security.AuthRateLimiter.class})
 class PhotoAnalysisDraftControllerTest {
 
     @Autowired
@@ -64,11 +65,12 @@ class PhotoAnalysisDraftControllerTest {
                 OffsetDateTime.now()
         );
 
-        when(currentNutritionUserResolver.resolve(any(), eq(null))).thenReturn(userId);
+        when(currentNutritionUserResolver.resolve(any())).thenReturn(userId);
         when(draftService.create(any())).thenReturn(response);
         when(draftService.get(draftId, userId)).thenReturn(response);
 
         mockMvc.perform(post("/api/photo-analysis/drafts")
+                        .session(TestAuthSession.of(userId))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
                                 {
@@ -101,7 +103,8 @@ class PhotoAnalysisDraftControllerTest {
                 .andExpect(jsonPath("$.id").value(draftId.toString()))
                 .andExpect(jsonPath("$.status").value("DRAFT"));
 
-        mockMvc.perform(get("/api/photo-analysis/drafts/{draftId}", draftId))
+        mockMvc.perform(get("/api/photo-analysis/drafts/{draftId}", draftId)
+                        .session(TestAuthSession.of(userId)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.analysis.totals.calories").value(560));
 

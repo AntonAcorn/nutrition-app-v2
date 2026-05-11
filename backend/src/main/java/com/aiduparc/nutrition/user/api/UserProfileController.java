@@ -36,7 +36,7 @@ public class UserProfileController {
             @Valid @RequestBody CreateProfileRequest request,
             HttpSession session
     ) {
-        UUID nutritionUserId = currentNutritionUserResolver.resolve(session, null);
+        UUID nutritionUserId = currentNutritionUserResolver.resolve(session);
 
         if (userProfileService.existsByNutritionUserId(nutritionUserId)) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Profile already exists");
@@ -63,7 +63,7 @@ public class UserProfileController {
             @Valid @RequestBody CreateProfileRequest request,
             HttpSession session
     ) {
-        UUID nutritionUserId = currentNutritionUserResolver.resolve(session, null);
+        UUID nutritionUserId = currentNutritionUserResolver.resolve(session);
 
         var entity = userProfileService.updateProfile(new UserProfileService.UpdateUserProfileCommand(
             nutritionUserId,
@@ -91,7 +91,7 @@ public class UserProfileController {
 
     @GetMapping
     public UserProfileResponse getProfile(HttpSession session) {
-        UUID nutritionUserId = currentNutritionUserResolver.resolve(session, null);
+        UUID nutritionUserId = currentNutritionUserResolver.resolve(session);
 
         return userProfileService.findByNutritionUserId(nutritionUserId)
             .map(UserProfileResponse::from)

@@ -31,7 +31,7 @@ public class WellbeingController {
     @PostMapping("/rate")
     @ResponseStatus(HttpStatus.CREATED)
     public void rate(@Valid @RequestBody WellbeingRateRequest request, HttpSession session) {
-        UUID userId = userResolver.resolve(session, null);
+        UUID userId = userResolver.resolve(session);
         log.info("wellbeing rate userId={} rating={} date={}", userId, request.rating(), request.entryDate());
         wellbeingService.saveRating(userId, request.rating(), request.entryDate());
     }

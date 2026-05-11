@@ -5,13 +5,12 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.aiduparc.nutrition.photoanalysis.application.AiAnalysisRateLimitService;
-import com.aiduparc.nutrition.photoanalysis.application.PhotoAnalysisService;
 import com.aiduparc.nutrition.security.SecurityConfig;
+import com.aiduparc.nutrition.security.TestAuthSession;
 import com.aiduparc.nutrition.security.service.CurrentNutritionUserResolver;
 import com.aiduparc.nutrition.photoanalysis.application.PhotoUploadAnalysisService;
 import com.aiduparc.nutrition.photoanalysis.application.dto.AnalyzedFoodItem;
@@ -28,20 +27,16 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.web.servlet.MockMvc;
 
 @WebMvcTest(PhotoAnalysisController.class)
-@Import(SecurityConfig.class)
+@Import({SecurityConfig.class, com.aiduparc.nutrition.security.AuthRateLimiter.class})
 class PhotoAnalysisControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
-
-    @MockBean
-    private PhotoAnalysisService photoAnalysisService;
 
     @MockBean
     private PhotoUploadAnalysisService photoUploadAnalysisService;
@@ -53,55 +48,11 @@ class PhotoAnalysisControllerTest {
     private AiAnalysisRateLimitService aiAnalysisRateLimitService;
 
     @Test
-    void shouldReturnStructuredPhotoAnalysisResponse() throws Exception {
-        when(photoAnalysisService.analyze(any())).thenReturn(new PhotoAnalysisResponse(
-                List.of(new AnalyzedFoodItem(
-                        "Chicken breast",
-                        "150 g",
-                        new BigDecimal("248"),
-                        new BigDecimal("46"),
-                        new BigDecimal("0"),
-                        new BigDecimal("5"),
-                        new BigDecimal("0"),
-                        new BigDecimal("0.81")
-                )),
-                new PhotoAnalysisTotals(
-                        new BigDecimal("248"),
-                        new BigDecimal("46"),
-                        new BigDecimal("0"),
-                        new BigDecimal("5"),
-                        new BigDecimal("0")
-                ),
-                new BigDecimal("0.81"),
-                List.of("stub analysis"),
-                true
-        ));
-
-        mockMvc.perform(post("/api/photo-analysis")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("""
-                                {
-                                  "imageUrl": "https://cdn.example.com/meal.jpg",
-                                  "userNote": "Lunch",
-                                  "locale": "en"
-                                }
-                                """))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.items[0].name").value("Chicken breast"))
-                .andExpect(jsonPath("$.totals.calories").value(248))
-                .andExpect(jsonPath("$.confidence").value(0.81))
-                .andExpect(jsonPath("$.notes[0]").value("stub analysis"))
-                .andExpect(jsonPath("$.needsUserConfirmation").value(true));
-
-        verify(photoAnalysisService).analyze(any());
-    }
-
-    @Test
     void shouldCreateDraftFromUploadedPhoto() throws Exception {
         UUID userId = UUID.randomUUID();
         UUID draftId = UUID.randomUUID();
 
-        when(currentNutritionUserResolver.resolve(any(), eq(null))).thenReturn(userId);
+        when(currentNutritionUserResolver.resolve(any())).thenReturn(userId);
         when(photoUploadAnalysisService.analyzeAndCreateDraft(any())).thenReturn(new PhotoAnalysisDraftResponse(
                 draftId,
                 userId,
@@ -147,6 +98,7 @@ class PhotoAnalysisControllerTest {
 
         mockMvc.perform(multipart("/api/photo-analysis/upload")
                         .file(file)
+                        .session(TestAuthSession.of(userId))
                         .param("entryDate", "2026-04-08")
                         .param("userNote", "Lunch")
                         .param("locale", "en"))
@@ -159,20 +111,6 @@ class PhotoAnalysisControllerTest {
     }
 
     @Test
-    void shouldRejectBlankImageUrl() throws Exception {
-        mockMvc.perform(post("/api/photo-analysis")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("""
-                                {
-                                  "imageUrl": "",
-                                  "userNote": "Lunch",
-                                  "locale": "en"
-                                }
-                                """))
-                .andExpect(status().isBadRequest());
-    }
-
-    @Test
     void shouldRejectNonImageUpload() throws Exception {
         MockMultipartFile file = new MockMultipartFile(
                 "file",
@@ -182,7 +120,8 @@ class PhotoAnalysisControllerTest {
         );
 
         mockMvc.perform(multipart("/api/photo-analysis/upload")
-                        .file(file))
+                        .file(file)
+                        .session(TestAuthSession.of(UUID.randomUUID())))
                 .andExpect(status().isBadRequest());
     }
 }

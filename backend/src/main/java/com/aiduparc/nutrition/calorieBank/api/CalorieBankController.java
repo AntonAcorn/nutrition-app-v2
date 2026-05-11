@@ -39,7 +39,7 @@ public class CalorieBankController {
         @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date,
         HttpSession session
     ) {
-        UUID userId = userResolver.resolve(session, null);
+        UUID userId = userResolver.resolve(session);
         LocalDate today = date != null ? date : LocalDate.now();
         return calorieBankService.getSnapshot(userId, today);
     }
@@ -47,7 +47,7 @@ public class CalorieBankController {
     @PostMapping("/relax-day")
     @ResponseStatus(HttpStatus.CREATED)
     public void markRelaxDay(@Valid @RequestBody RelaxDayRequest request, HttpSession session) {
-        UUID userId = userResolver.resolve(session, null);
+        UUID userId = userResolver.resolve(session);
         calorieBankService.markRelaxDay(userId, request.date());
     }
 
@@ -57,7 +57,7 @@ public class CalorieBankController {
         @PathVariable @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date,
         HttpSession session
     ) {
-        UUID userId = userResolver.resolve(session, null);
+        UUID userId = userResolver.resolve(session);
         calorieBankService.unmarkRelaxDay(userId, date);
     }
 
@@ -66,7 +66,7 @@ public class CalorieBankController {
         @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate month,
         HttpSession session
     ) {
-        UUID userId = userResolver.resolve(session, null);
+        UUID userId = userResolver.resolve(session);
         LocalDate ref = month != null ? month : LocalDate.now();
         return calorieBankService.getRelaxDaysForMonth(userId, ref);
     }

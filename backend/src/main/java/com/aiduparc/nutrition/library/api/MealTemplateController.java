@@ -31,14 +31,14 @@ public class MealTemplateController {
 
     @GetMapping
     public List<MealTemplateResponse> list(HttpSession session) {
-        UUID userId = resolver.resolve(session, null);
+        UUID userId = resolver.resolve(session);
         return service.list(userId);
     }
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public MealTemplateResponse create(@Valid @RequestBody MealTemplateRequest request, HttpSession session) {
-        UUID userId = resolver.resolve(session, null);
+        UUID userId = resolver.resolve(session);
         return service.create(userId, request);
     }
 
@@ -48,14 +48,14 @@ public class MealTemplateController {
             @Valid @RequestBody MealTemplateRequest request,
             HttpSession session
     ) {
-        UUID userId = resolver.resolve(session, null);
+        UUID userId = resolver.resolve(session);
         return service.update(userId, id, request);
     }
 
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void delete(@PathVariable UUID id, HttpSession session) {
-        UUID userId = resolver.resolve(session, null);
+        UUID userId = resolver.resolve(session);
         service.delete(userId, id);
     }
 
@@ -66,7 +66,7 @@ public class MealTemplateController {
             @Valid @RequestBody LogTemplateRequest request,
             HttpSession session
     ) {
-        UUID userId = resolver.resolve(session, null);
+        UUID userId = resolver.resolve(session);
         service.log(userId, id, request.entryDate(), request.slotType());
     }
 
@@ -77,7 +77,7 @@ public class MealTemplateController {
             @Valid @RequestBody LogTemplateRequest request,
             HttpSession session
     ) {
-        UUID userId = resolver.resolve(session, null);
+        UUID userId = resolver.resolve(session);
         service.unlog(userId, id, request.entryDate());
     }
 }

@@ -31,7 +31,7 @@ public class HealthMetricsController {
         @Valid @RequestBody HealthMetricsSyncRequest request,
         HttpSession session
     ) {
-        UUID userId = userResolver.resolve(session, null);
+        UUID userId = userResolver.resolve(session);
         int written = service.sync(userId, request);
         return Map.of("written", written);
     }

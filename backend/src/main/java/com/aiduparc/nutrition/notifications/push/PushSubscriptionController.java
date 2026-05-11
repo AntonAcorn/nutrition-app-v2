@@ -2,6 +2,7 @@ package com.aiduparc.nutrition.notifications.push;
 
 import com.aiduparc.nutrition.security.service.CurrentNutritionUserResolver;
 import jakarta.servlet.http.HttpSession;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
@@ -24,7 +25,7 @@ public class PushSubscriptionController {
 
     @GetMapping("/subscription")
     public PushSubscriptionResponse getSubscription(HttpSession session) {
-        UUID userId = currentNutritionUserResolver.resolve(session, null);
+        UUID userId = currentNutritionUserResolver.resolve(session);
         return repository.findByUserId(userId).stream().findFirst()
                 .map(s -> new PushSubscriptionResponse(true, s.isEnabled(), s.getReminderHour(), s.getTimezone()))
                 .orElse(new PushSubscriptionResponse(false, false, 20, null));
@@ -32,8 +33,8 @@ public class PushSubscriptionController {
 
     @PostMapping("/subscribe")
     @ResponseStatus(HttpStatus.CREATED)
-    public PushSubscriptionResponse subscribe(@RequestBody PushSubscribeRequest request, HttpSession session) {
-        UUID userId = currentNutritionUserResolver.resolve(session, null);
+    public PushSubscriptionResponse subscribe(@Valid @RequestBody PushSubscribeRequest request, HttpSession session) {
+        UUID userId = currentNutritionUserResolver.resolve(session);
         String platform = request.platform() != null ? request.platform() : "web";
 
         PushSubscriptionEntity sub;
@@ -59,8 +60,8 @@ public class PushSubscriptionController {
     }
 
     @PutMapping("/settings")
-    public PushSubscriptionResponse updateSettings(@RequestBody PushSettingsRequest request, HttpSession session) {
-        UUID userId = currentNutritionUserResolver.resolve(session, null);
+    public PushSubscriptionResponse updateSettings(@Valid @RequestBody PushSettingsRequest request, HttpSession session) {
+        UUID userId = currentNutritionUserResolver.resolve(session);
         var subs = repository.findByUserId(userId);
         subs.forEach(sub -> {
             sub.setEnabled(request.enabled());
@@ -73,7 +74,7 @@ public class PushSubscriptionController {
 
     @PutMapping("/timezone")
     public PushSubscriptionResponse updateTimezone(@RequestBody TimezoneRequest request, HttpSession session) {
-        UUID userId = currentNutritionUserResolver.resolve(session, null);
+        UUID userId = currentNutritionUserResolver.resolve(session);
         if (request.timezone() == null || request.timezone().isBlank()) {
             return getSubscription(session);
         }
@@ -92,7 +93,7 @@ public class PushSubscriptionController {
     @DeleteMapping("/unsubscribe")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void unsubscribe(HttpSession session) {
-        UUID userId = currentNutritionUserResolver.resolve(session, null);
+        UUID userId = currentNutritionUserResolver.resolve(session);
         repository.deleteAll(repository.findByUserId(userId));
     }
 }

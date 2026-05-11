@@ -30,33 +30,33 @@ public class FastingController {
 
     @GetMapping("/active")
     public FastingSessionResponse getActive(HttpSession session) {
-        UUID userId = resolver.resolve(session, null);
+        UUID userId = resolver.resolve(session);
         return service.getActive(userId).orElse(null);
     }
 
     @PostMapping("/start")
     @ResponseStatus(HttpStatus.CREATED)
     public FastingSessionResponse start(@Valid @RequestBody StartFastRequest request, HttpSession session) {
-        UUID userId = resolver.resolve(session, null);
+        UUID userId = resolver.resolve(session);
         return service.startFast(userId, request.targetHours());
     }
 
     @PostMapping("/stop")
     public FastingSessionResponse stop(HttpSession session) {
-        UUID userId = resolver.resolve(session, null);
+        UUID userId = resolver.resolve(session);
         return service.stopFast(userId);
     }
 
     @GetMapping("/history")
     public List<FastingSessionResponse> history(HttpSession session) {
-        UUID userId = resolver.resolve(session, null);
+        UUID userId = resolver.resolve(session);
         return service.getHistory(userId);
     }
 
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void delete(@PathVariable UUID id, HttpSession session) {
-        UUID userId = resolver.resolve(session, null);
+        UUID userId = resolver.resolve(session);
         service.deleteSession(userId, id);
     }
 }

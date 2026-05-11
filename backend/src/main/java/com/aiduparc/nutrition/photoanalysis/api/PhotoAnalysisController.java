@@ -1,21 +1,17 @@
 package com.aiduparc.nutrition.photoanalysis.api;
 
 import com.aiduparc.nutrition.photoanalysis.application.AiAnalysisRateLimitService;
-import com.aiduparc.nutrition.photoanalysis.application.PhotoAnalysisService;
 import com.aiduparc.nutrition.photoanalysis.application.PhotoUploadAnalysisService;
-import com.aiduparc.nutrition.photoanalysis.application.dto.PhotoAnalysisRequest;
-import com.aiduparc.nutrition.photoanalysis.application.dto.PhotoAnalysisResponse;
 import com.aiduparc.nutrition.photoanalysis.application.dto.PhotoUploadAnalysisRequest;
 import com.aiduparc.nutrition.security.service.CurrentNutritionUserResolver;
 import jakarta.servlet.http.HttpSession;
-import jakarta.validation.Valid;
 import java.io.IOException;
 import java.time.LocalDate;
+import java.util.Set;
 import java.util.UUID;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -28,28 +24,28 @@ import org.springframework.web.server.ResponseStatusException;
 public class PhotoAnalysisController {
 
     private static final long MAX_UPLOAD_SIZE_BYTES = 10 * 1024 * 1024;
+    private static final int MAX_USER_NOTE_LENGTH = 500;
+    private static final int MAX_LOCALE_LENGTH = 16;
+    private static final Set<String> ALLOWED_IMAGE_TYPES = Set.of(
+            "image/jpeg",
+            "image/png",
+            "image/webp",
+            "image/heic",
+            "image/heif"
+    );
 
-    private final PhotoAnalysisService photoAnalysisService;
     private final PhotoUploadAnalysisService photoUploadAnalysisService;
     private final CurrentNutritionUserResolver currentNutritionUserResolver;
     private final AiAnalysisRateLimitService rateLimitService;
 
     public PhotoAnalysisController(
-            PhotoAnalysisService photoAnalysisService,
             PhotoUploadAnalysisService photoUploadAnalysisService,
             CurrentNutritionUserResolver currentNutritionUserResolver,
             AiAnalysisRateLimitService rateLimitService
     ) {
-        this.photoAnalysisService = photoAnalysisService;
         this.photoUploadAnalysisService = photoUploadAnalysisService;
         this.currentNutritionUserResolver = currentNutritionUserResolver;
         this.rateLimitService = rateLimitService;
-    }
-
-    @PostMapping
-    @ResponseStatus(HttpStatus.OK)
-    public PhotoAnalysisResponse analyze(@Valid @RequestBody PhotoAnalysisRequest request) {
-        return photoAnalysisService.analyze(request);
     }
 
     @PostMapping(path = "/upload", consumes = "multipart/form-data")
@@ -65,7 +61,7 @@ public class PhotoAnalysisController {
 
         try {
             LocalDate safeEntryDate = entryDate != null ? entryDate : LocalDate.now();
-            UUID resolvedUserId = currentNutritionUserResolver.resolve(session, null);
+            UUID resolvedUserId = currentNutritionUserResolver.resolve(session);
             rateLimitService.checkLimit(resolvedUserId);
             return new PhotoUploadAnalysisResponse(photoUploadAnalysisService.analyzeAndCreateDraft(
                     new PhotoUploadAnalysisRequest(
@@ -74,8 +70,8 @@ public class PhotoAnalysisController {
                             file.getOriginalFilename(),
                             file.getContentType(),
                             file.getBytes(),
-                            userNote,
-                            locale
+                            truncate(userNote, MAX_USER_NOTE_LENGTH),
+                            truncate(locale, MAX_LOCALE_LENGTH)
                     )
             ));
         } catch (IOException exception) {
@@ -91,8 +87,14 @@ public class PhotoAnalysisController {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Image file is too large");
         }
         String contentType = file.getContentType();
-        if (contentType == null || !contentType.startsWith("image/")) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Only image uploads are supported");
+        if (contentType == null || !ALLOWED_IMAGE_TYPES.contains(contentType.toLowerCase())) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "Only JPEG, PNG, WebP, or HEIC images are allowed");
         }
+    }
+
+    private static String truncate(String s, int max) {
+        if (s == null) return null;
+        return s.length() <= max ? s : s.substring(0, max);
     }
 }

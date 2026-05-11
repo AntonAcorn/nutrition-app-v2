@@ -35,7 +35,7 @@ public class MealLogController {
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date,
             HttpSession session
     ) {
-        UUID userId = resolver.resolve(session, null);
+        UUID userId = resolver.resolve(session);
         LocalDate safeDate = date != null ? date : LocalDate.now();
         return nutritionHistoryService.getMealLog(userId, safeDate);
     }
@@ -46,14 +46,14 @@ public class MealLogController {
             @RequestBody UpdateMealLogEntryRequest request,
             HttpSession session
     ) {
-        UUID userId = resolver.resolve(session, null);
+        UUID userId = resolver.resolve(session);
         return nutritionHistoryService.updateMealLogEntry(userId, id, request);
     }
 
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteMeal(@PathVariable UUID id, HttpSession session) {
-        UUID userId = resolver.resolve(session, null);
+        UUID userId = resolver.resolve(session);
         nutritionHistoryService.deleteMealLogEntry(userId, id);
     }
 }

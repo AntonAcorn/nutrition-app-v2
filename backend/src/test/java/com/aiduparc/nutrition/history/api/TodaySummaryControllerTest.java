@@ -12,6 +12,7 @@ import org.springframework.http.MediaType;
 
 import com.aiduparc.nutrition.history.service.NutritionHistoryService;
 import com.aiduparc.nutrition.security.SecurityConfig;
+import com.aiduparc.nutrition.security.TestAuthSession;
 import com.aiduparc.nutrition.security.service.CurrentNutritionUserResolver;
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -24,7 +25,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.test.web.servlet.MockMvc;
 
 @WebMvcTest(TodaySummaryController.class)
-@Import(SecurityConfig.class)
+@Import({SecurityConfig.class, com.aiduparc.nutrition.security.AuthRateLimiter.class})
 class TodaySummaryControllerTest {
 
     @Autowired
@@ -41,7 +42,7 @@ class TodaySummaryControllerTest {
         UUID userId = UUID.randomUUID();
         LocalDate entryDate = LocalDate.of(2026, 4, 8);
 
-        when(currentNutritionUserResolver.resolve(any(), eq(null))).thenReturn(userId);
+        when(currentNutritionUserResolver.resolve(any())).thenReturn(userId);
 
         when(nutritionHistoryService.getTodaySummary(userId, entryDate)).thenReturn(
                 new TodaySummaryResponse(
@@ -70,6 +71,7 @@ class TodaySummaryControllerTest {
         );
 
         mockMvc.perform(get("/api/history/today-summary")
+                        .session(TestAuthSession.of(userId))
                         .param("entryDate", "2026-04-08"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.weightKg").value(82.40))
@@ -87,7 +89,7 @@ class TodaySummaryControllerTest {
         UUID userId = UUID.randomUUID();
         LocalDate entryDate = LocalDate.of(2026, 4, 8);
 
-        when(currentNutritionUserResolver.resolve(any(), eq(null))).thenReturn(userId);
+        when(currentNutritionUserResolver.resolve(any())).thenReturn(userId);
         when(nutritionHistoryService.getTodaySummary(userId, entryDate)).thenReturn(
             new TodaySummaryResponse(
                 userId, entryDate,
@@ -113,6 +115,7 @@ class TodaySummaryControllerTest {
         );
 
         mockMvc.perform(put("/api/history/today-summary/nutrition-totals")
+                .session(TestAuthSession.of(userId))
                 .param("entryDate", "2026-04-08")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("{\"caloriesConsumedKcal\":1200,\"proteinGrams\":90,\"fatGrams\":40,\"fiberGrams\":18}"))
@@ -128,9 +131,11 @@ class TodaySummaryControllerTest {
 
     @Test
     void shouldRejectNegativeNutritionTotals() throws Exception {
-        when(currentNutritionUserResolver.resolve(any(), eq(null))).thenReturn(UUID.randomUUID());
+        UUID userId = UUID.randomUUID();
+        when(currentNutritionUserResolver.resolve(any())).thenReturn(userId);
 
         mockMvc.perform(put("/api/history/today-summary/nutrition-totals")
+                .session(TestAuthSession.of(userId))
                 .param("entryDate", "2026-04-08")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("{\"caloriesConsumedKcal\":-1,\"proteinGrams\":90,\"fatGrams\":40,\"fiberGrams\":18}"))

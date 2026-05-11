@@ -8,12 +8,15 @@ import com.aiduparc.nutrition.security.service.CurrentNutritionUserResolver;
 import com.aiduparc.nutrition.security.service.GoogleOAuthService;
 import com.aiduparc.nutrition.security.service.GoogleUserInfo;
 import com.aiduparc.nutrition.security.api.GoogleNativeSignInRequest;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import java.io.IOException;
 import java.util.Map;
 import java.util.UUID;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -29,6 +32,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/auth")
 public class AuthController {
 
+    private static final Logger log = LoggerFactory.getLogger(AuthController.class);
     private static final String AUTH_SESSION_KEY = "nutrition.auth.session";
     private static final String GOOGLE_STATE_KEY = "google_oauth_state";
 
@@ -56,16 +60,28 @@ public class AuthController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<AuthResponse> register(@Valid @RequestBody RegisterRequest request, HttpSession session) {
+    public ResponseEntity<AuthResponse> register(@Valid @RequestBody RegisterRequest request) {
         AuthenticatedSession authenticatedSession = authFacade.register(request);
-        session.setAttribute(AUTH_SESSION_KEY, authenticatedSession);
-        return ResponseEntity.status(HttpStatus.CREATED).body(authFacade.me(authenticatedSession));
+        // No session created — user must verify email and then log in.
+        return ResponseEntity.status(HttpStatus.CREATED).body(new AuthResponse(
+                authenticatedSession.accountId(),
+                authenticatedSession.email(),
+                authenticatedSession.displayName(),
+                null,
+                false,
+                false,
+                false
+        ));
     }
 
     @PostMapping("/login")
-    public AuthResponse login(@Valid @RequestBody LoginRequest request, HttpSession session) {
+    public AuthResponse login(
+            @Valid @RequestBody LoginRequest request,
+            HttpServletRequest httpRequest,
+            HttpSession session
+    ) {
         AuthenticatedSession authenticatedSession = authFacade.login(request);
-        session.setAttribute(AUTH_SESSION_KEY, authenticatedSession);
+        rotateSession(httpRequest, session, authenticatedSession);
         return authFacade.me(authenticatedSession);
     }
 
@@ -88,7 +104,7 @@ public class AuthController {
     @PostMapping("/delete-account")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteAccount(HttpSession session) {
-        UUID userId = currentNutritionUserResolver.resolve(session, null);
+        UUID userId = currentNutritionUserResolver.resolve(session);
         accountDeletionService.deleteAccount(userId, session);
     }
 
@@ -99,14 +115,14 @@ public class AuthController {
 
     @PostMapping("/forgot-password")
     @ResponseStatus(HttpStatus.OK)
-    public Map<String, String> forgotPassword(@RequestBody ForgotPasswordRequest request) {
+    public Map<String, String> forgotPassword(@Valid @RequestBody ForgotPasswordRequest request) {
         authFacade.requestPasswordReset(request.email());
         return Map.of("message", "If this email is registered, you will receive a reset link.");
     }
 
     @PostMapping("/reset-password")
     @ResponseStatus(HttpStatus.OK)
-    public Map<String, String> resetPassword(@RequestBody ResetPasswordRequest request) {
+    public Map<String, String> resetPassword(@Valid @RequestBody ResetPasswordRequest request) {
         boolean ok = authFacade.resetPassword(request.token(), request.newPassword());
         if (!ok) {
             throw new IllegalArgumentException("Invalid or expired reset link.");
@@ -126,6 +142,7 @@ public class AuthController {
             @RequestParam(required = false) String code,
             @RequestParam(required = false) String state,
             @RequestParam(required = false) String error,
+            HttpServletRequest httpRequest,
             HttpSession session,
             HttpServletResponse response) throws IOException {
         String expectedState = (String) session.getAttribute(GOOGLE_STATE_KEY);
@@ -145,9 +162,10 @@ public class AuthController {
         try {
             GoogleUserInfo userInfo = googleOAuthService.exchangeCodeForUserInfo(code);
             AuthenticatedSession authSession = authFacade.loginWithGoogle(userInfo);
-            session.setAttribute(AUTH_SESSION_KEY, authSession);
+            rotateSession(httpRequest, session, authSession);
             response.sendRedirect(frontendUrl + "/");
         } catch (Exception e) {
+            log.warn("Google OAuth callback failed ({}): {}", e.getClass().getSimpleName(), e.getMessage());
             response.sendRedirect(frontendUrl + "/?google_error=failed");
         }
     }
@@ -160,11 +178,15 @@ public class AuthController {
     }
 
     @PostMapping("/google/token")
-    public AuthResponse googleNativeSignIn(@RequestBody GoogleNativeSignInRequest request, HttpSession session) {
+    public AuthResponse googleNativeSignIn(
+            @RequestBody GoogleNativeSignInRequest request,
+            HttpServletRequest httpRequest,
+            HttpSession session
+    ) {
         try {
             GoogleUserInfo userInfo = googleOAuthService.verifyIdToken(request.idToken());
             AuthenticatedSession authSession = authFacade.loginWithGoogle(userInfo);
-            session.setAttribute(AUTH_SESSION_KEY, authSession);
+            rotateSession(httpRequest, session, authSession);
             return authFacade.me(authSession);
         } catch (IllegalArgumentException e) {
             throw e;
@@ -174,9 +196,23 @@ public class AuthController {
     }
 
     @PostMapping("/apple")
-    public AuthResponse appleSignIn(@RequestBody AppleSignInRequest request, HttpSession session) {
+    public AuthResponse appleSignIn(
+            @RequestBody AppleSignInRequest request,
+            HttpServletRequest httpRequest,
+            HttpSession session
+    ) {
         AuthenticatedSession authSession = authFacade.loginWithApple(request.identityToken(), request.displayName());
-        session.setAttribute(AUTH_SESSION_KEY, authSession);
+        rotateSession(httpRequest, session, authSession);
         return authFacade.me(authSession);
+    }
+
+    private static void rotateSession(HttpServletRequest httpRequest, HttpSession current, AuthenticatedSession authData) {
+        // Session-fixation defense: invalidate any pre-auth session ID and bind the
+        // authentication attribute to a fresh session.
+        if (current != null) {
+            try { current.invalidate(); } catch (IllegalStateException ignored) { /* already invalid */ }
+        }
+        HttpSession fresh = httpRequest.getSession(true);
+        fresh.setAttribute(AUTH_SESSION_KEY, authData);
     }
 }

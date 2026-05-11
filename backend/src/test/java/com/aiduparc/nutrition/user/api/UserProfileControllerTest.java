@@ -9,6 +9,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.aiduparc.nutrition.security.SecurityConfig;
+import com.aiduparc.nutrition.security.TestAuthSession;
 import com.aiduparc.nutrition.security.service.CurrentNutritionUserResolver;
 import com.aiduparc.nutrition.user.model.UserProfileEntity;
 import com.aiduparc.nutrition.user.service.UserProfileService;
@@ -25,7 +26,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
 @WebMvcTest(UserProfileController.class)
-@Import(SecurityConfig.class)
+@Import({SecurityConfig.class, com.aiduparc.nutrition.security.AuthRateLimiter.class})
 class UserProfileControllerTest {
 
     @Autowired
@@ -51,13 +52,14 @@ class UserProfileControllerTest {
     @Test
     void createProfileReturns201() throws Exception {
         UUID userId = UUID.randomUUID();
-        when(currentNutritionUserResolver.resolve(any(), eq(null))).thenReturn(userId);
+        when(currentNutritionUserResolver.resolve(any())).thenReturn(userId);
         when(userProfileService.existsByNutritionUserId(userId)).thenReturn(false);
 
         UserProfileEntity entity = buildEntity(userId, new BigDecimal("2136"));
         when(userProfileService.createProfile(any(CreateUserProfileCommand.class))).thenReturn(entity);
 
         mockMvc.perform(post("/api/profile")
+                        .session(TestAuthSession.of(userId))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(VALID_BODY))
                 .andExpect(status().isCreated())
@@ -69,10 +71,11 @@ class UserProfileControllerTest {
     @Test
     void createProfileReturns409WhenProfileExists() throws Exception {
         UUID userId = UUID.randomUUID();
-        when(currentNutritionUserResolver.resolve(any(), eq(null))).thenReturn(userId);
+        when(currentNutritionUserResolver.resolve(any())).thenReturn(userId);
         when(userProfileService.existsByNutritionUserId(userId)).thenReturn(true);
 
         mockMvc.perform(post("/api/profile")
+                        .session(TestAuthSession.of(userId))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(VALID_BODY))
                 .andExpect(status().isConflict());
@@ -81,12 +84,13 @@ class UserProfileControllerTest {
     @Test
     void getProfileReturns200() throws Exception {
         UUID userId = UUID.randomUUID();
-        when(currentNutritionUserResolver.resolve(any(), eq(null))).thenReturn(userId);
+        when(currentNutritionUserResolver.resolve(any())).thenReturn(userId);
 
         UserProfileEntity entity = buildEntity(userId, new BigDecimal("2136"));
         when(userProfileService.findByNutritionUserId(userId)).thenReturn(Optional.of(entity));
 
-        mockMvc.perform(get("/api/profile"))
+        mockMvc.perform(get("/api/profile")
+                        .session(TestAuthSession.of(userId)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.goal").value("maintain"))
                 .andExpect(jsonPath("$.dailyCalorieTargetKcal").value(2136));
@@ -95,10 +99,11 @@ class UserProfileControllerTest {
     @Test
     void getProfileReturns404WhenMissing() throws Exception {
         UUID userId = UUID.randomUUID();
-        when(currentNutritionUserResolver.resolve(any(), eq(null))).thenReturn(userId);
+        when(currentNutritionUserResolver.resolve(any())).thenReturn(userId);
         when(userProfileService.findByNutritionUserId(userId)).thenReturn(Optional.empty());
 
-        mockMvc.perform(get("/api/profile"))
+        mockMvc.perform(get("/api/profile")
+                        .session(TestAuthSession.of(userId)))
                 .andExpect(status().isNotFound());
     }
 

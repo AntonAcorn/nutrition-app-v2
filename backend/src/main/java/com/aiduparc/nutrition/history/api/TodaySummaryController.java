@@ -43,7 +43,7 @@ public class TodaySummaryController {
             HttpSession session
     ) {
         LocalDate safeDate = entryDate != null ? entryDate : LocalDate.now();
-        UUID resolvedUserId = currentNutritionUserResolver.resolve(session, null);
+        UUID resolvedUserId = currentNutritionUserResolver.resolve(session);
         log.info("today-summary request userId={} entryDate={}", resolvedUserId, safeDate);
         return nutritionHistoryService.getTodaySummary(resolvedUserId, safeDate);
     }
@@ -56,7 +56,7 @@ public class TodaySummaryController {
             HttpSession session
     ) {
         LocalDate safeDate = entryDate != null ? entryDate : LocalDate.now();
-        UUID resolvedUserId = currentNutritionUserResolver.resolve(session, null);
+        UUID resolvedUserId = currentNutritionUserResolver.resolve(session);
         log.info("weight update request userId={} entryDate={} weightKg={}", resolvedUserId, safeDate, request.weightKg());
         nutritionHistoryService.updateWeight(resolvedUserId, safeDate, request.weightKg());
         return nutritionHistoryService.getTodaySummary(resolvedUserId, safeDate);
@@ -70,7 +70,7 @@ public class TodaySummaryController {
             HttpSession session
     ) {
         LocalDate safeDate = entryDate != null ? entryDate : LocalDate.now();
-        UUID resolvedUserId = currentNutritionUserResolver.resolve(session, null);
+        UUID resolvedUserId = currentNutritionUserResolver.resolve(session);
         String mealName = request.mealName() != null && !request.mealName().isBlank()
             ? request.mealName().trim() : "Manual entry";
         nutritionHistoryService.addToDailyTotals(new NutritionHistoryService.AddToDailyTotalsCommand(
@@ -88,7 +88,7 @@ public class TodaySummaryController {
             HttpSession session
     ) {
         LocalDate safeDate = entryDate != null ? entryDate : LocalDate.now();
-        UUID resolvedUserId = currentNutritionUserResolver.resolve(session, null);
+        UUID resolvedUserId = currentNutritionUserResolver.resolve(session);
         nutritionHistoryService.resetDayNutrition(resolvedUserId, safeDate);
         return nutritionHistoryService.getTodaySummary(resolvedUserId, safeDate);
     }
@@ -101,7 +101,7 @@ public class TodaySummaryController {
             HttpSession session
     ) {
         LocalDate safeDate = entryDate != null ? entryDate : LocalDate.now();
-        UUID resolvedUserId = currentNutritionUserResolver.resolve(session, null);
+        UUID resolvedUserId = currentNutritionUserResolver.resolve(session);
         nutritionHistoryService.updateWater(resolvedUserId, safeDate, request.glasses());
         return nutritionHistoryService.getTodaySummary(resolvedUserId, safeDate);
     }
@@ -114,7 +114,7 @@ public class TodaySummaryController {
             HttpSession session
     ) {
         LocalDate safeDate = entryDate != null ? entryDate : LocalDate.now();
-        UUID resolvedUserId = currentNutritionUserResolver.resolve(session, null);
+        UUID resolvedUserId = currentNutritionUserResolver.resolve(session);
         log.info("nutrition-totals update userId={} entryDate={} kcal={} protein={} fat={} fiber={}",
             resolvedUserId, safeDate,
             request.caloriesConsumedKcal(), request.proteinGrams(), request.fatGrams(), request.fiberGrams());

@@ -29,6 +29,7 @@ spring:
 
 server:
   port: ${PORT:8080}
+  forward-headers-strategy: framework
   servlet:
     session:
       timeout: ${SESSION_TIMEOUT:30d}
@@ -51,7 +52,6 @@ nutrition:
   app:
     base-url: ${APP_BASE_URL:http://localhost:5173}
   auth:
-    enabled: false
     google-client-id: ${GOOGLE_CLIENT_ID:}
     google-client-secret: ${GOOGLE_CLIENT_SECRET:}
     google-redirect-uri: ${GOOGLE_REDIRECT_URI:${nutrition.app.base-url}/api/auth/google/callback}

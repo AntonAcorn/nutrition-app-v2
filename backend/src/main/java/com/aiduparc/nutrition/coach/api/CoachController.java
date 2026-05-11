@@ -64,7 +64,7 @@ public class CoachController {
         @RequestParam(required = false) String tz,
         HttpSession session
     ) {
-        UUID userId = userResolver.resolve(session, null);
+        UUID userId = userResolver.resolve(session);
         ZoneId zone = CoachSnapshotService.resolveZone(tz);
         return coachSnapshotService.buildSnapshot(userId, today(date), windowDays(days), zone);
     }
@@ -77,7 +77,7 @@ public class CoachController {
         @RequestParam(required = false) String locale,
         HttpSession session
     ) {
-        UUID userId = userResolver.resolve(session, null);
+        UUID userId = userResolver.resolve(session);
         ZoneId zone = CoachSnapshotService.resolveZone(tz);
         return coachInsightService.getOrGenerate(userId, today(date), windowDays(days), zone, locale);
     }
@@ -90,7 +90,7 @@ public class CoachController {
         @RequestParam(required = false) String locale,
         HttpSession session
     ) {
-        UUID userId = userResolver.resolve(session, null);
+        UUID userId = userResolver.resolve(session);
         rateLimitService.checkRefreshLimit(userId);
         ZoneId zone = CoachSnapshotService.resolveZone(tz);
         return coachInsightService.refresh(userId, today(date), windowDays(days), zone, locale);
@@ -99,13 +99,13 @@ public class CoachController {
     @DeleteMapping("/insights/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void dismissInsight(@PathVariable UUID id, HttpSession session) {
-        UUID userId = userResolver.resolve(session, null);
+        UUID userId = userResolver.resolve(session);
         coachInsightService.dismiss(userId, id);
     }
 
     @GetMapping("/recap")
     public WeeklyRecapResponse getRecap(HttpSession session) {
-        UUID userId = userResolver.resolve(session, null);
+        UUID userId = userResolver.resolve(session);
         return weeklyRecapService.getLatest(userId).orElse(null);
     }
 
@@ -116,7 +116,7 @@ public class CoachController {
         @RequestParam(required = false) String locale,
         HttpSession session
     ) {
-        UUID userId = userResolver.resolve(session, null);
+        UUID userId = userResolver.resolve(session);
         rateLimitService.checkRefreshLimit(userId);
         ZoneId zone = CoachSnapshotService.resolveZone(tz);
         return weeklyRecapService.generateForCurrentWeek(userId, today(date), zone, locale);
@@ -125,7 +125,7 @@ public class CoachController {
     @DeleteMapping("/recap/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void dismissRecap(@PathVariable UUID id, HttpSession session) {
-        UUID userId = userResolver.resolve(session, null);
+        UUID userId = userResolver.resolve(session);
         weeklyRecapService.dismiss(userId, id);
     }
 
@@ -135,7 +135,8 @@ public class CoachController {
         @RequestParam(required = false) String tz,
         HttpSession session
     ) {
-        UUID userId = userResolver.resolve(session, null);
+        UUID userId = userResolver.resolve(session);
+        rateLimitService.checkRefreshLimit(userId);
         ZoneId zone = CoachSnapshotService.resolveZone(tz);
         return inlineTipService.compute(userId, request.kcal(), request.slotType(), zone);
     }
@@ -143,7 +144,7 @@ public class CoachController {
     @PostMapping("/escalation/accept")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void acceptEscalation(@RequestParam String strategy, HttpSession session) {
-        UUID userId = userResolver.resolve(session, null);
+        UUID userId = userResolver.resolve(session);
         goalAdjustmentService.applyWeightLossStrategy(userId, strategy);
     }
 
