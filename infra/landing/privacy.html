@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Privacy Policy — Rumbly Eats</title>
+<link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+<main class="container container--prose">
+  <header>
+    <p class="breadcrumb"><a href="/">← Rumbly Eats</a></p>
+    <h1>Privacy Policy</h1>
+    <p class="muted">Last updated: 2026-05-11</p>
+  </header>
+
+  <p>Rumbly Eats is an independent product run by one person ("we", "us"). This policy tells you exactly what we collect, why, and how to remove it.</p>
+
+  <h2>What we collect</h2>
+
+  <h3>Account information</h3>
+  <ul>
+    <li>Email address and display name (from Google or Apple Sign-In).</li>
+    <li>Authentication tokens — stored as a session cookie, used to verify your identity on subsequent requests.</li>
+  </ul>
+
+  <h3>Nutrition data you log</h3>
+  <ul>
+    <li>Meal entries — name, time, calories, macros, optional notes.</li>
+    <li>Photos of meals — when you use AI photo logging. Photos are sent to OpenAI for analysis and stored on our server tied to your account.</li>
+    <li>Voice transcripts — when you use AI voice logging. The audio is transcribed locally on your device by your operating system; only the resulting text is sent to our server and to OpenAI.</li>
+    <li>Profile data you enter — age, height, weight history, target weight, activity level, dietary goals, wellbeing ratings.</li>
+  </ul>
+
+  <h3>Health data (iOS only, with your permission)</h3>
+  <ul>
+    <li>Daily step count, active calories, and weight readings pulled from Apple HealthKit.</li>
+    <li>Used only to inform calorie targets and the coach. Never shared with third parties.</li>
+    <li>You can revoke access at any time in iOS Settings → Privacy → Health → Rumbly Eats.</li>
+  </ul>
+
+  <h3>Device & technical data</h3>
+  <ul>
+    <li>Push notification token (if you enable notifications).</li>
+    <li>App version, operating system version.</li>
+    <li>Server access logs — IP address, request timestamps, status codes. Used for rate limiting and abuse prevention. Rotated regularly.</li>
+  </ul>
+
+  <h3>Analytics & error reports</h3>
+  <ul>
+    <li>Anonymized feature-usage events (page views, button clicks). No email, name, or message content is sent.</li>
+    <li>Crash reports — stack traces with personal data redacted.</li>
+  </ul>
+
+  <h2>Third parties we share data with</h2>
+  <ul>
+    <li><strong>OpenAI</strong> — meal photos and voice transcripts are sent to OpenAI's API for AI analysis. OpenAI does not use this content to train their models when accessed via API. See <a href="https://openai.com/policies/api-data-usage-policies" target="_blank" rel="noopener noreferrer">OpenAI's API data policy</a>.</li>
+    <li><strong>Google</strong> — used for "Sign in with Google" only. We receive your email and name; Google does not receive any nutrition data.</li>
+    <li><strong>Apple</strong> — used for "Sign in with Apple" and push notifications. We receive your email (or Apple's relay address) and name; Apple does not receive nutrition data.</li>
+    <li><strong>Sentry</strong> — receives crash reports with personally identifying data redacted before sending.</li>
+    <li><strong>PostHog</strong> — receives anonymized feature-usage events with no email, name, or meal content.</li>
+    <li><strong>Ko-fi / Stripe</strong> — if you choose to support development via the donation widget on rumblyeats.org, those services handle the transaction. Rumbly Eats does not see your card number or billing address.</li>
+  </ul>
+
+  <h2>What we do NOT do</h2>
+  <ul>
+    <li>We do not sell your data.</li>
+    <li>We do not show ads.</li>
+    <li>We do not share your nutrition data with anyone, ever.</li>
+    <li>We do not use your data to train AI models.</li>
+  </ul>
+
+  <h2>How long we keep data</h2>
+  <p>We keep your data for as long as your account is active. When you delete your account inside the app (Profile → Delete account), <strong>all</strong> your data — meals, photos, profile, health metrics — is permanently erased from our database within 24 hours.</p>
+  <p>Server access logs (IP / timestamps) are retained for up to 30 days for security purposes, then deleted.</p>
+
+  <h2>Your rights</h2>
+  <ul>
+    <li><strong>Export</strong> — Profile → Export data lets you download all your nutrition history as CSV.</li>
+    <li><strong>Delete</strong> — Profile → Delete account removes everything. Irreversible.</li>
+    <li><strong>Ask questions</strong> — email <a href="mailto:support@rumblyeats.org">support@rumblyeats.org</a> and we'll respond within a few days.</li>
+  </ul>
+
+  <h2>Children</h2>
+  <p>Rumbly Eats is not intended for users under 13. We do not knowingly collect data from children under 13. If you believe a child has created an account, please contact us and we'll remove it.</p>
+
+  <h2>Changes to this policy</h2>
+  <p>If anything material changes — new third party, new data category — we'll update this page and bump the "Last updated" date. For significant changes we'll also surface a notice in the app on your next launch.</p>
+
+  <h2>Contact</h2>
+  <p>Questions, concerns, or data requests: <a href="mailto:support@rumblyeats.org">support@rumblyeats.org</a></p>
+
+  <footer class="footer">
+    <nav class="footer__nav">
+      <a href="/">Home</a>
+      <a href="/terms">Terms</a>
+      <a href="/support">Support</a>
+    </nav>
+  </footer>
+</main>
+</body>
+</html>

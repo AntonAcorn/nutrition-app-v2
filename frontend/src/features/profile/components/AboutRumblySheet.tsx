@@ -4,7 +4,7 @@ interface AboutRumblySheetProps {
   onClose: () => void
 }
 
-const WEBSITE_URL = 'https://rumblyeats.org'
+const WEBSITE_URL = 'https://rumblyeats.org/about'
 
 /**
  * "Behind Rumbly" sheet — honest one-line story about who's behind the app
@@ -66,7 +66,7 @@ export function AboutRumblySheet({ onClose }: AboutRumblySheetProps) {
           className="about-sheet__cta"
           onClick={openWebsite}
         >
-          Visit rumblyeats.org →
+          Read more on rumblyeats.org →
         </button>
       </div>
     </div>

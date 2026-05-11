@@ -558,7 +558,7 @@ export function ProfileTab({ displayName, email, onLogout, onDeleteAccount }: Pr
         Made by one person in Canada ·{' '}
         <a
           className="profile-footer-credit__link"
-          href="https://rumblyeats.org"
+          href="https://rumblyeats.org/about"
           target="_blank"
           rel="noopener noreferrer"
         >
