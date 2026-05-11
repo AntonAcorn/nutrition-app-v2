@@ -1,6 +1,8 @@
 import React from 'react'
 import ReactDOM from 'react-dom/client'
 import * as Sentry from '@sentry/react'
+import { Capacitor } from '@capacitor/core'
+import { StatusBar, Style } from '@capacitor/status-bar'
 import App from './app/App'
 import './styles/index.css'
 import { initAnalytics } from './shared/lib/analytics'
@@ -12,6 +14,12 @@ if (import.meta.env.VITE_SENTRY_DSN) {
     integrations: [Sentry.browserTracingIntegration()],
     tracesSampleRate: 0.1,
   })
+}
+
+if (Capacitor.isNativePlatform()) {
+  StatusBar.setOverlaysWebView({ overlay: false }).catch(() => {})
+  StatusBar.setStyle({ style: Style.Dark }).catch(() => {})
+  StatusBar.setBackgroundColor({ color: '#000000' }).catch(() => {})
 }
 
 initAnalytics()

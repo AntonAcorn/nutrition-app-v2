@@ -5,7 +5,7 @@
   justify-content: center;
   min-height: 100dvh;
   gap: 20px;
-  padding: max(env(safe-area-inset-top, 0px), 24px) 14px max(env(safe-area-inset-bottom, 0px), 24px);
+  padding: max(env(safe-area-inset-top, 0px), 60px) 14px max(env(safe-area-inset-bottom, 0px), 24px);
 }
 
 .auth-hero {

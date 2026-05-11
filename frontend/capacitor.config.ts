@@ -12,6 +12,11 @@ const config: CapacitorConfig = {
     SplashScreen: {
       launchShowDuration: 0,
     },
+    StatusBar: {
+      overlaysWebView: false,
+      style: 'DARK',
+      backgroundColor: '#000000',
+    },
   },
   ios: {
     packageClassList: ['GoogleSignInPlugin'],
