@@ -91,6 +91,10 @@ public class NutritionHistoryService {
         return mealLogService.getMealLog(userId, date);
     }
 
+    public List<com.aiduparc.nutrition.history.api.FrequentMealResponse> getFrequentMeals(UUID userId, int days, int limit) {
+        return mealLogService.getFrequentMeals(userId, days, limit);
+    }
+
     @Transactional
     public MealSlotEntity getOrCreateSlot(UUID userId, LocalDate date, String slotType) {
         return mealLogService.getOrCreateSlot(userId, date, slotType);

@@ -7,6 +7,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 public interface MealLogEntryRepository extends JpaRepository<MealLogEntryEntity, UUID> {
 
@@ -26,4 +28,27 @@ public interface MealLogEntryRepository extends JpaRepository<MealLogEntryEntity
         UUID userId, LocalDate fromInclusive, LocalDate toInclusive);
 
     Optional<MealLogEntryEntity> findTopByUserIdAndCreatedAtBeforeOrderByCreatedAtDesc(UUID userId, OffsetDateTime before);
+
+    @Query(value = """
+        select
+            name,
+            round(avg(calories_kcal)::numeric, 0) as cal,
+            round(avg(protein_g)::numeric, 1)    as prot,
+            round(avg(fat_g)::numeric, 1)        as fat,
+            round(avg(carbs_g)::numeric, 1)      as carb,
+            round(avg(fiber_g)::numeric, 1)      as fib,
+            count(*)                              as cnt
+        from meal_log_entries
+        where user_id = :userId
+          and entry_date >= :since
+          and length(trim(name)) > 0
+        group by name
+        order by cnt desc, max(created_at) desc
+        limit :maxRows
+        """, nativeQuery = true)
+    List<Object[]> findFrequentMeals(
+        @Param("userId") UUID userId,
+        @Param("since") LocalDate since,
+        @Param("maxRows") int maxRows
+    );
 }

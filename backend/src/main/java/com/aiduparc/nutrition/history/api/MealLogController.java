@@ -40,6 +40,16 @@ public class MealLogController {
         return nutritionHistoryService.getMealLog(userId, safeDate);
     }
 
+    @GetMapping("/frequent")
+    public List<FrequentMealResponse> getFrequent(
+            @RequestParam(required = false, defaultValue = "7") int days,
+            @RequestParam(required = false, defaultValue = "5") int limit,
+            HttpSession session
+    ) {
+        UUID userId = resolver.resolve(session);
+        return nutritionHistoryService.getFrequentMeals(userId, days, limit);
+    }
+
     @PatchMapping("/{id}")
     public MealLogEntryResponse updateMeal(
             @PathVariable UUID id,

@@ -1,5 +1,6 @@
 package com.aiduparc.nutrition.history.service;
 
+import com.aiduparc.nutrition.history.api.FrequentMealResponse;
 import com.aiduparc.nutrition.history.api.MealLogEntryResponse;
 import com.aiduparc.nutrition.history.api.MealSlotResponse;
 import com.aiduparc.nutrition.history.api.UpdateMealLogEntryRequest;
@@ -62,6 +63,30 @@ public class MealLogService {
         this.mealSlotRepository = mealSlotRepository;
         this.dailyEntryRepository = dailyEntryRepository;
         this.userProfileRepository = userProfileRepository;
+    }
+
+    public List<FrequentMealResponse> getFrequentMeals(UUID userId, int days, int limit) {
+        int safeDays = days <= 0 ? 7 : Math.min(days, 90);
+        int safeLimit = limit <= 0 ? 5 : Math.min(limit, 20);
+        LocalDate since = LocalDate.now().minusDays(safeDays);
+        return mealLogRepository.findFrequentMeals(userId, since, safeLimit).stream()
+            .map(row -> new FrequentMealResponse(
+                (String) row[0],
+                toBigDecimal(row[1]),
+                toBigDecimal(row[2]),
+                toBigDecimal(row[3]),
+                toBigDecimal(row[4]),
+                toBigDecimal(row[5]),
+                ((Number) row[6]).longValue()
+            ))
+            .toList();
+    }
+
+    private static BigDecimal toBigDecimal(Object value) {
+        if (value == null) return BigDecimal.ZERO;
+        if (value instanceof BigDecimal bd) return bd;
+        if (value instanceof Number n) return BigDecimal.valueOf(n.doubleValue());
+        return BigDecimal.ZERO;
     }
 
     public List<MealSlotResponse> getMealLog(UUID userId, LocalDate date) {

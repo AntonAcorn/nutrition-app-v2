@@ -86,6 +86,92 @@
 }
 
 
+/* ── Frequent Meals Card ─────────────────────────────────────────────────── */
+.frequent-meals-card {
+  padding: 16px 20px;
+  display: grid;
+  gap: 12px;
+}
+
+.frequent-meals-card__title {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.4);
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+}
+
+.frequent-meals-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.frequent-meal-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.04);
+  color: #ffffff;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s, transform 0.1s;
+  text-align: left;
+  max-width: 100%;
+}
+
+.frequent-meal-chip:active {
+  transform: scale(0.97);
+}
+
+.frequent-meal-chip:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.frequent-meal-chip--done {
+  background: rgba(52, 199, 89, 0.18);
+  border-color: rgba(52, 199, 89, 0.4);
+}
+
+.frequent-meal-chip__name {
+  font-size: 0.88rem;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 140px;
+}
+
+.frequent-meal-chip__meta {
+  font-size: 0.72rem;
+  color: rgba(255, 255, 255, 0.45);
+  white-space: nowrap;
+}
+
+.frequent-meal-chip__action {
+  display: inline-flex;
+  width: 22px;
+  height: 22px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.85);
+  font-size: 1rem;
+  font-weight: 300;
+  flex-shrink: 0;
+}
+
+.frequent-meal-chip--done .frequent-meal-chip__action {
+  background: rgba(52, 199, 89, 0.3);
+  color: #34c759;
+  font-size: 0.8rem;
+}
+
+
 /* ── Quick Add Trigger Card ──────────────────────────────────────────────── */
 .quick-add-fab {
   position: fixed;
