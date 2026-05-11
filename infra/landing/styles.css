@@ -115,13 +115,32 @@ li { margin-bottom: 6px; }
   cursor: not-allowed;
 }
 
-/* Ko-fi embed */
-.kofi-embed {
-  margin: 18px 0;
-  border-radius: 14px;
-  overflow: hidden;
-  background: var(--card);
-  border: 1px solid var(--border);
+/* Tip jar */
+.tip-jar {
+  margin: 22px 0 28px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+}
+.tip-jar__button {
+  display: inline-block;
+  padding: 12px 22px;
+  border-radius: 10px;
+  background: #ffdd00;
+  color: #111;
+  font-weight: 600;
+  text-decoration: none;
+  border: 1px solid #e6c700;
+  transition: transform 0.08s ease, box-shadow 0.15s ease;
+}
+.tip-jar__button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 14px rgba(0,0,0,0.12);
+}
+.tip-jar__note {
+  font-size: 0.8rem;
+  color: var(--muted);
 }
 
 /* Footer */

@@ -14,7 +14,7 @@ const WEBSITE_URL = 'https://rumblyeats.org/about'
  *   - opening the URL through window.open which Capacitor routes to Safari
  *     (not an in-app webview), so Apple sees an external system link.
  *
- * The actual /support page on the website hosts the Ko-fi widget — that's
+ * The actual /about page on the website links out to Buy Me a Coffee — that's
  * outside the app's jurisdiction.
  */
 export function AboutRumblySheet({ onClose }: AboutRumblySheetProps) {
