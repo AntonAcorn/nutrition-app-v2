@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<title>Screenshot 5 - Weekly Recap</title>
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<link rel="stylesheet" href="/src/styles/index.css" />
+<style>
+  .ss-caption {
+    position: absolute;
+    top: env(safe-area-inset-top, 0);
+    left: 0; right: 0;
+    padding: 18px 22px 14px;
+    background: linear-gradient(180deg, rgba(0,0,0,0.65) 0%, rgba(0,0,0,0) 100%);
+    text-align: center;
+    z-index: 100;
+    pointer-events: none;
+  }
+  .ss-caption h2 {
+    margin: 0;
+    font-size: 1.55rem;
+    line-height: 1.15;
+    font-weight: 800;
+    color: #ffffff;
+    letter-spacing: -0.01em;
+  }
+  .app-shell.ss-shell {
+    padding-top: calc(env(safe-area-inset-top, 0px) + 88px) !important;
+  }
+  body {
+    background: linear-gradient(180deg, #0a0d14 0%, #1a1f2e 100%);
+    min-height: 100dvh;
+    margin: 0;
+  }
+</style>
+</head>
+<body>
+
+<div class="ss-caption">
+  <h2>Your week, in numbers worth sharing.</h2>
+</div>
+
+<main class="app-shell ss-shell">
+  <header class="app-header app-header--dark">
+    <div>
+      <p class="app-header__eyebrow">Daily nutrition</p>
+    </div>
+  </header>
+
+  <section class="tabs-shell tabs-shell--dark">
+    <div class="tabs-body tabs-body--dark">
+      <section class="screen-section screen-section--home-dark" style="gap: 14px;">
+
+        <div class="day-nav">
+          <button type="button" class="day-nav__btn" disabled>←</button>
+          <div class="day-nav__label-wrap"><span class="day-nav__label">Today</span></div>
+          <button type="button" class="day-nav__btn" disabled>→</button>
+        </div>
+
+        <section class="panel weekly-recap-card" aria-label="Weekly recap">
+          <header class="weekly-recap-card__header">
+            <div>
+              <p class="weekly-recap-card__brand">📊 WEEK RECAP</p>
+              <p class="weekly-recap-card__week">Week of May 4</p>
+            </div>
+            <button type="button" class="weekly-recap-card__dismiss" aria-label="Dismiss">✕</button>
+          </header>
+
+          <ul class="weekly-recap-card__list">
+            <li class="weekly-recap-card__item">
+              <span class="weekly-recap-card__emoji" aria-hidden>🏆</span>
+              <div class="weekly-recap-card__body">
+                <p class="weekly-recap-card__label">Highlight</p>
+                <p class="weekly-recap-card__title">5 days within calorie target</p>
+                <p class="weekly-recap-card__text">Best stretch since you started. Friday's celebration was on a Relax Day — bank balance untouched.</p>
+              </div>
+            </li>
+
+            <li class="weekly-recap-card__item">
+              <span class="weekly-recap-card__emoji" aria-hidden>📈</span>
+              <div class="weekly-recap-card__body">
+                <p class="weekly-recap-card__label">Trend</p>
+                <p class="weekly-recap-card__title">Protein up 12g/day vs last week</p>
+                <p class="weekly-recap-card__text">128g average — your strongest week. Lunch swap to grain bowls is doing the heavy lifting.</p>
+              </div>
+            </li>
+
+            <li class="weekly-recap-card__item">
+              <span class="weekly-recap-card__emoji" aria-hidden>⚠️</span>
+              <div class="weekly-recap-card__body">
+                <p class="weekly-recap-card__label">Challenge</p>
+                <p class="weekly-recap-card__title">Tuesday and Wednesday were the dip</p>
+                <p class="weekly-recap-card__text">Both days under 1500 kcal — likely not enough fuel. Not a failure, just a signal.</p>
+              </div>
+            </li>
+
+            <li class="weekly-recap-card__item">
+              <span class="weekly-recap-card__emoji" aria-hidden>🎯</span>
+              <div class="weekly-recap-card__body">
+                <p class="weekly-recap-card__label">Next week</p>
+                <p class="weekly-recap-card__title">Eat lunch by 1:15 PM</p>
+                <p class="weekly-recap-card__text">The afternoon dips show up when lunch is past 2. A consistent earlier window should smooth them out.</p>
+              </div>
+            </li>
+          </ul>
+
+          <button type="button" class="weekly-recap-card__share">
+            📤 Share my week
+          </button>
+        </section>
+
+      </section>
+    </div>
+  </section>
+
+  <nav class="bottom-tab-bar" role="tablist">
+    <a href="#" role="tab" class="bottom-tab-item bottom-tab-item--active">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 11.5L12 4L21 11.5V20A1 1 0 0 1 20 21H15V15.5H9V21H4A1 1 0 0 1 3 20V11.5Z"/></svg>
+      <span class="bottom-tab-item__label">Today</span>
+    </a>
+    <a href="#" role="tab" class="bottom-tab-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20V14H8V20M10 20V8H14V20M16 20V4H20V20"/><line x1="2" y1="20" x2="22" y2="20"/></svg>
+      <span class="bottom-tab-item__label">Stats</span>
+    </a>
+    <a href="#" role="tab" class="bottom-tab-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 20C4 16.2 7.6 13.5 12 13.5C16.4 13.5 20 16.2 20 20"/></svg>
+      <span class="bottom-tab-item__label">Me</span>
+    </a>
+  </nav>
+</main>
+
+</body>
+</html>

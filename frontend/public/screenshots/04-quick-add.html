@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<title>Screenshot 4 - Quick Add</title>
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<link rel="stylesheet" href="/src/styles/index.css" />
+<style>
+  .ss-caption {
+    position: absolute;
+    top: env(safe-area-inset-top, 0);
+    left: 0; right: 0;
+    padding: 18px 22px 14px;
+    background: linear-gradient(180deg, rgba(0,0,0,0.65) 0%, rgba(0,0,0,0) 100%);
+    text-align: center;
+    z-index: 100;
+    pointer-events: none;
+  }
+  .ss-caption h2 {
+    margin: 0;
+    font-size: 1.55rem;
+    line-height: 1.15;
+    font-weight: 800;
+    color: #ffffff;
+    letter-spacing: -0.01em;
+  }
+  body {
+    background: linear-gradient(180deg, #0a0d14 0%, #1a1f2e 100%);
+    min-height: 100dvh;
+    margin: 0;
+    overflow: hidden;
+  }
+  /* Stage: render the modal sheet inline, positioned to dominate */
+  .ss-sheet-stage {
+    position: relative;
+    width: 100%;
+    height: 100dvh;
+    display: flex;
+    align-items: flex-end;
+  }
+  .ss-sheet-stage .qs-sheet {
+    margin: 0 auto !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    border-radius: 28px 28px 0 0 !important;
+    padding-top: calc(env(safe-area-inset-top, 0px) + 96px) !important;
+    padding-bottom: 28px !important;
+    max-height: 100dvh !important;
+    transform: none !important;
+  }
+</style>
+</head>
+<body>
+
+<div class="ss-caption">
+  <h2>Log in 2 seconds.</h2>
+</div>
+
+<div class="ss-sheet-stage">
+  <div class="qs-sheet">
+    <div class="qs-header">
+      <p class="qs-title">Quick add</p>
+      <button type="button" class="qs-close" aria-label="Close">✕</button>
+    </div>
+
+    <div class="qs-analyzer-row">
+      <button type="button" class="qs-analyzer-btn">
+        <span class="qs-analyzer-btn__icon">📷</span>
+        <span>Camera</span>
+      </button>
+      <button type="button" class="qs-analyzer-btn">
+        <span class="qs-analyzer-btn__icon">🖼️</span>
+        <span>Gallery</span>
+      </button>
+      <button type="button" class="qs-analyzer-btn">
+        <span class="qs-analyzer-btn__icon">🎤</span>
+        <span>Voice</span>
+      </button>
+      <button type="button" class="qs-analyzer-btn">
+        <span class="qs-analyzer-btn__icon">▦</span>
+        <span>Barcode</span>
+      </button>
+    </div>
+
+    <div class="qs-slot-pill-row">
+      <button type="button" class="qs-slot-pill">
+        Saving to · <strong>Lunch</strong>
+        <span class="qs-slot-pill__chevron" aria-hidden>▾</span>
+      </button>
+    </div>
+
+    <div class="qs-search">
+      <input
+        class="qs-search__input"
+        type="text"
+        placeholder="Search saved or 3M+ products..."
+        readonly
+      />
+    </div>
+
+    <div class="qs-recent">
+      <p class="qs-recent__label">Recent</p>
+      <div class="qs-search-results">
+        <button type="button" class="qs-search-result">
+          <span class="qs-search-result__name">Oatmeal with banana &amp; almond butter</span>
+          <span class="qs-search-result__kcal">350g · 480 kcal</span>
+        </button>
+        <button type="button" class="qs-search-result">
+          <span class="qs-search-result__name">Chicken Caesar salad, no croutons</span>
+          <span class="qs-search-result__kcal">280g · 420 kcal</span>
+        </button>
+        <button type="button" class="qs-search-result">
+          <span class="qs-search-result__name">Greek yogurt + berries</span>
+          <span class="qs-search-result__kcal">200g · 165 kcal</span>
+        </button>
+        <button type="button" class="qs-search-result">
+          <span class="qs-search-result__name">Espresso, oat milk latte</span>
+          <span class="qs-search-result__kcal">240ml · 95 kcal</span>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

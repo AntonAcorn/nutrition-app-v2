@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<title>Screenshot 6 - Onboarding</title>
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<link rel="stylesheet" href="/src/styles/index.css" />
+<style>
+  .ss-caption {
+    position: absolute;
+    top: env(safe-area-inset-top, 0);
+    left: 0; right: 0;
+    padding: 18px 22px 14px;
+    background: linear-gradient(180deg, rgba(0,0,0,0.65) 0%, rgba(0,0,0,0) 100%);
+    text-align: center;
+    z-index: 100;
+    pointer-events: none;
+  }
+  .ss-caption h2 {
+    margin: 0;
+    font-size: 1.55rem;
+    line-height: 1.15;
+    font-weight: 800;
+    color: #ffffff;
+    letter-spacing: -0.01em;
+  }
+  body {
+    background: linear-gradient(180deg, #0a0d14 0%, #1a1f2e 100%);
+    min-height: 100dvh;
+    margin: 0;
+  }
+  .app-shell.ss-shell {
+    padding-top: calc(env(safe-area-inset-top, 0px) + 110px) !important;
+    justify-content: center;
+  }
+</style>
+</head>
+<body>
+
+<div class="ss-caption">
+  <h2>Built for real life, not perfection.</h2>
+</div>
+
+<main class="app-shell app-shell--auth ss-shell">
+  <section class="auth-panel auth-panel--dark">
+    <div class="onboarding-welcome">
+      <div class="onboarding-welcome__slide">
+        <div class="onboarding-welcome__visual">
+          <div class="onboarding-welcome__hero">🏦</div>
+        </div>
+        <h2 class="onboarding-welcome__title">Bad days happen.<br/>Your coach gets it.</h2>
+        <p class="onboarding-welcome__body">Most apps make you feel guilty for going over. Yours gives you a calorie bank instead — every day under target deposits, bad days withdraw, your streak holds.</p>
+      </div>
+
+      <div class="onboarding-welcome__dots" aria-hidden>
+        <span class="onboarding-welcome__dot onboarding-welcome__dot--active"></span>
+        <span class="onboarding-welcome__dot"></span>
+        <span class="onboarding-welcome__dot"></span>
+        <span class="onboarding-welcome__dot"></span>
+      </div>
+
+      <div class="onboarding-welcome__nav">
+        <button type="button" class="tab-button tab-button--dark">Skip</button>
+        <button type="button" style="flex: 1;">Next</button>
+      </div>
+    </div>
+  </section>
+</main>
+
+</body>
+</html>
