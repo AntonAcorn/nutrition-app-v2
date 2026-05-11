@@ -95,14 +95,47 @@ Comments and bug reports go to feedback@rumblyeats.org. We read everything.
 
 ## Apple App Privacy (data collected)
 
-Required to fill in App Store Connect privacy questionnaire:
+Required to fill in App Store Connect privacy questionnaire.
 
-- **Data Linked to User:**
-  - Health & Fitness (food logs, weight, wellbeing ratings) — for app functionality
-  - Identifiers (Apple ID via Sign in with Apple) — for account
-  - Diagnostics (Sentry crash reports) — for app functionality
-  - Usage Data (PostHog analytics) — for analytics
-- **Data NOT Collected:** Location, Contacts, Browsing History, Search History
-- **Tracking:** None
+### Data Linked to User
 
-Privacy questionnaire wording: "We use your food log only to power the app for you. We don't sell or share it with third parties for advertising."
+| Category | Specific data | Purpose |
+|---|---|---|
+| Contact Info | Email Address | App Functionality (account, sign-in via Google/Apple) |
+| Contact Info | Name | App Functionality (Apple Sign-In may pass user's name on first login) |
+| Health & Fitness | Food logs, weight entries, wellbeing ratings, fasting windows | App Functionality |
+| User Content | Other User Content (typed meal descriptions, coach focus notes, AI-generated meal items from photo/voice) | App Functionality |
+| Identifiers | User ID (Apple ID / Google account ID) | App Functionality |
+| Diagnostics | Crash Data, Performance Data (Sentry) | App Functionality |
+| Usage Data | Product Interaction (PostHog analytics — screen views, feature usage) | Analytics |
+
+### Data NOT Collected
+Location, Contacts, Browsing History, Search History, Financial Info, Sensitive Info, Purchases (handled by Apple), Advertising Data.
+
+### Tracking
+None. We do not use third-party SDKs for advertising or cross-app/site tracking.
+
+### Privacy questionnaire wording
+"We use your food log only to power the app for you. We don't sell or share it with third parties for advertising."
+
+## Monetization (v1.0)
+
+**v1.0 ships free with no in-app purchases.** App Store Connect → App Information → "Does your app use Apple's StoreKit framework?" = **No**. Pricing tier = **Free**.
+
+### Future paywall guardrails (do not violate when monetizing)
+
+If/when we add a subscription in a later version, the paywall must meet Apple guideline 3.1.2(a) AND avoid the Cal-AI removal pattern (April 2026). Concrete rules - bake into the implementation review:
+
+1. **The headline price is the price the user is charged.** If the plan is $39.99/year, show "$39.99 per year" in the largest type. Do NOT show "$0.77/week" larger than the actual annual charge. Cal-AI was pulled for putting the weekly-equivalent above the real billing amount.
+2. **Free-trial toggle must clearly show what auto-renews.** A toggle for "Start free trial" must say next to it "Renews at $X/year after 7 days." Not in fine print, not collapsed.
+3. **Cancel must work from inside the app.** Settings → Subscription → Manage opens Apple's standard subscription management. No "contact support to cancel."
+4. **All purchases go through Apple IAP.** No external billing links, no Stripe redirect, no "buy on our website for less." Cal-AI's primary removal cause.
+5. **Restore Purchases button is visible on every paywall.** Required by guideline 3.1.1.
+6. **No dark-pattern colour priority** - the "Continue free / Maybe later" option must be readable, not greyed-out to ghost-button invisibility.
+
+A free-tier-only ship is the safest path for v1.0. Hold this section as the bar for any future paid tier.
+
+### Notes on photo/voice retention (verified 2026-05-10)
+- **Meal photos:** uploaded as `multipart/form-data` to `/api/photo-analysis`, forwarded to OpenAI Vision, and **not persisted** — `photo_analysis_drafts` stores only the parsed `analysis_json`, no `image_url`/blob column. Apple "Photos or Videos" → **Data Not Collected**.
+- **Voice:** transcribed **on-device** (Web Speech / iOS Speech). The backend's `/api/voice-analysis` receives plain text (`request.description`), not audio. Apple "Audio Data" → **Data Not Collected**.
+- The AI-parsed meal items (calories, macros, food names) are stored as text under User Content → Other User Content, linked to the user, for the meal history.

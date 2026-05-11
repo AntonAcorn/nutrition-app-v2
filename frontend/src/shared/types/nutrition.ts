@@ -30,6 +30,7 @@ export interface DraftItem {
   fat: number
   carbs: number
   fiber: number
+  confidence?: number
 }
 
 export interface DraftTotals {

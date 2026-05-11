@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import type { DraftItem } from '../../../shared/types/nutrition'
-import { numericFields } from '../model/photoAnalysis'
+import { confidenceLevel, numericFields } from '../model/photoAnalysis'
 
 interface DraftItemEditorProps {
   item: DraftItem
@@ -15,8 +15,15 @@ const fieldLabels: Record<string, string> = {
   fiber: 'Fiber',
 }
 
+const confidenceLabels: Record<'high' | 'medium' | 'low', string> = {
+  high: 'Confident',
+  medium: 'Double-check',
+  low: 'Verify',
+}
+
 export function DraftItemEditor({ item, onChange }: DraftItemEditorProps) {
   const [fieldValues, setFieldValues] = useState<Record<string, string>>({})
+  const itemConfidence = confidenceLevel(item.confidence)
 
   useEffect(() => {
     setFieldValues({
@@ -32,7 +39,17 @@ export function DraftItemEditor({ item, onChange }: DraftItemEditorProps) {
     <article className="draft-item-card">
       <div className="draft-item-card__header">
         <label className="draft-item-card__name-field">
-          <span className="draft-item-card__field-label">Name</span>
+          <span className="draft-item-card__field-label">
+            Name
+            {itemConfidence && (
+              <span
+                className={`draft-item-card__confidence draft-item-card__confidence--${itemConfidence}`}
+                title="How sure the AI is about this item — adjust portion/macros below if needed"
+              >
+                {confidenceLabels[itemConfidence]}
+              </span>
+            )}
+          </span>
           <input value={item.name} onChange={(event) => onChange(item.id, 'name', event.target.value)} />
         </label>
 

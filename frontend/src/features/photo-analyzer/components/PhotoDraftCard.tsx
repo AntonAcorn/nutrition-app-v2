@@ -1,6 +1,6 @@
 import { useMemo } from 'react'
 import { DraftItemEditor } from './DraftItemEditor'
-import { calculateTotals } from '../model/photoAnalysis'
+import { calculateTotals, confidenceLevel } from '../model/photoAnalysis'
 import type { DraftItem, PhotoAnalysisDraft } from '../../../shared/types/nutrition'
 
 export type DraftEntryStatus = 'analyzing' | 'idle' | 'saving' | 'saved' | 'error'
@@ -36,13 +36,10 @@ export function PhotoDraftCard({ entry, onSave, onDiscard, onToggleExpand, onUpd
     return entry.draft.items.slice(0, 2).map(i => i.name).join(', ')
   }, [entry.draft])
 
-  const confidenceLevel = useMemo(() => {
-    if (!entry.draft) return null
-    const pct = entry.draft.confidence > 1 ? entry.draft.confidence : entry.draft.confidence * 100
-    if (pct >= 80) return 'high'
-    if (pct >= 55) return 'medium'
-    return 'low'
-  }, [entry.draft])
+  const overallConfidence = useMemo(
+    () => (entry.draft ? confidenceLevel(entry.draft.confidence) : null),
+    [entry.draft],
+  )
 
   if (entry.status === 'saved') {
     return (
@@ -92,9 +89,9 @@ export function PhotoDraftCard({ entry, onSave, onDiscard, onToggleExpand, onUpd
         <div className="photo-draft-card__summary">
           <div className="photo-draft-card__name-row">
             <p className="photo-draft-card__name">{mealName}</p>
-            {confidenceLevel && (
-              <span className={`photo-draft-card__confidence photo-draft-card__confidence--${confidenceLevel}`}>
-                {confidenceLevel === 'high' ? 'Good match' : confidenceLevel === 'medium' ? 'Review' : 'Check carefully'}
+            {overallConfidence && (
+              <span className={`photo-draft-card__confidence photo-draft-card__confidence--${overallConfidence}`}>
+                {overallConfidence === 'high' ? 'Good match' : overallConfidence === 'medium' ? 'Review' : 'Check carefully'}
               </span>
             )}
           </div>

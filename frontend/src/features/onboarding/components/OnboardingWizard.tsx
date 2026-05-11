@@ -399,7 +399,7 @@ export function OnboardingWizard({ onComplete }: Props) {
           <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '0.25rem' }}><MascotCameraSvg size={80} /></div>
           <p className="onboarding-complete__title" style={{ textAlign: 'center', fontSize: '1.5rem', fontWeight: 700, margin: '0 0 0.2rem', lineHeight: 1.2 }}>You're all set!</p>
           <p className="onboarding-complete__subtitle" style={{ textAlign: 'center', fontSize: '0.875rem', margin: '0 0 1rem' }}>
-            Here's how to log your meals
+            Three ways to log. You're always in control — adjust anything before it lands.
           </p>
 
           <div className="onboarding-feature-cards">
@@ -407,7 +407,7 @@ export function OnboardingWizard({ onComplete }: Props) {
               <span className="onboarding-feature-card__icon">📸</span>
               <div>
                 <p className="onboarding-feature-card__title">Snap a photo</p>
-                <p className="onboarding-feature-card__desc">AI recognises the meal and estimates calories. Glance at the numbers, fix anything off.</p>
+                <p className="onboarding-feature-card__desc">AI gives you a first guess at calories. Glance, tweak portions, then save — never blind.</p>
               </div>
             </div>
             <div className="onboarding-feature-card">

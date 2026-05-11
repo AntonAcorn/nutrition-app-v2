@@ -15,6 +15,16 @@ interface DraftPayload {
 
 export const numericFields: Array<keyof DraftItem> = ['calories', 'protein', 'fat', 'carbs', 'fiber']
 
+export type ConfidenceLevel = 'high' | 'medium' | 'low'
+
+export function confidenceLevel(score: number | undefined | null): ConfidenceLevel | null {
+  if (score == null || Number.isNaN(score)) return null
+  const pct = score > 1 ? score : score * 100
+  if (pct >= 80) return 'high'
+  if (pct >= 55) return 'medium'
+  return 'low'
+}
+
 export function normalizeDraft(payload: DraftPayload): PhotoAnalysisDraft {
   const source = payload?.analysis ?? {}
   const items = Array.isArray(source.items)
@@ -30,6 +40,7 @@ export function normalizeDraft(payload: DraftPayload): PhotoAnalysisDraft {
         fat: toNumber(item.fat),
         carbs: toNumber(item.carbs),
         fiber: toNumber(item.fiber),
+        confidence: typeof item.confidence === 'number' ? item.confidence : undefined,
       }))
     : []
 
