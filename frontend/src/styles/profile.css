@@ -471,3 +471,97 @@
   color: #1f2a44;
 }
 
+
+
+/* ── Behind Rumbly: subtle author footer + about sheet ── */
+.profile-footer-credit {
+  margin-top: 28px;
+  padding: 0 4px 16px;
+  text-align: center;
+  font-size: 0.78rem;
+  opacity: 0.45;
+  line-height: 1.45;
+}
+.profile-footer-credit__link {
+  color: inherit;
+  text-decoration: underline;
+  text-decoration-color: rgba(255, 255, 255, 0.25);
+}
+[data-theme="light"] .profile-footer-credit { opacity: 0.5; }
+[data-theme="light"] .profile-footer-credit__link {
+  text-decoration-color: rgba(20, 33, 61, 0.2);
+}
+
+.about-sheet-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  z-index: 1000;
+  animation: about-fade 0.15s ease;
+}
+.about-sheet {
+  position: relative;
+  width: 100%;
+  max-width: 560px;
+  max-height: 90vh;
+  overflow-y: auto;
+  background: #1a1d24;
+  color: #fff;
+  border-radius: 22px 22px 0 0;
+  padding: 24px 22px 28px;
+  box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.4);
+  animation: about-slide 0.22s cubic-bezier(.2,.8,.3,1);
+}
+[data-theme="light"] .about-sheet {
+  background: #fffaf0;
+  color: #14213d;
+}
+@keyframes about-fade { from { opacity: 0 } to { opacity: 1 } }
+@keyframes about-slide { from { transform: translateY(20px) } to { transform: translateY(0) } }
+
+.about-sheet__close {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 1rem;
+  cursor: pointer;
+}
+[data-theme="light"] .about-sheet__close {
+  background: rgba(20, 33, 61, 0.06);
+  color: rgba(20, 33, 61, 0.6);
+}
+
+.about-sheet__header { text-align: center; margin-bottom: 18px; }
+.about-sheet__emoji { font-size: 2rem; display: block; margin-bottom: 6px; }
+.about-sheet__header h2 { font-size: 1.15rem; margin: 0; }
+
+.about-sheet__body p {
+  font-size: 0.92rem;
+  line-height: 1.5;
+  margin: 0 0 12px;
+  opacity: 0.85;
+}
+.about-sheet__body p:last-child { margin-bottom: 0; }
+
+.about-sheet__cta {
+  margin-top: 22px;
+  width: 100%;
+  padding: 13px 16px;
+  border-radius: 14px;
+  border: none;
+  background: linear-gradient(135deg, #ffd56b 0%, #ffb84d 100%);
+  color: #1a1d24;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+.about-sheet__cta:hover { filter: brightness(1.05); }

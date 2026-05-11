@@ -27,28 +27,30 @@ public class EntitlementController {
     @GetMapping
     public EntitlementResponse get(HttpSession session) {
         UUID userId = resolver.resolve(session);
-        UserEntitlementEntity entity = entitlementService.getOrBootstrap(userId);
-        EntitlementTier tier = EntitlementService.tierOf(entity);
+        boolean paywallOn = entitlementService.isPaywallEnabled();
 
-        boolean unlimited = tier.hasAiAccess();
+        UserEntitlementEntity entity = entitlementService.getOrBootstrap(userId);
+        EntitlementTier tier = paywallOn ? EntitlementService.tierOf(entity) : EntitlementTier.PRO;
+        boolean unlimited = paywallOn && tier.hasAiAccess();
+
         LocalDate today = LocalDate.now(ZoneOffset.UTC);
         int photoUsed = today.equals(entity.getAiUsageDate()) ? entity.getAiPhotoUsedToday() : 0;
         int voiceUsed = today.equals(entity.getAiUsageDate()) ? entity.getAiVoiceUsedToday() : 0;
 
         return new EntitlementResponse(
                 tier,
-                entity.getTrialEndsAt(),
-                entity.getProActiveUntil(),
-                entity.getFounderNumber(),
+                paywallOn ? entity.getTrialEndsAt() : null,
+                paywallOn ? entity.getProActiveUntil() : null,
+                paywallOn ? entity.getFounderNumber() : null,
                 entitlementService.foundersRemaining(),
                 new EntitlementResponse.AiQuota(
                         unlimited ? 0 : photoUsed,
-                        EntitlementService.FREE_PHOTO_PER_DAY,
+                        entitlementService.photoCap(),
                         unlimited
                 ),
                 new EntitlementResponse.AiQuota(
                         unlimited ? 0 : voiceUsed,
-                        EntitlementService.FREE_VOICE_PER_DAY,
+                        entitlementService.voiceCap(),
                         unlimited
                 )
         );

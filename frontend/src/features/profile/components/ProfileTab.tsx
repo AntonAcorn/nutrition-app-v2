@@ -7,6 +7,7 @@ import { NotificationSettings } from '../../notifications/components/Notificatio
 import { exportNutritionCsv } from '../model/exportData'
 import { useCalorieBank } from '../../calorie-bank/model/useCalorieBank'
 import { CalorieBankSheet } from '../../calorie-bank/components/CalorieBankSheet'
+import { AboutRumblySheet } from './AboutRumblySheet'
 import { localDateString } from '../../statistics/model/formatters'
 
 const ACTIVITY_LABELS: Record<string, string> = {
@@ -59,6 +60,7 @@ export function ProfileTab({ displayName, email, onLogout, onDeleteAccount }: Pr
   const [showExport, setShowExport] = useState(false)
   const [exporting, setExporting] = useState(false)
   const [showBank, setShowBank] = useState(false)
+  const [showAbout, setShowAbout] = useState(false)
   const todayStr = localDateString(new Date())
   const { snapshot: bankSnapshot } = useCalorieBank(todayStr)
 
@@ -511,6 +513,13 @@ export function ProfileTab({ displayName, email, onLogout, onDeleteAccount }: Pr
         >
           📤 Export data
         </button>
+        <button
+          type="button"
+          className="profile-tool-row"
+          onClick={() => setShowAbout(true)}
+        >
+          💛 Behind Rumbly
+        </button>
         {showExport && (
           <div className="export-range-picker">
             {([{ label: 'Last 30 days', days: 30 }, { label: 'Last 90 days', days: 90 }, { label: 'Last year', days: 365 }, { label: 'All data', days: 730 }] as const).map(opt => (
@@ -545,6 +554,18 @@ export function ProfileTab({ displayName, email, onLogout, onDeleteAccount }: Pr
         </button>
       </div>
 
+      <p className="profile-footer-credit">
+        Made by one person in Canada ·{' '}
+        <a
+          className="profile-footer-credit__link"
+          href="https://rumblyeats.org"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          rumblyeats.org
+        </a>
+      </p>
+
       {showBank && bankSnapshot && (
         <CalorieBankSheet
           snapshot={bankSnapshot}
@@ -552,6 +573,8 @@ export function ProfileTab({ displayName, email, onLogout, onDeleteAccount }: Pr
           onClose={() => setShowBank(false)}
         />
       )}
+
+      {showAbout && <AboutRumblySheet onClose={() => setShowAbout(false)} />}
     </section>
   )
 }

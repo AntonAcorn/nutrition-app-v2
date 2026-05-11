@@ -9,6 +9,7 @@ import java.time.ZoneOffset;
 import java.util.UUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -18,6 +19,11 @@ import org.springframework.web.server.ResponseStatusException;
  * Owns user monetization state: trial / Pro / Founder Lifetime resolution and
  * daily AI quota for the free tier. Called by AI controllers before any
  * outbound OpenAI call so token spend is always gated by entitlement.
+ *
+ * <p>When {@code nutrition.paywall.enabled=false} (open-beta mode), every user
+ * is treated as PRO: quota checks no-op, FounderBanner hides, paywall never
+ * opens. The RevenueCat plumbing remains in place so flipping the flag re-
+ * activates monetization without code changes.
  *
  * <p>See memory/project_monetization.md for the product decision.
  */
@@ -31,14 +37,37 @@ public class EntitlementService {
     public static final int FOUNDER_CAP = 200;
     public static final int FREE_PHOTO_PER_DAY = 1;
     public static final int FREE_VOICE_PER_DAY = 1;
+    /**
+     * Open-beta caps — enforced when {@code paywallEnabled=false}. Higher than
+     * FREE caps because there is no upgrade path: this is the only quota the
+     * user gets. Sized to cover a typical day of meal logging (≈ 4–6 entries)
+     * with headroom for retries / edits.
+     */
+    public static final int OPEN_BETA_PHOTO_PER_DAY = 10;
+    public static final int OPEN_BETA_VOICE_PER_DAY = 10;
 
     private final UserEntitlementRepository repository;
+    private final boolean paywallEnabled;
 
-    public EntitlementService(UserEntitlementRepository repository) {
+    public EntitlementService(
+            UserEntitlementRepository repository,
+            @Value("${nutrition.paywall.enabled:false}") boolean paywallEnabled
+    ) {
         this.repository = repository;
+        this.paywallEnabled = paywallEnabled;
+        log.info("entitlement initialised paywallEnabled={}", paywallEnabled);
+    }
+
+    public boolean isPaywallEnabled() {
+        return paywallEnabled;
     }
 
     public EntitlementTier resolve(UUID userId) {
+        if (!paywallEnabled) {
+            // Open-beta: tier reported as PRO so other UI gates pass, but
+            // consumeQuota still enforces the open-beta cap independently.
+            return EntitlementTier.PRO;
+        }
         return repository.findById(userId)
             .map(EntitlementService::tierOf)
             .orElse(EntitlementTier.FREE);
@@ -83,12 +112,16 @@ public class EntitlementService {
 
     private EntitlementTier consumeQuota(UUID userId, QuotaKind kind) {
         var entity = getOrBootstrap(userId);
-        var tier = tierOf(entity);
-        if (tier.hasAiAccess()) {
-            return tier;
+        // In open-beta the entity exists but its trial/pro fields are unused;
+        // we treat everyone as quota-capped regardless of tierOf(entity).
+        if (paywallEnabled) {
+            var tier = tierOf(entity);
+            if (tier.hasAiAccess()) {
+                return tier;
+            }
         }
 
-        // FREE tier: enforce daily cap, atomic reset at UTC midnight rollover.
+        // Daily cap, atomic reset at UTC midnight rollover.
         var today = LocalDate.now(ZoneOffset.UTC);
         if (entity.getAiUsageDate() == null || !today.equals(entity.getAiUsageDate())) {
             entity.setAiUsageDate(today);
@@ -96,10 +129,12 @@ public class EntitlementService {
             entity.setAiVoiceUsedToday(0);
         }
         int used = kind == QuotaKind.PHOTO ? entity.getAiPhotoUsedToday() : entity.getAiVoiceUsedToday();
-        int cap  = kind == QuotaKind.PHOTO ? FREE_PHOTO_PER_DAY : FREE_VOICE_PER_DAY;
+        int cap = capFor(kind);
         if (used >= cap) {
-            throw new ResponseStatusException(HttpStatus.PAYMENT_REQUIRED,
-                "Free tier " + kind.label + " quota reached (" + cap + "/day). Upgrade or wait until tomorrow.");
+            String message = paywallEnabled
+                ? "Free tier " + kind.label + " quota reached (" + cap + "/day). Upgrade or wait until tomorrow."
+                : "Daily AI " + kind.label + " limit reached (" + cap + "/day). Come back tomorrow.";
+            throw new ResponseStatusException(HttpStatus.PAYMENT_REQUIRED, message);
         }
         if (kind == QuotaKind.PHOTO) {
             entity.setAiPhotoUsedToday(used + 1);
@@ -107,7 +142,22 @@ public class EntitlementService {
             entity.setAiVoiceUsedToday(used + 1);
         }
         repository.save(entity);
-        return tier;
+        return paywallEnabled ? tierOf(entity) : EntitlementTier.PRO;
+    }
+
+    private int capFor(QuotaKind kind) {
+        if (paywallEnabled) {
+            return kind == QuotaKind.PHOTO ? FREE_PHOTO_PER_DAY : FREE_VOICE_PER_DAY;
+        }
+        return kind == QuotaKind.PHOTO ? OPEN_BETA_PHOTO_PER_DAY : OPEN_BETA_VOICE_PER_DAY;
+    }
+
+    public int photoCap() {
+        return capFor(QuotaKind.PHOTO);
+    }
+
+    public int voiceCap() {
+        return capFor(QuotaKind.VOICE);
     }
 
     /**
@@ -159,10 +209,14 @@ public class EntitlementService {
     }
 
     public long foundersRemaining() {
+        if (!paywallEnabled) {
+            // FounderBanner reads this value; returning 0 hides the banner.
+            return 0;
+        }
         return Math.max(0, FOUNDER_CAP - repository.countFounders());
     }
 
-    static EntitlementTier tierOf(UserEntitlementEntity e) {
+    public static EntitlementTier tierOf(UserEntitlementEntity e) {
         if (e == null) return EntitlementTier.FREE;
         if (e.getFounderPurchasedAt() != null) return EntitlementTier.FOUNDER;
         var now = OffsetDateTime.now(ZoneOffset.UTC);

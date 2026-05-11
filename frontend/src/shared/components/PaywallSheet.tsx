@@ -27,6 +27,30 @@ const triggerCopy: Record<Props['trigger'], { title: string; body: string }> = {
   },
 }
 
+/**
+ * Open-beta copy — shown when paywall is disabled server-side but the user
+ * still hit a daily AI quota. No plans, no upgrade pitch, just an honest
+ * "see you tomorrow" message.
+ */
+const openBetaCopy: Record<Props['trigger'], { title: string; body: string }> = {
+  photo: {
+    title: 'Daily AI photo limit reached',
+    body: 'Rumbly is free during open beta with a daily AI cap to keep server costs sustainable. Try a manual log now — or come back tomorrow for more AI.',
+  },
+  voice: {
+    title: 'Daily AI voice limit reached',
+    body: 'Rumbly is free during open beta with a daily AI cap to keep server costs sustainable. Try a manual log now — or come back tomorrow for more AI.',
+  },
+  coach: {
+    title: 'Coach is taking a break',
+    body: 'Coach Insights are free during open beta but capped to keep things sustainable. Check back tomorrow.',
+  },
+  manual: {
+    title: 'You\'re on open beta',
+    body: 'Rumbly is free with a daily AI cap. There\'s no upgrade right now — just enjoy the app.',
+  },
+}
+
 export function PaywallSheet({ open, trigger, onClose }: Props) {
   const { data: entitlement } = useEntitlement()
   const invalidate = useInvalidateEntitlement()
@@ -36,6 +60,32 @@ export function PaywallSheet({ open, trigger, onClose }: Props) {
   }, [open, invalidate])
 
   if (!open) return null
+
+  // Open-beta detection: server reports PRO tier with a finite quota.
+  // (When paywall is active, PRO users have unlimited=true; when paywall is
+  // off, everyone is reported as PRO with a cap, so this branch triggers.)
+  const isOpenBeta = entitlement?.tier === 'PRO'
+    && entitlement.photoQuota.unlimited === false
+
+  if (isOpenBeta) {
+    const copy = openBetaCopy[trigger]
+    const cap = trigger === 'voice' ? entitlement!.voiceQuota.cap : entitlement!.photoQuota.cap
+    return (
+      <div className="paywall-backdrop" onClick={onClose}>
+        <div className="paywall-sheet" onClick={(e) => e.stopPropagation()}>
+          <button type="button" className="paywall-sheet__close" onClick={onClose} aria-label="Close">✕</button>
+
+          <p className="paywall-sheet__eyebrow">Open beta · {cap}/day</p>
+          <h2 className="paywall-sheet__title">{copy.title}</h2>
+          <p className="paywall-sheet__body">{copy.body}</p>
+
+          <button type="button" className="paywall-sheet__free-fallback" onClick={onClose}>
+            Got it, see you tomorrow
+          </button>
+        </div>
+      </div>
+    )
+  }
 
   const copy = triggerCopy[trigger]
   const trialDays = trialDaysRemaining(entitlement)
