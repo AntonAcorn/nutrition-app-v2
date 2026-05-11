@@ -218,24 +218,18 @@ export function QuickAddSheet({ initialSlot, onAdd, onLogTemplate, onClose, onOp
 
   async function handleGalleryClick() {
     try {
-      const { Capacitor } = await import('@capacitor/core')
-      if (Capacitor.isNativePlatform()) {
-        const { Camera, CameraResultType, CameraSource } = await import('@capacitor/camera')
-        const photo = await Camera.getPhoto({
-          quality: 85,
-          allowEditing: false,
-          resultType: CameraResultType.Uri,
-          source: CameraSource.Photos,
-        })
-        if (photo.webPath) {
-          const res = await fetch(photo.webPath)
-          const blob = await res.blob()
+      const { isNativePlatform, pickPhotoNative } = await import('../../photo-analyzer/model/platform')
+      if (await isNativePlatform()) {
+        const file = await pickPhotoNative('photos')
+        if (file) {
           onClose()
-          onOpenAnalyzerWithPhoto?.(new File([blob], 'photo.jpg', { type: blob.type || 'image/jpeg' }), slot)
-          return
+          onOpenAnalyzerWithPhoto?.(file, slot)
         }
+        return
       }
-    } catch {}
+    } catch {
+      // Fall through to file input fallback on any error
+    }
     galleryInputRef.current?.click()
   }
 
@@ -259,24 +253,18 @@ export function QuickAddSheet({ initialSlot, onAdd, onLogTemplate, onClose, onOp
 
   async function handlePhotoClick() {
     try {
-      const { Capacitor } = await import('@capacitor/core')
-      if (Capacitor.isNativePlatform()) {
-        const { Camera, CameraResultType, CameraSource } = await import('@capacitor/camera')
-        const photo = await Camera.getPhoto({
-          quality: 85,
-          allowEditing: false,
-          resultType: CameraResultType.Uri,
-          source: CameraSource.Camera,
-        })
-        if (photo.webPath) {
-          const res = await fetch(photo.webPath)
-          const blob = await res.blob()
+      const { isNativePlatform, pickPhotoNative } = await import('../../photo-analyzer/model/platform')
+      if (await isNativePlatform()) {
+        const file = await pickPhotoNative('camera')
+        if (file) {
           onClose()
-          onOpenAnalyzerWithPhoto?.(new File([blob], 'photo.jpg', { type: blob.type || 'image/jpeg' }), slot)
-          return
+          onOpenAnalyzerWithPhoto?.(file, slot)
         }
+        return
       }
-    } catch {}
+    } catch {
+      // Fall through to file input fallback on any error
+    }
     cameraInputRef.current?.click()
   }
 

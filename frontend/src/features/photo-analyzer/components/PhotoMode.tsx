@@ -8,7 +8,7 @@ import { track } from '../../../shared/lib/analytics'
 import { compressImage } from '../../../shared/lib/imageCompress'
 import type { DraftItem, MealTemplateItem } from '../../../shared/types/nutrition'
 import { calculateTotals, normalizeDraft } from '../model/photoAnalysis'
-import { isNativePlatform, pickPhotoNative } from '../model/platform'
+import { isNativePlatform, pickPhotoNative, PhotoPickError } from '../model/platform'
 import { getWebSpeechRecognition } from '../model/speechRecognition'
 import { PhotoDraftCard, type DraftEntry } from './PhotoDraftCard'
 import { MicButton } from './MicButton'
@@ -35,6 +35,7 @@ export function PhotoMode({
   const [photoDrafts, setPhotoDrafts] = useState<DraftEntry[]>([])
   const [pendingPhotos, setPendingPhotos] = useState<{ file: File; thumb: string }[]>([])
   const [paywallOpen, setPaywallOpen] = useState(false)
+  const [pickError, setPickError] = useState<string>('')
   const [userNote, setUserNote] = useState('')
   const [noteExpanded, setNoteExpanded] = useState(false)
   const [noteRecording, setNoteRecording] = useState(false)
@@ -97,9 +98,19 @@ export function PhotoMode({
   }
 
   async function handleTakePhoto() {
+    setPickError('')
     if (await isNativePlatform()) {
-      const file = await pickPhotoNative()
-      if (file) stagePhoto(file)
+      try {
+        const file = await pickPhotoNative()
+        if (file) stagePhoto(file)
+      } catch (err) {
+        const msg = err instanceof PhotoPickError
+          ? `Couldn't open the camera: ${err.message}`
+          : err instanceof Error
+            ? `Camera error: ${err.message}`
+            : 'Camera error - try again'
+        setPickError(msg)
+      }
     } else {
       fileInputRef.current?.click()
     }
@@ -385,11 +396,15 @@ export function PhotoMode({
           <button type="button" className="upload-button photo-upload-hero__cta" onClick={handleTakePhoto}>
             <span>📸  Open camera</span>
           </button>
+          {pickError && <p className="photo-pick-error" role="alert">{pickError}</p>}
         </div>
       ) : (
-        <button type="button" className="upload-button upload-button--compact" onClick={handleTakePhoto}>
-          <span>+ Add another photo</span>
-        </button>
+        <>
+          <button type="button" className="upload-button upload-button--compact" onClick={handleTakePhoto}>
+            <span>+ Add another photo</span>
+          </button>
+          {pickError && <p className="photo-pick-error" role="alert">{pickError}</p>}
+        </>
       )}
 
       <input
