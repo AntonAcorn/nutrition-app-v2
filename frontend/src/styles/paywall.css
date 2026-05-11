@@ -176,3 +176,55 @@
   text-decoration: underline;
   text-underline-offset: 3px;
 }
+
+
+/* ── Founder Banner (Today) ──────────────────────────────────────────────── */
+.founder-banner {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  border-radius: 14px;
+  background: linear-gradient(135deg, rgba(255, 183, 77, 0.15), rgba(255, 183, 77, 0.06));
+  border: 1px solid rgba(255, 183, 77, 0.3);
+  color: #ffffff;
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.15s, transform 0.1s;
+}
+
+.founder-banner:active {
+  transform: scale(0.99);
+}
+
+.founder-banner__icon {
+  font-size: 1.4rem;
+  flex-shrink: 0;
+}
+
+.founder-banner__text {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.founder-banner__title {
+  font-size: 0.92rem;
+  font-weight: 600;
+  color: #ffb74d;
+}
+
+.founder-banner__sub {
+  font-size: 0.74rem;
+  color: rgba(255, 255, 255, 0.55);
+}
+
+.founder-banner__chevron {
+  font-size: 1.4rem;
+  color: rgba(255, 255, 255, 0.4);
+  font-weight: 300;
+  flex-shrink: 0;
+}

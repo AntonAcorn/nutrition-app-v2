@@ -12,6 +12,7 @@ import { MealSlotPickerPopup } from './MealSlotPickerPopup'
 import { defaultSlotByTime, type MealSlot } from '../model/mealLogApi'
 import { MealsLogCard } from './MealsLogCard'
 import { FrequentMealsCard } from './FrequentMealsCard'
+import { FounderBanner } from '../../../shared/components/FounderBanner'
 import { fetchTodaySummary } from '../model/todaySummaryApi'
 import { updateTodayWeight } from '../model/weightApi'
 import { addMealManually, resetToday } from '../model/nutritionTotalsApi'
@@ -493,6 +494,11 @@ export function CurrentDayTab({ refreshToken = 0, successMessage = '', onDayUpda
           {isToday && (
             <div className="content-fade-in" style={{ animationDelay: '20ms' }}>
               <WeeklyBankCard refreshToken={refreshToken} />
+            </div>
+          )}
+          {isToday && (
+            <div className="content-fade-in" style={{ animationDelay: '25ms' }}>
+              <FounderBanner />
             </div>
           )}
           {isToday && (

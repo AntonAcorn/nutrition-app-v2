@@ -61,6 +61,14 @@ nutrition:
     google-native-client-ids: ${GOOGLE_NATIVE_CLIENT_IDS:12070092066-84aqttkj4oa7786751ifg1huf0stvsja.apps.googleusercontent.com}
   ai-analysis:
     daily-limit: ${AI_ANALYSIS_DAILY_LIMIT:30}
+  revenuecat:
+    # Shared "Authorization" header value RevenueCat sends with every webhook.
+    # Configure it in RevenueCat dashboard -> Project -> Integrations -> Webhooks.
+    # If blank, the webhook endpoint rejects all requests (safe default).
+    webhook-auth: ${REVENUECAT_WEBHOOK_AUTH:}
+    # IAP product IDs that grant the Founder Lifetime entitlement.
+    # Comma-separated. Configure in App Store Connect AND RevenueCat.
+    founder-product-ids: ${REVENUECAT_FOUNDER_PRODUCTS:rumbly_founder_lifetime}
   push:
     vapid-public-key: ${VAPID_PUBLIC_KEY:}
     vapid-private-key: ${VAPID_PRIVATE_KEY:}

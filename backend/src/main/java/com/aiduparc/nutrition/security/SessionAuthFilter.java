@@ -31,7 +31,10 @@ public class SessionAuthFilter extends OncePerRequestFilter {
             "/api/auth/google",
             "/api/auth/google/callback",
             "/api/auth/google/token",
-            "/api/auth/apple"
+            "/api/auth/apple",
+            // Webhooks are public endpoints authenticated by shared secret
+            // checked inside the controller, not by user session.
+            "/api/webhooks/**"
     );
 
     private final AntPathMatcher matcher = new AntPathMatcher();
