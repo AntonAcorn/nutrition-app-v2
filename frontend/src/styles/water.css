@@ -1195,7 +1195,11 @@
 
 @media (max-width: 640px) {
   .app-shell {
-    padding: 12px 10px calc(72px + env(safe-area-inset-bottom, 0px));
+    padding-inline: 10px;
+    padding-bottom: calc(72px + env(safe-area-inset-bottom, 0px));
+    /* padding-top intentionally NOT overridden here so the safe-area
+       floor defined in base.css keeps clearing the iOS status bar /
+       Android system bar. */
   }
 
   .screen-section--statistics-dark {
