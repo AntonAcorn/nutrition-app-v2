@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<title>Screenshot 2 - Relax Days</title>
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<link rel="stylesheet" href="/src/styles/index.css" />
+<style>
+  .ss-caption {
+    position: absolute;
+    top: env(safe-area-inset-top, 0);
+    left: 0; right: 0;
+    padding: 18px 22px 14px;
+    background: linear-gradient(180deg, rgba(0,0,0,0.65) 0%, rgba(0,0,0,0) 100%);
+    text-align: center;
+    z-index: 100;
+    pointer-events: none;
+  }
+  .ss-caption h2 {
+    margin: 0;
+    font-size: 1.55rem;
+    line-height: 1.15;
+    font-weight: 800;
+    color: #ffffff;
+    letter-spacing: -0.01em;
+  }
+  body {
+    background: linear-gradient(180deg, #0a0d14 0%, #1a1f2e 100%);
+    min-height: 100dvh;
+    margin: 0;
+    overflow: hidden;
+  }
+  /* The sheet is normally a modal — for screenshot we render it inline,
+     positioned to dominate the screen */
+  .ss-sheet-stage {
+    position: relative;
+    width: 100%;
+    height: 100dvh;
+    display: flex;
+    align-items: flex-end;
+  }
+  .ss-sheet-stage .calorie-bank-sheet {
+    margin: 0 auto !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    border-radius: 28px 28px 0 0 !important;
+    padding-top: calc(env(safe-area-inset-top, 0px) + 90px) !important;
+    padding-bottom: 28px !important;
+    transform: none !important;
+    height: auto !important;
+    max-height: 100dvh !important;
+  }
+</style>
+</head>
+<body>
+
+<div class="ss-caption">
+  <h2>2 free-pass days every month.</h2>
+</div>
+
+<div class="ss-sheet-stage">
+  <div class="calorie-bank-sheet" role="dialog" aria-label="Calorie bank">
+
+    <header class="calorie-bank-sheet__header">
+      <span class="calorie-bank-sheet__emoji" aria-hidden>🏦</span>
+      <h2>Calorie bank</h2>
+      <p>Calories saved over the past 7 days — for that Friday feast.</p>
+    </header>
+
+    <div class="calorie-bank-sheet__stats">
+      <div class="calorie-bank-sheet__stat">
+        <span class="calorie-bank-sheet__stat-label">In bank</span>
+        <strong class="calorie-bank-sheet__stat-value">+320</strong>
+        <span class="calorie-bank-sheet__stat-unit">kcal</span>
+      </div>
+    </div>
+
+    <p class="calorie-bank-sheet__food-hint">
+      ≈ a slice of birthday cake or two glasses of wine
+    </p>
+
+    <section class="calorie-bank-sheet__relax">
+      <button type="button" class="calorie-bank-sheet__relax-toggle">
+        <span class="calorie-bank-sheet__relax-emoji" aria-hidden>🎂</span>
+        <div class="calorie-bank-sheet__relax-text">
+          <strong>Relax day</strong>
+          <span>2 of 2 this month</span>
+        </div>
+        <span class="calorie-bank-sheet__chevron calorie-bank-sheet__chevron--open">›</span>
+      </button>
+
+      <div class="relax-calendar">
+        <div class="relax-calendar__header">
+          <button type="button" class="relax-calendar__nav" aria-label="Previous month">‹</button>
+          <span class="relax-calendar__title">May 2026</span>
+          <button type="button" class="relax-calendar__nav" aria-label="Next month">›</button>
+        </div>
+
+        <div class="relax-calendar__counter">2 of 2 used</div>
+
+        <div class="relax-calendar__weekdays">
+          <span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span><span>Sun</span>
+        </div>
+
+        <div class="relax-calendar__grid">
+          <!-- Padding cells before May 1 (Fri) -->
+          <span class="relax-calendar__cell relax-calendar__cell--pad"></span>
+          <span class="relax-calendar__cell relax-calendar__cell--pad"></span>
+          <span class="relax-calendar__cell relax-calendar__cell--pad"></span>
+          <span class="relax-calendar__cell relax-calendar__cell--pad"></span>
+          <button type="button" class="relax-calendar__cell relax-calendar__cell--past" disabled>1</button>
+          <button type="button" class="relax-calendar__cell relax-calendar__cell--past" disabled>2</button>
+          <button type="button" class="relax-calendar__cell relax-calendar__cell--past" disabled>3</button>
+          <button type="button" class="relax-calendar__cell relax-calendar__cell--relax">4<span class="relax-calendar__dot" aria-hidden>🎂</span></button>
+          <button type="button" class="relax-calendar__cell relax-calendar__cell--past" disabled>5</button>
+          <button type="button" class="relax-calendar__cell relax-calendar__cell--past" disabled>6</button>
+          <button type="button" class="relax-calendar__cell relax-calendar__cell--past" disabled>7</button>
+          <button type="button" class="relax-calendar__cell relax-calendar__cell--past" disabled>8</button>
+          <button type="button" class="relax-calendar__cell relax-calendar__cell--past" disabled>9</button>
+          <button type="button" class="relax-calendar__cell relax-calendar__cell--relax">10<span class="relax-calendar__dot" aria-hidden>🎂</span></button>
+          <button type="button" class="relax-calendar__cell relax-calendar__cell--today">11</button>
+          <button type="button" class="relax-calendar__cell" disabled>12</button>
+          <button type="button" class="relax-calendar__cell" disabled>13</button>
+          <button type="button" class="relax-calendar__cell" disabled>14</button>
+          <button type="button" class="relax-calendar__cell" disabled>15</button>
+          <button type="button" class="relax-calendar__cell" disabled>16</button>
+          <button type="button" class="relax-calendar__cell" disabled>17</button>
+          <button type="button" class="relax-calendar__cell" disabled>18</button>
+          <button type="button" class="relax-calendar__cell" disabled>19</button>
+          <button type="button" class="relax-calendar__cell" disabled>20</button>
+          <button type="button" class="relax-calendar__cell" disabled>21</button>
+          <button type="button" class="relax-calendar__cell" disabled>22</button>
+          <button type="button" class="relax-calendar__cell" disabled>23</button>
+          <button type="button" class="relax-calendar__cell" disabled>24</button>
+          <button type="button" class="relax-calendar__cell" disabled>25</button>
+          <button type="button" class="relax-calendar__cell" disabled>26</button>
+          <button type="button" class="relax-calendar__cell" disabled>27</button>
+          <button type="button" class="relax-calendar__cell" disabled>28</button>
+          <button type="button" class="relax-calendar__cell" disabled>29</button>
+          <button type="button" class="relax-calendar__cell" disabled>30</button>
+          <button type="button" class="relax-calendar__cell" disabled>31</button>
+        </div>
+      </div>
+    </section>
+
+    <footer class="calorie-bank-sheet__footer">
+      Limits: up to 200 kcal/day deposited, 1000 kcal ceiling. Edit in profile.
+    </footer>
+  </div>
+</div>
+
+</body>
+</html>

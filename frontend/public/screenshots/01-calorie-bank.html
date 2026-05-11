@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<title>Screenshot 1 - Calorie Bank</title>
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<link rel="stylesheet" href="/src/styles/index.css" />
+<style>
+  /* Caption overlay for App Store */
+  .ss-caption {
+    position: absolute;
+    top: env(safe-area-inset-top, 0);
+    left: 0; right: 0;
+    padding: 18px 22px 14px;
+    background: linear-gradient(180deg, rgba(0,0,0,0.65) 0%, rgba(0,0,0,0) 100%);
+    text-align: center;
+    z-index: 100;
+    pointer-events: none;
+  }
+  .ss-caption h2 {
+    margin: 0;
+    font-size: 1.55rem;
+    line-height: 1.15;
+    font-weight: 800;
+    color: #ffffff;
+    letter-spacing: -0.01em;
+  }
+  /* Push content down enough so the caption doesn't obstruct */
+  .app-shell.ss-shell {
+    padding-top: calc(env(safe-area-inset-top, 0px) + 88px) !important;
+  }
+  body {
+    background: linear-gradient(180deg, #0a0d14 0%, #1a1f2e 100%);
+    min-height: 100dvh;
+    margin: 0;
+  }
+</style>
+</head>
+<body>
+
+<div class="ss-caption">
+  <h2>Bad day? Withdraw, keep going.</h2>
+</div>
+
+<main class="app-shell ss-shell">
+  <header class="app-header app-header--dark">
+    <div>
+      <p class="app-header__eyebrow">Daily nutrition</p>
+    </div>
+    <button type="button" class="theme-toggle-btn" aria-label="Toggle theme">
+      <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <circle cx="12" cy="12" r="4"/>
+        <line x1="12" y1="2" x2="12" y2="5"/><line x1="12" y1="19" x2="12" y2="22"/>
+        <line x1="2" y1="12" x2="5" y2="12"/><line x1="19" y1="12" x2="22" y2="12"/>
+        <line x1="4.5" y1="4.5" x2="6.6" y2="6.6"/><line x1="17.4" y1="17.4" x2="19.5" y2="19.5"/>
+        <line x1="4.5" y1="19.5" x2="6.6" y2="17.4"/><line x1="17.4" y1="6.6" x2="19.5" y2="4.5"/>
+      </svg>
+    </button>
+  </header>
+
+  <section class="tabs-shell tabs-shell--dark">
+    <div class="tabs-body tabs-body--dark">
+      <section class="screen-section screen-section--home-dark">
+
+        <div class="day-nav">
+          <button type="button" class="day-nav__btn" disabled aria-label="Previous day">←</button>
+          <div class="day-nav__label-wrap">
+            <span class="day-nav__label">Today</span>
+          </div>
+          <button type="button" class="day-nav__btn" disabled aria-label="Next day">→</button>
+        </div>
+
+        <section class="today-summary today-summary--dark" aria-label="Daily nutrition summary">
+          <article class="today-dark-card">
+            <div class="today-dark-card__topbar today-dark-card__topbar--split">
+              <p class="today-dark-card__title">Calories</p>
+              <button type="button" class="today-card-details-toggle today-card-details-toggle--pill">
+                <span class="today-macros-preview">
+                  <span class="today-macros-preview__item today-macros-preview__item--p">P 128</span>
+                  <span class="today-macros-preview__dot">·</span>
+                  <span class="today-macros-preview__item today-macros-preview__item--f">F 74</span>
+                  <span class="today-macros-preview__dot">·</span>
+                  <span class="today-macros-preview__item today-macros-preview__item--c">C 248</span>
+                  <span class="today-macros-preview__chevron"> ▾</span>
+                </span>
+              </button>
+            </div>
+
+            <div class="today-dark-ring-layout">
+              <div class="today-side-stat">
+                <strong>2250</strong>
+                <span>EATEN</span>
+              </div>
+
+              <div class="today-ring">
+                <svg viewBox="0 0 160 160" class="today-ring__svg" aria-hidden="true">
+                  <defs>
+                    <linearGradient id="ringGradDanger" x1="0%" y1="0%" x2="100%" y2="0%">
+                      <stop offset="0%" stop-color="#ef4444" />
+                      <stop offset="100%" stop-color="#f87171" />
+                    </linearGradient>
+                  </defs>
+                  <circle cx="80" cy="80" r="64" class="today-ring__track"></circle>
+                  <circle cx="80" cy="80" r="64" class="today-ring__progress"
+                    stroke="url(#ringGradDanger)"
+                    stroke-dasharray="402.12"
+                    stroke-dashoffset="0"></circle>
+                </svg>
+                <div class="today-ring__center">
+                  <strong>0</strong>
+                  <span>kcal left</span>
+                </div>
+              </div>
+
+              <div class="today-side-stat">
+                <strong>2050</strong>
+                <span>TARGET</span>
+              </div>
+            </div>
+
+            <p class="today-ring__caption">Congrats, you've eaten yourself into tomorrow's problem.</p>
+
+            <div style="display: flex; justify-content: center;">
+              <button type="button" class="calorie-bank-badge">
+                <span class="calorie-bank-badge__emoji" aria-hidden>🍺</span>
+                <span class="calorie-bank-badge__text">−200 from bank</span>
+              </button>
+            </div>
+
+            <div class="activity-row">
+              <div class="activity-chip">
+                <span class="activity-chip__icon">👟</span>
+                <span class="activity-chip__value">8,247</span>
+                <span class="activity-chip__label">steps</span>
+              </div>
+              <div class="activity-chip activity-chip--earned">
+                <span class="activity-chip__icon">🔥</span>
+                <span class="activity-chip__value">412</span>
+                <span class="activity-chip__label">kcal burned</span>
+              </div>
+            </div>
+          </article>
+        </section>
+
+      </section>
+    </div>
+  </section>
+
+  <nav class="bottom-tab-bar" role="tablist" aria-label="App sections">
+    <a href="#" role="tab" class="bottom-tab-item bottom-tab-item--active">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 11.5L12 4L21 11.5V20A1 1 0 0 1 20 21H15V15.5H9V21H4A1 1 0 0 1 3 20V11.5Z"/></svg>
+      <span class="bottom-tab-item__label">Today</span>
+    </a>
+    <a href="#" role="tab" class="bottom-tab-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20V14H8V20M10 20V8H14V20M16 20V4H20V20"/><line x1="2" y1="20" x2="22" y2="20"/></svg>
+      <span class="bottom-tab-item__label">Stats</span>
+    </a>
+    <a href="#" role="tab" class="bottom-tab-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 20C4 16.2 7.6 13.5 12 13.5C16.4 13.5 20 16.2 20 20"/></svg>
+      <span class="bottom-tab-item__label">Me</span>
+    </a>
+  </nav>
+</main>
+
+</body>
+</html>
