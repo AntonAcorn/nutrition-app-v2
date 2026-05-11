@@ -4,6 +4,7 @@ import com.aiduparc.nutrition.history.service.NutritionHistoryService;
 import com.aiduparc.nutrition.security.service.CurrentNutritionUserResolver;
 import jakarta.servlet.http.HttpSession;
 import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 import java.util.UUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,12 +15,14 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
 
 @RestController
 @RequestMapping("/api/history/statistics")
 public class NutritionStatisticsController {
 
     private static final Logger log = LoggerFactory.getLogger(NutritionStatisticsController.class);
+    private static final long MAX_RANGE_DAYS = 366;
 
     private final NutritionHistoryService nutritionHistoryService;
     private final CurrentNutritionUserResolver currentNutritionUserResolver;
@@ -39,7 +42,14 @@ public class NutritionStatisticsController {
         @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate toDate,
         HttpSession session
     ) {
-        UUID resolvedUserId = currentNutritionUserResolver.resolve(session, null);
+        UUID resolvedUserId = currentNutritionUserResolver.resolve(session);
+        if (fromDate.isAfter(toDate)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "fromDate must be on or before toDate");
+        }
+        if (ChronoUnit.DAYS.between(fromDate, toDate) > MAX_RANGE_DAYS) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "Date range too large (max " + MAX_RANGE_DAYS + " days)");
+        }
         log.info("statistics request userId={} fromDate={} toDate={}", resolvedUserId, fromDate, toDate);
         return nutritionHistoryService.getStatistics(resolvedUserId, fromDate, toDate);
     }
