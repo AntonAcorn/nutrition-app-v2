@@ -1,6 +1,9 @@
-const MAX_DIMENSION = 1280
+// Backend sends image to OpenAI Vision with detail="high". A single 512×512
+// tile costs 255 tokens; going above 512px in either dimension pushes us into
+// 4 tiles (765 tokens), so 512 is the sweet spot for our "medium" tier.
+const MAX_DIMENSION = 512
 const JPEG_QUALITY = 0.82
-const SKIP_BELOW_BYTES = 400 * 1024 // <400KB — already small enough
+const SKIP_BELOW_BYTES = 80 * 1024 // <80KB — already small enough
 
 export async function compressImage(file: File): Promise<File> {
   if (!file.type.startsWith('image/') || file.size < SKIP_BELOW_BYTES) return file

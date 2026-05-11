@@ -1,5 +1,6 @@
 package com.aiduparc.nutrition.photoanalysis.application;
 
+import com.aiduparc.nutrition.aibudget.AiCostBudgetService;
 import com.aiduparc.nutrition.photoanalysis.config.PhotoAnalysisProperties;
 import com.aiduparc.nutrition.photoanalysis.draft.application.PhotoAnalysisDraftService;
 import com.aiduparc.nutrition.photoanalysis.draft.dto.CreatePhotoAnalysisDraftRequest;
@@ -37,15 +38,18 @@ public class DefaultVoiceAnalysisService {
     private final ObjectMapper objectMapper;
     private final PhotoAnalysisDraftService draftService;
     private final HttpClient httpClient;
+    private final AiCostBudgetService budget;
 
     public DefaultVoiceAnalysisService(
             PhotoAnalysisProperties properties,
             ObjectMapper objectMapper,
-            PhotoAnalysisDraftService draftService
+            PhotoAnalysisDraftService draftService,
+            AiCostBudgetService budget
     ) {
         this.properties = properties;
         this.objectMapper = objectMapper;
         this.draftService = draftService;
+        this.budget = budget;
         int timeoutMs = properties.openai().timeoutMs() > 0 ? properties.openai().timeoutMs() : 25000;
         this.httpClient = HttpClient.newBuilder()
                 .connectTimeout(Duration.ofMillis(timeoutMs))
@@ -73,6 +77,7 @@ public class DefaultVoiceAnalysisService {
     }
 
     private String callOpenAi(String description, String locale, String apiKey) {
+        budget.assertBudgetOk();
         try {
             String endpoint = normalizeBaseUrl() + "/chat/completions";
             String payload = objectMapper.writeValueAsString(buildRequestBody(description, locale));
@@ -95,6 +100,7 @@ public class DefaultVoiceAnalysisService {
             if (content.isMissingNode() || content.asText().isBlank()) {
                 throw new ResponseStatusException(HttpStatus.BAD_GATEWAY, "OpenAI response did not include content");
             }
+            budget.recordCost(AiCostBudgetService.VOICE_CENTS);
             return content.asText();
         } catch (HttpTimeoutException e) {
             throw new ResponseStatusException(HttpStatus.GATEWAY_TIMEOUT, "OpenAI voice analysis timed out", e);

@@ -1,5 +1,6 @@
 package com.aiduparc.nutrition.coach.service;
 
+import com.aiduparc.nutrition.aibudget.AiCostBudgetService;
 import com.aiduparc.nutrition.coach.api.CoachSnapshotResponse;
 import com.aiduparc.nutrition.coach.api.InlineTipResponse;
 import com.aiduparc.nutrition.coach.config.CoachInsightProperties;
@@ -54,6 +55,7 @@ public class CoachInlineTipService {
     private final CoachInsightProperties properties;
     private final ObjectMapper objectMapper;
     private final HttpClient httpClient;
+    private final AiCostBudgetService budget;
 
     /**
      * Tiny in-process cache so rapid keystrokes don't multiply OpenAI calls.
@@ -66,13 +68,15 @@ public class CoachInlineTipService {
         DailyNutritionEntryRepository dailyEntryRepository,
         CoachSnapshotService snapshotService,
         CoachInsightProperties properties,
-        ObjectMapper objectMapper
+        ObjectMapper objectMapper,
+        AiCostBudgetService budget
     ) {
         this.userProfileRepository = userProfileRepository;
         this.dailyEntryRepository = dailyEntryRepository;
         this.snapshotService = snapshotService;
         this.properties = properties;
         this.objectMapper = objectMapper;
+        this.budget = budget;
         this.httpClient = HttpClient.newBuilder()
             .connectTimeout(Duration.ofMillis(timeoutMs()))
             .build();
@@ -260,8 +264,15 @@ public class CoachInlineTipService {
             .POST(HttpRequest.BodyPublishers.ofString(payload))
             .build();
 
+        try {
+            budget.assertBudgetOk();
+        } catch (RuntimeException e) {
+            // Inline tip is best-effort UX polish. Skip silently on budget exhaustion.
+            return null;
+        }
         HttpResponse<String> res = httpClient.send(req, HttpResponse.BodyHandlers.ofString());
         if (res.statusCode() >= 400) return null;
+        budget.recordCost(AiCostBudgetService.COACH_INLINE_TIP_CENTS);
         JsonNode root = objectMapper.readTree(res.body());
         String content = root.path("choices").path(0).path("message").path("content").asText("");
         if (content.isBlank()) return null;

@@ -1,5 +1,6 @@
 package com.aiduparc.nutrition.coach.infrastructure;
 
+import com.aiduparc.nutrition.aibudget.AiCostBudgetService;
 import com.aiduparc.nutrition.coach.api.CoachSnapshotResponse;
 import com.aiduparc.nutrition.coach.config.CoachInsightProperties;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -163,10 +164,16 @@ public class OpenAiCoachInsightProvider implements CoachInsightProvider {
     private final CoachInsightProperties properties;
     private final ObjectMapper objectMapper;
     private final HttpClient httpClient;
+    private final AiCostBudgetService budget;
 
-    public OpenAiCoachInsightProvider(CoachInsightProperties properties, ObjectMapper objectMapper) {
+    public OpenAiCoachInsightProvider(
+            CoachInsightProperties properties,
+            ObjectMapper objectMapper,
+            AiCostBudgetService budget
+    ) {
         this.properties = properties;
         this.objectMapper = objectMapper;
+        this.budget = budget;
         this.httpClient = HttpClient.newBuilder()
             .connectTimeout(Duration.ofMillis(timeoutMs()))
             .build();
@@ -230,6 +237,7 @@ public class OpenAiCoachInsightProvider implements CoachInsightProvider {
     }
 
     private String invokeOpenAi(String apiKey, String snapshotJson, String historyJson, String locale) {
+        budget.assertBudgetOk();
         try {
             String endpoint = normalizeBaseUrl() + "/chat/completions";
             String payload = objectMapper.writeValueAsString(buildRequestBody(snapshotJson, historyJson, locale));
@@ -245,6 +253,7 @@ public class OpenAiCoachInsightProvider implements CoachInsightProvider {
             if (response.statusCode() >= 400) {
                 throw mapHttpError(response.statusCode(), response.body());
             }
+            budget.recordCost(AiCostBudgetService.COACH_INSIGHT_CENTS);
 
             JsonNode root = objectMapper.readTree(response.body());
             JsonNode contentNode = root.path("choices").path(0).path("message").path("content");
@@ -408,6 +417,7 @@ public class OpenAiCoachInsightProvider implements CoachInsightProvider {
     );
 
     private String invokeOpenAiForRecap(String apiKey, String snapshotJson, String historyJson, String locale) {
+        budget.assertBudgetOk();
         try {
             String endpoint = normalizeBaseUrl() + "/chat/completions";
             String payload = objectMapper.writeValueAsString(buildRecapRequestBody(snapshotJson, historyJson, locale));
@@ -423,6 +433,7 @@ public class OpenAiCoachInsightProvider implements CoachInsightProvider {
             if (response.statusCode() >= 400) {
                 throw mapHttpError(response.statusCode(), response.body());
             }
+            budget.recordCost(AiCostBudgetService.COACH_INSIGHT_CENTS);
 
             JsonNode root = objectMapper.readTree(response.body());
             JsonNode contentNode = root.path("choices").path(0).path("message").path("content");

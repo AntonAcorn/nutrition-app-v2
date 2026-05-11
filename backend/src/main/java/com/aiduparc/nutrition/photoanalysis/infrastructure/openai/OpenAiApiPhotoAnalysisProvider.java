@@ -1,5 +1,6 @@
 package com.aiduparc.nutrition.photoanalysis.infrastructure.openai;
 
+import com.aiduparc.nutrition.aibudget.AiCostBudgetService;
 import com.aiduparc.nutrition.photoanalysis.application.dto.PhotoAnalysisResponse;
 import com.aiduparc.nutrition.photoanalysis.config.PhotoAnalysisProperties;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -29,10 +30,16 @@ public class OpenAiApiPhotoAnalysisProvider implements OpenAiPhotoAnalysisProvid
     private final PhotoAnalysisProperties properties;
     private final ObjectMapper objectMapper;
     private final HttpClient httpClient;
+    private final AiCostBudgetService budget;
 
-    public OpenAiApiPhotoAnalysisProvider(PhotoAnalysisProperties properties, ObjectMapper objectMapper) {
+    public OpenAiApiPhotoAnalysisProvider(
+            PhotoAnalysisProperties properties,
+            ObjectMapper objectMapper,
+            AiCostBudgetService budget
+    ) {
         this.properties = properties;
         this.objectMapper = objectMapper;
+        this.budget = budget;
         this.httpClient = HttpClient.newBuilder()
                 .connectTimeout(Duration.ofMillis(timeoutMs()))
                 .build();
@@ -61,6 +68,7 @@ public class OpenAiApiPhotoAnalysisProvider implements OpenAiPhotoAnalysisProvid
     }
 
     private String invokeOpenAi(OpenAiPhotoAnalysisPrompt prompt, String apiKey) {
+        budget.assertBudgetOk();
         try {
             var endpoint = normalizeBaseUrl() + "/chat/completions";
             String payload = objectMapper.writeValueAsString(buildRequestBody(prompt));
@@ -82,6 +90,7 @@ public class OpenAiApiPhotoAnalysisProvider implements OpenAiPhotoAnalysisProvid
             if (contentNode.isMissingNode() || contentNode.asText().isBlank()) {
                 throw new ResponseStatusException(HttpStatus.BAD_GATEWAY, "OpenAI response did not include content");
             }
+            budget.recordCost(AiCostBudgetService.PHOTO_CENTS);
             return contentNode.asText();
         } catch (HttpTimeoutException e) {
             throw new ResponseStatusException(HttpStatus.GATEWAY_TIMEOUT, "OpenAI photo analysis timed out", e);
@@ -116,7 +125,15 @@ public class OpenAiApiPhotoAnalysisProvider implements OpenAiPhotoAnalysisProvid
     private Object buildRequestBody(OpenAiPhotoAnalysisPrompt prompt) {
         List<Map<String, Object>> content = new ArrayList<>();
         content.add(Map.of("type", "text", "text", buildUserText(prompt)));
-        content.add(Map.of("type", "image_url", "image_url", Map.of("url", prompt.imageUrl())));
+        // "Medium" recognition tier: detail=high + frontend caps image at 512×512.
+        // OpenAI Vision has no literal "medium"; this combination yields 1 tile
+        // (255 tokens) instead of 4 tiles at 1024px (765 tokens) — 3× cheaper
+        // than the API default while preserving enough detail to identify food
+        // toppings, sauces, and approximate portion size.
+        content.add(Map.of(
+                "type", "image_url",
+                "image_url", Map.of("url", prompt.imageUrl(), "detail", "high")
+        ));
 
         return Map.of(
                 "model", prompt.model(),

@@ -1,5 +1,6 @@
 package com.aiduparc.nutrition.coach.trigger;
 
+import com.aiduparc.nutrition.aibudget.AiCostBudgetService;
 import com.aiduparc.nutrition.coach.api.CoachSnapshotResponse;
 import com.aiduparc.nutrition.coach.config.CoachInsightProperties;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -60,10 +61,16 @@ public class CoachTriggerCopywriter {
     private final CoachInsightProperties properties;
     private final ObjectMapper objectMapper;
     private final HttpClient httpClient;
+    private final AiCostBudgetService budget;
 
-    public CoachTriggerCopywriter(CoachInsightProperties properties, ObjectMapper objectMapper) {
+    public CoachTriggerCopywriter(
+            CoachInsightProperties properties,
+            ObjectMapper objectMapper,
+            AiCostBudgetService budget
+    ) {
         this.properties = properties;
         this.objectMapper = objectMapper;
+        this.budget = budget;
         this.httpClient = HttpClient.newBuilder()
             .connectTimeout(Duration.ofMillis(timeoutMs()))
             .build();
@@ -131,8 +138,16 @@ public class CoachTriggerCopywriter {
             .POST(HttpRequest.BodyPublishers.ofString(body))
             .build();
 
+        try {
+            budget.assertBudgetOk();
+        } catch (RuntimeException e) {
+            // Trigger copywriter is best-effort. If budget is exhausted, skip
+            // gracefully — the caller falls back to a static template.
+            return null;
+        }
         HttpResponse<String> res = httpClient.send(req, HttpResponse.BodyHandlers.ofString());
         if (res.statusCode() >= 400) return null;
+        budget.recordCost(AiCostBudgetService.COACH_TRIGGER_CENTS);
         JsonNode root = objectMapper.readTree(res.body());
         return root.path("choices").path(0).path("message").path("content").asText("");
     }

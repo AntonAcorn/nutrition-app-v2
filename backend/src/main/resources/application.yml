@@ -61,6 +61,18 @@ nutrition:
     google-native-client-ids: ${GOOGLE_NATIVE_CLIENT_IDS:12070092066-84aqttkj4oa7786751ifg1huf0stvsja.apps.googleusercontent.com}
   ai-analysis:
     daily-limit: ${AI_ANALYSIS_DAILY_LIMIT:30}
+  ai-budget:
+    # Hard ceiling on total AI cost (cents) per UTC day across all users.
+    # Backstop to per-user quotas — protects against viral spikes / runaway
+    # scripts. When exceeded, /api/photo-analysis/* and coach endpoints return
+    # 503 until midnight UTC. Set to 0 to disable. Default = $5/day.
+    daily-cents: ${AI_DAILY_BUDGET_CENTS:500}
+  paywall:
+    # Master switch for the monetization layer. When false (open-beta / pre-tax-
+    # registration mode), every user is treated as PRO: AI quota is unlimited,
+    # PaywallSheet never opens, FounderBanner hides. RevenueCat infrastructure
+    # stays in code, ready to flip back on. See memory/project_monetization.md.
+    enabled: ${PAYWALL_ENABLED:false}
   revenuecat:
     # Shared "Authorization" header value RevenueCat sends with every webhook.
     # Configure it in RevenueCat dashboard -> Project -> Integrations -> Webhooks.
@@ -84,7 +96,9 @@ nutrition:
   coach:
     enabled: ${COACH_ENABLED:true}
     provider: ${COACH_PROVIDER:openai-stub}
-    validity-hours: ${COACH_VALIDITY_HOURS:72}
+    # Open-beta default = 168h (weekly cadence) to keep coach LLM cost bounded.
+    # Bump down to 72h once paywall is on and Pro users justify the spend.
+    validity-hours: ${COACH_VALIDITY_HOURS:168}
     min-logged-days: ${COACH_MIN_LOGGED_DAYS:3}
     openai:
       api-key: ${COACH_OPENAI_API_KEY:${OPENAI_API_KEY:}}
