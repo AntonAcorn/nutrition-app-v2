@@ -93,12 +93,61 @@
   gap: 12px;
 }
 
+.frequent-meals-card--collapsed {
+  gap: 0;
+}
+
+.frequent-meals-card__toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  background: none;
+  border: none;
+  padding: 0;
+  color: inherit;
+  cursor: pointer;
+  font: inherit;
+  text-align: left;
+  -webkit-tap-highlight-color: transparent;
+}
+
 .frequent-meals-card__title {
   font-size: 0.78rem;
   font-weight: 700;
   color: rgba(255, 255, 255, 0.4);
   text-transform: uppercase;
   letter-spacing: 0.07em;
+}
+
+.frequent-meals-card__count {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: rgba(123, 97, 255, 0.22);
+  color: #c4b5fd;
+}
+
+.frequent-meals-card__chevron {
+  margin-left: auto;
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.4);
+  transition: transform 0.2s ease;
+}
+
+.frequent-meals-card__chevron--collapsed {
+  transform: rotate(-90deg);
+}
+
+[data-theme="light"] .frequent-meals-card__chevron {
+  color: rgba(20, 33, 61, 0.45);
+}
+
+[data-theme="light"] .frequent-meals-card__count {
+  background: rgba(123, 97, 255, 0.14);
+  color: #6d28d9;
 }
 
 .frequent-meals-list {
