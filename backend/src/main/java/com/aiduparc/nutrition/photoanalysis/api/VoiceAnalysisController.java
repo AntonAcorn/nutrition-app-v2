@@ -42,7 +42,7 @@ public class VoiceAnalysisController {
             HttpSession session
     ) {
         UUID userId = currentNutritionUserResolver.resolve(session);
-        rateLimitService.checkLimit(userId);
+        rateLimitService.checkAndConsume(userId, AiAnalysisRateLimitService.Kind.VOICE);
         LocalDate entryDate = request.entryDate() != null ? request.entryDate() : LocalDate.now();
         return voiceAnalysisService.analyzeAndCreateDraft(userId, entryDate, request.description(), request.locale());
     }

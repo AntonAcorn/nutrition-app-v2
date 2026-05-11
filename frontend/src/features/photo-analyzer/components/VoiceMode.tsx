@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { MascotSvg } from '../../current-day/components/MascotSvg'
 import { getTodayLocalDateInputValue } from '../../../shared/lib/date'
-import { apiClient } from '../../../shared/lib/apiClient'
+import { apiClient, ApiError } from '../../../shared/lib/apiClient'
+import { PaywallSheet } from '../../../shared/components/PaywallSheet'
 import { toNumber } from '../../../shared/lib/number'
 import { track } from '../../../shared/lib/analytics'
 import type { DraftItem, MealTemplateItem, PhotoAnalysisDraft } from '../../../shared/types/nutrition'
@@ -49,6 +50,7 @@ export function VoiceMode({
   const [voiceSaving, setVoiceSaving] = useState(false)
   const [voiceError, setVoiceError] = useState('')
   const [voiceSuccess, setVoiceSuccess] = useState('')
+  const [paywallOpen, setPaywallOpen] = useState(false)
   const recognitionRef = useRef<SpeechRecognition | null>(null)
 
   const voiceDraftTotals = useMemo(
@@ -150,7 +152,11 @@ export function VoiceMode({
       track('voice_analyzed', { item_count: result.items.length, confidence: result.confidence })
       onVoiceDraftChange(result)
     } catch (err) {
-      setVoiceError(err instanceof Error ? err.message : 'Voice analysis failed')
+      if (err instanceof ApiError && err.status === 402) {
+        setPaywallOpen(true)
+      } else {
+        setVoiceError(err instanceof Error ? err.message : 'Voice analysis failed')
+      }
     } finally {
       setAnalyzing(false)
     }
@@ -324,6 +330,7 @@ export function VoiceMode({
       ) : null}
 
       {voiceError && <p className="error-text">{voiceError}</p>}
+      <PaywallSheet open={paywallOpen} trigger="voice" onClose={() => setPaywallOpen(false)} />
     </div>
   )
 }

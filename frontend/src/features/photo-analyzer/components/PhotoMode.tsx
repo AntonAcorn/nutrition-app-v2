@@ -1,7 +1,8 @@
 import { ChangeEvent, useEffect, useMemo, useRef, useState } from 'react'
 import { MascotCameraSvg } from '../../current-day/components/MascotCameraSvg'
 import { getTodayLocalDateInputValue } from '../../../shared/lib/date'
-import { apiClient } from '../../../shared/lib/apiClient'
+import { apiClient, ApiError } from '../../../shared/lib/apiClient'
+import { PaywallSheet } from '../../../shared/components/PaywallSheet'
 import { toNumber } from '../../../shared/lib/number'
 import { track } from '../../../shared/lib/analytics'
 import { compressImage } from '../../../shared/lib/imageCompress'
@@ -33,6 +34,7 @@ export function PhotoMode({
 }: PhotoModeProps) {
   const [photoDrafts, setPhotoDrafts] = useState<DraftEntry[]>([])
   const [pendingPhotos, setPendingPhotos] = useState<{ file: File; thumb: string }[]>([])
+  const [paywallOpen, setPaywallOpen] = useState(false)
   const [userNote, setUserNote] = useState('')
   const [noteExpanded, setNoteExpanded] = useState(false)
   const [noteRecording, setNoteRecording] = useState(false)
@@ -80,6 +82,12 @@ export function PhotoMode({
         e.localId === localId ? { ...e, status: 'idle', draft } : e,
       ))
     } catch (err) {
+      if (err instanceof ApiError && err.status === 402) {
+        // Free-tier quota exhausted: drop the in-flight draft card and open paywall.
+        setPhotoDrafts(prev => prev.filter(e => e.localId !== localId))
+        setPaywallOpen(true)
+        return
+      }
       setPhotoDrafts(prev => prev.map(e =>
         e.localId === localId
           ? { ...e, status: 'error', analyzeError: err instanceof Error ? err.message : 'Analysis failed' }
@@ -431,6 +439,7 @@ export function PhotoMode({
           )}
         </div>
       )}
+      <PaywallSheet open={paywallOpen} trigger="photo" onClose={() => setPaywallOpen(false)} />
     </>
   )
 }

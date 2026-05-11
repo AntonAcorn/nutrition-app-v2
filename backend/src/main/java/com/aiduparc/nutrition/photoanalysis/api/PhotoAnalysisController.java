@@ -62,7 +62,7 @@ public class PhotoAnalysisController {
         try {
             LocalDate safeEntryDate = entryDate != null ? entryDate : LocalDate.now();
             UUID resolvedUserId = currentNutritionUserResolver.resolve(session);
-            rateLimitService.checkLimit(resolvedUserId);
+            rateLimitService.checkAndConsume(resolvedUserId, AiAnalysisRateLimitService.Kind.PHOTO);
             return new PhotoUploadAnalysisResponse(photoUploadAnalysisService.analyzeAndCreateDraft(
                     new PhotoUploadAnalysisRequest(
                             resolvedUserId,
