@@ -21,6 +21,7 @@ import java.util.Optional;
 import java.util.UUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -164,34 +165,42 @@ public class NutritionHistoryService {
 
     @Transactional
     public void subtractFromDailyTotals(SubtractFromDailyTotalsCommand command) {
-        DailyNutritionEntrySnapshot current = getOrCreateEmptySnapshot(command.userId(), command.entryDate());
+        DailyNutritionEntryEntity entity = lockOrCreateDailyEntry(command.userId(), command.entryDate());
 
-        upsert(new UpsertDailyNutritionEntryCommand(
-            command.userId(), command.entryDate(),
-            defaultBigDecimal(current.caloriesConsumedKcal()).subtract(defaultBigDecimal(command.caloriesConsumedKcal())).max(BigDecimal.ZERO),
-            current.calorieTargetKcal(), current.weightKg(),
-            defaultBigDecimal(current.proteinGrams()).subtract(defaultBigDecimal(command.proteinGrams())).max(BigDecimal.ZERO),
-            defaultBigDecimal(current.fatGrams()).subtract(defaultBigDecimal(command.fatGrams())).max(BigDecimal.ZERO),
-            defaultBigDecimal(current.fiberGrams()).subtract(defaultBigDecimal(command.fiberGrams())).max(BigDecimal.ZERO),
-            defaultBigDecimal(current.carbsGrams()).subtract(defaultBigDecimal(command.carbsGrams())).max(BigDecimal.ZERO),
-            current.notes(), current.waterGlasses()
-        ));
+        entity.setCaloriesConsumedKcal(defaultBigDecimal(entity.getCaloriesConsumedKcal())
+            .subtract(defaultBigDecimal(command.caloriesConsumedKcal())).max(BigDecimal.ZERO));
+        entity.setProteinGrams(defaultBigDecimal(entity.getProteinGrams())
+            .subtract(defaultBigDecimal(command.proteinGrams())).max(BigDecimal.ZERO));
+        entity.setFatGrams(defaultBigDecimal(entity.getFatGrams())
+            .subtract(defaultBigDecimal(command.fatGrams())).max(BigDecimal.ZERO));
+        entity.setFiberGrams(defaultBigDecimal(entity.getFiberGrams())
+            .subtract(defaultBigDecimal(command.fiberGrams())).max(BigDecimal.ZERO));
+        entity.setCarbsGrams(defaultBigDecimal(entity.getCarbsGrams())
+            .subtract(defaultBigDecimal(command.carbsGrams())).max(BigDecimal.ZERO));
+        entity.setCalorieTargetKcal(resolveTarget(command.userId(), entity.getCalorieTargetKcal()));
+
+        repository.save(entity);
     }
 
     @Transactional
     public DailyNutritionEntrySnapshot addToDailyTotals(AddToDailyTotalsCommand command) {
-        DailyNutritionEntrySnapshot current = getOrCreateEmptySnapshot(command.userId(), command.entryDate());
+        DailyNutritionEntryEntity entity = lockOrCreateDailyEntry(command.userId(), command.entryDate());
 
-        DailyNutritionEntrySnapshot result = upsert(new UpsertDailyNutritionEntryCommand(
-            command.userId(), command.entryDate(),
-            defaultBigDecimal(current.caloriesConsumedKcal()).add(defaultBigDecimal(command.caloriesConsumedKcal())),
-            current.calorieTargetKcal(), current.weightKg(),
-            defaultBigDecimal(current.proteinGrams()).add(defaultBigDecimal(command.proteinGrams())),
-            defaultBigDecimal(current.fatGrams()).add(defaultBigDecimal(command.fatGrams())),
-            defaultBigDecimal(current.fiberGrams()).add(defaultBigDecimal(command.fiberGrams())),
-            defaultBigDecimal(current.carbsGrams()).add(defaultBigDecimal(command.carbsGrams())),
-            mergeNotes(current.notes(), command.notes()), current.waterGlasses()
-        ));
+        entity.setCaloriesConsumedKcal(defaultBigDecimal(entity.getCaloriesConsumedKcal())
+            .add(defaultBigDecimal(command.caloriesConsumedKcal())));
+        entity.setProteinGrams(defaultBigDecimal(entity.getProteinGrams())
+            .add(defaultBigDecimal(command.proteinGrams())));
+        entity.setFatGrams(defaultBigDecimal(entity.getFatGrams())
+            .add(defaultBigDecimal(command.fatGrams())));
+        entity.setFiberGrams(defaultBigDecimal(entity.getFiberGrams())
+            .add(defaultBigDecimal(command.fiberGrams())));
+        entity.setCarbsGrams(defaultBigDecimal(entity.getCarbsGrams())
+            .add(defaultBigDecimal(command.carbsGrams())));
+        entity.setNotes(mergeNotes(entity.getNotes(), command.notes()));
+        entity.setCalorieTargetKcal(resolveTarget(command.userId(), entity.getCalorieTargetKcal()));
+
+        DailyNutritionEntryEntity saved = repository.save(entity);
+        DailyNutritionEntrySnapshot result = DailyNutritionEntrySnapshot.fromEntity(saved);
 
         MealSlotEntity slot = mealLogService.getOrCreateSlot(command.userId(), command.entryDate(), command.slotType());
         mealLogService.saveEntry(
@@ -211,6 +220,40 @@ public class NutritionHistoryService {
             result.caloriesConsumedKcal(), result.proteinGrams(), result.fatGrams(), result.fiberGrams()
         );
         return result;
+    }
+
+    /**
+     * Fetch the daily-totals row for (userId, entryDate) under a row-level
+     * write lock, creating an empty row on the fly if one doesn't exist. The
+     * pessimistic lock serialises concurrent read-modify-write calls (e.g.
+     * "Save all N meals" sending parallel /confirm requests), preventing the
+     * second writer from clobbering the first writer's increment.
+     */
+    private DailyNutritionEntryEntity lockOrCreateDailyEntry(UUID userId, LocalDate entryDate) {
+        Optional<DailyNutritionEntryEntity> found =
+            repository.findByUserIdAndEntryDateForUpdate(userId, entryDate);
+        if (found.isPresent()) return found.get();
+
+        DailyNutritionEntryEntity fresh = new DailyNutritionEntryEntity();
+        fresh.setUserId(userId);
+        fresh.setEntryDate(entryDate);
+        fresh.setCaloriesConsumedKcal(BigDecimal.ZERO);
+        fresh.setProteinGrams(BigDecimal.ZERO);
+        fresh.setFatGrams(BigDecimal.ZERO);
+        fresh.setFiberGrams(BigDecimal.ZERO);
+        fresh.setCarbsGrams(BigDecimal.ZERO);
+        fresh.setWaterGlasses(0);
+        fresh.setCalorieTargetKcal(resolveTarget(userId, null));
+
+        try {
+            repository.saveAndFlush(fresh);
+        } catch (DataIntegrityViolationException ignored) {
+            // Concurrent insert won the unique-constraint race; re-fetch below.
+        }
+
+        return repository.findByUserIdAndEntryDateForUpdate(userId, entryDate)
+            .orElseThrow(() -> new IllegalStateException(
+                "Daily entry vanished after lockOrCreate for user=" + userId + " date=" + entryDate));
     }
 
     @Transactional

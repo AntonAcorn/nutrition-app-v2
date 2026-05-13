@@ -63,7 +63,7 @@ class NutritionHistoryServiceTest {
         existing.setFiberGrams(new BigDecimal("18.00"));
         existing.setNotes("breakfast");
 
-        when(repository.findByUserIdAndEntryDate(userId, entryDate)).thenReturn(Optional.of(existing));
+        when(repository.findByUserIdAndEntryDateForUpdate(userId, entryDate)).thenReturn(Optional.of(existing));
         when(repository.save(any(DailyNutritionEntryEntity.class))).thenAnswer(inv -> inv.getArgument(0));
 
         var saved = service.addToDailyTotals(new NutritionHistoryService.AddToDailyTotalsCommand(

@@ -198,8 +198,13 @@ export function PhotoMode({
     }
   }
 
-  function saveAllPhotoDrafts() {
-    photoDrafts.filter(e => e.status === 'idle').forEach(e => savePhotoDraft(e.localId))
+  async function saveAllPhotoDrafts() {
+    // Run sequentially so each /confirm call sees the daily totals committed
+    // by the previous one. Parallel saves used to land in a race where two
+    // RMW writers read the same baseline and only the last increment stuck.
+    for (const entry of photoDrafts.filter(e => e.status === 'idle')) {
+      await savePhotoDraft(entry.localId)
+    }
   }
 
   function savePhotoDraftToLibrary(localId: string) {
