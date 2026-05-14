@@ -80,17 +80,14 @@ ul {
 .app-shell {
   width: min(520px, 100%);
   margin: 0 auto;
-  padding: calc(max(env(safe-area-inset-top, 0px), 55px) + 6px) 14px calc(72px + env(safe-area-inset-bottom, 0px));
+  /* StatusBar.overlaysWebView is false on both iOS and Android, so the WebView
+     viewport already starts below the status bar / Dynamic Island and
+     env(safe-area-inset-top) resolves to 0. A small fixed inset is enough —
+     no platform-specific floor needed. */
+  padding: calc(env(safe-area-inset-top, 0px) + 12px) 14px calc(72px + env(safe-area-inset-bottom, 0px));
   display: flex;
   flex-direction: column;
   min-height: 100dvh;
-}
-
-/* Android keeps the status bar outside the WebView (overlaysWebView: false),
-   so env(safe-area-inset-top) is 0 and the iOS 55px floor would just add dead
-   space. Use a small fixed inset instead. */
-.platform-android .app-shell {
-  padding-top: calc(env(safe-area-inset-top, 0px) + 12px);
 }
 
 .app-header {
