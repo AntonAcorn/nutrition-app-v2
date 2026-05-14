@@ -86,6 +86,13 @@ ul {
   min-height: 100dvh;
 }
 
+/* Android keeps the status bar outside the WebView (overlaysWebView: false),
+   so env(safe-area-inset-top) is 0 and the iOS 55px floor would just add dead
+   space. Use a small fixed inset instead. */
+.platform-android .app-shell {
+  padding-top: calc(env(safe-area-inset-top, 0px) + 12px);
+}
+
 .app-header {
   display: flex;
   align-items: center;

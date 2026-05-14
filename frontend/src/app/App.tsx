@@ -24,12 +24,14 @@ function getInitialTheme(): Theme {
   return 'dark'
 }
 
-async function checkNativePlatform(): Promise<boolean> {
+type Platform = 'ios' | 'android' | 'web'
+
+async function detectPlatform(): Promise<Platform> {
   try {
     const { Capacitor } = await import('@capacitor/core')
-    return Capacitor.isNativePlatform()
+    return Capacitor.getPlatform() as Platform
   } catch {
-    return false
+    return 'web'
   }
 }
 
@@ -56,12 +58,12 @@ export default function App() {
 
 function AppInner() {
   const [theme, setTheme] = useState<Theme>(getInitialTheme)
-  const [isNative, setIsNative] = useState(false)
+  const [platform, setPlatform] = useState<Platform>('web')
   const [authUser, setAuthUser] = useState<AuthUser | null>(null)
   const [authLoading, setAuthLoading] = useState(true)
 
   useEffect(() => {
-    checkNativePlatform().then(setIsNative)
+    detectPlatform().then(setPlatform)
   }, [])
 
   useEffect(() => {
@@ -170,7 +172,7 @@ function AppInner() {
     return (
       <AuthShell
         authUser={authUser}
-        isNative={isNative}
+        platform={platform}
         theme={theme}
         onToggleTheme={toggleTheme}
         onAuthenticated={(user) => setAuthUser(user)}

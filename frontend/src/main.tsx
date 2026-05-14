@@ -16,6 +16,8 @@ if (import.meta.env.VITE_SENTRY_DSN) {
   })
 }
 
+document.documentElement.classList.add(`platform-${Capacitor.getPlatform()}`)
+
 if (Capacitor.isNativePlatform()) {
   StatusBar.setOverlaysWebView({ overlay: false }).catch(() => {})
   StatusBar.setStyle({ style: Style.Dark }).catch(() => {})
