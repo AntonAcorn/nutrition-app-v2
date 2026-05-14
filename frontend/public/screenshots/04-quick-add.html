@@ -8,19 +8,21 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
 <link rel="stylesheet" href="/src/styles/index.css" />
 <style>
+  html, body { background: #0a0d14 !important; width: 428px !important; max-width: 428px !important; min-height: 100vh !important; overflow-x: hidden !important; margin: 0 !important; } * { box-sizing: border-box !important; }
   .ss-caption {
-    position: absolute;
-    top: env(safe-area-inset-top, 0);
-    left: 0; right: 0;
-    padding: 18px 22px 14px;
-    background: linear-gradient(180deg, rgba(0,0,0,0.65) 0%, rgba(0,0,0,0) 100%);
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 428px;
+    padding: 32px 22px 28px;
+    background: linear-gradient(180deg, rgba(0,0,0,0.92) 0%, rgba(0,0,0,0.7) 60%, rgba(0,0,0,0) 100%);
     text-align: center;
     z-index: 100;
     pointer-events: none;
   }
   .ss-caption h2 {
     margin: 0;
-    font-size: 1.55rem;
+    font-size: 1.3rem;
     line-height: 1.15;
     font-weight: 800;
     color: #ffffff;
@@ -28,27 +30,91 @@
   }
   body {
     background: linear-gradient(180deg, #0a0d14 0%, #1a1f2e 100%);
-    min-height: 100dvh;
+    height: 926px;
     margin: 0;
     overflow: hidden;
   }
   /* Stage: render the modal sheet inline, positioned to dominate */
   .ss-sheet-stage {
     position: relative;
-    width: 100%;
-    height: 100dvh;
-    display: flex;
-    align-items: flex-end;
+    width: 428px;
+    height: 926px;
   }
+  .ss-sheet-stage * { box-sizing: border-box; }
+  .ss-sheet-stage .qs-sheet, .ss-sheet-stage * { animation: none !important; }
   .ss-sheet-stage .qs-sheet {
-    margin: 0 auto !important;
-    width: 100% !important;
-    max-width: 100% !important;
+    position: absolute !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    margin: 0 !important;
+    width: 428px !important;
+    max-width: 428px !important;
     border-radius: 28px 28px 0 0 !important;
-    padding-top: calc(env(safe-area-inset-top, 0px) + 96px) !important;
-    padding-bottom: 28px !important;
-    max-height: 100dvh !important;
+    padding: 36px 14px 28px !important;
+    height: 884px !important;
+    max-height: 884px !important;
+    overflow: hidden !important;
     transform: none !important;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 14px !important;
+  }
+  .ss-sheet-stage .qs-recent {
+    flex: 1 1 auto !important;
+    min-height: 0 !important;
+    display: flex !important;
+    flex-direction: column !important;
+  }
+  .ss-sheet-stage .qs-search-results {
+    flex: 1 1 auto !important;
+    max-height: none !important;
+    overflow: hidden !important;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 10px !important;
+  }
+  .ss-sheet-stage .qs-search-result { flex: 1 1 auto !important; }
+  .ss-sheet-stage .qs-analyzer-row {
+    display: grid !important;
+    grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+    gap: 8px !important;
+    width: 100% !important;
+  }
+  .ss-sheet-stage .qs-analyzer-btn {
+    min-width: 0 !important;
+    width: 100% !important;
+    padding: 12px 4px !important;
+    font-size: 0.78rem !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
+  }
+  .ss-sheet-stage .qs-analyzer-btn span {
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
+    max-width: 100% !important;
+  }
+  .ss-sheet-stage .qs-search-result {
+    display: flex !important;
+    align-items: center !important;
+    gap: 10px !important;
+    overflow: hidden !important;
+    width: 100% !important;
+    padding-right: 14px !important;
+  }
+  .ss-sheet-stage .qs-search-result__name {
+    flex: 1 1 auto !important;
+    min-width: 0 !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
+  }
+  .ss-sheet-stage .qs-search-result__kcal {
+    flex-shrink: 0 !important;
+    font-size: 0.75rem !important;
+    white-space: nowrap !important;
   }
 </style>
 </head>
@@ -65,22 +131,22 @@
       <button type="button" class="qs-close" aria-label="Close">✕</button>
     </div>
 
-    <div class="qs-analyzer-row">
-      <button type="button" class="qs-analyzer-btn">
+    <div class="qs-analyzer-row" style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; width: 100%; box-sizing: border-box;">
+      <button type="button" class="qs-analyzer-btn" style="min-width: 0; width: 100%; padding: 12px 4px; font-size: 0.72rem; overflow: hidden;">
         <span class="qs-analyzer-btn__icon">📷</span>
-        <span>Camera</span>
+        <span style="display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; width: 100%;">Camera</span>
       </button>
-      <button type="button" class="qs-analyzer-btn">
+      <button type="button" class="qs-analyzer-btn" style="min-width: 0; width: 100%; padding: 12px 4px; font-size: 0.72rem; overflow: hidden;">
         <span class="qs-analyzer-btn__icon">🖼️</span>
-        <span>Gallery</span>
+        <span style="display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; width: 100%;">Gallery</span>
       </button>
-      <button type="button" class="qs-analyzer-btn">
+      <button type="button" class="qs-analyzer-btn" style="min-width: 0; width: 100%; padding: 12px 4px; font-size: 0.72rem; overflow: hidden;">
         <span class="qs-analyzer-btn__icon">🎤</span>
-        <span>Voice</span>
+        <span style="display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; width: 100%;">Voice</span>
       </button>
-      <button type="button" class="qs-analyzer-btn">
+      <button type="button" class="qs-analyzer-btn" style="min-width: 0; width: 100%; padding: 12px 4px; font-size: 0.72rem; overflow: hidden;">
         <span class="qs-analyzer-btn__icon">▦</span>
-        <span>Barcode</span>
+        <span style="display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; width: 100%;">Barcode</span>
       </button>
     </div>
 
@@ -103,21 +169,37 @@
     <div class="qs-recent">
       <p class="qs-recent__label">Recent</p>
       <div class="qs-search-results">
-        <button type="button" class="qs-search-result">
-          <span class="qs-search-result__name">Oatmeal with banana &amp; almond butter</span>
-          <span class="qs-search-result__kcal">350g · 480 kcal</span>
+        <button type="button" class="qs-search-result" style="display: flex; align-items: center; gap: 10px; width: 100%; box-sizing: border-box; padding-right: 14px; overflow: hidden;">
+          <span class="qs-search-result__name" style="flex: 1 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Oatmeal with banana &amp; almond butter</span>
+          <span class="qs-search-result__kcal" style="flex-shrink: 0; white-space: nowrap; font-size: 0.75rem;">350g · 480 kcal</span>
         </button>
-        <button type="button" class="qs-search-result">
-          <span class="qs-search-result__name">Chicken Caesar salad, no croutons</span>
-          <span class="qs-search-result__kcal">280g · 420 kcal</span>
+        <button type="button" class="qs-search-result" style="display: flex; align-items: center; gap: 10px; width: 100%; box-sizing: border-box; padding-right: 14px; overflow: hidden;">
+          <span class="qs-search-result__name" style="flex: 1 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Chicken Caesar salad, no croutons</span>
+          <span class="qs-search-result__kcal" style="flex-shrink: 0; white-space: nowrap; font-size: 0.75rem;">280g · 420 kcal</span>
         </button>
-        <button type="button" class="qs-search-result">
-          <span class="qs-search-result__name">Greek yogurt + berries</span>
-          <span class="qs-search-result__kcal">200g · 165 kcal</span>
+        <button type="button" class="qs-search-result" style="display: flex; align-items: center; gap: 10px; width: 100%; box-sizing: border-box; padding-right: 14px; overflow: hidden;">
+          <span class="qs-search-result__name" style="flex: 1 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Greek yogurt + berries</span>
+          <span class="qs-search-result__kcal" style="flex-shrink: 0; white-space: nowrap; font-size: 0.75rem;">200g · 165 kcal</span>
         </button>
-        <button type="button" class="qs-search-result">
-          <span class="qs-search-result__name">Espresso, oat milk latte</span>
-          <span class="qs-search-result__kcal">240ml · 95 kcal</span>
+        <button type="button" class="qs-search-result" style="display: flex; align-items: center; gap: 10px; width: 100%; box-sizing: border-box; padding-right: 14px; overflow: hidden;">
+          <span class="qs-search-result__name" style="flex: 1 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Espresso, oat milk latte</span>
+          <span class="qs-search-result__kcal" style="flex-shrink: 0; white-space: nowrap; font-size: 0.75rem;">240ml · 95 kcal</span>
+        </button>
+        <button type="button" class="qs-search-result" style="display: flex; align-items: center; gap: 10px; width: 100%; box-sizing: border-box; padding-right: 14px; overflow: hidden;">
+          <span class="qs-search-result__name" style="flex: 1 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Avocado toast, sourdough</span>
+          <span class="qs-search-result__kcal" style="flex-shrink: 0; white-space: nowrap; font-size: 0.75rem;">160g · 320 kcal</span>
+        </button>
+        <button type="button" class="qs-search-result" style="display: flex; align-items: center; gap: 10px; width: 100%; box-sizing: border-box; padding-right: 14px; overflow: hidden;">
+          <span class="qs-search-result__name" style="flex: 1 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Grilled salmon &amp; quinoa</span>
+          <span class="qs-search-result__kcal" style="flex-shrink: 0; white-space: nowrap; font-size: 0.75rem;">380g · 510 kcal</span>
+        </button>
+        <button type="button" class="qs-search-result" style="display: flex; align-items: center; gap: 10px; width: 100%; box-sizing: border-box; padding-right: 14px; overflow: hidden;">
+          <span class="qs-search-result__name" style="flex: 1 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Protein shake, whey + milk</span>
+          <span class="qs-search-result__kcal" style="flex-shrink: 0; white-space: nowrap; font-size: 0.75rem;">350ml · 240 kcal</span>
+        </button>
+        <button type="button" class="qs-search-result" style="display: flex; align-items: center; gap: 10px; width: 100%; box-sizing: border-box; padding-right: 14px; overflow: hidden;">
+          <span class="qs-search-result__name" style="flex: 1 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Apple &amp; almond butter</span>
+          <span class="qs-search-result__kcal" style="flex-shrink: 0; white-space: nowrap; font-size: 0.75rem;">180g · 250 kcal</span>
         </button>
       </div>
     </div>
