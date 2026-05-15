@@ -554,18 +554,6 @@ export function ProfileTab({ displayName, email, onLogout, onDeleteAccount }: Pr
         </button>
       </div>
 
-      <p className="profile-footer-credit">
-        Made by one person in Canada ·{' '}
-        <a
-          className="profile-footer-credit__link"
-          href="https://rumblyeats.org/about"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          rumblyeats.org
-        </a>
-      </p>
-
       {showBank && bankSnapshot && (
         <CalorieBankSheet
           snapshot={bankSnapshot}

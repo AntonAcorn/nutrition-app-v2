@@ -68,12 +68,20 @@ export function NotificationSettings() {
     }
   }
 
-  if (!supported) return (
-    <div className="notif-settings-section">
-      <p className="screen-header__meta">Notifications</p>
-      <p className="notif-settings__unsupported">Push notifications are not supported in this browser.</p>
-    </div>
-  )
+  if (!supported) {
+    const isIOSWeb = /iPad|iPhone|iPod/.test(navigator.userAgent)
+      && (window.navigator as { standalone?: boolean }).standalone !== true
+    return (
+      <div className="notif-settings-section">
+        <p className="screen-header__meta">Notifications</p>
+        <p className="notif-settings__unsupported">
+          {isIOSWeb
+            ? 'To get reminders, install the Rumbly Eats app from the App Store, or open this site once and add it to your Home Screen.'
+            : 'Push notifications are not supported in this browser. Install the app to enable reminders.'}
+        </p>
+      </div>
+    )
+  }
 
   if (loading) return (
     <div className="notif-settings-section">

@@ -117,5 +117,13 @@ export async function unsubscribePush(): Promise<void> {
 
 export async function isPushSupported(): Promise<boolean> {
   if (await isNativePlatform()) return true
-  return 'Notification' in window && 'serviceWorker' in navigator && 'PushManager' in window
+  if (!('Notification' in window && 'serviceWorker' in navigator && 'PushManager' in window)) {
+    return false
+  }
+  // iOS Safari exposes PushManager but only delivers Web Push when the site is
+  // installed as a PWA (Add to Home Screen, navigator.standalone === true).
+  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent)
+  const isStandalone = (window.navigator as { standalone?: boolean }).standalone === true
+  if (isIOS && !isStandalone) return false
+  return true
 }
