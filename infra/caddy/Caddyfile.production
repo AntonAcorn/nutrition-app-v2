@@ -24,10 +24,10 @@ rumblyeats.org, www.rumblyeats.org {
 		reverse_proxy backend:8080
 	}
 
-	# Static landing pages (about, privacy, terms, support). Served from
+	# Static landing pages (about, privacy, terms, support, delete-account). Served from
 	# /srv/landing inside the caddy container (mount infra/landing there).
 	# try_files appends .html so /privacy resolves to privacy.html.
-	@landing path /privacy /privacy.html /terms /terms.html /support /support.html /about /about.html /styles.css /favicon.ico /robots.txt
+	@landing path /privacy /privacy.html /terms /terms.html /support /support.html /about /about.html /delete-account /delete-account.html /styles.css /favicon.ico /robots.txt
 	handle @landing {
 		root * /srv/landing
 		try_files {path}.html {path}
