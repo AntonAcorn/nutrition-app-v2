@@ -112,6 +112,13 @@ jobs:
 
           docker compose --env-file "$DEPLOY_PATH/.env" -f infra/docker/docker-compose.prod.yml config >/dev/null
           docker compose --env-file "$DEPLOY_PATH/.env" -f infra/docker/docker-compose.prod.yml up -d --build
+
+          # Caddy uses stock image with bind-mounted Caddyfile + landing dir.
+          # `up -d --build` won't recreate it when only those mounted files
+          # changed, so force a reload to pick up new routes / static pages.
+          docker compose --env-file "$DEPLOY_PATH/.env" -f infra/docker/docker-compose.prod.yml exec -T caddy caddy reload --config /etc/caddy/Caddyfile || \
+            docker compose --env-file "$DEPLOY_PATH/.env" -f infra/docker/docker-compose.prod.yml restart caddy
+
           docker image prune -f >/dev/null 2>&1 || true
 
           printf '%s\n' "$GITHUB_SHA" > .deploy-revision
