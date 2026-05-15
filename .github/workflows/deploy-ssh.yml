@@ -115,9 +115,10 @@ jobs:
 
           # Caddy uses stock image with bind-mounted Caddyfile + landing dir.
           # `up -d --build` won't recreate it when only those mounted files
-          # changed, so force a reload to pick up new routes / static pages.
-          docker compose --env-file "$DEPLOY_PATH/.env" -f infra/docker/docker-compose.prod.yml exec -T caddy caddy reload --config /etc/caddy/Caddyfile || \
-            docker compose --env-file "$DEPLOY_PATH/.env" -f infra/docker/docker-compose.prod.yml restart caddy
+          # changed, so force-recreate the caddy container to pick up new
+          # routes and static pages (no-downtime reload via admin API doesn't
+          # always pick up the new config on this setup).
+          docker compose --env-file "$DEPLOY_PATH/.env" -f infra/docker/docker-compose.prod.yml up -d --force-recreate --no-deps caddy
 
           docker image prune -f >/dev/null 2>&1 || true
 
