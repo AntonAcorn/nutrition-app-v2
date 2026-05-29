@@ -69,8 +69,14 @@ export function logout(): Promise<void> {
 }
 
 const GOOGLE_IOS_CLIENT_ID = '12070092066-84aqttkj4oa7786751ifg1huf0stvsja.apps.googleusercontent.com'
+// Android's GoogleSignIn SDK requires the OAuth **Web** Client ID in
+// requestIdToken() — not the Android client ID. The Android client ID only
+// binds the package + SHA-1 fingerprint; the Web client ID is what ends up as
+// the `aud` claim on the returned ID token, so it must also be present in the
+// backend's GOOGLE_NATIVE_CLIENT_IDS allowlist.
+const GOOGLE_ANDROID_WEB_CLIENT_ID = '12070092066-kkh8fuffj7nhke6e4r2iujugk1b5ra9o.apps.googleusercontent.com'
 
-export async function loginWithGoogleNative(): Promise<AuthUser> {
+export async function loginWithGoogleNative(platform: 'ios' | 'android'): Promise<AuthUser> {
   const { registerPlugin } = await import('@capacitor/core')
   const GoogleSignIn = registerPlugin<{
     signIn(opts: { clientId: string }): Promise<{
@@ -80,7 +86,8 @@ export async function loginWithGoogleNative(): Promise<AuthUser> {
     }>
   }>('GoogleSignIn')
 
-  const result = await GoogleSignIn.signIn({ clientId: GOOGLE_IOS_CLIENT_ID })
+  const clientId = platform === 'ios' ? GOOGLE_IOS_CLIENT_ID : GOOGLE_ANDROID_WEB_CLIENT_ID
+  const result = await GoogleSignIn.signIn({ clientId })
   return apiClient.post<AuthUser>(
     '/api/auth/google/token',
     { idToken: result.idToken, displayName: result.displayName },

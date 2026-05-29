@@ -38,10 +38,11 @@ function trackUser(user: AuthUser) {
 }
 
 export function AuthShell({ authUser, platform, theme, onToggleTheme, onAuthenticated, onResetUser }: AuthShellProps) {
-  // Apple Sign-In and the native Google Sign-In plugin are iOS-only. On Android
-  // (and web) we fall back to the server-side Google OAuth redirect; Apple is
-  // hidden entirely since there's no Android implementation.
+  // Apple Sign-In is iOS-only (no Android implementation, button hidden).
+  // Google Sign-In: iOS and Android both use the native plugin (returns an
+  // idToken to /api/auth/google/token). Web uses the server-side OAuth redirect.
   const isIOS = platform === 'ios'
+  const isNative = platform === 'ios' || platform === 'android'
   const initialMode: AuthMode = authUser?.authenticated && !authUser.emailVerified ? 'check-email' : 'login'
   const [authMode, setAuthMode] = useState<AuthMode>(initialMode)
   const [authEmail, setAuthEmail] = useState(authUser?.email ?? '')
@@ -76,10 +77,11 @@ export function AuthShell({ authUser, platform, theme, onToggleTheme, onAuthenti
   }, [])
 
   async function handleGoogleSignInNative() {
+    if (platform === 'web') return
     setAuthSubmitting(true)
     setAuthError('')
     try {
-      const nextUser = await loginWithGoogleNative()
+      const nextUser = await loginWithGoogleNative(platform)
       trackUser(nextUser)
       onAuthenticated(nextUser)
     } catch (e) {
@@ -440,18 +442,16 @@ export function AuthShell({ authUser, platform, theme, onToggleTheme, onAuthenti
               </button>
             )}
 
-            {!isIOS && (
-              <a href={`${API_BASE}/api/auth/google`} className="auth-google-btn">
-                <GoogleIcon />
-                Continue with Google
-              </a>
-            )}
-
-            {isIOS && (
+            {isNative ? (
               <button type="button" className="auth-google-btn" onClick={handleGoogleSignInNative} disabled={authSubmitting}>
                 <GoogleIcon />
                 Continue with Google
               </button>
+            ) : (
+              <a href={`${API_BASE}/api/auth/google`} className="auth-google-btn">
+                <GoogleIcon />
+                Continue with Google
+              </a>
             )}
 
             <p className="auth-switch-text">
