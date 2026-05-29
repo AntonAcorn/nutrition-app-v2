@@ -52,6 +52,35 @@
   gap: 14px;
 }
 
+.auth-verify-msg {
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.6);
+  text-align: center;
+  line-height: 1.6;
+}
+
+.auth-verify-msg__email {
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.auth-verify-hint {
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.4);
+  text-align: center;
+  line-height: 1.5;
+}
+
+.auth-legal-text {
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.35);
+  text-align: center;
+  margin: 0;
+}
+
+.auth-legal-link {
+  color: rgba(120, 180, 255, 0.7);
+}
+
 .auth-label {
   display: grid;
   gap: 7px;
@@ -1134,6 +1163,21 @@
 }
 [data-theme="light"] .auth-forgot-link:hover {
   color: #14213d;
+}
+[data-theme="light"] .auth-verify-msg {
+  color: rgba(20, 33, 61, 0.65);
+}
+[data-theme="light"] .auth-verify-msg__email {
+  color: #14213d;
+}
+[data-theme="light"] .auth-verify-hint {
+  color: rgba(20, 33, 61, 0.5);
+}
+[data-theme="light"] .auth-legal-text {
+  color: rgba(20, 33, 61, 0.5);
+}
+[data-theme="light"] .auth-legal-link {
+  color: rgba(37, 99, 235, 0.85);
 }
 [data-theme="light"] .auth-google-btn,
 [data-theme="light"] .auth-apple-btn {

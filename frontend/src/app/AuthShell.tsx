@@ -230,11 +230,11 @@ export function AuthShell({ authUser, platform, theme, onToggleTheme, onAuthenti
         </div>
         <section className="auth-card">
           <div className="auth-form">
-            <p style={{ fontSize: '0.9rem', color: 'rgba(255,255,255,0.6)', textAlign: 'center', lineHeight: 1.6 }}>
+            <p className="auth-verify-msg">
               We sent a verification link to<br />
-              <strong style={{ color: 'rgba(255,255,255,0.85)' }}>{verifyEmail}</strong>
+              <strong className="auth-verify-msg__email">{verifyEmail}</strong>
             </p>
-            <p style={{ fontSize: '0.85rem', color: 'rgba(255,255,255,0.4)', textAlign: 'center', lineHeight: 1.5 }}>
+            <p className="auth-verify-hint">
               Click the link to activate your account. Check your spam folder if you don&apos;t see it.
             </p>
             {resendSuccess ? (
@@ -420,9 +420,9 @@ export function AuthShell({ authUser, platform, theme, onToggleTheme, onAuthenti
             {authError ? <p className="error-text">{authError}</p> : null}
 
             {authMode === 'register' ? (
-              <p style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.35)', textAlign: 'center', margin: '0' }}>
+              <p className="auth-legal-text">
                 By creating an account you agree to our{' '}
-                <a href="/privacy/" target="_blank" rel="noopener noreferrer" style={{ color: 'rgba(120,180,255,0.7)' }}>
+                <a href="/privacy/" target="_blank" rel="noopener noreferrer" className="auth-legal-link">
                   Privacy Policy
                 </a>
               </p>
