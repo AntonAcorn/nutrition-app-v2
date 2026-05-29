@@ -1,4 +1,4 @@
-import { lazy, Suspense, useEffect, useState } from 'react'
+import { Suspense, useEffect, useState } from 'react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { HashRouter } from 'react-router-dom'
 import * as Sentry from '@sentry/react'
@@ -9,8 +9,9 @@ import { logout, fetchMe, deleteAccount, type AuthUser } from '../features/auth/
 import { identifyUser, resetAnalyticsUser, track } from '../shared/lib/analytics'
 import { requestHealthPermissions } from '../shared/lib/healthKit'
 import { UNAUTHORIZED_EVENT } from '../shared/lib/apiClient'
+import { lazyWithReload } from '../shared/lib/lazyWithReload'
 
-const OnboardingWizard = lazy(() => import('../features/onboarding/components/OnboardingWizard').then(m => ({ default: m.OnboardingWizard })))
+const OnboardingWizard = lazyWithReload(() => import('../features/onboarding/components/OnboardingWizard').then(m => ({ default: m.OnboardingWizard })))
 
 type Theme = 'dark' | 'light'
 

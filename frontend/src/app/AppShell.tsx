@@ -1,4 +1,4 @@
-import { lazy, Suspense, useEffect, useState } from 'react'
+import { Suspense, useEffect, useState } from 'react'
 import { Routes, Route, NavLink, Navigate, useNavigate, useLocation } from 'react-router-dom'
 import { useQueryClient } from '@tanstack/react-query'
 import { listTemplates } from '../features/food-library/model/mealTemplateApi'
@@ -9,12 +9,13 @@ import type { MealTemplateItem } from '../shared/types/nutrition'
 import { SunIcon, MoonIcon, TabIconToday, TabIconStats, TabIconMe } from './icons'
 import { getSubscriptionStatus, getCurrentTimezone, updatePushTimezone } from '../features/notifications/model/pushApi'
 import { syncHealthDataIfDue } from '../features/health/healthSyncApi'
+import { lazyWithReload } from '../shared/lib/lazyWithReload'
 
-const PhotoAnalyzerTab = lazy(() => import('../features/photo-analyzer/components/PhotoAnalyzerTab').then(m => ({ default: m.PhotoAnalyzerTab })))
-const StatisticsTab    = lazy(() => import('../features/statistics/components/StatisticsTab').then(m => ({ default: m.StatisticsTab })))
-const ProfileTab       = lazy(() => import('../features/profile/components/ProfileTab').then(m => ({ default: m.ProfileTab })))
-const FoodLibraryTab   = lazy(() => import('../features/food-library/components/FoodLibraryTab').then(m => ({ default: m.FoodLibraryTab })))
-const FastingTab       = lazy(() => import('../features/fasting/components/FastingTab').then(m => ({ default: m.FastingTab })))
+const PhotoAnalyzerTab = lazyWithReload(() => import('../features/photo-analyzer/components/PhotoAnalyzerTab').then(m => ({ default: m.PhotoAnalyzerTab })))
+const StatisticsTab    = lazyWithReload(() => import('../features/statistics/components/StatisticsTab').then(m => ({ default: m.StatisticsTab })))
+const ProfileTab       = lazyWithReload(() => import('../features/profile/components/ProfileTab').then(m => ({ default: m.ProfileTab })))
+const FoodLibraryTab   = lazyWithReload(() => import('../features/food-library/components/FoodLibraryTab').then(m => ({ default: m.FoodLibraryTab })))
+const FastingTab       = lazyWithReload(() => import('../features/fasting/components/FastingTab').then(m => ({ default: m.FastingTab })))
 
 type Theme = 'dark' | 'light'
 
