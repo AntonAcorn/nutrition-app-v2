@@ -33,15 +33,6 @@ export function WeeklyRecapCard() {
   const recap = query.data
   if (!recap) return null
 
-  function handleShare() {
-    hapticLight()
-    if (navigator.share) {
-      navigator.share({ text: recap!.shareLine }).catch(() => {})
-    } else if (navigator.clipboard) {
-      navigator.clipboard.writeText(recap!.shareLine).catch(() => {})
-    }
-  }
-
   const weekStartDate = new Date(recap.weekStart + 'T00:00:00')
   const weekLabel = weekStartDate.toLocaleDateString(undefined, { month: 'short', day: 'numeric' })
 
@@ -83,12 +74,6 @@ export function WeeklyRecapCard() {
           )
         })}
       </ul>
-
-      {recap.shareLine && (
-        <button type="button" className="weekly-recap-card__share" onClick={handleShare}>
-          📤 Share my week
-        </button>
-      )}
     </section>
   )
 }

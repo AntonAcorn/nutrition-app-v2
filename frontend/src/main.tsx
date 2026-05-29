@@ -30,9 +30,24 @@ if ('serviceWorker' in navigator) {
   })
 }
 
+function ErrorFallback() {
+  return (
+    <div style={{ padding: '2rem', textAlign: 'center', color: 'rgba(255,255,255,0.6)', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1rem', minHeight: '60vh', justifyContent: 'center' }}>
+      <p style={{ margin: 0, fontSize: '1.05rem' }}>Something went wrong.</p>
+      <button
+        type="button"
+        onClick={() => window.location.reload()}
+        style={{ background: 'rgba(123, 97, 255, 0.22)', border: '1px solid rgba(123, 97, 255, 0.4)', color: '#ddd6fe', borderRadius: '12px', padding: '10px 22px', fontSize: '0.95rem', fontWeight: 600, cursor: 'pointer' }}
+      >
+        Reload
+      </button>
+    </div>
+  )
+}
+
 ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
   <React.StrictMode>
-    <Sentry.ErrorBoundary fallback={<p style={{ padding: '2rem', textAlign: 'center', color: 'rgba(255,255,255,0.5)' }}>Something went wrong. Please reload the page.</p>}>
+    <Sentry.ErrorBoundary fallback={<ErrorFallback />}>
       <App />
     </Sentry.ErrorBoundary>
   </React.StrictMode>,

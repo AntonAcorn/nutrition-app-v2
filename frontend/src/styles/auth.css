@@ -688,6 +688,22 @@
   font-size: 0.72rem;
 }
 
+[data-theme="light"] .activity-chip {
+  background: rgba(0, 0, 0, 0.05);
+}
+
+[data-theme="light"] .activity-chip--earned {
+  background: rgba(59, 125, 255, 0.12);
+}
+
+[data-theme="light"] .activity-chip__value {
+  color: rgba(0, 0, 0, 0.85);
+}
+
+[data-theme="light"] .activity-chip__label {
+  color: rgba(0, 0, 0, 0.5);
+}
+
 .macro-meter-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));

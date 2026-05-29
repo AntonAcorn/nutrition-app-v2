@@ -110,25 +110,6 @@
   color: rgba(255, 255, 255, 0.78);
 }
 
-.weekly-recap-card__share {
-  background: rgba(123, 97, 255, 0.22);
-  border: 1px solid rgba(123, 97, 255, 0.4);
-  color: #ddd6fe;
-  border-radius: 14px;
-  padding: 12px 16px;
-  font-size: 0.92rem;
-  font-weight: 600;
-  cursor: pointer;
-  -webkit-tap-highlight-color: transparent;
-  position: relative;
-  transition: background 0.15s;
-}
-
-.weekly-recap-card__share:hover,
-.weekly-recap-card__share:active {
-  background: rgba(123, 97, 255, 0.35);
-}
-
 [data-theme="light"] .weekly-recap-card {
   background: linear-gradient(140deg, rgba(123, 97, 255, 0.10), rgba(34, 211, 238, 0.05));
   border-color: rgba(123, 97, 255, 0.28);
@@ -157,10 +138,4 @@
 
 [data-theme="light"] .weekly-recap-card__text {
   color: rgba(20, 33, 61, 0.75);
-}
-
-[data-theme="light"] .weekly-recap-card__share {
-  background: rgba(123, 97, 255, 0.12);
-  border-color: rgba(123, 97, 255, 0.32);
-  color: #6d28d9;
 }
