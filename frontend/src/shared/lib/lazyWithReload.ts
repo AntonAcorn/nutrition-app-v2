@@ -4,12 +4,14 @@ const RELOAD_FLAG = 'rumbly:stale-chunk-reload'
 
 function isStaleChunkError(err: unknown): boolean {
   if (!(err instanceof Error)) return false
-  const msg = err.message || ''
+  const msg = (err.message || '').toLowerCase()
   return (
-    msg.includes('Failed to fetch dynamically imported module')
-    || msg.includes('Importing a module script failed')
+    msg.includes('failed to fetch dynamically imported module')
+    || msg.includes('importing a module script failed')
     || msg.includes('error loading dynamically imported module')
-    || msg.includes('Loading chunk')
+    || msg.includes('loading chunk')
+    || msg.includes('failed to import')
+    || msg.includes('chunkloaderror')
   )
 }
 
