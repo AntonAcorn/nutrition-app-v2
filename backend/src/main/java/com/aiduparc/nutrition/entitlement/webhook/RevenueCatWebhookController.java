@@ -1,5 +1,6 @@
 package com.aiduparc.nutrition.entitlement.webhook;
 
+import jakarta.annotation.PostConstruct;
 import jakarta.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,6 +37,22 @@ public class RevenueCatWebhookController {
     ) {
         this.service = service;
         this.expectedAuth = expectedAuth == null ? "" : expectedAuth.trim();
+    }
+
+    @PostConstruct
+    void warnIfUnconfigured() {
+        // Loud startup warning so a missing REVENUECAT_WEBHOOK_AUTH env doesn't
+        // silently degrade purchases. Without it the webhook endpoint will
+        // reject every RC delivery with 503, RC retries with backoff and
+        // eventually stops, users pay but never get Pro, no one notices until
+        // someone complains.
+        if (expectedAuth.isEmpty()) {
+            log.error("REVENUECAT_WEBHOOK_AUTH is NOT set — RevenueCat webhook deliveries "
+                    + "will be rejected with 503. Configure it before any user purchases.");
+        } else {
+            log.info("RevenueCat webhook authentication configured (secret length={}).",
+                    expectedAuth.length());
+        }
     }
 
     @PostMapping
