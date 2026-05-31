@@ -63,6 +63,11 @@ nutrition:
     # so rainbow tables built for other apps don't apply.
     # Production MUST override the dev default via TRIAL_EMAIL_SALT.
     email-salt: ${TRIAL_EMAIL_SALT:dev-salt-change-me}
+  admin:
+    # Bearer token for /api/admin/* — comp Pro grants, lookups, revokes.
+    # Pick a long random string and store in a password manager. Leaving it
+    # blank disables the endpoints entirely (they 503).
+    token: ${NUTRITION_ADMIN_TOKEN:}
   paywall:
     # Master switch — set true to flip from open-beta to real monetisation.
     enabled: ${PAYWALL_ENABLED:false}

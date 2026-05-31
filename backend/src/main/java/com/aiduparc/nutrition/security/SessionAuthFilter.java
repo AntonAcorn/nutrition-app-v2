@@ -34,7 +34,10 @@ public class SessionAuthFilter extends OncePerRequestFilter {
             "/api/auth/apple",
             // Webhooks are public endpoints authenticated by shared secret
             // checked inside the controller, not by user session.
-            "/api/webhooks/**"
+            "/api/webhooks/**",
+            // Admin comp-Pro endpoints — bearer-token authenticated inside
+            // the controller, not by user session.
+            "/api/admin/**"
     );
 
     private final AntPathMatcher matcher = new AntPathMatcher();
