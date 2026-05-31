@@ -62,11 +62,11 @@ public class PushScheduler {
                 boolean dead = false;
                 if (loggedToday) {
                     int deposit = calorieBankService.getTodayDeposit(sub.getUserId(), today);
-                    if (deposit >= 100) {
+                    if (deposit >= 100 && sub.isNotifyBankWin()) {
                         dead = pushNotificationService.send(sub,
                                 "🏦 +" + deposit + " in bank",
                                 "Stayed under target today — saving up for the weekend.");
-                    } else {
+                    } else if (sub.isNotifyStreak()) {
                         int streak = calculateStreak(sub.getUserId(), today);
                         if (streak >= 3) {
                             dead = pushNotificationService.send(sub,
@@ -74,7 +74,7 @@ public class PushScheduler {
                                     "You've logged every day for " + streak + " days. Keep going!");
                         }
                     }
-                } else {
+                } else if (sub.isNotifyDailyLog()) {
                     dead = pushNotificationService.send(sub,
                             "Don't forget to log today 🍽",
                             "A quick photo or description takes 10 seconds.");

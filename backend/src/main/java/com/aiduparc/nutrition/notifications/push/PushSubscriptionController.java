@@ -27,8 +27,10 @@ public class PushSubscriptionController {
     public PushSubscriptionResponse getSubscription(HttpSession session) {
         UUID userId = currentNutritionUserResolver.resolve(session);
         return repository.findByUserId(userId).stream().findFirst()
-                .map(s -> new PushSubscriptionResponse(true, s.isEnabled(), s.getReminderHour(), s.getTimezone()))
-                .orElse(new PushSubscriptionResponse(false, false, 20, null));
+                .map(s -> new PushSubscriptionResponse(
+                        true, s.isEnabled(), s.getReminderHour(), s.getTimezone(),
+                        s.isNotifyDailyLog(), s.isNotifyBankWin(), s.isNotifyStreak()))
+                .orElse(new PushSubscriptionResponse(false, false, 20, null, true, true, true));
     }
 
     @PostMapping("/subscribe")
@@ -59,7 +61,8 @@ public class PushSubscriptionController {
         sub.setReminderHour(request.reminderHour() != null ? request.reminderHour() : 20);
         sub.setEnabled(true);
         repository.save(sub);
-        return new PushSubscriptionResponse(true, true, sub.getReminderHour(), sub.getTimezone());
+        return new PushSubscriptionResponse(true, true, sub.getReminderHour(), sub.getTimezone(),
+                sub.isNotifyDailyLog(), sub.isNotifyBankWin(), sub.isNotifyStreak());
     }
 
     @PutMapping("/settings")
@@ -69,10 +72,18 @@ public class PushSubscriptionController {
         subs.forEach(sub -> {
             sub.setEnabled(request.enabled());
             sub.setReminderHour(request.reminderHour());
+            // Per-type toggles are optional in the request; only overwrite when present.
+            if (request.notifyDailyLog() != null) sub.setNotifyDailyLog(request.notifyDailyLog());
+            if (request.notifyBankWin()  != null) sub.setNotifyBankWin(request.notifyBankWin());
+            if (request.notifyStreak()   != null) sub.setNotifyStreak(request.notifyStreak());
             repository.save(sub);
         });
-        String tz = subs.stream().findFirst().map(PushSubscriptionEntity::getTimezone).orElse(null);
-        return new PushSubscriptionResponse(true, request.enabled(), request.reminderHour(), tz);
+        return subs.stream().findFirst()
+                .map(s -> new PushSubscriptionResponse(
+                        true, s.isEnabled(), s.getReminderHour(), s.getTimezone(),
+                        s.isNotifyDailyLog(), s.isNotifyBankWin(), s.isNotifyStreak()))
+                .orElse(new PushSubscriptionResponse(true, request.enabled(), request.reminderHour(), null,
+                        true, true, true));
     }
 
     @PutMapping("/timezone")
@@ -87,8 +98,10 @@ public class PushSubscriptionController {
             repository.save(sub);
         });
         return subs.stream().findFirst()
-                .map(s -> new PushSubscriptionResponse(true, s.isEnabled(), s.getReminderHour(), s.getTimezone()))
-                .orElse(new PushSubscriptionResponse(false, false, 20, request.timezone()));
+                .map(s -> new PushSubscriptionResponse(
+                        true, s.isEnabled(), s.getReminderHour(), s.getTimezone(),
+                        s.isNotifyDailyLog(), s.isNotifyBankWin(), s.isNotifyStreak()))
+                .orElse(new PushSubscriptionResponse(false, false, 20, request.timezone(), true, true, true));
     }
 
     public record TimezoneRequest(String timezone) {}

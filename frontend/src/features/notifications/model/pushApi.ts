@@ -7,6 +7,9 @@ export interface PushSubscriptionStatus {
   enabled: boolean
   reminderHour: number
   timezone?: string | null
+  notifyDailyLog: boolean
+  notifyBankWin: boolean
+  notifyStreak: boolean
 }
 
 async function isNativePlatform(): Promise<boolean> {
@@ -90,8 +93,16 @@ export async function subscribePush(reminderHour: number): Promise<PushSubscript
   return subscribeWebPush(reminderHour)
 }
 
-export function updatePushSettings(enabled: boolean, reminderHour: number): Promise<PushSubscriptionStatus> {
-  return apiClient.put<PushSubscriptionStatus>('/api/push/settings', { enabled, reminderHour })
+export function updatePushSettings(
+  enabled: boolean,
+  reminderHour: number,
+  types?: { notifyDailyLog?: boolean; notifyBankWin?: boolean; notifyStreak?: boolean }
+): Promise<PushSubscriptionStatus> {
+  return apiClient.put<PushSubscriptionStatus>('/api/push/settings', {
+    enabled,
+    reminderHour,
+    ...types,
+  })
 }
 
 export function updatePushTimezone(timezone: string): Promise<PushSubscriptionStatus> {

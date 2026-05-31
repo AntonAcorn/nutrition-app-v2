@@ -4,5 +4,8 @@ public record PushSubscriptionResponse(
         boolean subscribed,
         boolean enabled,
         int reminderHour,
-        String timezone
+        String timezone,
+        boolean notifyDailyLog,
+        boolean notifyBankWin,
+        boolean notifyStreak
 ) {}

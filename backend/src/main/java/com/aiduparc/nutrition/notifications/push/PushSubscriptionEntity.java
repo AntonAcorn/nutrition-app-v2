@@ -41,6 +41,15 @@ public class PushSubscriptionEntity {
     @Column(nullable = false)
     private boolean enabled;
 
+    @Column(name = "notify_daily_log", nullable = false)
+    private boolean notifyDailyLog = true;
+
+    @Column(name = "notify_bank_win", nullable = false)
+    private boolean notifyBankWin = true;
+
+    @Column(name = "notify_streak", nullable = false)
+    private boolean notifyStreak = true;
+
     @Column(name = "created_at", nullable = false)
     private OffsetDateTime createdAt;
 
@@ -72,5 +81,11 @@ public class PushSubscriptionEntity {
     public void setReminderHour(int reminderHour) { this.reminderHour = reminderHour; }
     public boolean isEnabled() { return enabled; }
     public void setEnabled(boolean enabled) { this.enabled = enabled; }
+    public boolean isNotifyDailyLog() { return notifyDailyLog; }
+    public void setNotifyDailyLog(boolean v) { this.notifyDailyLog = v; }
+    public boolean isNotifyBankWin() { return notifyBankWin; }
+    public void setNotifyBankWin(boolean v) { this.notifyBankWin = v; }
+    public boolean isNotifyStreak() { return notifyStreak; }
+    public void setNotifyStreak(boolean v) { this.notifyStreak = v; }
     public OffsetDateTime getCreatedAt() { return createdAt; }
 }

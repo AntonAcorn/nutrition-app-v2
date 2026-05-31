@@ -365,6 +365,109 @@
   cursor: pointer;
 }
 
+/* Per-type toggles inside the notifications card */
+.notif-settings-types {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.notif-settings-type {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  width: 100%;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 12px;
+  padding: 10px 12px;
+  cursor: pointer;
+  color: inherit;
+  text-align: left;
+  -webkit-tap-highlight-color: transparent;
+  transition: background 0.12s;
+}
+
+.notif-settings-type:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.notif-settings-type:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.notif-settings-type__main {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.notif-settings-type__emoji {
+  font-size: 1.1rem;
+  flex-shrink: 0;
+}
+
+.notif-settings-type__title {
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: #ffffff;
+  margin: 0;
+}
+
+.notif-settings-type__desc {
+  font-size: 0.74rem;
+  color: rgba(255, 255, 255, 0.5);
+  margin: 1px 0 0;
+  line-height: 1.35;
+}
+
+.notif-mini-toggle {
+  flex-shrink: 0;
+  padding: 5px 12px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.06);
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.45);
+  letter-spacing: 0.05em;
+}
+
+.notif-mini-toggle--on {
+  background: rgba(52, 199, 89, 0.18);
+  color: #34c759;
+}
+
+[data-theme="light"] .notif-settings-types {
+  border-top-color: rgba(20, 33, 61, 0.08);
+}
+[data-theme="light"] .notif-settings-type {
+  background: rgba(20, 33, 61, 0.04);
+  border-color: rgba(20, 33, 61, 0.08);
+}
+[data-theme="light"] .notif-settings-type:hover:not(:disabled) {
+  background: rgba(20, 33, 61, 0.06);
+}
+[data-theme="light"] .notif-settings-type__title {
+  color: #14213d;
+}
+[data-theme="light"] .notif-settings-type__desc {
+  color: rgba(20, 33, 61, 0.55);
+}
+[data-theme="light"] .notif-mini-toggle {
+  background: rgba(20, 33, 61, 0.08);
+  color: rgba(20, 33, 61, 0.5);
+}
+[data-theme="light"] .notif-mini-toggle--on {
+  background: rgba(52, 199, 89, 0.15);
+  color: #00753a;
+}
+
 .profile-delete-btn {
   border: 1px solid rgba(255, 80, 80, 0.25);
   background: transparent;
