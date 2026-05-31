@@ -59,21 +59,26 @@ public class EntitlementService {
     private final AuthAccountRepository authAccountRepository;
     private final boolean paywallEnabled;
     private final String trialSalt;
+    private final OffsetDateTime paywallLaunchedAt;
 
     public EntitlementService(
             UserEntitlementRepository repository,
             TrialEmailHashRepository trialHashRepository,
             AuthAccountRepository authAccountRepository,
             @Value("${nutrition.paywall.enabled:false}") boolean paywallEnabled,
-            @Value("${nutrition.trial.email-salt:dev-salt-change-me}") String trialSalt
+            @Value("${nutrition.trial.email-salt:dev-salt-change-me}") String trialSalt,
+            @Value("${nutrition.paywall.launched-at:}") String paywallLaunchedAtRaw
     ) {
         this.repository = repository;
         this.trialHashRepository = trialHashRepository;
         this.authAccountRepository = authAccountRepository;
         this.paywallEnabled = paywallEnabled;
         this.trialSalt = trialSalt;
-        log.info("entitlement initialised paywallEnabled={} trialSaltLength={}",
-                paywallEnabled, trialSalt.length());
+        this.paywallLaunchedAt = paywallLaunchedAtRaw == null || paywallLaunchedAtRaw.isBlank()
+                ? null
+                : OffsetDateTime.parse(paywallLaunchedAtRaw);
+        log.info("entitlement initialised paywallEnabled={} paywallLaunchedAt={} trialSaltLength={}",
+                paywallEnabled, paywallLaunchedAt, trialSalt.length());
     }
 
     public boolean isPaywallEnabled() {
@@ -87,7 +92,7 @@ public class EntitlementService {
             return EntitlementTier.PRO;
         }
         return repository.findById(userId)
-            .map(EntitlementService::tierOf)
+            .map(this::tierOf)
             .orElse(EntitlementTier.FREE);
     }
 
@@ -326,12 +331,22 @@ public class EntitlementService {
         return Math.max(0, FOUNDER_CAP - repository.countFounders());
     }
 
-    public static EntitlementTier tierOf(UserEntitlementEntity e) {
+    public EntitlementTier tierOf(UserEntitlementEntity e) {
         if (e == null) return EntitlementTier.FREE;
         if (e.getFounderPurchasedAt() != null) return EntitlementTier.FOUNDER;
         var now = OffsetDateTime.now(ZoneOffset.UTC);
         if (e.getProActiveUntil() != null && e.getProActiveUntil().isAfter(now)) return EntitlementTier.PRO;
-        if (e.getTrialEndsAt() != null && e.getTrialEndsAt().isAfter(now)) return EntitlementTier.TRIAL;
+
+        OffsetDateTime trialEnd = e.getTrialEndsAt();
+        // Grandfather window: every entitlement whose trial expired before the
+        // paywall launched (i.e. created during the free beta) gets a fresh
+        // 7-day trial computed from the launch date. Without this they'd drop
+        // straight to FREE the moment the flag flips, after a month of full
+        // access — burning goodwill.
+        if (trialEnd != null && paywallLaunchedAt != null && trialEnd.isBefore(paywallLaunchedAt)) {
+            trialEnd = paywallLaunchedAt.plusDays(TRIAL_DAYS);
+        }
+        if (trialEnd != null && trialEnd.isAfter(now)) return EntitlementTier.TRIAL;
         return EntitlementTier.FREE;
     }
 

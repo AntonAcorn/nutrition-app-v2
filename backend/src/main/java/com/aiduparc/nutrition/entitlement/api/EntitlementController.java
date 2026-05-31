@@ -30,7 +30,7 @@ public class EntitlementController {
         boolean paywallOn = entitlementService.isPaywallEnabled();
 
         UserEntitlementEntity entity = entitlementService.getOrBootstrap(userId);
-        EntitlementTier tier = paywallOn ? EntitlementService.tierOf(entity) : EntitlementTier.PRO;
+        EntitlementTier tier = paywallOn ? entitlementService.tierOf(entity) : EntitlementTier.PRO;
         boolean unlimited = paywallOn && tier.hasAiAccess();
 
         LocalDate today = LocalDate.now(ZoneOffset.UTC);
