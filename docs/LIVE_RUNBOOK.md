@@ -223,5 +223,9 @@ docker compose --env-file /opt/nutrition-app-v2/.env -f infra/docker/docker-comp
 
 ## См. также
 
+- [`LAUNCH_CHECKLIST.md`](LAUNCH_CHECKLIST.md) — что должно быть готово
+  и проверено перед лончем (env, infra, push, deep links, compliance).
+- [`PAYWALL_FLIP.md`](PAYWALL_FLIP.md) — как переключить с open beta на
+  платную версию (с grandfather window для существующих юзеров).
 - [`ADMIN_COMP_ACCESS.md`](ADMIN_COMP_ACCESS.md) — как выдавать Pro
   вручную друзьям / прессе / инфлюенсерам через admin endpoint.
