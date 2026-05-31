@@ -92,6 +92,14 @@
             <artifactId>pushy</artifactId>
             <version>0.15.4</version>
         </dependency>
+        <dependency>
+            <!-- FCM (Android native push). Initialized with a service-account
+                 JSON snippet split into env vars (project_id, client_email,
+                 private_key) so no file needs to ship with the build. -->
+            <groupId>com.google.firebase</groupId>
+            <artifactId>firebase-admin</artifactId>
+            <version>9.4.1</version>
+        </dependency>
     </dependencies>
 
     <build>

@@ -38,7 +38,10 @@ public class PushSubscriptionController {
         String platform = request.platform() != null ? request.platform() : "web";
 
         PushSubscriptionEntity sub;
-        if ("apns".equals(platform)) {
+        // Both APNs (iOS) and FCM (Android) are token-based; web push is
+        // endpoint-based. Group them so a device that resubscribes with the
+        // same token updates the existing row instead of duplicating.
+        if ("apns".equals(platform) || "fcm".equals(platform)) {
             sub = repository.findByUserIdAndDeviceToken(userId, request.deviceToken())
                     .orElseGet(PushSubscriptionEntity::new);
             sub.setDeviceToken(request.deviceToken());

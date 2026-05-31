@@ -28,7 +28,8 @@ export function getSubscriptionStatus(): Promise<PushSubscriptionStatus> {
   return apiClient.get<PushSubscriptionStatus>('/api/push/subscription')
 }
 
-async function subscribeApns(reminderHour: number): Promise<PushSubscriptionStatus> {
+async function subscribeNative(reminderHour: number): Promise<PushSubscriptionStatus> {
+  const { Capacitor } = await import('@capacitor/core')
   const { PushNotifications } = await import('@capacitor/push-notifications')
 
   const permResult = await PushNotifications.requestPermissions()
@@ -38,8 +39,12 @@ async function subscribeApns(reminderHour: number): Promise<PushSubscriptionStat
 
   await PushNotifications.register()
 
+  // The plugin returns an APNs token on iOS and an FCM token on Android.
+  // Label them correctly so the backend dispatches to the right service.
+  const platformLabel = Capacitor.getPlatform() === 'android' ? 'fcm' : 'apns'
+
   const deviceToken = await new Promise<string>((resolve, reject) => {
-    const timeout = setTimeout(() => reject(new Error('APNs token timeout')), 15000)
+    const timeout = setTimeout(() => reject(new Error('Push registration timeout')), 15000)
     PushNotifications.addListener('registration', token => {
       clearTimeout(timeout)
       resolve(token.value)
@@ -52,7 +57,7 @@ async function subscribeApns(reminderHour: number): Promise<PushSubscriptionStat
 
   return apiClient.post<PushSubscriptionStatus>('/api/push/subscribe', {
     deviceToken,
-    platform: 'apns',
+    platform: platformLabel,
     timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
     reminderHour,
   })
@@ -80,7 +85,7 @@ async function subscribeWebPush(reminderHour: number): Promise<PushSubscriptionS
 
 export async function subscribePush(reminderHour: number): Promise<PushSubscriptionStatus> {
   if (await isNativePlatform()) {
-    return subscribeApns(reminderHour)
+    return subscribeNative(reminderHour)
   }
   return subscribeWebPush(reminderHour)
 }

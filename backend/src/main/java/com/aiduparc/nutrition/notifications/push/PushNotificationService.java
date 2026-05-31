@@ -18,12 +18,14 @@ public class PushNotificationService {
 
     private final PushService webPushService;
     private final ApnsPushService apnsPushService;
+    private final FcmPushService fcmPushService;
 
     public PushNotificationService(
             @Value("${nutrition.push.vapid-public-key:}") String vapidPublicKey,
             @Value("${nutrition.push.vapid-private-key:}") String vapidPrivateKey,
             @Value("${nutrition.push.vapid-subject:mailto:admin@rumblyeats.org}") String vapidSubject,
-            ApnsPushService apnsPushService
+            ApnsPushService apnsPushService,
+            FcmPushService fcmPushService
     ) throws Exception {
         if (Security.getProvider("BC") == null) {
             Security.addProvider(new BouncyCastleProvider());
@@ -35,15 +37,19 @@ public class PushNotificationService {
             this.webPushService = null;
         }
         this.apnsPushService = apnsPushService;
+        this.fcmPushService = fcmPushService;
     }
 
     /**
      * @return true when the subscription is permanently dead and the caller
-     *         should delete it (stale APNs token, 404/410 web-push endpoint).
+     *         should delete it (stale APNs / FCM token, 404/410 web-push endpoint).
      */
     public boolean send(PushSubscriptionEntity sub, String title, String body) {
         if ("apns".equals(sub.getPlatform())) {
             return apnsPushService.send(sub.getDeviceToken(), title, body);
+        }
+        if ("fcm".equals(sub.getPlatform())) {
+            return fcmPushService.send(sub.getDeviceToken(), title, body);
         }
         return sendWebPush(sub, title, body);
     }

@@ -97,6 +97,16 @@ nutrition:
     vapid-public-key: ${VAPID_PUBLIC_KEY:}
     vapid-private-key: ${VAPID_PRIVATE_KEY:}
     vapid-subject: ${VAPID_SUBJECT:mailto:admin@rumblyeats.org}
+    fcm:
+      # FCM (Android native push). Source the three values from a Firebase
+      # service-account JSON key (Firebase Console → Project settings →
+      # Service accounts → Generate new private key). Without them, Android
+      # push is silently disabled.
+      project-id: ${FIREBASE_PROJECT_ID:}
+      client-email: ${FIREBASE_CLIENT_EMAIL:}
+      # In env vars the PEM private_key must use \n for newlines; the
+      # service unescapes them at startup.
+      private-key: ${FIREBASE_PRIVATE_KEY:}
   photo-analysis:
     enabled: ${PHOTO_ANALYSIS_ENABLED:true}
     provider: ${PHOTO_ANALYSIS_PROVIDER:openai-stub}
