@@ -7,9 +7,10 @@ import java.time.ZoneOffset;
 import java.util.UUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import jakarta.mail.internet.MimeMessage;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -56,16 +57,15 @@ public class PasswordResetService {
             authAccountRepository.save(account);
 
             String link = baseUrl + "/?reset_token=" + token;
+            String name = account.getDisplayName() == null ? "there" : account.getDisplayName();
+            EmailTemplates.Rendered rendered = EmailTemplates.passwordReset(name, link, baseUrl);
 
-            SimpleMailMessage message = new SimpleMailMessage();
-            message.setFrom(fromEmail);
-            message.setTo(account.getEmail());
-            message.setSubject("Reset your password");
-            message.setText("Hi " + account.getDisplayName() + ",\n\n"
-                    + "Click the link below to reset your password:\n\n"
-                    + link + "\n\n"
-                    + "The link is valid for 1 hour.\n\n"
-                    + "If you did not request a password reset, ignore this email.");
+            MimeMessage message = mailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
+            helper.setFrom(fromEmail);
+            helper.setTo(account.getEmail());
+            helper.setSubject("Reset your password");
+            helper.setText(rendered.text(), rendered.html());
 
             mailSender.send(message);
             log.info("Password reset email sent accountId={}", account.getId());

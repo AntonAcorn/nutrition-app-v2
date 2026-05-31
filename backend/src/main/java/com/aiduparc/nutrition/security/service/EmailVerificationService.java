@@ -7,9 +7,10 @@ import java.time.ZoneOffset;
 import java.util.UUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import jakarta.mail.internet.MimeMessage;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -53,16 +54,15 @@ public class EmailVerificationService {
             authAccountRepository.save(account);
 
             String link = baseUrl + "/api/auth/verify?token=" + token;
+            String name = account.getDisplayName() == null ? "there" : account.getDisplayName();
+            EmailTemplates.Rendered rendered = EmailTemplates.verification(name, link, baseUrl);
 
-            SimpleMailMessage message = new SimpleMailMessage();
-            message.setFrom(fromEmail);
-            message.setTo(account.getEmail());
-            message.setSubject("Confirm your email");
-            message.setText("Hi " + account.getDisplayName() + ",\n\n"
-                    + "Please confirm your email by clicking the link below:\n\n"
-                    + link + "\n\n"
-                    + "The link is valid for 24 hours.\n\n"
-                    + "If you did not register, ignore this email.");
+            MimeMessage message = mailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
+            helper.setFrom(fromEmail);
+            helper.setTo(account.getEmail());
+            helper.setSubject("Confirm your email");
+            helper.setText(rendered.text(), rendered.html());
 
             mailSender.send(message);
             log.info("Verification email sent accountId={}", account.getId());
