@@ -59,24 +59,31 @@ public class PushScheduler {
                                 && e.getCaloriesConsumedKcal().compareTo(BigDecimal.ZERO) > 0)
                         .orElse(false);
 
+                boolean dead = false;
                 if (loggedToday) {
                     int deposit = calorieBankService.getTodayDeposit(sub.getUserId(), today);
                     if (deposit >= 100) {
-                        pushNotificationService.send(sub,
+                        dead = pushNotificationService.send(sub,
                                 "🏦 +" + deposit + " in bank",
                                 "Stayed under target today — saving up for the weekend.");
                     } else {
                         int streak = calculateStreak(sub.getUserId(), today);
                         if (streak >= 3) {
-                            pushNotificationService.send(sub,
+                            dead = pushNotificationService.send(sub,
                                     "Day " + streak + " streak! 🔥",
                                     "You've logged every day for " + streak + " days. Keep going!");
                         }
                     }
                 } else {
-                    pushNotificationService.send(sub,
+                    dead = pushNotificationService.send(sub,
                             "Don't forget to log today 🍽",
                             "A quick photo or description takes 10 seconds.");
+                }
+                if (dead) {
+                    // Token / endpoint is permanently revoked — drop it so we don't
+                    // keep paying for failed deliveries every hour.
+                    subscriptionRepository.delete(sub);
+                    log.info("Removed dead push subscription id={} platform={}", sub.getId(), sub.getPlatform());
                 }
             } catch (Exception e) {
                 log.warn("Scheduler error for subscription {}: {}", sub.getId(), e.getMessage());

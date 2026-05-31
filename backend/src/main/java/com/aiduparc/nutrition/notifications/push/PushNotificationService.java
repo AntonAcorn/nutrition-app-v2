@@ -37,16 +37,19 @@ public class PushNotificationService {
         this.apnsPushService = apnsPushService;
     }
 
-    public void send(PushSubscriptionEntity sub, String title, String body) {
+    /**
+     * @return true when the subscription is permanently dead and the caller
+     *         should delete it (stale APNs token, 404/410 web-push endpoint).
+     */
+    public boolean send(PushSubscriptionEntity sub, String title, String body) {
         if ("apns".equals(sub.getPlatform())) {
-            apnsPushService.send(sub.getDeviceToken(), title, body);
-        } else {
-            sendWebPush(sub, title, body);
+            return apnsPushService.send(sub.getDeviceToken(), title, body);
         }
+        return sendWebPush(sub, title, body);
     }
 
-    private void sendWebPush(PushSubscriptionEntity sub, String title, String body) {
-        if (webPushService == null) return;
+    private boolean sendWebPush(PushSubscriptionEntity sub, String title, String body) {
+        if (webPushService == null) return false;
         String payload = """
                 {"title":"%s","body":"%s"}
                 """.formatted(escape(title), escape(body)).strip();
@@ -55,9 +58,13 @@ public class PushNotificationService {
                     sub.getEndpoint(),
                     new Subscription.Keys(sub.getP256dh(), sub.getAuth())
             );
-            webPushService.send(new Notification(subscription, payload));
+            var response = webPushService.send(new Notification(subscription, payload));
+            int status = response.getStatusLine().getStatusCode();
+            // 404 / 410 mean the browser revoked the subscription — never deliver again.
+            return status == 404 || status == 410;
         } catch (Exception e) {
             log.warn("Failed to send web push to user={} endpoint={}: {}", sub.getUserId(), sub.getEndpoint(), e.getMessage());
+            return false;
         }
     }
 

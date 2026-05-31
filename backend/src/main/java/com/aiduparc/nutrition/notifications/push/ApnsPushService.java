@@ -53,8 +53,12 @@ public class ApnsPushService {
         }
     }
 
-    public void send(String deviceToken, String title, String body) {
-        if (apnsClient == null) return;
+    /**
+     * @return true when the token is permanently invalid and the caller should
+     *         delete the subscription. Transient failures return false.
+     */
+    public boolean send(String deviceToken, String title, String body) {
+        if (apnsClient == null) return false;
         try {
             String payload = new SimpleApnsPayloadBuilder()
                     .setAlertTitle(title)
@@ -65,7 +69,13 @@ public class ApnsPushService {
             PushNotificationResponse<SimpleApnsPushNotification> response =
                     apnsClient.sendNotification(notification).get();
             if (!response.isAccepted()) {
-                log.warn("APNs rejected push for token={}: {}", deviceToken, response.getRejectionReason().orElse("unknown"));
+                String reason = response.getRejectionReason().orElse("unknown");
+                log.warn("APNs rejected push for token={}: {}", deviceToken, reason);
+                // Terminal failures per APNs docs — token will never deliver again.
+                return reason.equals("Unregistered")
+                        || reason.equals("BadDeviceToken")
+                        || reason.equals("DeviceTokenNotForTopic")
+                        || reason.equals("TopicDisallowed");
             }
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
@@ -73,6 +83,7 @@ public class ApnsPushService {
         } catch (ExecutionException e) {
             log.warn("APNs send failed for token={}: {}", deviceToken, e.getMessage());
         }
+        return false;
     }
 
     @PreDestroy
