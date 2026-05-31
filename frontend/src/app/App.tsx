@@ -226,7 +226,14 @@ function AppInner() {
         platform={platform}
         theme={theme}
         onToggleTheme={toggleTheme}
-        onAuthenticated={(user) => setAuthUser(user)}
+        onAuthenticated={(user) => {
+          // HashRouter persists whichever tab the user was on before they
+          // logged out (or before the session expired). Without this reset,
+          // logging in via Google/Apple drops them on /me or /stats instead
+          // of the Today screen they expect.
+          window.location.hash = '/'
+          setAuthUser(user)
+        }}
         onResetUser={() => setAuthUser(null)}
       />
     )
