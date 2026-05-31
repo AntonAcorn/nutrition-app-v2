@@ -220,3 +220,8 @@ docker compose --env-file /opt/nutrition-app-v2/.env -f infra/docker/docker-comp
 В первой итерации цель — живой минимальный frontend с рабочим reverse proxy и health endpoint.
 
 Полноценные backend-экраны, auth, загрузка фото и analyzer pipeline — следующие шаги.
+
+## См. также
+
+- [`ADMIN_COMP_ACCESS.md`](ADMIN_COMP_ACCESS.md) — как выдавать Pro
+  вручную друзьям / прессе / инфлюенсерам через admin endpoint.
