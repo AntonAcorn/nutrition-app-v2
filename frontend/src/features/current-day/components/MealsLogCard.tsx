@@ -237,16 +237,31 @@ export function MealsLogCard({ date, refreshToken = 0, onAddToSlot, onDeleted, o
     if (!editForm.name.trim()) { setEditError('Name is required'); return }
     const cal = parseFloat(editForm.caloriesKcal)
     if (!Number.isFinite(cal) || cal < 0) { setEditError('Enter valid calories'); return }
+    // Macros: parse, default to 0, but reject negatives so we don't send
+    // bad data the backend will 400 on (@DecimalMin(0.0) on every macro).
+    const nonNeg = (raw: string) => {
+      const n = parseFloat(raw)
+      if (!Number.isFinite(n)) return 0
+      return n < 0 ? null : n
+    }
+    const protein = nonNeg(editForm.proteinG)
+    const fat     = nonNeg(editForm.fatG)
+    const carbs   = nonNeg(editForm.carbsG)
+    const fiber   = nonNeg(editForm.fiberG)
+    if (protein === null || fat === null || carbs === null || fiber === null) {
+      setEditError('Macros cannot be negative')
+      return
+    }
     setSavingId(id)
     setEditError('')
     try {
       const updated = await updateMealLogEntry(id, {
         name: editForm.name.trim(),
         caloriesKcal: cal,
-        proteinG: parseFloat(editForm.proteinG) || 0,
-        fatG: parseFloat(editForm.fatG) || 0,
-        carbsG: parseFloat(editForm.carbsG) || 0,
-        fiberG: parseFloat(editForm.fiberG) || 0,
+        proteinG: protein,
+        fatG: fat,
+        carbsG: carbs,
+        fiberG: fiber,
       })
       setSlots(prev => prev.map(slot => ({
         ...slot,

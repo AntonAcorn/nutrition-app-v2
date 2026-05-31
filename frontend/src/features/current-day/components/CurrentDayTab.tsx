@@ -66,6 +66,26 @@ interface CurrentDayTabProps {
 export function CurrentDayTab({ refreshToken = 0, successMessage = '', onDayUpdated, displayName, onOpenAnalyzer, onOpenAnalyzerWithPhoto, onOpenLibrary }: CurrentDayTabProps) {
   const queryClient = useQueryClient()
   const [selectedDate, setSelectedDate] = useState(() => getTodayLocalDateInputValue())
+  // Remember what "today" was the last time we resolved it, so we can detect
+  // when the user crossed midnight or changed timezone while the app was open.
+  const lastKnownTodayRef = useRef(getTodayLocalDateInputValue())
+
+  useEffect(() => {
+    function syncTodayOnReturn() {
+      const fresh = getTodayLocalDateInputValue()
+      const wasOnToday = selectedDate === lastKnownTodayRef.current
+      lastKnownTodayRef.current = fresh
+      // Only auto-advance if they were already viewing today — leave them on a
+      // past day they navigated to intentionally.
+      if (wasOnToday && fresh !== selectedDate) setSelectedDate(fresh)
+    }
+    document.addEventListener('visibilitychange', syncTodayOnReturn)
+    window.addEventListener('focus', syncTodayOnReturn)
+    return () => {
+      document.removeEventListener('visibilitychange', syncTodayOnReturn)
+      window.removeEventListener('focus', syncTodayOnReturn)
+    }
+  }, [selectedDate])
   const [steps, setSteps] = useState(0)
   const [activeCalories, setActiveCalories] = useState(0)
   const [savingWeight, setSavingWeight] = useState(false)

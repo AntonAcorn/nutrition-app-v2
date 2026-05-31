@@ -148,6 +148,11 @@ export function ProfileTab({ displayName, email, onLogout, onDeleteAccount }: Pr
         coachFocus: serializeCoachFocus(coachFocus) ?? undefined,
       })
       setProfile(updated)
+      // Profile changes (target calories, macros, activity) feed into the
+      // daily summary and calorie bank calculations — invalidate both so
+      // the user doesn't see stale numbers when they switch tabs.
+      queryClient.invalidateQueries({ queryKey: ['today-summary'] })
+      queryClient.invalidateQueries({ queryKey: ['calorie-bank'] })
       setEditing(false)
     } catch (err) {
       setSaveError(err instanceof Error ? err.message : 'Failed to save')
