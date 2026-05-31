@@ -10,6 +10,7 @@ import java.util.UUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -199,7 +200,16 @@ public class EntitlementService {
         if (revenuecatAppUserId != null && entity.getRevenuecatAppUserId() == null) {
             entity.setRevenuecatAppUserId(revenuecatAppUserId);
         }
-        repository.save(entity);
+        try {
+            repository.save(entity);
+        } catch (DataIntegrityViolationException e) {
+            // Two purchases hit findMaxFounderNumber() simultaneously and tried
+            // to write the same `next` value. The unique index on founder_number
+            // rejects the second one — surface it as 409 instead of a 500.
+            log.warn("entitlement founder slot collision userId={} number={}", userId, next);
+            throw new ResponseStatusException(HttpStatus.CONFLICT,
+                "Founder slot was just taken — please retry.");
+        }
         log.info("entitlement founder activated userId={} number={}", userId, next);
         return next;
     }

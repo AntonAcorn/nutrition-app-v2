@@ -70,7 +70,9 @@ public class PasswordResetService {
             mailSender.send(message);
             log.info("Password reset email sent accountId={}", account.getId());
         } catch (Exception e) {
-            log.warn("Failed to send password reset email accountId={}: {}", account.getId(), e.getMessage());
+            // See EmailVerificationService — log.error so Sentry pages us when
+            // SMTP is down. Client response stays generic.
+            log.error("Failed to send password reset email accountId={}", account.getId(), e);
         }
     }
 

@@ -3,6 +3,7 @@ package com.aiduparc.nutrition.history.api;
 import com.aiduparc.nutrition.history.service.NutritionHistoryService;
 import com.aiduparc.nutrition.security.service.CurrentNutritionUserResolver;
 import jakarta.servlet.http.HttpSession;
+import jakarta.validation.Valid;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
@@ -53,7 +54,7 @@ public class MealLogController {
     @PatchMapping("/{id}")
     public MealLogEntryResponse updateMeal(
             @PathVariable UUID id,
-            @RequestBody UpdateMealLogEntryRequest request,
+            @Valid @RequestBody UpdateMealLogEntryRequest request,
             HttpSession session
     ) {
         UUID userId = resolver.resolve(session);

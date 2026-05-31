@@ -67,7 +67,11 @@ public class EmailVerificationService {
             mailSender.send(message);
             log.info("Verification email sent accountId={}", account.getId());
         } catch (Exception e) {
-            log.warn("Failed to send verification email accountId={}: {}", account.getId(), e.getMessage());
+            // log.error so Sentry captures it — silent log.warn meant a broken
+            // SMTP relay went unnoticed while users assumed they entered the
+            // wrong email. Client still sees the generic OK response so we
+            // don't leak whether the email is registered.
+            log.error("Failed to send verification email accountId={}", account.getId(), e);
         }
     }
 
