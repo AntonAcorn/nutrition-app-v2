@@ -49,6 +49,18 @@ export function OnboardingWizard({ onComplete }: Props) {
   const [coachFocus, setCoachFocus] = useState<CoachFocusTag[]>([])
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState('')
+  const [acceptedLowBmi, setAcceptedLowBmi] = useState(false)
+
+  // Returns target-weight BMI when both height and target are set, else null.
+  // < 17  = severe underweight (block in the UI to mirror the backend guard).
+  // 17–18.5 = underweight (show a warning + require confirmation).
+  function targetBmi(): number | null {
+    const h = Number(heightCm)
+    const t = Number(targetWeightKg)
+    if (!Number.isFinite(h) || !Number.isFinite(t) || h <= 0 || t <= 0) return null
+    const m = h / 100
+    return t / (m * m)
+  }
 
   function toggleFocus(tag: CoachFocusTag) {
     setCoachFocus(prev => prev.includes(tag) ? prev.filter(t => t !== tag) : [...prev, tag])
@@ -78,7 +90,13 @@ export function OnboardingWizard({ onComplete }: Props) {
     if (!inRange(startingWeightKg, 30, 300)) return false
     // targetWeightKg is optional, but if provided it must be in range.
     if (targetWeightKg && !inRange(targetWeightKg, 30, 300)) return false
-    return !!activityLevel
+    if (!activityLevel) return false
+    const bmi = targetBmi()
+    if (bmi !== null) {
+      if (bmi < 17) return false // hard block — backend will also reject
+      if (bmi < 18.5 && !acceptedLowBmi) return false
+    }
+    return true
   }
 
   function missingStep2() {
@@ -262,10 +280,38 @@ export function OnboardingWizard({ onComplete }: Props) {
               max={300}
               step="0.1"
               value={targetWeightKg}
-              onChange={(e) => setTargetWeightKg(e.target.value)}
+              onChange={(e) => { setTargetWeightKg(e.target.value); setAcceptedLowBmi(false) }}
               placeholder="e.g. 75"
             />
           </label>
+
+          {(() => {
+            const bmi = targetBmi()
+            if (bmi === null || bmi >= 18.5) return null
+            if (bmi < 17) {
+              return (
+                <p className="onboarding-bmi-block">
+                  ⚠️ This target is in a range that's harmful for your height (BMI {bmi.toFixed(1)}).
+                  Please talk to a doctor first. Free Canadian helpline:{' '}
+                  <a href="https://nedic.ca" target="_blank" rel="noopener noreferrer">NEDIC</a>{' '}
+                  or call <strong>1-866-633-4220</strong>.
+                </p>
+              )
+            }
+            return (
+              <label className="onboarding-bmi-warning">
+                <input
+                  type="checkbox"
+                  checked={acceptedLowBmi}
+                  onChange={(e) => setAcceptedLowBmi(e.target.checked)}
+                />
+                <span>
+                  This target is below a healthy weight for your height (BMI {bmi.toFixed(1)}).
+                  I understand and have discussed this with a doctor.
+                </span>
+              </label>
+            )
+          })()}
 
           <label>Activity level</label>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>

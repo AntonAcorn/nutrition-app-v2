@@ -21,6 +21,7 @@ public class UserProfileService {
 
     @Transactional
     public UserProfileEntity createProfile(CreateUserProfileCommand command) {
+        SafetyCheck.assertTargetWeightSafe(command.targetWeightKg(), command.heightCm());
         BigDecimal target = CalorieTargetCalculator.calculate(
             command.ageYears(),
             command.gender(),
@@ -64,6 +65,7 @@ public class UserProfileService {
 
     @Transactional
     public UserProfileEntity updateProfile(UpdateUserProfileCommand command) {
+        SafetyCheck.assertTargetWeightSafe(command.targetWeightKg(), command.heightCm());
         UserProfileEntity entity = repository.findByNutritionUserId(command.nutritionUserId())
             .orElseThrow(() -> new IllegalArgumentException("Profile not found"));
 
