@@ -42,11 +42,17 @@
 
 html {
   min-width: 320px;
+  /* iOS WKWebView rubber-band scroll lifted the position:fixed bottom tab bar
+     visually when the user pulled past content. overscroll-behavior: none on
+     html + body stops the page-level overscroll without disabling
+     pull-to-refresh that's implemented inside the tab content. */
+  overscroll-behavior: none;
 }
 
 body {
   margin: 0;
   min-height: 100vh;
+  overscroll-behavior: none;
   background:
     radial-gradient(circle at top left, rgba(111, 76, 255, 0.16), transparent 24%),
     radial-gradient(circle at top right, rgba(255, 191, 63, 0.12), transparent 22%),
