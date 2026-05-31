@@ -27,7 +27,7 @@ public class EmailVerificationService {
             JavaMailSender mailSender,
             AuthAccountRepository authAccountRepository,
             @Value("${nutrition.app.base-url}") String baseUrl,
-            @Value("${spring.mail.username}") String fromEmail
+            @Value("${nutrition.mail.from}") String fromEmail
     ) {
         this.mailSender = mailSender;
         this.authAccountRepository = authAccountRepository;

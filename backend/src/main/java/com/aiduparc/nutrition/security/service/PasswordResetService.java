@@ -29,7 +29,7 @@ public class PasswordResetService {
             AuthAccountRepository authAccountRepository,
             AuthAccountService authAccountService,
             @Value("${nutrition.app.base-url}") String baseUrl,
-            @Value("${spring.mail.username}") String fromEmail
+            @Value("${nutrition.mail.from}") String fromEmail
     ) {
         this.mailSender = mailSender;
         this.authAccountRepository = authAccountRepository;
