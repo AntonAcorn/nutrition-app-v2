@@ -1,11 +1,18 @@
 package com.aiduparc.nutrition.entitlement.service;
 
 import com.aiduparc.nutrition.entitlement.model.EntitlementTier;
+import com.aiduparc.nutrition.entitlement.model.TrialEmailHashEntity;
 import com.aiduparc.nutrition.entitlement.model.UserEntitlementEntity;
+import com.aiduparc.nutrition.entitlement.repository.TrialEmailHashRepository;
 import com.aiduparc.nutrition.entitlement.repository.UserEntitlementRepository;
+import com.aiduparc.nutrition.security.repository.AuthAccountRepository;
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
+import java.util.HexFormat;
 import java.util.UUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -48,15 +55,25 @@ public class EntitlementService {
     public static final int OPEN_BETA_VOICE_PER_DAY = 10;
 
     private final UserEntitlementRepository repository;
+    private final TrialEmailHashRepository trialHashRepository;
+    private final AuthAccountRepository authAccountRepository;
     private final boolean paywallEnabled;
+    private final String trialSalt;
 
     public EntitlementService(
             UserEntitlementRepository repository,
-            @Value("${nutrition.paywall.enabled:false}") boolean paywallEnabled
+            TrialEmailHashRepository trialHashRepository,
+            AuthAccountRepository authAccountRepository,
+            @Value("${nutrition.paywall.enabled:false}") boolean paywallEnabled,
+            @Value("${nutrition.trial.email-salt:dev-salt-change-me}") String trialSalt
     ) {
         this.repository = repository;
+        this.trialHashRepository = trialHashRepository;
+        this.authAccountRepository = authAccountRepository;
         this.paywallEnabled = paywallEnabled;
-        log.info("entitlement initialised paywallEnabled={}", paywallEnabled);
+        this.trialSalt = trialSalt;
+        log.info("entitlement initialised paywallEnabled={} trialSaltLength={}",
+                paywallEnabled, trialSalt.length());
     }
 
     public boolean isPaywallEnabled() {
@@ -79,8 +96,9 @@ public class EntitlementService {
     }
 
     /**
-     * Creates a 7-day trial for a brand-new user. Idempotent: if a record
-     * already exists, returns it unchanged.
+     * Creates a 7-day trial for a brand-new user — unless this email has
+     * already consumed one in the past (account-delete-then-re-register
+     * gaming). Idempotent: if a record already exists, returns it unchanged.
      */
     @Transactional
     public UserEntitlementEntity bootstrapTrial(UUID userId) {
@@ -88,12 +106,65 @@ public class EntitlementService {
             var now = OffsetDateTime.now(ZoneOffset.UTC);
             var entity = new UserEntitlementEntity();
             entity.setUserId(userId);
-            entity.setTrialStartedAt(now);
-            entity.setTrialEndsAt(now.plusDays(TRIAL_DAYS));
-            var saved = repository.save(entity);
-            log.info("entitlement trial bootstrapped userId={} endsAt={}", userId, saved.getTrialEndsAt());
-            return saved;
+
+            if (isFirstTrialForUserEmail(userId)) {
+                entity.setTrialStartedAt(now);
+                entity.setTrialEndsAt(now.plusDays(TRIAL_DAYS));
+                var saved = repository.save(entity);
+                log.info("entitlement trial bootstrapped userId={} endsAt={}", userId, saved.getTrialEndsAt());
+                return saved;
+            } else {
+                // Email seen before — drop straight to FREE tier (no trial fields set).
+                var saved = repository.save(entity);
+                log.info("entitlement trial SKIPPED (email previously used) userId={}", userId);
+                return saved;
+            }
         });
+    }
+
+    /**
+     * Returns true on the first trial for this email and records the hash
+     * so subsequent re-registrations with the same email skip the trial.
+     * Hard-deleting the auth_accounts row leaves this hash in place — that's
+     * the whole point. Hash is SHA-256 of (salt + ":" + lowercased email),
+     * one-way so the table is GDPR-safe even after account deletion.
+     */
+    private boolean isFirstTrialForUserEmail(UUID userId) {
+        var account = authAccountRepository.findByNutritionUserId(userId).orElse(null);
+        if (account == null || account.getEmail() == null) {
+            // Apple private-relay or OAuth without email — can't fingerprint,
+            // give the trial. Edge case, low abuse value.
+            return true;
+        }
+        String hash = hashEmail(account.getEmail());
+        if (trialHashRepository.existsById(hash)) {
+            return false;
+        }
+        try {
+            var row = new TrialEmailHashEntity();
+            row.setEmailHash(hash);
+            row.setFirstTrialAt(OffsetDateTime.now(ZoneOffset.UTC));
+            trialHashRepository.save(row);
+        } catch (DataIntegrityViolationException race) {
+            // Concurrent first-trial bootstrap on the same email — second
+            // caller saw existsById=false then PK collided. Treat as
+            // not-first so we don't double-grant the trial.
+            return false;
+        }
+        return true;
+    }
+
+    private String hashEmail(String email) {
+        try {
+            var md = MessageDigest.getInstance("SHA-256");
+            md.update(trialSalt.getBytes(StandardCharsets.UTF_8));
+            md.update((byte) ':');
+            md.update(email.trim().toLowerCase().getBytes(StandardCharsets.UTF_8));
+            return HexFormat.of().formatHex(md.digest());
+        } catch (NoSuchAlgorithmException e) {
+            // SHA-256 is mandated by every JRE — should be unreachable.
+            throw new IllegalStateException("SHA-256 unavailable", e);
+        }
     }
 
     /**
