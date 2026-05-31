@@ -23,7 +23,7 @@ final class EmailTemplates {
     record Rendered(String html, String text) {}
 
     static Rendered verification(String displayName, String link, String baseUrl) {
-        String mascot = baseUrl + "/mascot/cheer.png";
+        String mascot = baseUrl + "/mascot-email/welcome.png";
         String greeting = "Hi " + escape(displayName) + ",";
         String html = wrap(
             "Welcome to Rumbly Eats",
@@ -45,7 +45,7 @@ final class EmailTemplates {
     }
 
     static Rendered passwordReset(String displayName, String link, String baseUrl) {
-        String mascot = baseUrl + "/mascot/happy.png";
+        String mascot = baseUrl + "/mascot-email/reset.png";
         String greeting = "Hi " + escape(displayName) + ",";
         String html = wrap(
             "Reset your password",
@@ -87,12 +87,19 @@ final class EmailTemplates {
             + "<span style=\"display:none!important;visibility:hidden;opacity:0;height:0;width:0;overflow:hidden;\">" + escape(preheader) + "</span>"
             + "<table role=\"presentation\" width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" style=\"background:" + BG_PAGE + ";padding:32px 16px;\">"
             +   "<tr><td align=\"center\">"
-            +     "<table role=\"presentation\" width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" style=\"max-width:520px;background:" + BG_CARD + ";border:1px solid " + BORDER + ";border-radius:24px;overflow:hidden;\">"
-            +       "<tr><td align=\"center\" style=\"padding:32px 24px 8px 24px;\">"
-            +         "<img src=\"" + mascotUrl + "\" alt=\"\" width=\"96\" height=\"96\" style=\"display:block;border:0;outline:none;text-decoration:none;width:96px;height:auto;\">"
+            +     "<table role=\"presentation\" width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" style=\"max-width:520px;margin-bottom:12px;\">"
+            +       "<tr><td align=\"center\">"
+            +         "<a href=\"" + baseUrl + "\" style=\"display:inline-block;text-decoration:none;color:" + TEXT_PRIMARY + ";\">"
+            +           "<img src=\"" + baseUrl + "/icon-192.png\" alt=\"\" width=\"36\" height=\"36\" style=\"display:inline-block;border:0;border-radius:8px;vertical-align:middle;margin-right:8px;\">"
+            +           "<span style=\"font-size:18px;font-weight:700;color:" + TEXT_PRIMARY + ";vertical-align:middle;letter-spacing:-0.01em;\">Rumbly Eats</span>"
+            +         "</a>"
             +       "</td></tr>"
-            +       "<tr><td align=\"center\" style=\"padding:8px 24px 0 24px;\">"
-            +         "<div style=\"font-size:12px;letter-spacing:1.5px;text-transform:uppercase;color:" + TEXT_SECONDARY + ";margin-bottom:8px;\">Rumbly Eats</div>"
+            +     "</table>"
+            +     "<table role=\"presentation\" width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" style=\"max-width:520px;background:" + BG_CARD + ";border:1px solid " + BORDER + ";border-radius:24px;overflow:hidden;\">"
+            +       "<tr><td align=\"center\" style=\"padding:32px 24px 0 24px;\">"
+            +         "<img src=\"" + mascotUrl + "\" alt=\"\" width=\"120\" height=\"120\" style=\"display:block;border:0;outline:none;text-decoration:none;width:120px;height:auto;\">"
+            +       "</td></tr>"
+            +       "<tr><td align=\"center\" style=\"padding:16px 24px 0 24px;\">"
             +         "<h1 style=\"font-size:24px;line-height:1.2;font-weight:700;margin:0 0 12px 0;color:" + TEXT_PRIMARY + ";\">" + escape(preheader) + "</h1>"
             +       "</td></tr>"
             +       "<tr><td style=\"padding:8px 32px 0 32px;\">"
@@ -111,7 +118,7 @@ final class EmailTemplates {
             +       "</td></tr>"
             +     "</table>"
             +     "<div style=\"max-width:520px;margin:16px auto 0 auto;text-align:center;\">"
-            +       "<p style=\"font-size:11px;line-height:1.5;margin:0;color:" + TEXT_SECONDARY + ";\">Rumbly Eats · <a href=\"" + baseUrl + "\" style=\"color:" + TEXT_SECONDARY + ";text-decoration:underline;\">rumblyeats.org</a></p>"
+            +       "<p style=\"font-size:11px;line-height:1.5;margin:0;color:" + TEXT_SECONDARY + ";\">© Rumbly Eats</p>"
             +     "</div>"
             +   "</td></tr>"
             + "</table>"
