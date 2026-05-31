@@ -62,6 +62,11 @@
 .onboarding-complete__subtitle { color: rgba(255, 255, 255, 0.65); }
 .onboarding-pace-warning       { color: rgba(255, 200, 80, 0.85); font-size: 0.8rem; margin: 2px 0 0; }
 
+/* Wizard panel becomes cream in light theme — white step-4 text was invisible. */
+[data-theme="light"] .onboarding-complete__title    { color: #14213d; }
+[data-theme="light"] .onboarding-complete__subtitle { color: rgba(20, 33, 61, 0.6); }
+[data-theme="light"] .onboarding-pace-warning       { color: #b6580c; }
+
 /* ── Onboarding wizard in light mode ── */
 [data-theme="light"] .auth-panel--dark {
   background: rgba(255, 252, 247, 0.95);

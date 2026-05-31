@@ -45,6 +45,32 @@
 .what-if-card__delta--add { color: #fca5a5; }
 .what-if-card__delta--flat { color: rgba(255, 255, 255, 0.65); }
 
+/* ── What-if card — light theme overrides ──────────────────────────────────
+ * Card sits inside a .panel which becomes cream in light theme. All the
+ * rgba(255,255,255,X) labels/brand/sub were invisible on cream.
+ */
+[data-theme="light"] .what-if-card__brand { color: rgba(20, 33, 61, 0.5); }
+[data-theme="light"] .what-if-card__label { color: rgba(20, 33, 61, 0.55); }
+[data-theme="light"] .what-if-card__delta--flat { color: rgba(20, 33, 61, 0.6); }
+[data-theme="light"] .what-if-card__delta--cut { color: #047857; }
+[data-theme="light"] .what-if-card__delta--add { color: #b91c1c; }
+[data-theme="light"] .what-if-card__chip {
+  border-color: rgba(20, 33, 61, 0.15);
+  color: rgba(20, 33, 61, 0.7);
+}
+[data-theme="light"] .what-if-card__chip--active {
+  background: rgba(123, 97, 255, 0.12);
+  border-color: rgba(123, 97, 255, 0.4);
+  color: #6d28d9;
+}
+[data-theme="light"] .what-if-card__result--muted {
+  background: rgba(20, 33, 61, 0.04);
+  border-color: rgba(20, 33, 61, 0.10);
+}
+[data-theme="light"] .what-if-card__weight { color: #14213d; }
+[data-theme="light"] .what-if-card__result-sub { color: rgba(20, 33, 61, 0.75); }
+[data-theme="light"] .what-if-card__result-fine { color: rgba(20, 33, 61, 0.5); }
+
 .what-if-card__chips {
   display: flex;
   gap: 8px;

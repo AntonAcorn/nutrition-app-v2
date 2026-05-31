@@ -228,3 +228,22 @@
   font-weight: 300;
   flex-shrink: 0;
 }
+
+/* ── Founder banner — light theme overrides ──────────────────────────────── */
+/* The banner sits on the Today screen page, not inside the dark paywall sheet,
+ * so its translucent orange overlay shows the cream background through it.
+ * White text on cream was invisible. */
+[data-theme="light"] .founder-banner {
+  background: linear-gradient(135deg, rgba(255, 160, 60, 0.18), rgba(255, 160, 60, 0.08));
+  border-color: rgba(255, 160, 60, 0.45);
+  color: #14213d;
+}
+[data-theme="light"] .founder-banner__title {
+  color: #b65d00;
+}
+[data-theme="light"] .founder-banner__sub {
+  color: rgba(20, 33, 61, 0.62);
+}
+[data-theme="light"] .founder-banner__chevron {
+  color: rgba(20, 33, 61, 0.45);
+}
