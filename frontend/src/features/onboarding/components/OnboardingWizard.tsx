@@ -61,13 +61,13 @@ export function OnboardingWizard({ onComplete }: Props) {
   }
 
   function canAdvanceStep1() {
-    return inRange(ageYears, 10, 120) && gender && inRange(heightCm, 100, 250)
+    return inRange(ageYears, 13, 120) && gender && inRange(heightCm, 100, 250)
   }
 
   function missingStep1() {
     const missing = []
     if (!ageYears) missing.push('age')
-    else if (!inRange(ageYears, 10, 120)) missing.push('age (10–120)')
+    else if (!inRange(ageYears, 13, 120)) missing.push('age (13–120)')
     if (!gender) missing.push('gender')
     if (!heightCm) missing.push('height')
     else if (!inRange(heightCm, 100, 250)) missing.push('height (100–250 cm)')
@@ -184,7 +184,7 @@ export function OnboardingWizard({ onComplete }: Props) {
             Age (years)
             <input
               type="number"
-              min={10}
+              min={13}
               max={120}
               value={ageYears}
               onChange={(e) => setAgeYears(e.target.value)}

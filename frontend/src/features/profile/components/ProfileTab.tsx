@@ -202,7 +202,7 @@ export function ProfileTab({ displayName, email, onLogout, onDeleteAccount }: Pr
           <div className="auth-form-grid">
             <label>
               Age (years)
-              <input type="number" min={10} max={120} value={ageYears} onChange={(e) => setAgeYears(e.target.value)} />
+              <input type="number" min={13} max={120} value={ageYears} onChange={(e) => setAgeYears(e.target.value)} />
             </label>
 
             <div>
@@ -517,6 +517,22 @@ export function ProfileTab({ displayName, email, onLogout, onDeleteAccount }: Pr
           onClick={() => setShowExport(v => !v)}
         >
           📤 Export data
+        </button>
+        <button
+          type="button"
+          className="profile-tool-row"
+          onClick={() => {
+            // App Store / Play Store handle subscription management. Apple
+            // requires this link be reachable from in-app. Open both URLs;
+            // the OS picks the one that matches its store.
+            const isAndroid = /android/i.test(navigator.userAgent)
+            const url = isAndroid
+              ? 'https://play.google.com/store/account/subscriptions'
+              : 'https://apps.apple.com/account/subscriptions'
+            window.open(url, '_blank', 'noopener,noreferrer')
+          }}
+        >
+          🧾 Manage subscription
         </button>
         <button
           type="button"

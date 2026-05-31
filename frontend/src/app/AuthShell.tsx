@@ -57,6 +57,7 @@ export function AuthShell({ authUser, platform, theme, onToggleTheme, onAuthenti
   const [resetToken, setResetToken] = useState('')
   const [resendLoading, setResendLoading] = useState(false)
   const [resendSuccess, setResendSuccess] = useState(false)
+  const [acceptedTerms, setAcceptedTerms] = useState(false)
 
   useEffect(() => {
     function syncFromUrl() {
@@ -157,6 +158,10 @@ export function AuthShell({ authUser, platform, theme, onToggleTheme, onAuthenti
     }
     if (authMode === 'register' && authPassword !== authConfirmPassword) {
       setAuthError('Passwords do not match')
+      return
+    }
+    if (authMode === 'register' && !acceptedTerms) {
+      setAuthError('Please accept the Terms and Privacy Policy to continue.')
       return
     }
     setAuthSubmitting(true)
@@ -452,12 +457,23 @@ export function AuthShell({ authUser, platform, theme, onToggleTheme, onAuthenti
             {authError ? <p className="error-text">{authError}</p> : null}
 
             {authMode === 'register' ? (
-              <p className="auth-legal-text">
-                By creating an account you agree to our{' '}
-                <a href="/privacy/" target="_blank" rel="noopener noreferrer" className="auth-legal-link">
-                  Privacy Policy
-                </a>
-              </p>
+              <label className="auth-legal-checkbox">
+                <input
+                  type="checkbox"
+                  checked={acceptedTerms}
+                  onChange={(e) => setAcceptedTerms(e.target.checked)}
+                />
+                <span className="auth-legal-text">
+                  I agree to the{' '}
+                  <a href="/terms/" target="_blank" rel="noopener noreferrer" className="auth-legal-link">
+                    Terms
+                  </a>
+                  {' '}and{' '}
+                  <a href="/privacy/" target="_blank" rel="noopener noreferrer" className="auth-legal-link">
+                    Privacy Policy
+                  </a>
+                </span>
+              </label>
             ) : null}
             <button type="submit" className="auth-btn-primary" disabled={authSubmitting}>
               {authSubmitting ? 'Please wait...' : authMode === 'login' ? 'Log in' : 'Create account'}

@@ -148,6 +148,41 @@ export function PaywallSheet({ open, trigger, onClose }: Props) {
         <button type="button" className="paywall-sheet__free-fallback" onClick={onClose}>
           Continue with free — that's totally fine
         </button>
+
+        {/* Apple guideline 3.1.2 — required subscription disclosures shown
+            before the user can confirm a purchase. Plus link to manage
+            existing subscriptions through the App Store, since the app has
+            no in-app cancel button. */}
+        <p className="paywall-sheet__legal">
+          Subscriptions auto-renew until cancelled. Cancel anytime in{' '}
+          <a
+            href="https://apps.apple.com/account/subscriptions"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="paywall-sheet__legal-link"
+          >
+            Apple
+          </a>
+          {' '}or{' '}
+          <a
+            href="https://play.google.com/store/account/subscriptions"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="paywall-sheet__legal-link"
+          >
+            Google
+          </a>
+          {' '}Subscriptions. Trial converts to paid at the end of the 7-day
+          period unless cancelled. See{' '}
+          <a href="/terms/" target="_blank" rel="noopener noreferrer" className="paywall-sheet__legal-link">
+            Terms
+          </a>
+          {' '}and{' '}
+          <a href="/privacy/" target="_blank" rel="noopener noreferrer" className="paywall-sheet__legal-link">
+            Privacy
+          </a>
+          .
+        </p>
       </div>
     </div>
   )

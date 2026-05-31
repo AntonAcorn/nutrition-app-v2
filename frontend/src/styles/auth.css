@@ -81,6 +81,28 @@
   color: rgba(120, 180, 255, 0.7);
 }
 
+.auth-legal-checkbox {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  cursor: pointer;
+  padding: 4px 0;
+}
+
+.auth-legal-checkbox input[type="checkbox"] {
+  margin-top: 2px;
+  width: 16px;
+  height: 16px;
+  accent-color: #7b61ff;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.auth-legal-checkbox .auth-legal-text {
+  text-align: left;
+  line-height: 1.5;
+}
+
 .auth-label {
   display: grid;
   gap: 7px;

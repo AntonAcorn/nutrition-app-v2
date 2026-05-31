@@ -177,6 +177,21 @@
   text-underline-offset: 3px;
 }
 
+/* Apple-required subscription disclosures + cancel link. Kept small so it
+   doesn't compete with the plan buttons, but always present per 3.1.2. */
+.paywall-sheet__legal {
+  margin: 14px 0 0;
+  font-size: 0.72rem;
+  line-height: 1.5;
+  color: rgba(255, 255, 255, 0.42);
+  text-align: center;
+}
+
+.paywall-sheet__legal-link {
+  color: rgba(180, 200, 255, 0.7);
+  text-decoration: underline;
+}
+
 
 /* ── Founder Banner (Today) ──────────────────────────────────────────────── */
 .founder-banner {

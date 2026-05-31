@@ -9,7 +9,10 @@ import jakarta.validation.constraints.NotNull;
 import java.math.BigDecimal;
 
 public record CreateProfileRequest(
-    @NotNull @Min(10) @Max(120) Integer ageYears,
+    // Min 13: App Store age policy for health/nutrition apps + PIPEDA / COPPA
+    // baseline for accounts without parental consent. If you ever target a
+    // younger audience you'll need a separate consent flow.
+    @NotNull @Min(13) @Max(120) Integer ageYears,
     @NotBlank String gender,
     @NotNull @DecimalMin("100") @DecimalMax("250") BigDecimal heightCm,
     @NotNull @DecimalMin("30") @DecimalMax("300") BigDecimal startingWeightKg,
