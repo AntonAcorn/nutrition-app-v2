@@ -5,8 +5,8 @@
       "namespace": "android_app",
       "package_name": "com.aiduparc.rumblyeats",
       "sha256_cert_fingerprints": [
-        "REPLACE_WITH_UPLOAD_KEYSTORE_SHA256",
-        "REPLACE_WITH_PLAY_APP_SIGNING_SHA256"
+        "8C:F9:A3:EF:4F:68:85:F0:9F:05:E8:20:CB:3C:FE:4B:50:16:43:32:79:E9:1A:A4:78:7B:02:B9:4C:55:06:17",
+        "D1:F5:7E:82:87:D6:85:78:8E:A4:86:1E:8A:1D:76:66:71:A0:23:0A:37:39:4A:31:D5:43:D0:84:01:B8:9C:3F"
       ]
     }
   }
