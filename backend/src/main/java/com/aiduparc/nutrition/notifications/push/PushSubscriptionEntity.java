@@ -50,6 +50,9 @@ public class PushSubscriptionEntity {
     @Column(name = "notify_streak", nullable = false)
     private boolean notifyStreak = true;
 
+    @Column(name = "last_sent_at")
+    private OffsetDateTime lastSentAt;
+
     @Column(name = "created_at", nullable = false)
     private OffsetDateTime createdAt;
 
@@ -87,5 +90,7 @@ public class PushSubscriptionEntity {
     public void setNotifyBankWin(boolean v) { this.notifyBankWin = v; }
     public boolean isNotifyStreak() { return notifyStreak; }
     public void setNotifyStreak(boolean v) { this.notifyStreak = v; }
+    public OffsetDateTime getLastSentAt() { return lastSentAt; }
+    public void setLastSentAt(OffsetDateTime v) { this.lastSentAt = v; }
     public OffsetDateTime getCreatedAt() { return createdAt; }
 }
