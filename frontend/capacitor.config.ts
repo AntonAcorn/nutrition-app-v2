@@ -7,6 +7,12 @@ const config: CapacitorConfig = {
   server: {
     url: 'https://rumblyeats.org',
     cleartext: false,
+    // Without this, any same-origin link with target="_blank" would still
+    // bounce to Safari/Chrome. Explicitly keep all rumblyeats.org paths
+    // inside the WebView; subdomains (accounts.google.com, etc.) are
+    // intentionally NOT listed so OAuth providers still surface in the
+    // proper native browser sheet.
+    allowNavigation: ['rumblyeats.org', 'www.rumblyeats.org'],
   },
   plugins: {
     SplashScreen: {

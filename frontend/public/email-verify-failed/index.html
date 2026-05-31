@@ -44,8 +44,13 @@
   <div class="card">
     <div class="icon">⏱</div>
     <h1>Link expired</h1>
-    <p>This verification link is invalid or has expired (links are valid for 24 hours).<br/>Open the app and request a new one.</p>
-    <a href="/">Open app</a>
+    <p>This verification link is invalid or has expired (links are valid for 24 hours).<br/>Taking you back to the app to request a new one…</p>
+    <a href="/?verify_failed=1">Open app</a>
   </div>
+  <script>
+    setTimeout(function () {
+      window.location.replace('/?verify_failed=1');
+    }, 1800);
+  </script>
 </body>
 </html>

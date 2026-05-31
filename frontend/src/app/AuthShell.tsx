@@ -70,6 +70,21 @@ export function AuthShell({ authUser, platform, theme, onToggleTheme, onAuthenti
         return
       }
 
+      // After the static /email-verified/ page bounces back, the SPA picks
+      // up these flags so the user gets immediate feedback inside the app.
+      if (params.get('verified') === '1') {
+        setAuthSuccessMessage('Email verified! You can now log in.')
+        setAuthMode('login')
+        window.history.replaceState({}, '', window.location.pathname)
+        return
+      }
+      if (params.get('verify_failed') === '1') {
+        setAuthError('Verification link expired or invalid. Resend a new one below.')
+        setAuthMode('check-email')
+        window.history.replaceState({}, '', window.location.pathname)
+        return
+      }
+
       const googleError = params.get('google_error')
       if (googleError) {
         setAuthError('Google sign-in failed. Please try again.')
@@ -433,6 +448,7 @@ export function AuthShell({ authUser, platform, theme, onToggleTheme, onAuthenti
               </label>
             ) : null}
 
+            {authSuccessMessage ? <p className="success-text">{authSuccessMessage}</p> : null}
             {authError ? <p className="error-text">{authError}</p> : null}
 
             {authMode === 'register' ? (

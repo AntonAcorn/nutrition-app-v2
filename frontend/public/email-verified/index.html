@@ -44,8 +44,17 @@
   <div class="card">
     <div class="icon">✅</div>
     <h1>Email confirmed!</h1>
-    <p>Your account is now active. You can log in and start tracking.</p>
-    <a href="/">Open app</a>
+    <p>Taking you back to the app…</p>
+    <a href="/?verified=1">Open app</a>
   </div>
+  <script>
+    // If we land here it means Universal Links / App Links didn't catch the
+    // verify URL and the user finished in the browser. Bounce them back into
+    // the SPA so they don't get stranded on a static page; the SPA reads the
+    // verified=1 query and shows a toast.
+    setTimeout(function () {
+      window.location.replace('/?verified=1');
+    }, 1500);
+  </script>
 </body>
 </html>
