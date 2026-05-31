@@ -79,7 +79,22 @@ public class AuthAccountService {
 
     @Transactional
     public void linkGoogleId(AuthAccountEntity account, String googleId) {
+        boolean wasUnverified = !account.isEmailVerified();
         account.setGoogleId(googleId);
+        // Google has already verified the email — treat that as authoritative
+        // so a previously-unverified email/password account can recover via
+        // Google Sign-In without going through the verification flow again.
+        account.setEmailVerified(true);
+        account.setVerificationToken(null);
+        account.setVerificationTokenExpiresAt(null);
+        if (wasUnverified) {
+            // A pre-existing unverified account means someone registered with
+            // this email but never proved ownership. The password hash they
+            // set is suspect — invalidate it so they can't log in later with
+            // the password they chose pre-takeover. The real owner can set a
+            // new password via Forgot password, or just use Google Sign-In.
+            account.setPasswordHash(null);
+        }
         authAccountRepository.save(account);
     }
 
@@ -102,7 +117,18 @@ public class AuthAccountService {
 
     @Transactional
     public void linkAppleId(AuthAccountEntity account, String appleId) {
+        boolean wasUnverified = !account.isEmailVerified();
         account.setAppleId(appleId);
+        // Apple has already verified the email (or issued a private relay
+        // address) — treat that as authoritative.
+        account.setEmailVerified(true);
+        account.setVerificationToken(null);
+        account.setVerificationTokenExpiresAt(null);
+        if (wasUnverified) {
+            // Invalidate suspect password set on a never-verified account —
+            // see linkGoogleId for the takeover scenario this prevents.
+            account.setPasswordHash(null);
+        }
         authAccountRepository.save(account);
     }
 

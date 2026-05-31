@@ -128,7 +128,11 @@ public class AuthFacade {
         AuthAccountEntity account = authAccountService.findByGoogleId(googleUser.id())
             .orElseGet(() -> {
                 Optional<AuthAccountEntity> byEmail = authAccountService.findByEmail(googleUser.email());
-                if (byEmail.isPresent() && byEmail.get().isEmailVerified()) {
+                if (byEmail.isPresent()) {
+                    // Link to the existing local account regardless of its
+                    // prior verification state. Google has confirmed the
+                    // email, and creating a parallel account would crash on
+                    // the unique-email constraint.
                     authAccountService.linkGoogleId(byEmail.get(), googleUser.id());
                     return byEmail.get();
                 }
@@ -156,7 +160,7 @@ public class AuthFacade {
             .orElseGet(() -> {
                 if (appleUser.email() != null) {
                     Optional<AuthAccountEntity> byEmail = authAccountService.findByEmail(appleUser.email());
-                    if (byEmail.isPresent() && byEmail.get().isEmailVerified()) {
+                    if (byEmail.isPresent()) {
                         authAccountService.linkAppleId(byEmail.get(), appleUser.appleId());
                         return byEmail.get();
                     }
