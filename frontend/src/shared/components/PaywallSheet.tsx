@@ -1,6 +1,7 @@
 import { useEffect } from 'react'
 import { useEntitlement, useInvalidateEntitlement } from '../model/useEntitlement'
 import { trialDaysRemaining } from '../model/entitlementApi'
+import { track } from '../lib/analytics'
 
 interface Props {
   open: boolean
@@ -56,8 +57,14 @@ export function PaywallSheet({ open, trigger, onClose }: Props) {
   const invalidate = useInvalidateEntitlement()
 
   useEffect(() => {
-    if (open) invalidate()
-  }, [open, invalidate])
+    if (open) {
+      invalidate()
+      // Funnel event: paywall view. Trigger tells us which feature gate
+      // bounced the user here (photo/voice/coach) or whether they opened it
+      // themselves from the founder banner ("manual").
+      track('paywall_shown', { trigger })
+    }
+  }, [open, trigger, invalidate])
 
   if (!open) return null
 

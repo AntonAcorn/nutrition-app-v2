@@ -6,6 +6,7 @@ import com.aiduparc.nutrition.coach.service.CoachInsightService;
 import com.aiduparc.nutrition.coach.service.CoachRateLimitService;
 import com.aiduparc.nutrition.coach.service.CoachSnapshotService;
 import com.aiduparc.nutrition.coach.service.WeeklyRecapService;
+import com.aiduparc.nutrition.entitlement.service.EntitlementService;
 import com.aiduparc.nutrition.security.service.CurrentNutritionUserResolver;
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
@@ -38,6 +39,7 @@ public class CoachController {
     private final CoachInlineTipService inlineTipService;
     private final CoachGoalAdjustmentService goalAdjustmentService;
     private final CurrentNutritionUserResolver userResolver;
+    private final EntitlementService entitlementService;
 
     public CoachController(
         CoachSnapshotService coachSnapshotService,
@@ -46,7 +48,8 @@ public class CoachController {
         WeeklyRecapService weeklyRecapService,
         CoachInlineTipService inlineTipService,
         CoachGoalAdjustmentService goalAdjustmentService,
-        CurrentNutritionUserResolver userResolver
+        CurrentNutritionUserResolver userResolver,
+        EntitlementService entitlementService
     ) {
         this.coachSnapshotService = coachSnapshotService;
         this.coachInsightService = coachInsightService;
@@ -55,6 +58,7 @@ public class CoachController {
         this.inlineTipService = inlineTipService;
         this.goalAdjustmentService = goalAdjustmentService;
         this.userResolver = userResolver;
+        this.entitlementService = entitlementService;
     }
 
     @GetMapping("/snapshot")
@@ -78,6 +82,7 @@ public class CoachController {
         HttpSession session
     ) {
         UUID userId = userResolver.resolve(session);
+        entitlementService.assertCoachAccess(userId);
         ZoneId zone = CoachSnapshotService.resolveZone(tz);
         return coachInsightService.getOrGenerate(userId, today(date), windowDays(days), zone, locale);
     }
@@ -91,6 +96,7 @@ public class CoachController {
         HttpSession session
     ) {
         UUID userId = userResolver.resolve(session);
+        entitlementService.assertCoachAccess(userId);
         rateLimitService.checkRefreshLimit(userId);
         ZoneId zone = CoachSnapshotService.resolveZone(tz);
         return coachInsightService.refresh(userId, today(date), windowDays(days), zone, locale);
@@ -117,6 +123,7 @@ public class CoachController {
         HttpSession session
     ) {
         UUID userId = userResolver.resolve(session);
+        entitlementService.assertCoachAccess(userId);
         rateLimitService.checkRefreshLimit(userId);
         ZoneId zone = CoachSnapshotService.resolveZone(tz);
         return weeklyRecapService.generateForCurrentWeek(userId, today(date), zone, locale);
@@ -136,6 +143,7 @@ public class CoachController {
         HttpSession session
     ) {
         UUID userId = userResolver.resolve(session);
+        entitlementService.assertCoachAccess(userId);
         rateLimitService.checkRefreshLimit(userId);
         ZoneId zone = CoachSnapshotService.resolveZone(tz);
         return inlineTipService.compute(userId, request.kcal(), request.slotType(), zone);

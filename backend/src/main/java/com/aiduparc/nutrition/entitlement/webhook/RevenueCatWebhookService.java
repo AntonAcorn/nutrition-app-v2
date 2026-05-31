@@ -76,6 +76,19 @@ public class RevenueCatWebhookService {
                             userId, event.productId());
                 }
             }
+            case "REFUND" -> {
+                // RevenueCat fires REFUND when Apple/Google reverses a charge.
+                // Founder is non-renewing and intentionally not revoked here —
+                // we eat the cost rather than fight a refund + churn the user.
+                if (isFounderProduct(event.productId())) {
+                    log.warn("rc webhook founder refund ignored userId={} product={}",
+                            userId, event.productId());
+                } else {
+                    entitlementService.revokePro(userId);
+                    log.info("rc webhook pro refund revoked userId={} product={}",
+                            userId, event.productId());
+                }
+            }
             case "CANCELLATION", "EXPIRATION", "BILLING_ISSUE", "SUBSCRIBER_ALIAS",
                  "TRANSFER", "TEST" -> {
                 log.info("rc webhook ignored userId={} type={}", userId, event.type());

@@ -162,6 +162,22 @@ public class EntitlementService {
     }
 
     /**
+     * Coach insights, weekly recap, inline tips, and what-if are TRIAL/PRO/FOUNDER
+     * features. Without this guard the endpoints were callable on every account,
+     * letting a FREE user (or expired-trial user) keep hitting GPT-4 with zero
+     * revenue offset — a direct OpenAI bill leak. Frontend treats 402 as the
+     * paywall trigger.
+     */
+    public void assertCoachAccess(UUID userId) {
+        if (!paywallEnabled) return; // open-beta: everyone has access
+        var tier = tierOf(getOrBootstrap(userId));
+        if (!tier.hasCoachInsights()) {
+            throw new ResponseStatusException(HttpStatus.PAYMENT_REQUIRED,
+                "Coach is a Pro feature. Start your 7-day free trial to unlock it.");
+        }
+    }
+
+    /**
      * Updates Pro subscription expiry (called from RevenueCat webhook).
      */
     @Transactional
@@ -173,6 +189,19 @@ public class EntitlementService {
         }
         repository.save(entity);
         log.info("entitlement pro updated userId={} until={}", userId, until);
+    }
+
+    /**
+     * Immediately revoke Pro access — used on RevenueCat REFUND. We set
+     * pro_active_until to now-1s rather than null so analytics can still tell
+     * "had pro then refunded" apart from "never bought".
+     */
+    @Transactional
+    public void revokePro(UUID userId) {
+        var entity = getOrBootstrap(userId);
+        entity.setProActiveUntil(OffsetDateTime.now(ZoneOffset.UTC).minusSeconds(1));
+        repository.save(entity);
+        log.info("entitlement pro revoked userId={}", userId);
     }
 
     /**
