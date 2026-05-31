@@ -54,6 +54,26 @@ final class PushMessageVariants {
             "Streak is alive. Tomorrow's log keeps it that way.")
     );
 
+    // Used when the user hasn't logged for 3–6 days. Gentle, no shame.
+    private static final List<Message> REENGAGE_SHORT = List.of(
+        new Message("We miss you 💛",
+            "It's been a few days. One quick log gets you back in the rhythm."),
+        new Message("Coach noticed a quiet stretch",
+            "No judgement. Whenever you're ready, the app's here."),
+        new Message("Fresh start tonight?",
+            "Skip the catch-up. Today is enough.")
+    );
+
+    // 7+ days. Even lighter touch — usually a one-time nudge per gap.
+    private static final List<Message> REENGAGE_LONG = List.of(
+        new Message("Still rooting for you 💛",
+            "A week off is OK. The app's still here when you want it."),
+        new Message("Tiny win today?",
+            "One photo of dinner is enough — no streak pressure."),
+        new Message("Anytime, no pressure",
+            "Open the app, snap a meal, that's it. No catch-up needed.")
+    );
+
     private static final List<Message> STREAK_SAVE = List.of(
         new Message("🔥 Streak at risk",
             "Your %d-day streak ends at midnight without a log. 10 seconds saves it."),
@@ -66,6 +86,8 @@ final class PushMessageVariants {
     );
 
     static Message dailyLog()        { return pick(DAILY_LOG); }
+    static Message reengageShort()   { return pick(REENGAGE_SHORT); }
+    static Message reengageLong()    { return pick(REENGAGE_LONG); }
     static Message bankWin()         { return pick(BANK_WIN); }
     static Message streakMilestone(int days) {
         Message m = pick(STREAK_MILESTONE);

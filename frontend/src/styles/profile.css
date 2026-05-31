@@ -365,6 +365,68 @@
   cursor: pointer;
 }
 
+/* Smart reminder-time suggestion banner */
+.notif-suggestion {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 10px;
+  padding: 12px 14px;
+  background: linear-gradient(135deg, rgba(123, 97, 255, 0.14), rgba(123, 97, 255, 0.05));
+  border: 1px solid rgba(123, 97, 255, 0.35);
+  border-radius: 12px;
+}
+.notif-suggestion__main {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+.notif-suggestion__emoji { font-size: 1.1rem; }
+.notif-suggestion__title {
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: #ddd6fe;
+  margin: 0;
+}
+.notif-suggestion__desc {
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.55);
+  margin: 2px 0 0;
+  line-height: 1.4;
+}
+.notif-suggestion__actions {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+}
+.notif-suggestion__dismiss,
+.notif-suggestion__accept {
+  border: 0;
+  border-radius: 8px;
+  padding: 6px 14px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+.notif-suggestion__dismiss {
+  background: transparent;
+  color: rgba(255, 255, 255, 0.55);
+}
+.notif-suggestion__accept {
+  background: rgba(123, 97, 255, 0.85);
+  color: #fff;
+}
+.notif-suggestion__accept:disabled,
+.notif-suggestion__dismiss:disabled { opacity: 0.5; cursor: default; }
+
+[data-theme="light"] .notif-suggestion {
+  background: linear-gradient(135deg, rgba(123, 97, 255, 0.10), rgba(123, 97, 255, 0.04));
+  border-color: rgba(123, 97, 255, 0.30);
+}
+[data-theme="light"] .notif-suggestion__title { color: #6d28d9; }
+[data-theme="light"] .notif-suggestion__desc  { color: rgba(20, 33, 61, 0.55); }
+[data-theme="light"] .notif-suggestion__dismiss { color: rgba(20, 33, 61, 0.55); }
+
 /* Per-type toggles inside the notifications card */
 .notif-settings-types {
   display: flex;

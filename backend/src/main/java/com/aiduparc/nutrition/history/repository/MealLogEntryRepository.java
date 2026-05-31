@@ -29,6 +29,11 @@ public interface MealLogEntryRepository extends JpaRepository<MealLogEntryEntity
 
     Optional<MealLogEntryEntity> findTopByUserIdAndCreatedAtBeforeOrderByCreatedAtDesc(UUID userId, OffsetDateTime before);
 
+    /** Just the timestamps — used by the push reminder-time suggestion. */
+    @Query(value = "select created_at from meal_log_entries where user_id = :userId and created_at > :since",
+           nativeQuery = true)
+    List<OffsetDateTime> findCreatedAtByUserIdSince(@Param("userId") UUID userId, @Param("since") OffsetDateTime since);
+
     @Query(value = """
         select
             name,

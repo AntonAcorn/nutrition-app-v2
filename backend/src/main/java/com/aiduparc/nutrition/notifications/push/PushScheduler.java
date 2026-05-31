@@ -132,7 +132,13 @@ public class PushScheduler {
                     && sub.isNotifyStreak()
                     && sub.getReminderHour() < STREAK_SAVE_HOUR;
             if (!willSaveLater && sub.isNotifyDailyLog()) {
-                picked = PushMessageVariants.dailyLog();
+                // Switch tone based on how long they've been away. Three to six
+                // days = gentle re-engagement; a full week or more = lightest
+                // touch so we don't push someone further away.
+                int gap = daysSinceLastLog(sub.getUserId(), today);
+                if (gap >= 7) picked = PushMessageVariants.reengageLong();
+                else if (gap >= 3) picked = PushMessageVariants.reengageShort();
+                else picked = PushMessageVariants.dailyLog();
             }
         }
         if (picked != null) deliverAndStamp(sub, picked);
@@ -168,6 +174,24 @@ public class PushScheduler {
 
     private static boolean isQuietHour(int localHour) {
         return localHour >= QUIET_HOURS_START || localHour < QUIET_HOURS_END;
+    }
+
+    /**
+     * Returns how many days ago the user last logged a meal (>0 kcal). Caps
+     * at 30 — anything beyond that just means "way back", we don't need a
+     * precise number to decide which re-engagement tone to use.
+     */
+    private int daysSinceLastLog(UUID userId, LocalDate today) {
+        for (int gap = 1; gap <= 30; gap++) {
+            LocalDate date = today.minusDays(gap);
+            boolean hasEntry = nutritionEntryRepository
+                    .findByUserIdAndEntryDate(userId, date)
+                    .map(e -> e.getCaloriesConsumedKcal() != null
+                            && e.getCaloriesConsumedKcal().compareTo(BigDecimal.ZERO) > 0)
+                    .orElse(false);
+            if (hasEntry) return gap;
+        }
+        return 30;
     }
 
     private int calculateStreak(UUID userId, LocalDate today) {

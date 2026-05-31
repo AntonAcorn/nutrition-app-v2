@@ -31,6 +31,15 @@ export function getSubscriptionStatus(): Promise<PushSubscriptionStatus> {
   return apiClient.get<PushSubscriptionStatus>('/api/push/subscription')
 }
 
+export interface SuggestedHour {
+  suggestedHour: number | null
+  basedOnLogs: number
+}
+
+export function getSuggestedReminderHour(): Promise<SuggestedHour> {
+  return apiClient.get<SuggestedHour>('/api/push/suggested-reminder-hour')
+}
+
 async function subscribeNative(reminderHour: number): Promise<PushSubscriptionStatus> {
   const { Capacitor } = await import('@capacitor/core')
   const { PushNotifications } = await import('@capacitor/push-notifications')

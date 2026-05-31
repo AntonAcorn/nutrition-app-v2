@@ -14,13 +14,32 @@ public class PushSubscriptionController {
 
     private final PushSubscriptionRepository repository;
     private final CurrentNutritionUserResolver currentNutritionUserResolver;
+    private final PushTimeSuggestionService timeSuggestion;
 
     public PushSubscriptionController(
             PushSubscriptionRepository repository,
-            CurrentNutritionUserResolver currentNutritionUserResolver
+            CurrentNutritionUserResolver currentNutritionUserResolver,
+            PushTimeSuggestionService timeSuggestion
     ) {
         this.repository = repository;
         this.currentNutritionUserResolver = currentNutritionUserResolver;
+        this.timeSuggestion = timeSuggestion;
+    }
+
+    @GetMapping("/suggested-reminder-hour")
+    public PushTimeSuggestionService.Suggestion suggestedHour(HttpSession session) {
+        java.util.UUID userId = currentNutritionUserResolver.resolve(session);
+        return repository.findByUserId(userId).stream().findFirst()
+                .map(s -> timeSuggestion.compute(
+                        userId,
+                        safeZone(s.getTimezone()),
+                        s.getReminderHour()))
+                .orElseGet(timeSuggestion::empty);
+    }
+
+    private static java.time.ZoneId safeZone(String tz) {
+        try { return java.time.ZoneId.of(tz); }
+        catch (Exception e) { return java.time.ZoneOffset.UTC; }
     }
 
     @GetMapping("/subscription")

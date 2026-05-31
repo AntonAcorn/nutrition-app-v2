@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { getSubscriptionStatus, subscribePush, unsubscribePush, updatePushSettings, isPushSupported } from '../model/pushApi'
+import { getSubscriptionStatus, subscribePush, unsubscribePush, updatePushSettings, isPushSupported, getSuggestedReminderHour } from '../model/pushApi'
 import type { PushSubscriptionStatus } from '../model/pushApi'
 
 const HOURS = Array.from({ length: 24 }, (_, i) => i)
@@ -25,6 +25,8 @@ export function NotificationSettings() {
   const [saving, setSaving] = useState(false)
   const [supported, setSupported] = useState(false)
   const [error, setError] = useState('')
+  const [suggestedHour, setSuggestedHour] = useState<number | null>(null)
+  const [dismissedSuggestion, setDismissedSuggestion] = useState(false)
 
   useEffect(() => {
     isPushSupported().then(s => {
@@ -36,6 +38,35 @@ export function NotificationSettings() {
         .finally(() => setLoading(false))
     })
   }, [])
+
+  // Fetch a smarter reminder time once we know push is on. Don't pester the
+  // user if backend has nothing to suggest (median ≈ current) or if they've
+  // already dismissed it this session.
+  useEffect(() => {
+    if (!status?.subscribed || dismissedSuggestion) {
+      setSuggestedHour(null)
+      return
+    }
+    getSuggestedReminderHour()
+      .then(r => setSuggestedHour(r.suggestedHour))
+      .catch(() => setSuggestedHour(null))
+  }, [status?.subscribed, dismissedSuggestion])
+
+  async function applySuggestion(hour: number) {
+    if (!status?.subscribed) return
+    setSaving(true)
+    setError('')
+    try {
+      const next = await updatePushSettings(status.enabled, hour)
+      setStatus(next)
+      setReminderHour(hour)
+      setSuggestedHour(null)
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Failed to save')
+    } finally {
+      setSaving(false)
+    }
+  }
 
   async function handleEnable() {
     setError('')
@@ -149,6 +180,40 @@ export function NotificationSettings() {
             {saving ? '...' : isOn ? 'On' : 'Off'}
           </button>
         </div>
+
+        {isOn && suggestedHour !== null && suggestedHour !== reminderHour && (
+          <div className="notif-suggestion">
+            <div className="notif-suggestion__main">
+              <span className="notif-suggestion__emoji" aria-hidden>💡</span>
+              <div>
+                <p className="notif-suggestion__title">
+                  Switch reminder to {formatHour(suggestedHour)}?
+                </p>
+                <p className="notif-suggestion__desc">
+                  Based on when you usually log over the last two weeks.
+                </p>
+              </div>
+            </div>
+            <div className="notif-suggestion__actions">
+              <button
+                type="button"
+                className="notif-suggestion__dismiss"
+                onClick={() => setDismissedSuggestion(true)}
+                disabled={saving}
+              >
+                Dismiss
+              </button>
+              <button
+                type="button"
+                className="notif-suggestion__accept"
+                onClick={() => applySuggestion(suggestedHour)}
+                disabled={saving}
+              >
+                {saving ? '...' : 'Switch'}
+              </button>
+            </div>
+          </div>
+        )}
 
         {isOn && (
           <>
