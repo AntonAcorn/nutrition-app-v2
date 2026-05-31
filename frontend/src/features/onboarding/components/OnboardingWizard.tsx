@@ -54,25 +54,34 @@ export function OnboardingWizard({ onComplete }: Props) {
     setCoachFocus(prev => prev.includes(tag) ? prev.filter(t => t !== tag) : [...prev, tag])
   }
 
+  function inRange(value: string, min: number, max: number): boolean {
+    if (!value) return false
+    const n = Number(value)
+    return Number.isFinite(n) && n >= min && n <= max
+  }
+
   function canAdvanceStep1() {
-    return ageYears && gender && heightCm
+    return inRange(ageYears, 10, 120) && gender && inRange(heightCm, 100, 250)
   }
 
   function missingStep1() {
     const missing = []
     if (!ageYears) missing.push('age')
+    else if (!inRange(ageYears, 10, 120)) missing.push('age (10–120)')
     if (!gender) missing.push('gender')
     if (!heightCm) missing.push('height')
+    else if (!inRange(heightCm, 100, 250)) missing.push('height (100–250 cm)')
     return missing
   }
 
   function canAdvanceStep2() {
-    return startingWeightKg && activityLevel
+    return inRange(startingWeightKg, 30, 300) && activityLevel
   }
 
   function missingStep2() {
     const missing = []
     if (!startingWeightKg) missing.push('weight')
+    else if (!inRange(startingWeightKg, 30, 300)) missing.push('weight (30–300 kg)')
     if (!activityLevel) missing.push('activity level')
     return missing
   }
