@@ -1,0 +1,16 @@
+{
+  "applinks": {
+    "apps": [],
+    "details": [
+      {
+        "appID": "REPLACE_WITH_TEAM_ID.com.aiduparc.rumblyeats",
+        "paths": [
+          "/api/auth/verify*",
+          "/email-verified*",
+          "/email-verify-failed*",
+          "/*reset_token*"
+        ]
+      }
+    ]
+  }
+}

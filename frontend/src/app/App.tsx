@@ -122,6 +122,56 @@ function AppInner() {
     return () => window.removeEventListener(UNAUTHORIZED_EVENT, onUnauthorized)
   }, [])
 
+  // Universal Links (iOS) / App Links (Android): when the OS hands us an
+  // rumblyeats.org URL (email verification or password reset link tapped from
+  // Gmail / Mail), Capacitor fires appUrlOpen. We translate it into in-app
+  // state so the user never bounces out to the browser.
+  useEffect(() => {
+    let cleanup: (() => void) | undefined
+    async function setup() {
+      try {
+        const { Capacitor } = await import('@capacitor/core')
+        if (!Capacitor.isNativePlatform()) return
+        const { App: CapApp } = await import('@capacitor/app')
+        const listener = await CapApp.addListener('appUrlOpen', async (event) => {
+          try {
+            const url = new URL(event.url)
+            // Email verification: hit the API ourselves so the session in the
+            // app is the one that gets the verified flag, then refetch /me.
+            if (url.pathname === '/api/auth/verify' && url.searchParams.get('token')) {
+              await fetch(url.toString(), { credentials: 'include' }).catch(() => {})
+              try {
+                const me = await fetchMe()
+                setAuthUser(me)
+                if (me.authenticated && me.nutritionUserId) {
+                  identifyUser(me.nutritionUserId)
+                  Sentry.setUser({ id: me.nutritionUserId, email: me.email ?? undefined })
+                }
+              } catch {}
+              return
+            }
+            // Password reset: surface the token so AuthShell shows the
+            // reset-password form. We push it into the URL bar and reload
+            // the SPA's URL parsing path.
+            const resetToken = url.searchParams.get('reset_token')
+            if (resetToken) {
+              window.history.replaceState({}, '', `/?reset_token=${encodeURIComponent(resetToken)}`)
+              window.dispatchEvent(new PopStateEvent('popstate'))
+              return
+            }
+          } catch {
+            // Malformed URL — nothing to do.
+          }
+        })
+        cleanup = () => { listener.remove() }
+      } catch {
+        // @capacitor/app not available (e.g. running in plain web)
+      }
+    }
+    setup()
+    return () => { cleanup?.() }
+  }, [])
+
   async function handleLogout() {
     await logout()
     resetAnalyticsUser()

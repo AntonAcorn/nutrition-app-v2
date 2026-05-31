@@ -59,21 +59,29 @@ export function AuthShell({ authUser, platform, theme, onToggleTheme, onAuthenti
   const [resendSuccess, setResendSuccess] = useState(false)
 
   useEffect(() => {
-    const params = new URLSearchParams(window.location.search)
+    function syncFromUrl() {
+      const params = new URLSearchParams(window.location.search)
 
-    const token = params.get('reset_token')
-    if (token) {
-      setResetToken(token)
-      setAuthMode('reset-password')
-      window.history.replaceState({}, '', window.location.pathname)
-      return
-    }
+      const token = params.get('reset_token')
+      if (token) {
+        setResetToken(token)
+        setAuthMode('reset-password')
+        window.history.replaceState({}, '', window.location.pathname)
+        return
+      }
 
-    const googleError = params.get('google_error')
-    if (googleError) {
-      setAuthError('Google sign-in failed. Please try again.')
-      window.history.replaceState({}, '', window.location.pathname)
+      const googleError = params.get('google_error')
+      if (googleError) {
+        setAuthError('Google sign-in failed. Please try again.')
+        window.history.replaceState({}, '', window.location.pathname)
+      }
     }
+    syncFromUrl()
+    // App.tsx fires popstate after handling a Universal Link / App Link so we
+    // re-evaluate the URL and pick up a reset_token that arrived while the
+    // auth shell was already mounted.
+    window.addEventListener('popstate', syncFromUrl)
+    return () => window.removeEventListener('popstate', syncFromUrl)
   }, [])
 
   async function handleGoogleSignInNative() {

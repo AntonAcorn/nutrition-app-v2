@@ -12,5 +12,9 @@
 	<array>
 		<string>Default</string>
 	</array>
+	<key>com.apple.developer.associated-domains</key>
+	<array>
+		<string>applinks:rumblyeats.org</string>
+	</array>
 </dict>
 </plist>

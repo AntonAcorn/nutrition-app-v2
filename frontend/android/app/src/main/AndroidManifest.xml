@@ -23,6 +23,34 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
 
+            <!--
+                App Links: when the user taps an https://rumblyeats.org link
+                from email / Slack / anywhere, Android opens this activity
+                directly instead of bouncing through Chrome.
+                autoVerify="true" makes Android fetch
+                /.well-known/assetlinks.json on first install and skip the
+                "Open with" chooser when the SHA-256 matches the upload or
+                Play app-signing certificate listed there.
+            -->
+            <intent-filter android:autoVerify="true">
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="https" />
+                <data android:host="rumblyeats.org" />
+                <data android:pathPrefix="/api/auth/verify" />
+                <data android:pathPrefix="/email-verified" />
+                <data android:pathPrefix="/email-verify-failed" />
+            </intent-filter>
+            <intent-filter android:autoVerify="true">
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="https" />
+                <data android:host="rumblyeats.org" />
+                <data android:pathPattern="/.*reset_token.*" />
+            </intent-filter>
+
         </activity>
 
         <provider
