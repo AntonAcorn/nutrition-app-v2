@@ -370,6 +370,7 @@ export function PhotoMode({
           value={userNote}
           onChange={(e) => setUserNote(e.target.value)}
           rows={2}
+          maxLength={500}
           placeholder="e.g. small portion, no oil, with feta"
           className={`photo-staging__textarea${noteRecording ? ' note-textarea--recording' : ''}`}
         />

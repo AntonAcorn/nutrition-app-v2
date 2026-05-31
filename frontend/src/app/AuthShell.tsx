@@ -124,6 +124,10 @@ export function AuthShell({ authUser, platform, theme, onToggleTheme, onAuthenti
       setAuthError('Please enter your password.')
       return
     }
+    if (authMode === 'register' && authPassword.length < 8) {
+      setAuthError('Password must be at least 8 characters.')
+      return
+    }
     if (authMode === 'register' && !authDisplayName.trim()) {
       setAuthError('Please enter your name.')
       return
@@ -180,6 +184,10 @@ export function AuthShell({ authUser, platform, theme, onToggleTheme, onAuthenti
 
   async function handleResetPassword(event?: FormEvent<HTMLFormElement>) {
     event?.preventDefault()
+    if (authPassword.length < 8) {
+      setAuthError('Password must be at least 8 characters.')
+      return
+    }
     if (authPassword !== authConfirmPassword) {
       setAuthError('Passwords do not match')
       return

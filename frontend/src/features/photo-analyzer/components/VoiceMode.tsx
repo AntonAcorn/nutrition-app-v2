@@ -313,6 +313,7 @@ export function VoiceMode({
           value={transcript}
           onChange={(e) => setTranscript(e.target.value)}
           rows={5}
+          maxLength={2000}
           placeholder="e.g. I had a bowl of oatmeal with banana and a cup of coffee"
           className={recording ? 'note-textarea--recording' : ''}
         />

@@ -75,13 +75,17 @@ export function OnboardingWizard({ onComplete }: Props) {
   }
 
   function canAdvanceStep2() {
-    return inRange(startingWeightKg, 30, 300) && activityLevel
+    if (!inRange(startingWeightKg, 30, 300)) return false
+    // targetWeightKg is optional, but if provided it must be in range.
+    if (targetWeightKg && !inRange(targetWeightKg, 30, 300)) return false
+    return !!activityLevel
   }
 
   function missingStep2() {
     const missing = []
     if (!startingWeightKg) missing.push('weight')
     else if (!inRange(startingWeightKg, 30, 300)) missing.push('weight (30–300 kg)')
+    if (targetWeightKg && !inRange(targetWeightKg, 30, 300)) missing.push('target weight (30–300 kg)')
     if (!activityLevel) missing.push('activity level')
     return missing
   }
