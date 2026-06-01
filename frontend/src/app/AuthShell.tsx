@@ -390,7 +390,7 @@ export function AuthShell({ authUser, platform, theme, onToggleTheme, onAuthenti
                   autoComplete="name"
                   value={authDisplayName}
                   onChange={(event) => setAuthDisplayName(event.target.value)}
-                  placeholder="Anton"
+                  placeholder="Your name"
                 />
               </label>
             ) : null}
