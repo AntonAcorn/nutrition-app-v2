@@ -68,15 +68,6 @@ nutrition:
     # Pick a long random string and store in a password manager. Leaving it
     # blank disables the endpoints entirely (they 503).
     token: ${NUTRITION_ADMIN_TOKEN:}
-  paywall:
-    # Master switch — set true to flip from open-beta to real monetisation.
-    enabled: ${PAYWALL_ENABLED:false}
-    # ISO-8601 timestamp of when the paywall went live. Used to grandfather
-    # existing beta users: anyone whose trial expired BEFORE this date gets
-    # a fresh 7-day trial computed from launch instead of dropping straight
-    # to FREE. Leave blank during open beta; set when flipping enabled=true.
-    # Example: 2026-06-15T00:00:00Z
-    launched-at: ${PAYWALL_LAUNCHED_AT:}
   auth:
     google-client-id: ${GOOGLE_CLIENT_ID:}
     google-client-secret: ${GOOGLE_CLIENT_SECRET:}
@@ -99,6 +90,12 @@ nutrition:
     # PaywallSheet never opens, FounderBanner hides. RevenueCat infrastructure
     # stays in code, ready to flip back on. See memory/project_monetization.md.
     enabled: ${PAYWALL_ENABLED:false}
+    # ISO-8601 timestamp of when the paywall went live. Used to grandfather
+    # existing beta users: anyone whose trial expired BEFORE this date gets
+    # a fresh 7-day trial computed from launch instead of dropping straight
+    # to FREE. Leave blank during open beta; set when flipping enabled=true.
+    # Example: 2026-06-15T00:00:00Z
+    launched-at: ${PAYWALL_LAUNCHED_AT:}
   revenuecat:
     # Shared "Authorization" header value RevenueCat sends with every webhook.
     # Configure it in RevenueCat dashboard -> Project -> Integrations -> Webhooks.
