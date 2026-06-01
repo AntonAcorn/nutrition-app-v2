@@ -1,10 +1,10 @@
 package com.aiduparc.nutrition.notifications.push;
 
 import com.aiduparc.nutrition.history.repository.MealLogEntryRepository;
+import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
-import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 import org.springframework.stereotype.Service;
@@ -36,11 +36,11 @@ public class PushTimeSuggestionService {
 
     public Suggestion compute(UUID userId, ZoneId zone, int currentReminderHour) {
         OffsetDateTime since = OffsetDateTime.now(ZoneOffset.UTC).minusDays(LOOKBACK_DAYS);
-        List<OffsetDateTime> times = mealRepo.findCreatedAtByUserIdSince(userId, since);
+        List<Instant> times = mealRepo.findCreatedAtByUserIdSince(userId, since);
         if (times.size() < MIN_LOGS) return new Suggestion(null, times.size());
 
         List<Integer> hours = times.stream()
-                .map(ts -> ts.atZoneSameInstant(zone).getHour())
+                .map(ts -> ts.atZone(zone).getHour())
                 .sorted()
                 .toList();
         // Use the dinner-time biased median: meals cluster at noon and 7pm, so
@@ -62,13 +62,5 @@ public class PushTimeSuggestionService {
 
     public Suggestion empty() {
         return new Suggestion(null, 0);
-    }
-
-    public Suggestion emptyWithCount(int count) {
-        return new Suggestion(null, count);
-    }
-
-    public static List<OffsetDateTime> emptyList() {
-        return Collections.emptyList();
     }
 }

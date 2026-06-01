@@ -29,10 +29,16 @@ public interface MealLogEntryRepository extends JpaRepository<MealLogEntryEntity
 
     Optional<MealLogEntryEntity> findTopByUserIdAndCreatedAtBeforeOrderByCreatedAtDesc(UUID userId, OffsetDateTime before);
 
-    /** Just the timestamps — used by the push reminder-time suggestion. */
+    /**
+     * Just the timestamps — used by the push reminder-time suggestion.
+     * Returns {@link java.time.Instant} because that's what the Postgres JDBC
+     * driver hands back for TIMESTAMPTZ on this Spring Boot version, and
+     * there's no auto-converter to {@code OffsetDateTime} for native query
+     * result types.
+     */
     @Query(value = "select created_at from meal_log_entries where user_id = :userId and created_at > :since",
            nativeQuery = true)
-    List<OffsetDateTime> findCreatedAtByUserIdSince(@Param("userId") UUID userId, @Param("since") OffsetDateTime since);
+    List<java.time.Instant> findCreatedAtByUserIdSince(@Param("userId") UUID userId, @Param("since") OffsetDateTime since);
 
     @Query(value = """
         select
