@@ -39,6 +39,14 @@ public record OpenAiPhotoAnalysisPrompt(
                         "Sauces, cream, oil, and dressing on a finished dish are easy to miss but typically add 100-300 kcal per dish.",
                         "Do not default to very low calories when the image suggests oil, sauce, frying, cheese, nuts, or dense carbs.",
 
+                        // High-density components that are commonly under-counted.
+                        // Each rule names a specific failure mode the model has made on real photos.
+                        "Processed meats are calorie-dense (kielbasa, salami, bacon, sausage, chorizo: 250-400 kcal per 100 g). When sliced into a dish, even a small visible amount often weighs 50-80 g and contributes 200-300 kcal — count it explicitly, not as 'a few pieces'.",
+                        "When meat was fried or sauteed in the dish, add a separate 'rendered fat / cooking oil' item with 100-150 kcal — the dish absorbs the fat whether or not free oil is still visible.",
+                        "Cheese melted INTO a dish (omelet, casserole, scramble, pasta) disappears visually but stays in the calories. If the dish looks creamy or glossy yellow, or if a yellow stringy texture is visible inside the eggs/pasta, assume 20-40 g of melted cheese (80-160 kcal).",
+                        "Glossy / creamy / shiny finish on eggs, chicken, or pasta usually means added butter, cream, or sour cream — add 30-80 kcal for the implicit sauce.",
+                        "Scrambled-egg or omelet servings on a plate are almost always 2-3 eggs (150-220 kcal base) plus whatever was cooked in. A single-egg portion is uncommon and looks much smaller than people picture.",
+
                         // User note overrides visual.
                         "If userNote mentions portion size, preparation method, or extra ingredients - prioritize that information over the visual estimate.",
 
