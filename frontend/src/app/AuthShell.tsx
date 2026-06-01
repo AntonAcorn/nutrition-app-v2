@@ -109,8 +109,17 @@ export function AuthShell({ authUser, platform, theme, onToggleTheme, onAuthenti
       trackUser(nextUser)
       onAuthenticated(nextUser)
     } catch (e) {
-      if (e instanceof Error && !e.message.includes('canceled')) {
-        setAuthError(e instanceof Error ? e.message : 'Google Sign In failed')
+      const msg = e instanceof Error ? e.message : ''
+      if (msg.includes('canceled')) return
+      // The native GoogleSignIn plugin is bundled into the APK / IPA. If the
+      // currently-installed build predates the plugin (true for any device
+      // running an APK from before this feature shipped), Capacitor surfaces
+      // "Plugin 'GoogleSignIn' is not implemented on <platform>". Translate
+      // that into a clearer next-step message instead of a stack-trace string.
+      if (msg.toLowerCase().includes('not implemented')) {
+        setAuthError('Google Sign-In needs an updated app version. Open the App Store / Play Store and update Rumbly Eats, then try again. You can use email or password sign-in in the meantime.')
+      } else {
+        setAuthError(msg || 'Google Sign In failed')
       }
     } finally {
       setAuthSubmitting(false)
@@ -125,8 +134,13 @@ export function AuthShell({ authUser, platform, theme, onToggleTheme, onAuthenti
       trackUser(nextUser)
       onAuthenticated(nextUser)
     } catch (e) {
-      if (e instanceof Error && !e.message.includes('AuthorizationError error 1001')) {
-        setAuthError(e instanceof Error ? e.message : 'Apple Sign In failed')
+      const msg = e instanceof Error ? e.message : ''
+      // 1001 = user cancelled the Apple Sign-In sheet; not an error to show.
+      if (msg.includes('AuthorizationError error 1001')) return
+      if (msg.toLowerCase().includes('not implemented')) {
+        setAuthError('Apple Sign-In needs an updated app version. Open the App Store and update Rumbly Eats, then try again.')
+      } else {
+        setAuthError(msg || 'Apple Sign In failed')
       }
     } finally {
       setAuthSubmitting(false)
