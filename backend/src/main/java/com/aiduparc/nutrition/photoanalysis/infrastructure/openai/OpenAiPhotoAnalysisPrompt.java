@@ -22,37 +22,58 @@ public record OpenAiPhotoAnalysisPrompt(
                         "If locale is ru, write food names, notes, and portion wording in Russian.",
 
                         // Anti-underestimate framing. GPT vision has a documented
-                        // systematic bias toward under-estimating real-world portions
-                        // by 15-30%; we counter-frame explicitly.
+                        // ~15-30% downward bias on real-world portions; counter
+                        // it explicitly so the model knows which way to lean.
                         "CRITICAL: Underestimation is the most common failure mode for visual nutrition analysis. When uncertain between two plausible estimates, pick the HIGHER one. A normal-looking dinner that comes out under 400 kcal is almost certainly wrong.",
-                        "Anchor against typical serving ranges as sanity checks: home-cooked dinner plate 600-1000 kcal; restaurant entree 800-1500 kcal; bowl of pasta with sauce 500-900 kcal; sandwich 400-700 kcal; breakfast plate 400-800 kcal; full bowl of soup 250-500 kcal; piece of cake 350-600 kcal.",
 
-                        // Calibration.
-                        "Use surrounding objects (fork, hand, plate rim, glass) to calibrate portion size. If no reference is visible, assume a realistic everyday adult serving.",
-                        "Write estimated portion explicitly in estimatedPortion, for example '180 г', '1 тарелка', '2 куска'.",
-                        "For mixed or composite dishes (soups, stews, pasta, rice dishes, salads), estimate all visible ingredients separately then sum into totals.",
-                        "Estimate calories, protein, carbs, fat, and fiber for the visible portion, not for a tiny tasting portion.",
-                        "Bread, rice, pasta, potatoes, and other grains usually weigh more cooked than they look — a bowl of rice that looks like 150 g is often 250-300 g cooked.",
+                        // Forced per-item breakdown. Models follow enumerated
+                        // procedures better than abstract instructions like
+                        // "estimate carefully" — we make the math explicit.
+                        "Method (follow for every dish, do not skip steps):",
+                        "1. List every visible component as its own item, with explicit weight in grams (estimatedPortion = '60 г' etc).",
+                        "2. For each item, recall the typical calorie density (kcal per 100 g) from the reference table below and multiply by weight.",
+                        "3. Add separate items for invisible-but-implied components: cooking oil if fried / sauteed, melted cheese if the dish looks creamy yellow, dressing if salad looks glossy, sugar if glazed.",
+                        "4. Sum all items into totals. Cross-check against the meal-type anchor below — if totals fall outside the band, re-examine portion sizes upward.",
 
-                        // Hidden-calorie checklist.
-                        "Include hidden calories that are visually subtle even when not the focal point: cooking oil absorbed during frying or sauteing (10-30 g per dish, 90-270 kcal), butter on bread (5-10 g, 35-70 kcal), salad dressing (15-30 g, 100-200 kcal), mayonnaise in sandwiches (10-20 g, 70-140 kcal), cheese melted on top, cream in soups and pasta sauces, sugar in glazes and marinades, syrup on pancakes or waffles (30-60 g, 100-200 kcal).",
-                        "Sauces, cream, oil, and dressing on a finished dish are easy to miss but typically add 100-300 kcal per dish.",
-                        "Do not default to very low calories when the image suggests oil, sauce, frying, cheese, nuts, or dense carbs.",
+                        // Density reference. ONE table that covers most failure
+                        // modes — replaces a long list of per-dish rules.
+                        "Calorie density reference (kcal per 100 g cooked weight unless noted):",
+                        "  • Lean meat (chicken breast, turkey, white fish): 100-150",
+                        "  • Fatty meat / oily fish (beef, pork, salmon, mackerel): 200-300",
+                        "  • Processed meat (sausage, kielbasa, salami, bacon, chorizo, ham): 250-400",
+                        "  • Cheese (most varieties): 300-400",
+                        "  • Eggs: 145 (one large egg ≈ 70 kcal, 50 g)",
+                        "  • Bread: 250-300",
+                        "  • Cooked pasta / rice / grains: 130-180",
+                        "  • Potato (boiled): 90, fried: 250-350",
+                        "  • Cooked beans / lentils: 100-130",
+                        "  • Vegetables (most): 20-50",
+                        "  • Fruits: 40-80; bananas / grapes: 90",
+                        "  • Nuts: 550-650",
+                        "  • Avocado: 160",
+                        "  • Oil / butter / ghee: 700-900",
+                        "  • Sour cream / heavy cream: 200-340",
+                        "  • Mayo / aioli: 600-700",
+                        "  • Sugar-sweetened sauces (ketchup, BBQ, sweet chili): 100-250",
+                        "  • Soda / sweetened drinks: 40-50 (per 100 ml)",
 
-                        // High-density components that are commonly under-counted.
-                        // Each rule names a specific failure mode the model has made on real photos.
-                        "Processed meats are calorie-dense (kielbasa, salami, bacon, sausage, chorizo: 250-400 kcal per 100 g). When sliced into a dish, even a small visible amount often weighs 50-80 g and contributes 200-300 kcal — count it explicitly, not as 'a few pieces'.",
-                        "When meat was fried or sauteed in the dish, add a separate 'rendered fat / cooking oil' item with 100-150 kcal — the dish absorbs the fat whether or not free oil is still visible.",
-                        "Cheese melted INTO a dish (omelet, casserole, scramble, pasta) disappears visually but stays in the calories. If the dish looks creamy or glossy yellow, or if a yellow stringy texture is visible inside the eggs/pasta, assume 20-40 g of melted cheese (80-160 kcal).",
-                        "Glossy / creamy / shiny finish on eggs, chicken, or pasta usually means added butter, cream, or sour cream — add 30-80 kcal for the implicit sauce.",
-                        "Scrambled-egg or omelet servings on a plate are almost always 2-3 eggs (150-220 kcal base) plus whatever was cooked in. A single-egg portion is uncommon and looks much smaller than people picture.",
+                        // Sanity anchors.
+                        "Meal-type sanity anchors (use as cross-check after summing): home-cooked dinner plate 600-1000 kcal; restaurant entree 800-1500; bowl of pasta with sauce 500-900; sandwich 400-700; breakfast plate 400-800; full bowl of soup 250-500; piece of cake 350-600.",
+
+                        // Portion calibration.
+                        "Use surrounding objects (fork, hand, plate rim, glass) to calibrate portion size. If no reference is visible, assume a realistic everyday adult serving — not a tasting portion.",
+                        "Bread, rice, pasta, potatoes, and other grains usually weigh more cooked than they look — a bowl that looks like 150 g is often 250-300 g cooked.",
+
+                        // Invisible-but-implied additions.
+                        "Whenever the dish appears fried, sauteed, or roasted with meat, add a separate 'cooking oil / rendered fat' item ~15-25 g (130-220 kcal). The dish absorbs fat whether or not free oil is visible.",
+                        "Whenever the dish has a creamy / glossy / shiny finish on eggs, chicken, pasta, or vegetables, add an implied sauce item (butter, cream, sour cream, or melted cheese) ~20-40 g (80-200 kcal).",
 
                         // User note overrides visual.
-                        "If userNote mentions portion size, preparation method, or extra ingredients - prioritize that information over the visual estimate.",
+                        "If userNote mentions portion size, preparation method, or extra ingredients — prioritize that information over the visual estimate.",
 
                         // Output format.
                         "Return JSON only, matching the schema with items, totals, confidence, notes, needsUserConfirmation.",
-                        "Each item must contain name, estimatedPortion, calories, protein, carbs, fat, fiber, confidence.",
+                        "Each item must contain name, estimatedPortion (grams), calories, protein, carbs, fat, fiber, confidence.",
                         "Mark whether user confirmation is still required."
                 )
         );
